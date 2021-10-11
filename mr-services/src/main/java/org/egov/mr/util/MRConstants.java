@@ -17,6 +17,8 @@ public class MRConstants {
 
     public static final String ACTION_APPLY  = "APPLY";
     
+    public static final String OTHERS  = "OTHERS";
+    
     
     public static final String ACTION_SCHEDULE  = "SCHEDULE";
     

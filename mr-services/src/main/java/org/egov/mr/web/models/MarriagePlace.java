@@ -30,7 +30,7 @@ public class MarriagePlace {
     private String ward ;
 	
 	
-	@Size(max=64)
+	@Size(max=256)
     @JsonProperty("placeOfMarriage")
     private String placeOfMarriage = null;
 	

@@ -2,6 +2,7 @@ package org.egov.mr.validator;
 
 
 import static org.egov.mr.util.MRConstants.ACTION_APPLY;
+import static org.egov.mr.util.MRConstants.OTHERS;
 import static org.egov.mr.util.MRConstants.ACTION_RESCHEDULE;
 import static org.egov.mr.util.MRConstants.ACTION_SCHEDULE;
 import static org.egov.mr.util.MRConstants.ROLE_CODE_COUNTER_EMPLOYEE;
@@ -134,7 +135,9 @@ public class MRValidator {
 			
 			 Map<String, String> errorMap = new HashMap<>();
 			 List<Boolean> isPrimaryOwnerTrueCounter = new ArrayList<>();
-			 
+				
+			 marriageRegistrationUtil.trimTrailingLeadingSpaces(marriageRegistration);
+				
 			 if(marriageRegistration.getApplicationType() == null )
 				 errorMap.put("NULL_APPLICATIONTYPE", " Application Type cannot be null");
 			 
@@ -158,6 +161,8 @@ public class MRValidator {
 				errorMap.put("NULL_MARRIAGEPLACE", " Marriage Details cannot be null");
 			else
 			{
+				marriageRegistrationUtil.trimTrailingLeadingSpaces(marriageRegistration.getMarriagePlace());
+				
 			if(StringUtils.isEmpty(marriageRegistration.getMarriagePlace().getWard()))
 				errorMap.put("NULL_WARD", " Ward cannot be null");
 			
@@ -186,6 +191,8 @@ public class MRValidator {
 			marriageRegistration.getCoupleDetails().forEach(couple -> {
 				
 				//===================================Bride Details=========================================
+				
+				marriageRegistrationUtil.trimTrailingLeadingSpaces(couple.getBride());
 				
 				if(couple.getBride().getIsDivyang()==null)
 					errorMap.put("COUPLE_DETAILS_ERROR", " IsDivyang is mandatory ");
@@ -251,6 +258,8 @@ public class MRValidator {
 				
 				if(couple.getBride().getAddress()!=null)
 				{
+					marriageRegistrationUtil.trimTrailingLeadingSpaces(couple.getBride().getAddress());
+					
 					if(StringUtils.isEmpty(couple.getBride().getAddress().getAddressLine1()))
 						errorMap.put("COUPLE_ADDRESS_ERROR", " Address is mandatory ");
 					
@@ -274,6 +283,8 @@ public class MRValidator {
 				
 				if(couple.getBride().getGuardianDetails()!=null)
 				{
+					marriageRegistrationUtil.trimTrailingLeadingSpaces(couple.getBride().getGuardianDetails());
+					
 					if(StringUtils.isEmpty(couple.getBride().getGuardianDetails().getAddressLine1()))
 						errorMap.put("GUARDIAN_ADDRESS_ERROR", " Address is mandatory ");
 					
@@ -293,6 +304,12 @@ public class MRValidator {
 					if(StringUtils.isEmpty(couple.getBride().getGuardianDetails().getRelationship()))
 						errorMap.put("GUARDIAN_DETAILS_ERROR", "Guardian Relationship is mandatory ");
 					
+					if(!StringUtils.isEmpty(couple.getBride().getGuardianDetails().getRelationship()) && OTHERS.equalsIgnoreCase(couple.getBride().getGuardianDetails().getRelationship()))
+					{
+						if(StringUtils.isEmpty(couple.getBride().getGuardianDetails().getRelationshipDesc()))
+							errorMap.put("GUARDIAN_DETAILS_ERROR", "Relationship description is mandatory for Others Relationship types");
+					}
+					
 					if(StringUtils.isEmpty(couple.getBride().getGuardianDetails().getName()))
 						errorMap.put("GUARDIAN_DETAILS_ERROR", "Guardian Name is mandatory ");
 					
@@ -306,6 +323,7 @@ public class MRValidator {
 				if(couple.getBride().getWitness() != null)
 				{
 
+					marriageRegistrationUtil.trimTrailingLeadingSpaces(couple.getBride().getWitness());
 					
 					if(StringUtils.isEmpty(couple.getBride().getWitness().getAddress()))
 						errorMap.put("WITNESS_DETAILS_ERROR", "Witness Address is mandatory ");
@@ -351,11 +369,15 @@ public class MRValidator {
 						
 				}
 				
+				
+				
 				if(couple.getGroom().getIsGroom()==null)
 					errorMap.put("COUPLE_DETAILS_ERROR", " Is Groom is mandatory ");
 				
 				if(couple.getGroom().getIsGroom()!=null && !couple.getGroom().getIsGroom())
 					errorMap.put("COUPLE_DETAILS_ERROR", " Is Groom Should be true in Groom Details ");
+				
+				marriageRegistrationUtil.trimTrailingLeadingSpaces(couple.getGroom());
 				
 				if(StringUtils.isEmpty(couple.getGroom().getFirstName()))
 					errorMap.put("COUPLE_DETAILS_ERROR", " Name is mandatory ");
@@ -381,6 +403,8 @@ public class MRValidator {
 				
 				if(couple.getGroom().getAddress()!=null)
 				{
+					marriageRegistrationUtil.trimTrailingLeadingSpaces(couple.getGroom().getAddress());
+					
 					if(StringUtils.isEmpty(couple.getGroom().getAddress().getAddressLine1()))
 						errorMap.put("COUPLE_ADDRESS_ERROR", " Address is mandatory ");
 					
@@ -404,6 +428,8 @@ public class MRValidator {
 				
 				if(couple.getGroom().getGuardianDetails()!=null)
 				{
+					marriageRegistrationUtil.trimTrailingLeadingSpaces(couple.getGroom().getGuardianDetails());
+					
 					if(StringUtils.isEmpty(couple.getGroom().getGuardianDetails().getAddressLine1()))
 						errorMap.put("GUARDIAN_ADDRESS_ERROR", " Address is mandatory ");
 					
@@ -423,6 +449,12 @@ public class MRValidator {
 					if(StringUtils.isEmpty(couple.getGroom().getGuardianDetails().getRelationship()))
 						errorMap.put("GUARDIAN_DETAILS_ERROR", "Guardian Relationship is mandatory ");
 					
+					if(!StringUtils.isEmpty(couple.getGroom().getGuardianDetails().getRelationship()) && OTHERS.equalsIgnoreCase(couple.getGroom().getGuardianDetails().getRelationship()))
+					{
+						if(StringUtils.isEmpty(couple.getGroom().getGuardianDetails().getRelationshipDesc()))
+							errorMap.put("GUARDIAN_DETAILS_ERROR", "Relationship description is mandatory for Others Relationship types");
+					}
+					
 					if(StringUtils.isEmpty(couple.getGroom().getGuardianDetails().getName()))
 						errorMap.put("GUARDIAN_DETAILS_ERROR", "Guardian Name is mandatory ");
 					
@@ -436,6 +468,7 @@ public class MRValidator {
 				
 				if(couple.getGroom().getWitness() != null)
 				{
+					marriageRegistrationUtil.trimTrailingLeadingSpaces(couple.getGroom().getWitness());
 					
 					if(StringUtils.isEmpty(couple.getGroom().getWitness().getAddress()))
 						errorMap.put("WITNESS_DETAILS_ERROR", "Witness Address is mandatory ");
