@@ -1,10 +1,13 @@
 package org.egov.mr.validator;
 
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
+import static org.egov.mr.util.MRConstants.ACTION_APPLY;
+import static org.egov.mr.util.MRConstants.ACTION_RESCHEDULE;
+import static org.egov.mr.util.MRConstants.ACTION_SCHEDULE;
+import static org.egov.mr.util.MRConstants.ROLE_CODE_COUNTER_EMPLOYEE;
+import static org.egov.mr.util.MRConstants.businessService_MR;
+import static org.egov.mr.util.MRConstants.businessService_MR_CORRECTION;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -13,8 +16,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -35,13 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import static org.egov.mr.util.MRConstants.ACTION_APPLY;
-import static org.egov.mr.util.MRConstants.businessService_MR;
-import static org.egov.mr.util.MRConstants.ACTION_SCHEDULE;
-import static org.egov.mr.util.MRConstants.ACTION_RESCHEDULE;
-import static org.egov.mr.util.MRConstants.businessService_MR_CORRECTION;
-import static org.egov.mr.util.MRConstants.ROLE_CODE_COUNTER_EMPLOYEE;
 
 @Component
 public class MRValidator {
@@ -230,7 +224,7 @@ public class MRValidator {
 				if(couple.getBride().getIsGroom()==null)
 					errorMap.put("COUPLE_DETAILS_ERROR", " Is Groom is mandatory ");
 				
-				if(couple.getBride().getIsGroom()==null)
+				if(couple.getBride().getIsGroom()!=null && couple.getBride().getIsGroom())
 					errorMap.put("COUPLE_DETAILS_ERROR", " Is Groom should be false in Bride json ");
 					
 				if(StringUtils.isEmpty(couple.getBride().getFirstName()))
@@ -266,6 +260,9 @@ public class MRValidator {
 					if(StringUtils.isEmpty(couple.getBride().getAddress().getState()))
 						errorMap.put("COUPLE_ADDRESS_ERROR", " State is mandatory ");
 					
+					if(StringUtils.isEmpty(couple.getBride().getAddress().getDistrict()))
+						errorMap.put("COUPLE_ADDRESS_ERROR", " District is mandatory ");
+					
 					if(StringUtils.isEmpty(couple.getBride().getAddress().getPinCode()))
 						errorMap.put("COUPLE_ADDRESS_ERROR", " Pin Code is mandatory ");
 					
@@ -285,6 +282,9 @@ public class MRValidator {
 					
 					if(StringUtils.isEmpty(couple.getBride().getGuardianDetails().getState()))
 						errorMap.put("GUARDIAN_ADDRESS_ERROR", " State is mandatory ");
+					
+					if(StringUtils.isEmpty(couple.getBride().getGuardianDetails().getDistrict()))
+						errorMap.put("GUARDIAN_ADDRESS_ERROR", " District is mandatory ");
 					
 					if(StringUtils.isEmpty(couple.getBride().getGuardianDetails().getPinCode()))
 						errorMap.put("GUARDIAN_ADDRESS_ERROR", " Pin Code is mandatory ");
@@ -354,7 +354,7 @@ public class MRValidator {
 				if(couple.getGroom().getIsGroom()==null)
 					errorMap.put("COUPLE_DETAILS_ERROR", " Is Groom is mandatory ");
 				
-				if(!couple.getGroom().getIsGroom())
+				if(couple.getGroom().getIsGroom()!=null && !couple.getGroom().getIsGroom())
 					errorMap.put("COUPLE_DETAILS_ERROR", " Is Groom Should be true in Groom Details ");
 				
 				if(StringUtils.isEmpty(couple.getGroom().getFirstName()))
@@ -390,6 +390,9 @@ public class MRValidator {
 					if(StringUtils.isEmpty(couple.getGroom().getAddress().getState()))
 						errorMap.put("COUPLE_ADDRESS_ERROR", " State is mandatory ");
 					
+					if(StringUtils.isEmpty(couple.getGroom().getAddress().getDistrict()))
+						errorMap.put("COUPLE_ADDRESS_ERROR", " District is mandatory ");
+					
 					if(StringUtils.isEmpty(couple.getGroom().getAddress().getPinCode()))
 						errorMap.put("COUPLE_ADDRESS_ERROR", " Pin Code is mandatory ");
 					
@@ -409,6 +412,9 @@ public class MRValidator {
 					
 					if(StringUtils.isEmpty(couple.getGroom().getGuardianDetails().getState()))
 						errorMap.put("GUARDIAN_ADDRESS_ERROR", " State is mandatory ");
+					
+					if(StringUtils.isEmpty(couple.getGroom().getGuardianDetails().getDistrict()))
+						errorMap.put("GUARDIAN_ADDRESS_ERROR", " District is mandatory ");
 					
 					if(StringUtils.isEmpty(couple.getGroom().getGuardianDetails().getPinCode()))
 						errorMap.put("GUARDIAN_ADDRESS_ERROR", " Pin Code is mandatory ");
@@ -500,8 +506,11 @@ public class MRValidator {
                 	if(!CollectionUtils.isEmpty(apointmentDetailsActive))
                 	{
                 		apointmentDetailsActive.forEach(appoinment -> {
+                			if(appoinment.getStartTime()  != null && appoinment.getEndTime() != null)
+                			{
                 			if(CheckIsPreviousDate(appoinment.getStartTime()))
                 				errorMap.put("APPOINTMENT_DEATILS_ERROR", " Appointment Date and Time Cannot be Less than Present time ");
+                			}
                 		});
                 		
                 	if(apointmentDetailsActive.size() == 0)
@@ -544,9 +553,30 @@ public class MRValidator {
 
         validateDuplicateDocuments(request);
         setFieldsFromSearch(request, searchResult);
-        
+        validateUserAuthorization(request );
     }
 
+    
+    private void validateUserAuthorization(MarriageRegistrationRequest request ){
+    	Map<String,String> errorMap = new HashMap<>();
+
+    	if(request.getRequestInfo().getUserInfo().getType().equalsIgnoreCase("CITIZEN" )){
+
+    		String userUUID = request.getRequestInfo().getUserInfo().getUuid();
+    		
+    		request.getMarriageRegistrations().forEach(marriageRegistartion -> {
+    			
+    			if(!(userUUID.equalsIgnoreCase(marriageRegistartion.getAccountId())))
+    			{
+    	        	errorMap.put("USER NOT AUTHORIZED", "Not authorized to perform this operation");
+    			}
+    	        
+    		});
+    	}
+
+    	if(!errorMap.isEmpty())
+    		throw new CustomException(errorMap);
+    }
     
     private void setFieldsFromSearch(MarriageRegistrationRequest request, List<MarriageRegistration> searchResult) {
         Map<String,MarriageRegistration> idToMarriageRegistrationFromSearch = new HashMap<>();
