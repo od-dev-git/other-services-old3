@@ -209,5 +209,8 @@ public class MRConfiguration {
     
     @Value("${egov.receipt.businessserviceMR}")
     private String businessServiceMR;
+    
+    @Value("${egov.migration.filename}")
+    private String migrationFileName ;
 
 }
