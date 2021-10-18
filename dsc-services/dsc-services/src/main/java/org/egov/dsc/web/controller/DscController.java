@@ -399,10 +399,16 @@ public class DscController {
 	  private String populateRandom(Long id,String channel) {
 		  String result="";
 		  DSAuthenticateWS authenticateWS =null;
+		  System.out.println("url     ::::"+applicationProperties.getEmasWsUrl());
+		  System.out.println("id      ::::"+id);
+		  System.out.println("channel ::::"+channel);
 		  try {
 		   authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
+			  System.out.println("after initialise");
 			result = authenticateWS.generateRandomNumber (id+"~"+channel);
+			  System.out.println("after generate ::::"+result);
 			result=result.split("~")[1];
+			  System.out.println("after result ::::"+result);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
