@@ -37,6 +37,7 @@ public class DSAuthenticateWSImplServiceLocator extends org.apache.axis.client.S
     private java.lang.String DSAuthenticateWSImplPort_address = applicationProperties.getEmasWsUrl();
 
     public java.lang.String getDSAuthenticateWSImplPortAddress() {
+	    System.out.println("soap url ::::"+DSAuthenticateWSImplPort_address);
         return DSAuthenticateWSImplPort_address;
     }
 
