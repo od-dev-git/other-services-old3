@@ -1,11 +1,16 @@
 package org.egov.mrcalculator.service;
 
 import static org.egov.mrcalculator.utils.MRCalculatorConstants.businessService_MR;
-import static org.egov.mr.util.MRConstants.MDMS_MARRIAGE_REGISTRATION_REGISTRATION_FEE;
-import static org.egov.mr.util.MRConstants.MDMS_AFTER_ONE_MONTH_OF_MARRIAGE;
-import static org.egov.mr.util.MRConstants.MDMS_WITHIN_ONE_MONTH_OF_MARRIAGE;
-import static org.egov.mr.util.MRConstants.MDMS_TREASURY_CHARGE;
-import static org.egov.mr.util.MRConstants.MDMS_ESTABLISHMENT_COST;
+import static org.egov.mr.util.MRConstants.MDMS_MARRIAGE_REGISTRATION_FEE_DETAILS;
+import static org.egov.mr.util.MRConstants.MDMS_AFTER_30_DAYS_OF_MARRIAGE;
+import static org.egov.mr.util.MRConstants.MDMS_WITHIN_30_DAYS_OF_MARRIAGE;
+import static org.egov.mr.util.MRConstants.MDMS_AFTER_ONE_YEAR_OF_MARRIAGE;
+import static org.egov.mr.util.MRConstants.MDMS_WITHIN_ONE_YEAR_OF_MARRIAGE;
+import static org.egov.mr.util.MRConstants.MDMS_CHALLAN_FEE;
+import static org.egov.mr.util.MRConstants.MDMS_REGISTRATION_FEE;
+import static org.egov.mr.util.MRConstants.MDMS_DEVELOPMENT_FEE;
+import static org.egov.mr.util.MRConstants.MDMS_REDCROSS_FEE;
+import static org.egov.mr.util.MRConstants.MDMS_USER_FEE;
 import static org.egov.mr.util.MRConstants.TENANT_ID;
 import static org.egov.mr.util.MRConstants.MDMS_COST;
 
@@ -223,91 +228,164 @@ public class CalculationService {
 			try {
 				Object mdmsData = mrUtils.mDMSCall(marriageRegistration,requestInfo);
 
-				List<LinkedHashMap<String,Object>> ulbWiseRateslist = JsonPath.read(mdmsData,MDMS_MARRIAGE_REGISTRATION_REGISTRATION_FEE);
+				List<LinkedHashMap<String,Object>> ulbWiseRateslist = JsonPath.read(mdmsData,MDMS_MARRIAGE_REGISTRATION_FEE_DETAILS);
 
 				if(ulbWiseRateslist == null || ulbWiseRateslist.isEmpty())
 				{
 					throw new CustomException("BILLING ERROR","Billing rates Not Found  ");	
 				}
 
-				HashMap<String,BigDecimal> tenantWiseRatesMap = new  HashMap<String, BigDecimal>();
 
 				LinkedHashMap<String,Object> mdmsMap =  ulbWiseRateslist.get(0);
 
 
 
-				LinkedHashMap<String,Object> treasuryChargesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_TREASURY_CHARGE);
+				LinkedHashMap<String,Object> challanFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_CHALLAN_FEE);
+				
+				LinkedHashMap<String,Object> registrationFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_REGISTRATION_FEE);
+				
+				LinkedHashMap<String,Object> developmentFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_DEVELOPMENT_FEE);
+				
+				LinkedHashMap<String,Object> redcrossFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_REDCROSS_FEE);
+				
+				LinkedHashMap<String,Object> userFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_USER_FEE);
 
-				ArrayList<LinkedHashMap<String,Object>> establishmentCostMap  = (ArrayList<LinkedHashMap<String, Object>>) mdmsMap.get(MDMS_ESTABLISHMENT_COST);
 
-				establishmentCostMap.forEach(establishment -> {
 
-					tenantWiseRatesMap.put(establishment.get(TENANT_ID).toString(),new BigDecimal(establishment.get(MDMS_COST).toString()));
-
-				});
-
-				if(tenantWiseRatesMap.isEmpty())
+				if(challanFeesMap == null || challanFeesMap.isEmpty())
 				{
-					throw new CustomException("BILLING ERROR","Billing rates Not Found  ");	
+					throw new CustomException("BILLING ERROR","Challan Fees Not Found  ");	
+				}
+				
+				if(registrationFeesMap == null || registrationFeesMap.isEmpty())
+				{
+					throw new CustomException("BILLING ERROR","Registration Fee Not Found  ");	
+				}
+				
+				if(developmentFeesMap == null || developmentFeesMap.isEmpty())
+				{
+					throw new CustomException("BILLING ERROR","Development Fee Not Found  ");	
+				}
+				
+				if(redcrossFeesMap == null || redcrossFeesMap.isEmpty())
+				{
+					throw new CustomException("BILLING ERROR","Redcross Fee Not Found  ");	
+				}
+				
+				if(userFeesMap == null || userFeesMap.isEmpty())
+				{
+					throw new CustomException("BILLING ERROR","User Fee Not Found  ");	
 				}
 
-				if(treasuryChargesMap == null || treasuryChargesMap.isEmpty())
-				{
-					throw new CustomException("BILLING ERROR","Treasury Charges Not Found  ");	
-				}
-
-				if(tenantWiseRatesMap.get(marriageRegistration.getTenantId())!=null)
-				{
-					BigDecimal treasuryCharge ;
-					BigDecimal establishmentCost = tenantWiseRatesMap.get(marriageRegistration.getTenantId());
+				
+					BigDecimal challanFee ;
+					BigDecimal registrationFee ;
+					BigDecimal developmentFee ;
+					BigDecimal redcrossFee ;
+					BigDecimal userFee ;
 
 					Long marriageDate = marriageRegistration.getMarriageDate();
 
 
-					Calendar currentDate = new GregorianCalendar(); 
+					Calendar currentDate = new GregorianCalendar();
+					currentDate.set(Calendar.HOUR_OF_DAY, 23);
+					currentDate.set(Calendar.MINUTE, 59);
+					currentDate.set(Calendar.SECOND, 59);
+					currentDate.set(Calendar.MILLISECOND, 0);
 
 					Calendar fromDate = new GregorianCalendar(); 
 					fromDate.setTimeInMillis(marriageDate);
 
-					fromDate.add(Calendar.MONTH, 1);
+					fromDate.add(Calendar.DAY_OF_MONTH, 30);
 
-					Long calculatedDateAfterOneMonth = fromDate.getTimeInMillis();
+					Long calculatedDateAfter30Days = fromDate.getTimeInMillis();
 
-					if(calculatedDateAfterOneMonth>currentDate.getTimeInMillis())
+					if(calculatedDateAfter30Days>=currentDate.getTimeInMillis())
 					{
-						treasuryCharge = new BigDecimal(treasuryChargesMap.get(MDMS_WITHIN_ONE_MONTH_OF_MARRIAGE).toString());
+						challanFee = new BigDecimal(challanFeesMap.get(MDMS_WITHIN_30_DAYS_OF_MARRIAGE).toString());
 					}else
-						treasuryCharge = new BigDecimal(treasuryChargesMap.get(MDMS_AFTER_ONE_MONTH_OF_MARRIAGE).toString());
+						challanFee = new BigDecimal(challanFeesMap.get(MDMS_AFTER_30_DAYS_OF_MARRIAGE).toString());
 
+					Calendar fromDateForRegistration = new GregorianCalendar(); 
+					
+					fromDateForRegistration.setTimeInMillis(marriageDate);
 
-					if(treasuryCharge.compareTo(BigDecimal.ZERO)==-1)
-						throw new CustomException("INVALID AMOUNT","Treasury Charge amount is negative");
+					fromDateForRegistration.add(Calendar.YEAR, 1);
 
-					if(establishmentCost.compareTo(BigDecimal.ZERO)==-1)
-						throw new CustomException("INVALID AMOUNT","Establishment Cost amount is negative");
+					Long calculatedDateAfterOneYear = fromDateForRegistration.getTimeInMillis();
+
+					if(calculatedDateAfterOneYear>=currentDate.getTimeInMillis())
+					{
+						registrationFee = new BigDecimal(registrationFeesMap.get(MDMS_WITHIN_ONE_YEAR_OF_MARRIAGE).toString());
+					}else
+						registrationFee = new BigDecimal(registrationFeesMap.get(MDMS_AFTER_ONE_YEAR_OF_MARRIAGE).toString());
+					
+					developmentFee =  new BigDecimal(developmentFeesMap.get(MDMS_COST).toString());
+					
+					redcrossFee = new BigDecimal(redcrossFeesMap.get(MDMS_COST).toString());
+					
+					userFee = new BigDecimal(userFeesMap.get(MDMS_COST).toString());
+
+					if(challanFee.compareTo(BigDecimal.ZERO)==-1)
+						throw new CustomException("INVALID AMOUNT","Challan Fee amount is negative");
+
+					if(registrationFee.compareTo(BigDecimal.ZERO)==-1)
+						throw new CustomException("INVALID AMOUNT","Registration Fee amount is negative");
+					
+					if(developmentFee.compareTo(BigDecimal.ZERO)==-1)
+						throw new CustomException("INVALID AMOUNT","Development Fee amount is negative");
+					
+					if(redcrossFee.compareTo(BigDecimal.ZERO)==-1)
+						throw new CustomException("INVALID AMOUNT","Redcross Fee amount is negative");
+					
+					if(userFee.compareTo(BigDecimal.ZERO)==-1)
+						throw new CustomException("INVALID AMOUNT","User Fee amount is negative");
 
 					
 					
-					TaxHeadEstimate treasuryEstimate = new TaxHeadEstimate();
+					TaxHeadEstimate challanFeeEstimate = new TaxHeadEstimate();
 
-					treasuryEstimate.setEstimateAmount(treasuryCharge);
-					treasuryEstimate.setCategory(Category.FEE);
+					challanFeeEstimate.setEstimateAmount(challanFee);
+					challanFeeEstimate.setCategory(Category.FEE);
 
-					treasuryEstimate.setTaxHeadCode(config.getTreasuryChargeTaxHead());
-					estimateList.add(treasuryEstimate);
+					challanFeeEstimate.setTaxHeadCode(config.getChallanFeeTaxHead());
+					estimateList.add(challanFeeEstimate);
 					
-					TaxHeadEstimate establishmentCostEstimate = new TaxHeadEstimate();
+					TaxHeadEstimate registrationFeeEstimate = new TaxHeadEstimate();
 
-					establishmentCostEstimate.setEstimateAmount(establishmentCost);
-					establishmentCostEstimate.setCategory(Category.FEE);
+					registrationFeeEstimate.setEstimateAmount(registrationFee);
+					registrationFeeEstimate.setCategory(Category.FEE);
 
-					establishmentCostEstimate.setTaxHeadCode(config.getEstablishmenCostTaxHead());
-					estimateList.add(establishmentCostEstimate);
+					registrationFeeEstimate.setTaxHeadCode(config.getRegistrationFeeTaxHead());
+					estimateList.add(registrationFeeEstimate);
+					
+					TaxHeadEstimate developmentFeeEstimate = new TaxHeadEstimate();
+
+					developmentFeeEstimate.setEstimateAmount(developmentFee);
+					developmentFeeEstimate.setCategory(Category.FEE);
+
+					developmentFeeEstimate.setTaxHeadCode(config.getDevelopmentFeeTaxHead());
+					estimateList.add(developmentFeeEstimate);
+					
+					TaxHeadEstimate redcrossFeeEstimate = new TaxHeadEstimate();
+
+					redcrossFeeEstimate.setEstimateAmount(redcrossFee);
+					redcrossFeeEstimate.setCategory(Category.FEE);
+
+					redcrossFeeEstimate.setTaxHeadCode(config.getRedcrossFeeTaxHead());
+					estimateList.add(redcrossFeeEstimate);
+					
+					TaxHeadEstimate userFeeEstimate = new TaxHeadEstimate();
+
+					userFeeEstimate.setEstimateAmount(userFee);
+					userFeeEstimate.setCategory(Category.FEE);
+
+					userFeeEstimate.setTaxHeadCode(config.getUserFeeTaxHead());
+					estimateList.add(userFeeEstimate);
 					
 
-				}
-				else
-					throw new CustomException("BILLING ERROR","Billing rates Not Found  for ULB "+marriageRegistration.getTenantId());	
+				
+				
 
 			} catch (Exception e) {
 				log.error(e.getMessage());

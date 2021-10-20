@@ -3,6 +3,7 @@ package org.egov.mr.util;
 
 
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -133,7 +134,7 @@ public class MarriageRegistrationUtil {
 
         List<MasterDetail> mrMasterDetails = new ArrayList<>();
 
-        mrMasterDetails.add(MasterDetail.builder().name(MRConstants.MDMS_REGISTRATION_FEE).build());
+        mrMasterDetails.add(MasterDetail.builder().name(MRConstants.MDMS_FEE_DETAILS).build());
 
         ModuleDetail mrModuleDtls = ModuleDetail.builder().masterDetails(mrMasterDetails)
                 .moduleName(MRConstants.MDMS_MARRIAGE_REGISTRATION).build();
@@ -209,5 +210,29 @@ public class MarriageRegistrationUtil {
 		}
 		return res.getUser().get(0);
 	}
+    
+    
+    /**
+     * Removes all the trailing and leading spaces of an object
+     * @param model
+     */
+    public void trimTrailingLeadingSpaces(Object model){
+    	  for(Field field : model.getClass().getDeclaredFields()){
+    	        try{
+    	        field.setAccessible(true);
+    	        Object value = field.get(model);
+    	         if(value != null){
+    	            if(value instanceof String){
+    	                String trimmed = (String) value;
+    	                field.set(model, trimmed.trim());
+    	                }
+
+    	            }
+    	                    }catch(Exception e){
+    	                    	log.error(" Error while trimming the spaces  ");
+    	                        e.printStackTrace();
+    	                    }
+    	                }
+    	}
 
 }
