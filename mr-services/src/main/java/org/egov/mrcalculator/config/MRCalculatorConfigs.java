@@ -47,12 +47,20 @@ public class MRCalculatorConfigs {
     private String baseTaxHead;
     
     
-    @Value("${egov.taxhead.establishmentcost}")
-    private String establishmenCostTaxHead;
+    @Value("${egov.taxhead.challanFee}")
+    private String challanFeeTaxHead;
     
-    @Value("${egov.taxhead.treasurycharge}")
-    private String treasuryChargeTaxHead;
+    @Value("${egov.taxhead.registrationFee}")
+    private String registrationFeeTaxHead;
     
+    @Value("${egov.taxhead.developmentFee}")
+    private String developmentFeeTaxHead;
+    
+    @Value("${egov.taxhead.redcrossFee}")
+    private String redcrossFeeTaxHead;
+    
+    @Value("${egov.taxhead.userFee}")
+    private String userFeeTaxHead;
 
 
     //MDMS

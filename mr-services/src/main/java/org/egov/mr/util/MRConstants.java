@@ -56,22 +56,34 @@ public class MRConstants {
 	
 	public static final String MDMS_MARRIAGE_REGISTRATION = "MarriageRegistration";
 	
-	public static final String MDMS_REGISTRATION_FEE = "RegistrationFee";
+	public static final String MDMS_FEE_DETAILS = "FeeDetails";
 
 	 
-	 public static final String MDMS_TREASURY_CHARGE = "treasuryCharge";
+	 public static final String MDMS_CHALLAN_FEE = "challanFee";
 	 
-	 public static final String MDMS_ESTABLISHMENT_COST = "establishmentCost";
+	 public static final String MDMS_REGISTRATION_FEE = "registrationFee";
+	 
+	 public static final String MDMS_DEVELOPMENT_FEE = "developmentFee";
+	 
+	 public static final String MDMS_REDCROSS_FEE = "redcrossFee";
+	 
+	 public static final String MDMS_USER_FEE = "userFee";
+	 
 	 
 	 public static final String TENANT_ID = "tenantId";
 	 
 	 public static final String MDMS_COST = "cost";
 	 
-	 public static final String MDMS_WITHIN_ONE_MONTH_OF_MARRIAGE = "withinOneMonthOfMarriage"; 
+	 public static final String MDMS_WITHIN_30_DAYS_OF_MARRIAGE = "within30daysOfMarriage"; 
 	 
-	 public static final String MDMS_AFTER_ONE_MONTH_OF_MARRIAGE = "afterOneMonthOfMarriage";  
+	 public static final String MDMS_AFTER_30_DAYS_OF_MARRIAGE = "after30daysOfMarriage";  
 	 
-	 public static final String MDMS_MARRIAGE_REGISTRATION_REGISTRATION_FEE = "$.MdmsRes.MarriageRegistration.RegistrationFee";
+	 public static final String MDMS_AFTER_ONE_YEAR_OF_MARRIAGE = "after1yearOfMarriage";  
+	 
+	 
+	 public static final String MDMS_WITHIN_ONE_YEAR_OF_MARRIAGE = "within1yearOfMarriage";  
+	 
+	 public static final String MDMS_MARRIAGE_REGISTRATION_FEE_DETAILS = "$.MdmsRes.MarriageRegistration.FeeDetails";
 
 	   
 

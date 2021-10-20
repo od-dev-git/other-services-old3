@@ -134,7 +134,7 @@ public class MarriageRegistrationUtil {
 
         List<MasterDetail> mrMasterDetails = new ArrayList<>();
 
-        mrMasterDetails.add(MasterDetail.builder().name(MRConstants.MDMS_REGISTRATION_FEE).build());
+        mrMasterDetails.add(MasterDetail.builder().name(MRConstants.MDMS_FEE_DETAILS).build());
 
         ModuleDetail mrModuleDtls = ModuleDetail.builder().masterDetails(mrMasterDetails)
                 .moduleName(MRConstants.MDMS_MARRIAGE_REGISTRATION).build();
