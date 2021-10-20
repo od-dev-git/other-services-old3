@@ -60,6 +60,11 @@ public class GuardianDetails {
     @JsonProperty("relationship")
 	private String relationship ;
 	
+	
+	@Size(max=256)
+    @JsonProperty("relationshipDesc")
+	private String relationshipDesc ;
+	
 	@Size(max=64)
     @JsonProperty("name")
 	private String name ;

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 
 import org.egov.mr.service.MarriageRegistrationService;
+import org.egov.mr.service.MigrationService;
 import org.egov.mr.util.ResponseInfoFactory;
 import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.MarriageRegistrationRequest;
@@ -39,14 +40,17 @@ import javax.servlet.http.HttpServletRequest;
         private final MarriageRegistrationService marriageRegistrationService;
 
         private final ResponseInfoFactory responseInfoFactory;
+        
+        private final  MigrationService migrationService ;
 
     @Autowired
     public MarriageRegistrationController(ObjectMapper objectMapper, HttpServletRequest request,
-    		MarriageRegistrationService marriageRegistrationService, ResponseInfoFactory responseInfoFactory) {
+    		MarriageRegistrationService marriageRegistrationService, ResponseInfoFactory responseInfoFactory,MigrationService migrationService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.marriageRegistrationService = marriageRegistrationService;
         this.responseInfoFactory = responseInfoFactory;
+        this.migrationService = migrationService ;
     }
 
 
@@ -86,6 +90,21 @@ import javax.servlet.http.HttpServletRequest;
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+	@PostMapping("/_migrate")
+	public ResponseEntity<?> marriageRegistrationImport(@RequestParam(required = false) Long limit,
+			@RequestParam(required = false, defaultValue = "1") Long skip  ) throws Exception {
+		long startTime = System.nanoTime();
+		
+	
+
+		migrationService.importMarriageRegistrations( skip, limit);
+		
+		long endtime = System.nanoTime();
+		long elapsetime = endtime - startTime;
+		System.out.println("Elapsed time--->" + elapsetime);
+
+		return new ResponseEntity<>(true, HttpStatus.OK);
+	}
 
 
 
