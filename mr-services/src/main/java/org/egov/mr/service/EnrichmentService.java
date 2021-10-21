@@ -476,43 +476,50 @@ public class EnrichmentService {
 		int count=0;
 
 
-
-		for (int i = 0; i < marriageRegistrations.size(); i++) {
-			MarriageRegistration marriageRegistration = marriageRegistrations.get(i);
-			if ((marriageRegistration.getStatus() != null) && marriageRegistration.getStatus().equalsIgnoreCase(endstates.get(i)))
-				count++;
-		}
-		if (count != 0) {
-			List<String> mrNumbers = null;
-			String businessService = marriageRegistrations.isEmpty() ? null : marriageRegistrations.get(0).getBusinessService();
-			if (businessService == null)
-				businessService = businessService_MR;
-			switch (businessService) {
-			case businessService_MR:
-				mrNumbers = getIdList(requestInfo, tenantId, config.getMrNumberIdgenNameMR(), config.getMrNumberIdgenFormatMR(), count);
-				break;
-
+		if (marriageRegistrations.get(0).getApplicationType() != null && marriageRegistrations.get(0).getApplicationType().toString().equals(MRConstants.APPLICATION_TYPE_CORRECTION)) {
+			for(int i=0;i<marriageRegistrations.size();i++){
+				MarriageRegistration marriageRegistration = marriageRegistrations.get(i);
+				Long time = System.currentTimeMillis();
+				marriageRegistration.setIssuedDate(time);
 			}
-			ListIterator<String> itr = mrNumbers.listIterator();
-
-			Map<String, String> errorMap = new HashMap<>();
-			if (mrNumbers.size() != count) {
-				errorMap.put("IDGEN ERROR ", "The number of MarriageRegistration Numbers returned by idgen is not equal to number of MarriageRegistartions");
-			}
-
-			if (!errorMap.isEmpty())
-				throw new CustomException(errorMap);
-
+		}else {
 			for (int i = 0; i < marriageRegistrations.size(); i++) {
 				MarriageRegistration marriageRegistration = marriageRegistrations.get(i);
-				if ((marriageRegistration.getStatus() != null) && marriageRegistration.getStatus().equalsIgnoreCase(endstates.get(i))) {
-					marriageRegistration.setMrNumber(itr.next());
-					Long time = System.currentTimeMillis();
-					marriageRegistration.setIssuedDate(time);
-				}
+				if ((marriageRegistration.getStatus() != null) && marriageRegistration.getStatus().equalsIgnoreCase(endstates.get(i)))
+					count++;
 			}
+			if (count != 0) {
+				List<String> mrNumbers = null;
+				String businessService = marriageRegistrations.isEmpty() ? null : marriageRegistrations.get(0).getBusinessService();
+				if (businessService == null)
+					businessService = businessService_MR;
+				switch (businessService) {
+				case businessService_MR:
+					mrNumbers = getIdList(requestInfo, tenantId, config.getMrNumberIdgenNameMR(), config.getMrNumberIdgenFormatMR(), count);
+					break;
+
+				}
+				ListIterator<String> itr = mrNumbers.listIterator();
+
+				Map<String, String> errorMap = new HashMap<>();
+				if (mrNumbers.size() != count) {
+					errorMap.put("IDGEN ERROR ", "The number of MarriageRegistration Numbers returned by idgen is not equal to number of MarriageRegistartions");
+				}
+
+				if (!errorMap.isEmpty())
+					throw new CustomException(errorMap);
+
+				for (int i = 0; i < marriageRegistrations.size(); i++) {
+					MarriageRegistration marriageRegistration = marriageRegistrations.get(i);
+					if ((marriageRegistration.getStatus() != null) && marriageRegistration.getStatus().equalsIgnoreCase(endstates.get(i))) {
+						marriageRegistration.setMrNumber(itr.next());
+						Long time = System.currentTimeMillis();
+						marriageRegistration.setIssuedDate(time);
+					}
+				}
 
 
+			}
 		}
 	}
 

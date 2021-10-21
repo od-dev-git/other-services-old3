@@ -15,6 +15,8 @@ import static org.egov.mr.util.MRConstants.TENANT_ID;
 import static org.egov.mr.util.MRConstants.MDMS_COST;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -23,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import org.egov.common.contract.request.RequestInfo;
@@ -288,6 +291,8 @@ public class CalculationService {
 
 
 					Calendar currentDate = new GregorianCalendar();
+					TimeZone timeZone = TimeZone.getTimeZone("Asia/Kolkata");
+					currentDate.setTimeZone(timeZone);
 					currentDate.set(Calendar.HOUR_OF_DAY, 23);
 					currentDate.set(Calendar.MINUTE, 59);
 					currentDate.set(Calendar.SECOND, 59);

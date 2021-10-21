@@ -8,6 +8,8 @@ import static org.egov.mr.util.MRConstants.ACTION_SCHEDULE;
 import static org.egov.mr.util.MRConstants.ROLE_CODE_COUNTER_EMPLOYEE;
 import static org.egov.mr.util.MRConstants.businessService_MR;
 import static org.egov.mr.util.MRConstants.businessService_MR_CORRECTION;
+import static org.egov.mr.util.MRConstants.BRIDE_DIVYANG_PROOF;
+import static org.egov.mr.util.MRConstants.GROOM_DIVYANG_PROOF;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -584,7 +587,7 @@ public class MRValidator {
 
         }
 
-        validateDuplicateDocuments(request);
+        validateDuplicateAndDivyangDocuments(request);
         setFieldsFromSearch(request, searchResult);
         validateUserAuthorization(request );
     }
@@ -630,17 +633,34 @@ public class MRValidator {
     }
     
   
-    private void validateDuplicateDocuments(MarriageRegistrationRequest request){
+    private void validateDuplicateAndDivyangDocuments(MarriageRegistrationRequest request){
         List<String> documentFileStoreIds = new LinkedList();
+        List<String> documentTypeList = new LinkedList();
         request.getMarriageRegistrations().forEach(marriageRegistration -> {
-            if(marriageRegistration.getApplicationDocuments()!=null){
+            if(!CollectionUtils.isEmpty(marriageRegistration.getApplicationDocuments())){
                 marriageRegistration.getApplicationDocuments().forEach(
                         document -> {
                                 if(documentFileStoreIds.contains(document.getFileStoreId()))
                                     throw new CustomException("DUPLICATE_DOCUMENT ERROR","Same document cannot be used multiple times");
-                                else documentFileStoreIds.add(document.getFileStoreId());
+                                else{
+                                	documentFileStoreIds.add(document.getFileStoreId());
+                                	documentTypeList.add(document.getDocumentType());
+                                	}
                         }
                 );
+                
+                marriageRegistration.getCoupleDetails().forEach(couple -> {
+                	if(couple.getBride().getIsDivyang())
+                	{
+                		if(!documentTypeList.contains(BRIDE_DIVYANG_PROOF))
+                		 throw new CustomException("BRIDE_DIVYANG_PROOF_ERROR", "Bride Divyang Proof is mandatory if IsDivyang is selected as Yes");
+                	}
+                	if(couple.getGroom().getIsDivyang())
+                	{
+                		if(!documentTypeList.contains(GROOM_DIVYANG_PROOF))
+                		 throw new CustomException("GROOM_DIVYANG_PROOF_ERROR", "Groom Divyang Proof is mandatory if IsDivyang is selected as Yes");
+                	}
+                });
             }
         });
     }
@@ -922,6 +942,8 @@ public class MRValidator {
 	private boolean CheckIsFutureDate(Long dateInMillisec)
 	{
 		Calendar presentDate = new GregorianCalendar(); 
+		TimeZone timeZone = TimeZone.getTimeZone("Asia/Kolkata");
+		presentDate.setTimeZone(timeZone);
 		presentDate.set(Calendar.HOUR_OF_DAY, 23);
 		presentDate.set(Calendar.MINUTE, 59);
 		presentDate.set(Calendar.SECOND, 59);
