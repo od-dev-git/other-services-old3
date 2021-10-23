@@ -73,5 +73,7 @@ public class ApplicationProperties {
     @Value("${egov.services.filestore.service.upload.file}")
     private String egovFileStoreUploadFile;
     
+    @Value("${egov.services.filestore.service.download.file}")
+    private String egovFileStoreDownloadFile;
     
 }

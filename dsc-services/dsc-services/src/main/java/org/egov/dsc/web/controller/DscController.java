@@ -40,21 +40,27 @@
 
 package org.egov.dsc.web.controller;
 
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.egov.common.contract.request.RequestInfo;
@@ -78,6 +84,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -92,6 +99,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import org.apache.commons.codec.binary.Base64;
 
 import emh.Enum.ContentType;
 import emh.Enum.Coordinates;
@@ -475,7 +484,10 @@ public class DscController {
 			e1.printStackTrace();
 		}
 		List<emBridgeSignerInput> inputs = new ArrayList<>();
-		emBridgeSignerInput input = new emBridgeSignerInput(dataSignRequest.getFileBytes(),dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),applicationProperties.getPdfProprty3(),true, PageTobeSigned.Last, Coordinates.BottomRight, applicationProperties.getPdfProprty4(), false);
+		//Obaid
+		String pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTennantId());
+		//End Obaid
+		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),applicationProperties.getPdfProprty3(),true, PageTobeSigned.Last, Coordinates.BottomRight, applicationProperties.getPdfProprty4(), false);
 		inputs.add(input);
 		PKCSBulkPdfHashSignRequest pKCSBulkPdfHashSignRequest = new PKCSBulkPdfHashSignRequest();
 		pKCSBulkPdfHashSignRequest.setBulkInput(inputs);
@@ -500,7 +512,30 @@ public class DscController {
         
     }
     
-    @RequestMapping(value = "/_pdfSign", method = RequestMethod.POST)
+    private String getPdfBytes(String fileStoreId, String tenantId) {
+    	String pdfStr = null;
+    	System.out.println("getPdfBytes : fileStoreId - " + fileStoreId);
+    	System.out.println("getPdfBytes : tenantId - " + tenantId);
+    	try {
+    		File unsignedFile = fetchAsDigitPath(fileStoreId, tenantId).toFile();
+    		System.out.println("fetchAsDigitPath(fileStoreId, tenantId).toFile() - Success");
+			InputStream unsignedFileStrm = new FileInputStream(unsignedFile);
+			System.out.println("unsignedFileStrm - Success");
+			byte[] pdfBytes = new byte[(int) unsignedFile.length()];
+			unsignedFileStrm.read(pdfBytes, 0, pdfBytes.length);
+			unsignedFileStrm.close();
+			System.out.println("byte[] pdfBytes ) - Success");
+			pdfStr = Base64.encodeBase64String(pdfBytes);
+			System.out.println("Base64.encodeBase64String(pdfBytes) - Success");
+		} catch (FileNotFoundException fe) {
+			fe.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return pdfStr;
+	}
+
+	@RequestMapping(value = "/_pdfSign", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<DataSignResponse> pdfSign(@RequestBody  DataSignRequest dataSignRequest) throws IOException  {
     	emBridge bridge = null;
@@ -656,6 +691,41 @@ public class DscController {
 		return result;
 	}
 
+	private Path fetchAsDigitPath(String fileStoreId, String tenantId) {
+        ResponseEntity<byte[]> responseEntity = fetchFilesFromDigitService(fileStoreId, tenantId);
+        Path fileDirPath = Paths.get(fileStoreId);
+        Path path = null;
+        try {
+            path = Files.write(fileDirPath, responseEntity.getBody());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return path;
+
+    }
 	
+	public ResponseEntity<byte[]> fetchFilesFromDigitService(String fileStoreId, String tenantId) throws RuntimeException {
+	    Map<String, String> request = new HashMap<String, String>();
+	    request.put("tenantId", tenantId);
+	    request.put("fileStoreId", fileStoreId);
+	    
+	    StringBuilder uri = new StringBuilder(applicationProperties.getEgovFileStoreSerHost())
+	            .append(applicationProperties.getEgovFileStoreDownloadFile()).append("?");
+
+	    if (tenantId != null && !tenantId.isEmpty()) {
+	        uri.append("tenantId=").append(tenantId);
+	    }
+	    if (fileStoreId != null && !fileStoreId.isEmpty()) {
+	        uri.append("&fileStoreId=").append(fileStoreId);
+	    }
+	    
+	    System.out.println("fetchFilesFromDigitService: URL - " +uri.toString());
+	  
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
+	    HttpEntity<String> entity = new HttpEntity<>(headers);
+	    ResponseEntity<byte[]> response = restTemplate.exchange(uri.toString(), HttpMethod.GET, entity, byte[].class);
+	    return response;
+	}
 
 }
