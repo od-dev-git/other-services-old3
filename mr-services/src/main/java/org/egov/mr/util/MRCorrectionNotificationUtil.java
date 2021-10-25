@@ -21,6 +21,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import  static org.egov.mr.util.MRConstants.*;
@@ -219,18 +220,21 @@ public class MRCorrectionNotificationUtil {
 		return message;
 	}
 
-    private String epochToDate(Long validTo){
-        Long timeStamp= validTo / 1000L;
-        java.util.Date time=new java.util.Date((Long)timeStamp*1000);
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(time);
+    private String epochToDate(Long scheduledTime){
+        Calendar cal = new GregorianCalendar(); 
+        TimeZone timeZone = TimeZone.getTimeZone("Asia/Kolkata");
+        cal.setTimeZone(timeZone);
+        cal.setTimeInMillis(scheduledTime);
         String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
         Integer mon = cal.get(Calendar.MONTH);
         mon=mon+1;
         String month = String.valueOf(mon);
         String year = String.valueOf(cal.get(Calendar.YEAR));
+        SimpleDateFormat time_format = new SimpleDateFormat("hh:mm aa");
+        time_format.setTimeZone(timeZone);
+        String timeComp = time_format.format(cal.getTime());
         StringBuilder date = new StringBuilder(day);
-        date.append("/").append(month).append("/").append(year);
+        date.append("/").append(month).append("/").append(year).append(" "+timeComp);
 
         return date.toString();
     }
