@@ -47,8 +47,8 @@ public class DataSignRequest {
     @JsonProperty("fileName")
     private String fileName;
     
-    @JsonProperty("tennantId")
-    private String tennantId;
+    @JsonProperty("tenantId")
+    private String tenantId;
     
     @JsonProperty("moduleName")
     private String moduleName;

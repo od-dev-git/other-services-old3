@@ -349,8 +349,6 @@ public class DscController {
 		DetailRequestPojo input=new DetailRequestPojo();
 		input.setEncryptedRequest(data.getEncryptedData());
 		input.setEncryptionKeyId(data.getEncryptionKeyID());
-		
-	
     	
         return getSuccessTokenInputResponse(input, dataSignRequest.getRequestInfo());
         
@@ -485,7 +483,7 @@ public class DscController {
 		}
 		List<emBridgeSignerInput> inputs = new ArrayList<>();
 		//Obaid
-		String pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTennantId());
+		String pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
 		//End Obaid
 		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),applicationProperties.getPdfProprty3(),true, PageTobeSigned.Last, Coordinates.BottomRight, applicationProperties.getPdfProprty4(), false);
 		inputs.add(input);
@@ -526,7 +524,7 @@ public class DscController {
 			unsignedFileStrm.close();
 			System.out.println("byte[] pdfBytes ) - Success");
 			pdfStr = Base64.encodeBase64String(pdfBytes);
-			System.out.println("Base64.encodeBase64String(pdfBytes) - Success");
+			System.out.println("Base64.encodeBase64String(pdfBytes) - Success:::: "+pdfStr);
 		} catch (FileNotFoundException fe) {
 			fe.printStackTrace();
 		}catch (Exception e) {
@@ -557,24 +555,31 @@ public class DscController {
 	            	
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 		} catch (IOException e) {
+			System.out.println("Issue in Temp file folder");
 			e.printStackTrace();
 		}
 		ResponseDataPKCSBulkSign apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(), tempFile.getCanonicalPath());
 		String fileId = null;
 		try {
-			fileId = populateSignedPdfFileStoreId(apiResponse,tempFile.getCanonicalPath(),dataSignRequest.getFileName(),dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getTennantId(),dataSignRequest.getModuleName());
+			System.out.println("Before populateSignedPdfFileStoreId() call:: "+apiResponse);
+			fileId = populateSignedPdfFileStoreId(apiResponse,tempFile.getCanonicalPath(),dataSignRequest.getFileName(),dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getTenantId(),dataSignRequest.getModuleName());
 		} catch (IOException e) {
+			System.out.println("Issue in populateSignedPdfFileStoreId()");
 			e.printStackTrace();
 		}
 		String result="";
 		if(fileId != null && !fileId.isEmpty() && !fileId.equalsIgnoreCase("0"))
 		{
 			result="Authentication Successfull";
+			System.out.println("fileID - "+fileId);
+			System.out.println("result - "+result);
 		}
 		else
 		{
 			fileId=null;
 			result="Authentication Failure";
+			System.out.println("fileID - "+fileId);
+			System.out.println("result - "+result);
 		}
     	
         return getSuccessDataSignResponse(result,fileId,dataSignRequest.getRequestInfo());
@@ -582,29 +587,41 @@ public class DscController {
     }
 
 	private String populateSignedPdfFileStoreId(ResponseDataPKCSBulkSign apiResponse, String serverTempPath,
-			String fileName, Long userId,String tennantId, String moduleName) throws IOException {
+			String fileName, Long userId,String tenantId, String moduleName) throws IOException {
 		String fileStoreId="0";
 		File file =null;
-		for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
-			if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData()))
-			{
-				break;
-			}
+		System.out.println("In populateSignedPdfFileStoreId():: apiResponse - "+apiResponse);
+		System.out.println("In populateSignedPdfFileStoreId():: serverTempPath - "+serverTempPath);
+		System.out.println("In populateSignedPdfFileStoreId():: fileName - "+fileName);
+		System.out.println("In populateSignedPdfFileStoreId():: userId - "+userId);
+		System.out.println("In populateSignedPdfFileStoreId():: tenantId - "+tenantId);
+		System.out.println("In populateSignedPdfFileStoreId():: moduleName - "+moduleName);
+		if(apiResponse != null) {
+			for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
+				if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData()))
+				{
+					break;
+				}
 			
-			byte[] signedDocBytes = Base64.decodeBase64(doc.getSignedData());
-			String finalFilePath = serverTempPath+"\\"+fileName+"_signed.pdf";
-			 file = new File(finalFilePath);
-			OutputStream os = new FileOutputStream(file);
-			os.write(signedDocBytes);
-			os.close();
+				byte[] signedDocBytes = Base64.decodeBase64(doc.getSignedData());
+				String finalFilePath = serverTempPath+"\\"+fileName+"_signed.pdf";
+				 file = new File(finalFilePath);
+				OutputStream os = new FileOutputStream(file);
+				os.write(signedDocBytes);
+				os.close();
+			}
 		}
-		fileStoreId=store(new FileInputStream(file),file.getName(),"application/pdf",moduleName,true,tennantId);
-		file.delete();
+		if(file != null) {
+			fileStoreId=store(new FileInputStream(file),file.getName(),"application/pdf",moduleName,true,tenantId);
+			System.out.println("In populateSignedPdfFileStoreId() after store():: fileStoreId - "+fileStoreId);
+			file.delete();
+			System.out.println("In populateSignedPdfFileStoreId() after store():: temp file delete - success"+fileStoreId);
+		}
 		return fileStoreId;
 	}
 
 	public String store(InputStream fileStream, String fileName, String mimeType, String moduleName,
-            boolean closeStream,String tennantId) {
+            boolean closeStream,String tenantId) {
 		String fileStoreId=null;
         try {          
             byte[] fileSize = fileName.getBytes();
@@ -620,7 +637,7 @@ public class DscController {
             MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
             fileStoreId = storeFiles(Arrays.asList(multipartFile),
                     fileName,
-                    mimeType, moduleName,false,tennantId);
+                    mimeType, moduleName,false,tenantId);
         } catch (IOException e) {
         	e.printStackTrace();
         }
@@ -628,10 +645,10 @@ public class DscController {
     }
 	
 	private String storeFiles(List<MultipartFile> files, String fileName, String mimeType, String moduleName,
-            boolean deleteFile,String tennantId) {
+            boolean deleteFile,String tenantId) {
 			String fileStoreId=null;
         try {
-            StorageResponse storageRes = getFileStorageService(files, moduleName,tennantId);
+            StorageResponse storageRes = getFileStorageService(files, moduleName,tenantId);
 
             List<FileReq> filesList = storageRes.getFiles();
             for (FileReq filesId : filesList) {
@@ -645,7 +662,7 @@ public class DscController {
         return fileStoreId;
     }
 	
-	public StorageResponse getFileStorageService(final List<MultipartFile> files, String modulename,String tennantId)
+	public StorageResponse getFileStorageService(final List<MultipartFile> files, String modulename,String tenantId)
 	        throws IOException {
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_UTF8_VALUE);
@@ -653,7 +670,7 @@ public class DscController {
 
 	    MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 	    map.add("module", modulename);
-	    map.add("tenantId", tennantId);
+	    map.add("tenantId", tenantId);
 
 	    ByteArrayResource contentsAsResource = null;
 	    for (MultipartFile file : files) {
