@@ -550,7 +550,10 @@ public class DscController {
 	            licFile.mkdirs();
 			}
 			if (!tempFile.exists()) {
+				System.out.println("Temp file folder created");
+				
 				tempFile.mkdirs();
+				System.out.println("Temp file folder created end");
 			}
 	            	
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
@@ -558,7 +561,8 @@ public class DscController {
 			System.out.println("Issue in Temp file folder");
 			e.printStackTrace();
 		}
-		ResponseDataPKCSBulkSign apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(), tempFile.getCanonicalPath());
+		ResponseDataPKCSBulkSign apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(),tempFile.getCanonicalPath());
+		System.out.println("apiResponse.getErrorCode() - " +apiResponse.getErrorCode());
 		String fileId = null;
 		try {
 			System.out.println("Before populateSignedPdfFileStoreId() call:: "+apiResponse);
@@ -590,32 +594,45 @@ public class DscController {
 			String fileName, Long userId,String tenantId, String moduleName) throws IOException {
 		String fileStoreId="0";
 		File file =null;
+		File tempFile = new File(serverTempPath);
 		System.out.println("In populateSignedPdfFileStoreId():: apiResponse - "+apiResponse);
 		System.out.println("In populateSignedPdfFileStoreId():: serverTempPath - "+serverTempPath);
 		System.out.println("In populateSignedPdfFileStoreId():: fileName - "+fileName);
 		System.out.println("In populateSignedPdfFileStoreId():: userId - "+userId);
 		System.out.println("In populateSignedPdfFileStoreId():: tenantId - "+tenantId);
 		System.out.println("In populateSignedPdfFileStoreId():: moduleName - "+moduleName);
-		if(apiResponse != null) {
-			for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
-				if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData()))
-				{
-					break;
+		try {
+			if(apiResponse != null) {
+				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getSiginedCertificate() - "+apiResponse.getSiginedCertificate());
+				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().size() - "+apiResponse.getBulkSignItems().size());
+				//System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0) - "+apiResponse.getBulkSignItems().get(0));
+				//System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0).getSignedData() - "+apiResponse.getBulkSignItems().get(0).getSignedData());
+				for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
+					if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData()))
+					{
+						break;
+					}
+				
+					byte[] signedDocBytes = Base64.decodeBase64(doc.getSignedData());
+					String finalFilePath = serverTempPath+"\\"+fileName+"_signed.pdf";
+					 file = new File(finalFilePath);
+					OutputStream os = new FileOutputStream(file);
+					os.write(signedDocBytes);
+					os.close();
 				}
-			
-				byte[] signedDocBytes = Base64.decodeBase64(doc.getSignedData());
-				String finalFilePath = serverTempPath+"\\"+fileName+"_signed.pdf";
-				 file = new File(finalFilePath);
-				OutputStream os = new FileOutputStream(file);
-				os.write(signedDocBytes);
-				os.close();
 			}
+			if(file != null) {
+				fileStoreId=store(new FileInputStream(file),file.getName(),"application/pdf",moduleName,true,tenantId);
+				System.out.println("In populateSignedPdfFileStoreId() after store():: fileStoreId - "+fileStoreId);
+				file.delete();
+				System.out.println("In populateSignedPdfFileStoreId() after store():: temp file delete - success"+fileStoreId);
+			}
+			tempFile.delete();
 		}
-		if(file != null) {
-			fileStoreId=store(new FileInputStream(file),file.getName(),"application/pdf",moduleName,true,tenantId);
-			System.out.println("In populateSignedPdfFileStoreId() after store():: fileStoreId - "+fileStoreId);
-			file.delete();
-			System.out.println("In populateSignedPdfFileStoreId() after store():: temp file delete - success"+fileStoreId);
+		catch(Exception e) {
+			tempFile.delete();
+			System.out.println("Error In populateSignedPdfFileStoreId():: Catch ---------");
+			e.printStackTrace();
 		}
 		return fileStoreId;
 	}

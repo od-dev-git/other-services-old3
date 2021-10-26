@@ -52,5 +52,4 @@ public class DataSignRequest {
     
     @JsonProperty("moduleName")
     private String moduleName;
-
 }
