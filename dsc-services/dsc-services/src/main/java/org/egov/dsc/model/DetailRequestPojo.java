@@ -20,5 +20,8 @@ public class DetailRequestPojo {
     
 	@JsonProperty("fileName")
 	private String fileName;
+	
+	@JsonProperty("tempFilePath")
+	private String tempFilePath;
 
 }

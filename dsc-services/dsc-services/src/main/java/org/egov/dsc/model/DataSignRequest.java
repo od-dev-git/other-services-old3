@@ -52,4 +52,7 @@ public class DataSignRequest {
     
     @JsonProperty("moduleName")
     private String moduleName;
+    
+    @JsonProperty("tempFilePath")
+	private String tempFilePath;
 }

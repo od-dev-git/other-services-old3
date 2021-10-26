@@ -136,7 +136,7 @@ public class DscController {
 	private String logPath=System.getProperty("user.dir")+"/DS/Log";
 	private String tempPath=System.getProperty("user.dir")+"/"+"DS/Temp";
 	private String licPath=System.getProperty("user.dir")+"/"+"DS/Lic";
-
+	
 	@GetMapping(value="/_getCheck")
 	public String test()
 	{
@@ -307,7 +307,6 @@ public class DscController {
 
     }
     
-    
     @RequestMapping(value = "/_dataSignInput", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<TokenInputResponse> dataSignInput(@RequestBody DataSignRequest dataSignRequest) throws IOException  {
@@ -422,8 +421,6 @@ public class DscController {
 		}
 		  return result;
 		  }
-	 
-	
 
 	private ResponseEntity<TokenResponse> getSuccessTokenResponse(List<String> tokens, RequestInfo requestInfo) {
         final ResponseInfo responseInfo = ResponseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true);
@@ -482,9 +479,8 @@ public class DscController {
 			e1.printStackTrace();
 		}
 		List<emBridgeSignerInput> inputs = new ArrayList<>();
-		//Obaid
+		
 		String pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
-		//End Obaid
 		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),applicationProperties.getPdfProprty3(),true, PageTobeSigned.Last, Coordinates.BottomRight, applicationProperties.getPdfProprty4(), false);
 		inputs.add(input);
 		PKCSBulkPdfHashSignRequest pKCSBulkPdfHashSignRequest = new PKCSBulkPdfHashSignRequest();
@@ -499,6 +495,8 @@ public class DscController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		String tempFilePath = bulkPKCSSignRequest.getTempFilePath();
+		System.out.println("tempFilePath:" + tempFilePath);
 		System.out.println("Encrypted Data :" + bulkPKCSSignRequest.getEncryptedData());
 		System.out.println("Encrypted Key ID :" + bulkPKCSSignRequest.getEncryptionKeyID());
     	
@@ -506,6 +504,7 @@ public class DscController {
     	pojo.setEncryptedRequest(bulkPKCSSignRequest.getEncryptedData());
     	pojo.setEncryptionKeyId(bulkPKCSSignRequest.getEncryptionKeyID());
     	pojo.setFileName(dataSignRequest.getFileName());
+    	pojo.setTempFilePath(tempFilePath);
         return getSuccessTokenInputResponse(pojo, dataSignRequest.getRequestInfo());
         
     }
@@ -539,9 +538,10 @@ public class DscController {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
+    	String tempFilePath = dataSignRequest.getTempFilePath();
     	File tempFile=new File(tempPath);
     	System.out.println("logPath :::"+logFile.getCanonicalPath());
-    	System.out.println("tempPath :::"+tempFile.getCanonicalPath());
+    	System.out.println("tempPath :::"+tempFile);
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -561,12 +561,12 @@ public class DscController {
 			System.out.println("Issue in Temp file folder");
 			e.printStackTrace();
 		}
-		ResponseDataPKCSBulkSign apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(),tempFile.getCanonicalPath());
+		ResponseDataPKCSBulkSign apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(),tempFilePath);
 		System.out.println("apiResponse.getErrorCode() - " +apiResponse.getErrorCode());
 		String fileId = null;
 		try {
 			System.out.println("Before populateSignedPdfFileStoreId() call:: "+apiResponse);
-			fileId = populateSignedPdfFileStoreId(apiResponse,tempFile.getCanonicalPath(),dataSignRequest.getFileName(),dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getTenantId(),dataSignRequest.getModuleName());
+			fileId = populateSignedPdfFileStoreId(apiResponse,tempFilePath,dataSignRequest.getFileName(),dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getTenantId(),dataSignRequest.getModuleName());
 		} catch (IOException e) {
 			System.out.println("Issue in populateSignedPdfFileStoreId()");
 			e.printStackTrace();
