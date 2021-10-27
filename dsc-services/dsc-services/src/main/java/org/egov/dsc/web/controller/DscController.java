@@ -136,6 +136,7 @@ public class DscController {
 	private String logPath=System.getProperty("user.dir")+"/DS/Log";
 	private String tempPath=System.getProperty("user.dir")+"/"+"DS/Temp";
 	private String licPath=System.getProperty("user.dir")+"/"+"DS/Lic";
+	private String resCodePdfSign = null;
 	
 	@GetMapping(value="/_getCheck")
 	public String test()
@@ -574,14 +575,14 @@ public class DscController {
 		String result="";
 		if(fileId != null && !fileId.isEmpty() && !fileId.equalsIgnoreCase("0"))
 		{
-			result="Authentication Successfull";
+			result="Success";
 			System.out.println("fileID - "+fileId);
 			System.out.println("result - "+result);
 		}
 		else
 		{
 			fileId=null;
-			result="Authentication Failure";
+			result=resCodePdfSign;
 			System.out.println("fileID - "+fileId);
 			System.out.println("result - "+result);
 		}
@@ -603,10 +604,11 @@ public class DscController {
 		System.out.println("In populateSignedPdfFileStoreId():: moduleName - "+moduleName);
 		try {
 			if(apiResponse != null) {
+				resCodePdfSign = apiResponse.getErrorCode();
 				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getSiginedCertificate() - "+apiResponse.getSiginedCertificate());
 				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().size() - "+apiResponse.getBulkSignItems().size());
-				//System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0) - "+apiResponse.getBulkSignItems().get(0));
-				//System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0).getSignedData() - "+apiResponse.getBulkSignItems().get(0).getSignedData());
+				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0) - "+apiResponse.getBulkSignItems().get(0));
+				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0).getSignedData() - "+apiResponse.getBulkSignItems().get(0).getSignedData());
 				for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
 					if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData()))
 					{
@@ -619,6 +621,7 @@ public class DscController {
 					OutputStream os = new FileOutputStream(file);
 					os.write(signedDocBytes);
 					os.close();
+					System.out.println("In populateSignedPdfFileStoreId() after store():: finalFilePath - "+finalFilePath);
 				}
 			}
 			if(file != null) {
@@ -630,6 +633,7 @@ public class DscController {
 			tempFile.delete();
 		}
 		catch(Exception e) {
+			resCodePdfSign = apiResponse.getErrorCode();
 			tempFile.delete();
 			System.out.println("Error In populateSignedPdfFileStoreId():: Catch ---------");
 			e.printStackTrace();
@@ -655,7 +659,10 @@ public class DscController {
             fileStoreId = storeFiles(Arrays.asList(multipartFile),
                     fileName,
                     mimeType, moduleName,false,tenantId);
+            System.out.println("In store() :: fileStoreId - "+fileStoreId);
         } catch (IOException e) {
+        	resCodePdfSign = "Exe-FileStore";
+        	System.out.println("Error In store():: Catch ---------" +e.getMessage()+"::::::::::::::::: "+resCodePdfSign);
         	e.printStackTrace();
         }
         return fileStoreId;
@@ -671,9 +678,11 @@ public class DscController {
             for (FileReq filesId : filesList) {
             	fileStoreId=filesId.getFileStoreId();
             }
-            
+            System.out.println("In storeFiles() :: fileStoreId - "+fileStoreId);
             
         } catch (IOException e) {
+        	resCodePdfSign = "Exe-FileStore";
+        	System.out.println("Error In storeFiles():: Catch ---------" +e.getMessage()+"::::::::::::::::: "+resCodePdfSign);
         	e.printStackTrace();
         }
         return fileStoreId;
@@ -713,14 +722,29 @@ public class DscController {
 		boolean result=false;
 		DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
 		String authenticatePDF =null;
+		System.out.println("In checkPdfAuthentication():: ");
+		System.out.println("In checkPdfAuthentication():: userId - "+userId);
+		System.out.println("In checkPdfAuthentication():: signedData - "+signedData);
 		try {
 			authenticatePDF = authenticateWS.authenticatePDF(userId, signedData , null, "authenticate");
-		} catch (RemoteException e) {
-			e.printStackTrace();
+			System.out.println("authenticatePDF:: "+authenticatePDF);
+		
+			if(authenticatePDF != null && !authenticatePDF.isEmpty() && authenticatePDF.contains("Success"))
+			{
+				System.out.println("In checkPdfAuthentication():: authenticatePDF loop - "+authenticatePDF);
+				result=true;
+			}
+			else {
+				resCodePdfSign = authenticatePDF.split("^")[0];
+				System.out.println("resCodePdfSign = "+ resCodePdfSign);
+			}
+		} catch (RemoteException re) {
+			System.out.println("In checkPdfAuthentication():: error - "+re.getMessage());
+			re.printStackTrace();
 		}
-		if(authenticatePDF != null && !authenticatePDF.isEmpty() && authenticatePDF.contains("Success"))
-		{
-			result=true;
+		catch (Exception e) {
+			System.out.println("In checkPdfAuthentication():: error - "+e.getMessage());
+			e.printStackTrace();
 		}
 		return result;
 	}
