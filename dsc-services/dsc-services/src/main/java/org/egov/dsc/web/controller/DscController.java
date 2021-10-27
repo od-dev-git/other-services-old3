@@ -567,7 +567,7 @@ public class DscController {
 		String fileId = null;
 		try {
 			System.out.println("Before populateSignedPdfFileStoreId() call:: "+apiResponse);
-			fileId = populateSignedPdfFileStoreId(apiResponse,tempFilePath,dataSignRequest.getFileName(),dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getTenantId(),dataSignRequest.getModuleName());
+			fileId = populateSignedPdfFileStoreId(apiResponse,tempFilePath,dataSignRequest.getFileName(),dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getTenantId(),dataSignRequest.getModuleName(), dataSignRequest.getChannelId());
 		} catch (IOException e) {
 			System.out.println("Issue in populateSignedPdfFileStoreId()");
 			e.printStackTrace();
@@ -592,7 +592,7 @@ public class DscController {
     }
 
 	private String populateSignedPdfFileStoreId(ResponseDataPKCSBulkSign apiResponse, String serverTempPath,
-			String fileName, Long userId,String tenantId, String moduleName) throws IOException {
+			String fileName, Long userId,String tenantId, String moduleName, String channelId) throws IOException {
 		String fileStoreId="0";
 		File file =null;
 		File tempFile = new File(serverTempPath);
@@ -610,7 +610,7 @@ public class DscController {
 				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0) - "+apiResponse.getBulkSignItems().get(0));
 				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0).getSignedData() - "+apiResponse.getBulkSignItems().get(0).getSignedData());
 				for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
-					if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData()))
+					if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData(),channelId))
 					{
 						break;
 					}
@@ -718,7 +718,7 @@ public class DscController {
 	    return restTemplate.postForObject(uri.toString(), request, StorageResponse.class);
 	}
 
-	private boolean checkPdfAuthentication(String userId, String signedData) {
+	private boolean checkPdfAuthentication(String userId, String signedData, String channelId) {
 		boolean result=false;
 		DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
 		String authenticatePDF =null;
@@ -726,7 +726,8 @@ public class DscController {
 		System.out.println("In checkPdfAuthentication():: userId - "+userId);
 		System.out.println("In checkPdfAuthentication():: signedData - "+signedData);
 		try {
-			authenticatePDF = authenticateWS.authenticatePDF(userId, signedData , null, "authenticate");
+			String uniqueId = userId+"~"+channelId;
+			authenticatePDF = authenticateWS.authenticatePDF(uniqueId, signedData , null, "authenticate");
 			System.out.println("authenticatePDF:: "+authenticatePDF);
 		
 			if(authenticatePDF != null && !authenticatePDF.isEmpty() && authenticatePDF.contains("Success"))
