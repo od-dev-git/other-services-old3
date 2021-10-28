@@ -394,7 +394,7 @@ public class DscController {
 		  DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
 		  
 		  try {
-			result = authenticateWS.register(id+"~"+channel,signedText,null,null,true);
+			result = authenticateWS.register(id+"~"+channel,signedText,"registration","registration",true);
 			System.out.println("result ::::"+result);
 		} catch (RemoteException e) {
 			e.printStackTrace();
