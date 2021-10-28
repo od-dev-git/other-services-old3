@@ -627,7 +627,7 @@ public class DscController {
 			if(file != null) {
 				fileStoreId=store(new FileInputStream(file),file.getName(),"application/pdf",moduleName,true,tenantId);
 				System.out.println("In populateSignedPdfFileStoreId() after store():: fileStoreId - "+fileStoreId);
-				file.delete();
+				//file.delete();
 				System.out.println("In populateSignedPdfFileStoreId() after store():: temp file delete - success"+fileStoreId);
 			}
 			tempFile.delete();
