@@ -616,7 +616,7 @@ public class DscController {
 					}
 				
 					byte[] signedDocBytes = Base64.decodeBase64(doc.getSignedData());
-					String finalFilePath = serverTempPath+"\\"+fileName+"_signed.pdf";
+					String finalFilePath = tempPath+"\\"+fileName+"_signed.pdf";
 					 file = new File(finalFilePath);
 					OutputStream os = new FileOutputStream(file);
 					os.write(signedDocBytes);
@@ -730,7 +730,7 @@ public class DscController {
 			authenticatePDF = authenticateWS.authenticatePDF(uniqueId, signedData , null, "authenticate");
 			System.out.println("authenticatePDF:: "+authenticatePDF);
 		
-			if(authenticatePDF != null && !authenticatePDF.isEmpty() && authenticatePDF.contains("Success"))
+			if(authenticatePDF != null && !authenticatePDF.isEmpty() && (authenticatePDF.contains("Success")|| authenticatePDF.contains("success")))
 			{
 				System.out.println("In checkPdfAuthentication():: authenticatePDF loop - "+authenticatePDF);
 				result=true;
