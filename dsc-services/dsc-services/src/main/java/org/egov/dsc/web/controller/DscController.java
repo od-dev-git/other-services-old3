@@ -332,7 +332,7 @@ public class DscController {
 		pKCSSignRequest.setKeyStorePassphrase(dataSignRequest.getKeyStorePassPhrase());
 		pKCSSignRequest.setKeyId(dataSignRequest.getKeyId());
 		
-		pKCSSignRequest.setDataType(ContentType.TextPKCS7ATTACHED); //detached data signature
+		pKCSSignRequest.setDataType(ContentType.TextPKCS7ATTACHED); 
 		
 		// emas random number execute
 		String randomNumber=populateRandom(dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getChannelId());
