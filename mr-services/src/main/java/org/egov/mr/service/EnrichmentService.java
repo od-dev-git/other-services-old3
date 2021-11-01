@@ -386,16 +386,6 @@ public class EnrichmentService {
 				
 				
 
-				if(!CollectionUtils.isEmpty(marriageRegistration.getVerificationDocuments())){
-					marriageRegistration.getVerificationDocuments().forEach(document -> {
-						if(document.getId()==null){
-							document.setId(UUID.randomUUID().toString());
-							document.setActive(true);
-						}
-					});
-
-				}
-
 				marriageRegistration.getCoupleDetails().forEach(couple -> {
 					
 					if(couple.getId()==null)
@@ -449,6 +439,17 @@ public class EnrichmentService {
 
 
 
+			}else
+			{
+				if(!CollectionUtils.isEmpty(marriageRegistration.getVerificationDocuments())){
+					marriageRegistration.getVerificationDocuments().forEach(document -> {
+						if(document.getId()==null){
+							document.setId(UUID.randomUUID().toString());
+							document.setActive(true);
+						}
+					});
+
+				}
 			}
 			
 			if (marriageRegistration.getAction().equalsIgnoreCase(ACTION_SCHEDULE) || marriageRegistration.getAction().equalsIgnoreCase(ACTION_RESCHEDULE)) {
