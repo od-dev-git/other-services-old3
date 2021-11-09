@@ -482,7 +482,7 @@ public class DscController {
 		List<emBridgeSignerInput> inputs = new ArrayList<>();
 		
 		String pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
-		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),dataSignRequest.getRequestInfo().getUserInfo().getName(),true, PageTobeSigned.Last, Coordinates.BottomRight, applicationProperties.getPdfProprty4(), false);
+		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),dataSignRequest.getRequestInfo().getUserInfo().getName(),true, PageTobeSigned.All, Coordinates.BottomMiddle, applicationProperties.getPdfProprty4(), false);
 		inputs.add(input);
 		PKCSBulkPdfHashSignRequest pKCSBulkPdfHashSignRequest = new PKCSBulkPdfHashSignRequest();
 		pKCSBulkPdfHashSignRequest.setBulkInput(inputs);
@@ -596,7 +596,6 @@ public class DscController {
 		String fileStoreId="0";
 		File file =null;
 		File tempFile = new File(serverTempPath);
-		System.out.println("In populateSignedPdfFileStoreId():: apiResponse - "+apiResponse);
 		System.out.println("In populateSignedPdfFileStoreId():: serverTempPath - "+serverTempPath);
 		System.out.println("In populateSignedPdfFileStoreId():: fileName - "+fileName);
 		System.out.println("In populateSignedPdfFileStoreId():: userId - "+userId);
@@ -607,8 +606,6 @@ public class DscController {
 				resCodePdfSign = apiResponse.getErrorCode();
 				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getSiginedCertificate() - "+apiResponse.getSiginedCertificate());
 				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().size() - "+apiResponse.getBulkSignItems().size());
-				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0) - "+apiResponse.getBulkSignItems().get(0));
-				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().get(0).getSignedData() - "+apiResponse.getBulkSignItems().get(0).getSignedData());
 				for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
 					if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData(),channelId))
 					{
@@ -724,7 +721,6 @@ public class DscController {
 		String authenticatePDF =null;
 		System.out.println("In checkPdfAuthentication():: ");
 		System.out.println("In checkPdfAuthentication():: userId - "+userId);
-		System.out.println("In checkPdfAuthentication():: signedData - "+signedData);
 		try {
 			String uniqueId = userId+"~"+channelId;
 			authenticatePDF = authenticateWS.authenticatePDF(uniqueId, signedData , null, "authenticate");
