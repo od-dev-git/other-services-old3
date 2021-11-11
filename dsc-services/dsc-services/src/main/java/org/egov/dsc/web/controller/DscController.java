@@ -482,8 +482,9 @@ public class DscController {
 		List<emBridgeSignerInput> inputs = new ArrayList<>();
 		
 		String pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
-		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),dataSignRequest.getRequestInfo().getUserInfo().getName(),true, PageTobeSigned.All, Coordinates.BottomMiddle, applicationProperties.getPdfProprty4(), false);
-		inputs.add(input);
+		//emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),dataSignRequest.getRequestInfo().getUserInfo().getName(),true, PageTobeSigned.All, Coordinates.BottomMiddle, applicationProperties.getPdfProprty4(), false);
+		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(), applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(), dataSignRequest.getRequestInfo().getUserInfo().getName(), true, "All-425,100,545,160", applicationProperties.getPdfProprty4(), false);
+	        inputs.add(input);
 		PKCSBulkPdfHashSignRequest pKCSBulkPdfHashSignRequest = new PKCSBulkPdfHashSignRequest();
 		pKCSBulkPdfHashSignRequest.setBulkInput(inputs);
 		pKCSBulkPdfHashSignRequest.setTempFolder(tempFile.getCanonicalPath());
