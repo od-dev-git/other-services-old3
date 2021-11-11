@@ -66,12 +66,12 @@ public class MRNotificationService {
 		switch(businessService)
 		{
 			case businessService_MR:
-				List<SMSRequest> smsRequestsTL = new LinkedList<>();
+				List<SMSRequest> smsRequestsMR = new LinkedList<>();
 				if(null != config.getIsMRSMSEnabled()) {
 					if(config.getIsMRSMSEnabled()) {
-						enrichSMSRequest(request,smsRequestsTL);
-						if(!CollectionUtils.isEmpty(smsRequestsTL))
-							util.sendSMS(smsRequestsTL,true);
+						enrichSMSRequest(request,smsRequestsMR);
+						if(!CollectionUtils.isEmpty(smsRequestsMR))
+							util.sendSMS(smsRequestsMR,true);
 					}
 				}
 				if(null != config.getIsUserEventsNotificationEnabledForMR()) {
