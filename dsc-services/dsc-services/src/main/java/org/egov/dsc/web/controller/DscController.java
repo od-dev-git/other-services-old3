@@ -48,10 +48,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.Files;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -61,6 +60,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.egov.common.contract.request.RequestInfo;
@@ -100,11 +100,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import org.apache.commons.codec.binary.Base64;
-
 import emh.Enum.ContentType;
-import emh.Enum.Coordinates;
-import emh.Enum.PageTobeSigned;
 import emh.Enum.Token_Status;
 import emh.Enum.Token_Type;
 import emh.Model.RequestData.ListCertificateRequest;
@@ -150,8 +146,6 @@ public class DscController {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
-    	System.out.println("logPath :::"+logFile.getCanonicalPath());
-    	System.out.println("lic path 2 :::"+licPath);
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -173,9 +167,7 @@ public class DscController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("data.getStatus() :::"+data.getStatus());
 		System.out.println("data.getErrorCode() :::"+data.getErrorCode());
-		System.out.println("data.getErrorMsg() :::"+data.getErrorMsg());
     	System.out.println("Encrypted Data :"+data.getEncryptedData());
     	System.out.println("Encrypted Key ID :"+data.getEncryptionKeyID());	
 
@@ -194,7 +186,6 @@ public class DscController {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
-    	System.out.println("logPath :::"+logFile.getCanonicalPath());
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -225,7 +216,6 @@ public class DscController {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
-    	System.out.println("logPath :::"+logFile.getCanonicalPath());
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -263,7 +253,6 @@ public class DscController {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
-    	System.out.println("logPath :::"+logFile.getCanonicalPath());
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -288,15 +277,12 @@ public class DscController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-    	 System.out.println(responseDataListPKCSCertificate.getCertificates().size());
     	 List<PKCSCertificate> certificates = responseDataListPKCSCertificate.getCertificates();
     	 List<CertificateResponsePojo> certificatesList=new ArrayList<CertificateResponsePojo>();
     	 CertificateResponsePojo certificate=null;
     	 for(PKCSCertificate cert : certificates) {
     				System.out.println("value of keyId :" + cert.getKeyId());
     				System.out.println("value of common name :" + cert.getCommonName());
-    				System.out.println("value of expiry :"+cert.getValidTill());
-    				System.out.println("value of Certificate data :"+cert.getCertificateData());
     				certificate=new CertificateResponsePojo();
     				certificate.setKeyId(cert.getKeyId());
     				certificate.setCommonName(cert.getCommonName());
@@ -314,7 +300,6 @@ public class DscController {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
-    	System.out.println("logPath :::"+logFile.getCanonicalPath());
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -360,7 +345,6 @@ public class DscController {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
-    	System.out.println("logPath :::"+logFile.getCanonicalPath());
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -378,8 +362,6 @@ public class DscController {
 		} catch (EMBLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("\n\nvalue of Data Sign is111:\n");
-		System.out.println("Signed Text :"+responseDataPKCSSign.getSignedText());
 		//register
 		String repsonse=populateRegisterSoapCall(dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getChannelId(),responseDataPKCSSign.getSignedText());
     	
@@ -388,33 +370,23 @@ public class DscController {
     }
 
 	private String populateRegisterSoapCall(Long id,String channel,String signedText) {
-		
-
 		  String result="";
 		  DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
-		  
 		  try {
 			result = authenticateWS.register(id+"~"+channel,signedText,"registration","registration",true);
-			System.out.println("result ::::"+result);
+			System.out.println("result after registration ::::"+result);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 		  return result;
-		  
 	}
-
 	
-	  private String populateRandom(Long id,String channel) {
+	private String populateRandom(Long id,String channel) {
 		  String result="";
 		  DSAuthenticateWS authenticateWS =null;
-		  System.out.println("url     ::::"+applicationProperties.getEmasWsUrl());
-		  System.out.println("id      ::::"+id);
-		  System.out.println("channel ::::"+channel);
 		  try {
 		   authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
-			  System.out.println("after initialise");
 			result = authenticateWS.generateRandomNumber (id+"~"+channel);
-			  System.out.println("after generate ::::"+result);
 			result=result.split("~")[1];
 			  System.out.println("after result ::::"+result);
 		} catch (RemoteException e) {
@@ -463,8 +435,6 @@ public class DscController {
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
     	File tempFile=new File(tempPath);
-    	System.out.println("logPath :::"+logFile.getCanonicalPath());
-    	System.out.println("tempPath :::"+tempFile.getCanonicalPath());
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -484,7 +454,7 @@ public class DscController {
 		String pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
 		//emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),dataSignRequest.getRequestInfo().getUserInfo().getName(),true, PageTobeSigned.All, Coordinates.BottomMiddle, applicationProperties.getPdfProprty4(), false);
 		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(), applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(), dataSignRequest.getRequestInfo().getUserInfo().getName(), true, "All-425,100,545,160", applicationProperties.getPdfProprty4(), false);
-	        inputs.add(input);
+	    inputs.add(input);
 		PKCSBulkPdfHashSignRequest pKCSBulkPdfHashSignRequest = new PKCSBulkPdfHashSignRequest();
 		pKCSBulkPdfHashSignRequest.setBulkInput(inputs);
 		pKCSBulkPdfHashSignRequest.setTempFolder(tempFile.getCanonicalPath());
@@ -498,7 +468,6 @@ public class DscController {
 			e.printStackTrace();
 		}
 		String tempFilePath = bulkPKCSSignRequest.getTempFilePath();
-		System.out.println("tempFilePath:" + tempFilePath);
 		System.out.println("Encrypted Data :" + bulkPKCSSignRequest.getEncryptedData());
 		System.out.println("Encrypted Key ID :" + bulkPKCSSignRequest.getEncryptionKeyID());
     	
@@ -513,19 +482,13 @@ public class DscController {
     
     private String getPdfBytes(String fileStoreId, String tenantId) {
     	String pdfStr = null;
-    	System.out.println("getPdfBytes : fileStoreId - " + fileStoreId);
-    	System.out.println("getPdfBytes : tenantId - " + tenantId);
     	try {
     		File unsignedFile = fetchAsDigitPath(fileStoreId, tenantId).toFile();
-    		System.out.println("fetchAsDigitPath(fileStoreId, tenantId).toFile() - Success");
 			InputStream unsignedFileStrm = new FileInputStream(unsignedFile);
-			System.out.println("unsignedFileStrm - Success");
 			byte[] pdfBytes = new byte[(int) unsignedFile.length()];
 			unsignedFileStrm.read(pdfBytes, 0, pdfBytes.length);
 			unsignedFileStrm.close();
-			System.out.println("byte[] pdfBytes ) - Success");
 			pdfStr = Base64.encodeBase64String(pdfBytes);
-			System.out.println("Base64.encodeBase64String(pdfBytes) - Success:::: "+pdfStr);
 		} catch (FileNotFoundException fe) {
 			fe.printStackTrace();
 		}catch (Exception e) {
@@ -542,8 +505,6 @@ public class DscController {
     	File licFile=new File(licPath);
     	String tempFilePath = dataSignRequest.getTempFilePath();
     	File tempFile=new File(tempPath);
-    	System.out.println("logPath :::"+logFile.getCanonicalPath());
-    	System.out.println("tempPath :::"+tempFile);
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -552,25 +513,19 @@ public class DscController {
 	            licFile.mkdirs();
 			}
 			if (!tempFile.exists()) {
-				System.out.println("Temp file folder created");
-				
 				tempFile.mkdirs();
-				System.out.println("Temp file folder created end");
 			}
 	            	
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 		} catch (IOException e) {
-			System.out.println("Issue in Temp file folder");
 			e.printStackTrace();
 		}
 		ResponseDataPKCSBulkSign apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(),tempFilePath);
 		System.out.println("apiResponse.getErrorCode() - " +apiResponse.getErrorCode());
 		String fileId = null;
 		try {
-			System.out.println("Before populateSignedPdfFileStoreId() call:: "+apiResponse);
 			fileId = populateSignedPdfFileStoreId(apiResponse,tempFilePath,dataSignRequest.getFileName(),dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getTenantId(),dataSignRequest.getModuleName(), dataSignRequest.getChannelId());
 		} catch (IOException e) {
-			System.out.println("Issue in populateSignedPdfFileStoreId()");
 			e.printStackTrace();
 		}
 		String result="";
@@ -597,16 +552,9 @@ public class DscController {
 		String fileStoreId="0";
 		File file =null;
 		File tempFile = new File(serverTempPath);
-		System.out.println("In populateSignedPdfFileStoreId():: serverTempPath - "+serverTempPath);
-		System.out.println("In populateSignedPdfFileStoreId():: fileName - "+fileName);
-		System.out.println("In populateSignedPdfFileStoreId():: userId - "+userId);
-		System.out.println("In populateSignedPdfFileStoreId():: tenantId - "+tenantId);
-		System.out.println("In populateSignedPdfFileStoreId():: moduleName - "+moduleName);
 		try {
 			if(apiResponse != null) {
 				resCodePdfSign = apiResponse.getErrorCode();
-				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getSiginedCertificate() - "+apiResponse.getSiginedCertificate());
-				System.out.println("In populateSignedPdfFileStoreId():: apiResponse.getBulkSignItems().size() - "+apiResponse.getBulkSignItems().size());
 				for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
 					if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData(),channelId))
 					{
@@ -619,21 +567,17 @@ public class DscController {
 					OutputStream os = new FileOutputStream(file);
 					os.write(signedDocBytes);
 					os.close();
-					System.out.println("In populateSignedPdfFileStoreId() after store():: finalFilePath - "+finalFilePath);
 				}
 			}
 			if(file != null) {
 				fileStoreId=store(new FileInputStream(file),file.getName(),"application/pdf",moduleName,true,tenantId);
-				System.out.println("In populateSignedPdfFileStoreId() after store():: fileStoreId - "+fileStoreId);
-				//file.delete();
-				System.out.println("In populateSignedPdfFileStoreId() after store():: temp file delete - success"+fileStoreId);
+				file.delete();
 			}
 			tempFile.delete();
 		}
 		catch(Exception e) {
 			resCodePdfSign = apiResponse.getErrorCode();
 			tempFile.delete();
-			System.out.println("Error In populateSignedPdfFileStoreId():: Catch ---------");
 			e.printStackTrace();
 		}
 		return fileStoreId;
@@ -657,10 +601,8 @@ public class DscController {
             fileStoreId = storeFiles(Arrays.asList(multipartFile),
                     fileName,
                     mimeType, moduleName,false,tenantId);
-            System.out.println("In store() :: fileStoreId - "+fileStoreId);
         } catch (IOException e) {
         	resCodePdfSign = "Exe-FileStore";
-        	System.out.println("Error In store():: Catch ---------" +e.getMessage()+"::::::::::::::::: "+resCodePdfSign);
         	e.printStackTrace();
         }
         return fileStoreId;
@@ -676,11 +618,8 @@ public class DscController {
             for (FileReq filesId : filesList) {
             	fileStoreId=filesId.getFileStoreId();
             }
-            System.out.println("In storeFiles() :: fileStoreId - "+fileStoreId);
-            
         } catch (IOException e) {
         	resCodePdfSign = "Exe-FileStore";
-        	System.out.println("Error In storeFiles():: Catch ---------" +e.getMessage()+"::::::::::::::::: "+resCodePdfSign);
         	e.printStackTrace();
         }
         return fileStoreId;
@@ -720,8 +659,6 @@ public class DscController {
 		boolean result=false;
 		DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
 		String authenticatePDF =null;
-		System.out.println("In checkPdfAuthentication():: ");
-		System.out.println("In checkPdfAuthentication():: userId - "+userId);
 		try {
 			String uniqueId = userId+"~"+channelId;
 			authenticatePDF = authenticateWS.authenticatePDF(uniqueId, signedData , null, "authenticate");
@@ -729,19 +666,15 @@ public class DscController {
 		
 			if(authenticatePDF != null && !authenticatePDF.isEmpty() && (authenticatePDF.contains("Success")|| authenticatePDF.contains("success")))
 			{
-				System.out.println("In checkPdfAuthentication():: authenticatePDF loop - "+authenticatePDF);
 				result=true;
 			}
 			else {
 				resCodePdfSign = authenticatePDF.split("^")[0];
-				System.out.println("resCodePdfSign = "+ resCodePdfSign);
 			}
 		} catch (RemoteException re) {
-			System.out.println("In checkPdfAuthentication():: error - "+re.getMessage());
 			re.printStackTrace();
 		}
 		catch (Exception e) {
-			System.out.println("In checkPdfAuthentication():: error - "+e.getMessage());
 			e.printStackTrace();
 		}
 		return result;
@@ -774,9 +707,6 @@ public class DscController {
 	    if (fileStoreId != null && !fileStoreId.isEmpty()) {
 	        uri.append("&fileStoreId=").append(fileStoreId);
 	    }
-	    
-	    System.out.println("fetchFilesFromDigitService: URL - " +uri.toString());
-	  
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
 	    HttpEntity<String> entity = new HttpEntity<>(headers);
