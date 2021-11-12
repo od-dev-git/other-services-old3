@@ -31,6 +31,10 @@ public class MRConstants {
     public static final String TRIGGER_NOWORKFLOW  = "NOWORKFLOW";
 
     public static final String ACTION_CANCEL  = "CANCEL";
+    
+    public static final String BRIDE_DIVYANG_PROOF  = "MR.BRIDEDIVYANGPROOF";
+    
+    public static final String GROOM_DIVYANG_PROOF  = "MR.GROOMDIVYANGPROOF";
 
 
     public static final String ACTION_PAY  = "PAY";

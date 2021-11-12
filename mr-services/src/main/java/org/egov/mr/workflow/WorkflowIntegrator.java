@@ -152,7 +152,7 @@ public class WorkflowIntegrator {
 			}
 
 			/*
-			 * on success result from work-flow read the data and set the status back to TL
+			 * on success result from work-flow read the data and set the status back to MR
 			 * object
 			 */
 			DocumentContext responseContext = JsonPath.parse(response);
@@ -165,7 +165,7 @@ public class WorkflowIntegrator {
 						idStatusMap.put(instanceContext.read(BUSINESSIDJOSNKEY), instanceContext.read(STATUSJSONKEY));
 					});
 
-			// setting the status back to TL object from wf response
+			// setting the status back to MR object from wf response
 			marriageRegistrationRequest.getMarriageRegistrations()
 					.forEach(mrObj -> mrObj.setStatus(idStatusMap.get(mrObj.getApplicationNumber())));
 		}

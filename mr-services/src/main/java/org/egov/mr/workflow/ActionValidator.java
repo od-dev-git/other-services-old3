@@ -104,7 +104,7 @@ public class ActionValidator {
 		request.getMarriageRegistrations().forEach(marriageRegistration -> {
 			
 			if(ACTION_APPLY.equalsIgnoreCase(marriageRegistration.getAction())){
-				if(marriageRegistration.getApplicationDocuments()==null)
+				if(CollectionUtils.isEmpty(marriageRegistration.getApplicationDocuments()))
 					errorMap.put("INVALID STATUS","Status cannot be APPLY when application document are not provided");
 			}
 		});
@@ -119,7 +119,7 @@ public class ActionValidator {
 		request.getMarriageRegistrations().forEach(marriageRegistration -> {
 			
 			if(ACTION_APPLY.equalsIgnoreCase(marriageRegistration.getAction())){
-				if(marriageRegistration.getCoupleDetails()==null)
+				if(CollectionUtils.isEmpty(marriageRegistration.getCoupleDetails()))
 					errorMap.put("INVALID UPDATE","Couple Details are mandatory");
 				
 				
