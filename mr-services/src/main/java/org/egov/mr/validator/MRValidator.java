@@ -31,6 +31,7 @@ import org.egov.mr.repository.MRRepository;
 import org.egov.mr.util.MRConstants;
 import org.egov.mr.util.MarriageRegistrationUtil;
 import org.egov.mr.web.models.AppointmentDetails;
+import org.egov.mr.web.models.DscDetails;
 import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.MarriageRegistration.ApplicationTypeEnum;
 import org.egov.mr.web.models.MarriageRegistrationRequest;
@@ -969,7 +970,99 @@ public class MRValidator {
 			return false;
 	}
 	
-	
+    public void validateDscSearch( MarriageRegistrationSearchCriteria criteria , RequestInfo requestInfo) {
 
+   	 if(StringUtils.isEmpty(criteria.getEmployeeUuid()))
+        	throw new CustomException("EMPLOYEE_UUID_ERROR", " Employee UUID is mandatory ");
+
+   	 if(StringUtils.isEmpty(criteria.getTenantId()))
+         	throw new CustomException("TENANT_ID_ERROR", " TenantId is mandatory ");
+
+   	 if(!criteria.getEmployeeUuid().equalsIgnoreCase(requestInfo.getUserInfo().getUuid()))
+   		 throw new CustomException("EMPLOYEE_UUID_ERROR", " Employee UUID not matching with the UUID in request ");
+
+   }
+	
+    public void validateDscDetails(MarriageRegistrationRequest request, List<MarriageRegistration> searchResult) {
+        Map<String,MarriageRegistration> idToMarriageRegistrationFromSearch = new HashMap<>();
+        searchResult.forEach(marriageRegistration -> {
+            idToMarriageRegistrationFromSearch.put(marriageRegistration.getId(),marriageRegistration);
+        });
+        request.getMarriageRegistrations().forEach(marriageRegistration -> {
+
+        	MarriageRegistration marriageRegistrationFromSearch = idToMarriageRegistrationFromSearch.get(marriageRegistration.getId()) ;
+
+        	if(marriageRegistrationFromSearch==null)
+        	{
+        		throw new CustomException("APPLICATION  ERROR","The Application does not exist ."); 
+        	}
+
+        	if(!marriageRegistrationFromSearch.getStatus().equalsIgnoreCase(MRConstants.STATUS_APPROVED))
+        	{
+        		throw new CustomException("APPLICATION STATUS ERROR","The Application should be in approved state for document signing ."); 
+        	}
+
+        	List<DscDetails> dscDetailsFromSearch = marriageRegistrationFromSearch.getDscDetails();
+        	List<DscDetails> dscDetailsFromRequest = marriageRegistration.getDscDetails();
+
+        	if(!CollectionUtils.isEmpty(dscDetailsFromSearch))
+        	{
+        		if(dscDetailsFromSearch.size()!=1)
+        			throw new CustomException("DSC DETAILS ERROR","There should be only one Digitally signed documemts for application ."); 
+
+        		DscDetails searchedDscDetail = dscDetailsFromSearch.get(0);
+
+        		if(!StringUtils.isEmpty(searchedDscDetail.getDocumentId()))
+        			throw new CustomException("DSC DETAILS ERROR","This Marriage Registration Certificate is already digitally signed."); 
+
+        	}else
+        		throw new CustomException("DSC DETAILS ERROR","There are no Digitally signed documemts for this application ."); 
+
+
+        	if(!CollectionUtils.isEmpty(dscDetailsFromRequest))
+        	{
+        		if(dscDetailsFromRequest.size()!=1)
+        			throw new CustomException("DSC DETAILS ERROR","There should be only one Digitally signed documemts for application .");
+
+        		DscDetails requestDscDetail = dscDetailsFromRequest.get(0);
+        		DscDetails searchedDscDetail = dscDetailsFromSearch.get(0);
+
+        		if(StringUtils.isEmpty(requestDscDetail.getApprovedBy()))
+        			throw new CustomException("DSC DETAILS ERROR","Approved by is mandatory in Digitally signed documemts .");
+
+        		if(StringUtils.isEmpty(requestDscDetail.getApplicationNumber()))
+        			throw new CustomException("DSC DETAILS ERROR","Application Number is mandatory in Digitally signed documemts .");
+
+        		if(StringUtils.isEmpty(requestDscDetail.getDocumentType()))
+        			throw new CustomException("DSC DETAILS ERROR","Document Type is mandatory in Digitally signed documemts .");
+
+        		if(StringUtils.isEmpty(requestDscDetail.getId()))
+        			throw new CustomException("DSC DETAILS ERROR","Id is mandatory in Digitally signed documemts .");
+
+        		if(StringUtils.isEmpty(requestDscDetail.getTenantId()))
+        			throw new CustomException("DSC DETAILS ERROR","TenantId is mandatory in Digitally signed documemts .");
+
+        		if(StringUtils.isEmpty(requestDscDetail.getDocumentId()))
+        			throw new CustomException("DSC DETAILS ERROR","DocumentId is mandatory in Digitally signed documemts .");
+
+
+        		if(!searchedDscDetail.getApplicationNumber().equalsIgnoreCase(requestDscDetail.getApplicationNumber()))
+        			throw new CustomException("DSC DETAILS ERROR","DSC Document Application Number does not match .");
+
+        		if(!searchedDscDetail.getId().equalsIgnoreCase(requestDscDetail.getId()))
+        			throw new CustomException("DSC DETAILS ERROR","DSC Document Id does not match .");
+
+        		if(!searchedDscDetail.getApprovedBy().equalsIgnoreCase(requestDscDetail.getApprovedBy()))
+        			throw new CustomException("DSC DETAILS ERROR","DSC Document Approved by does not match .");
+
+        		if(!searchedDscDetail.getApprovedBy().equalsIgnoreCase(request.getRequestInfo().getUserInfo().getUuid()))
+        			throw new CustomException("DSC DETAILS ERROR","DSC Document Can only be signed by the person who approved it .");
+
+
+        	}else
+        		throw new CustomException("DSC DETAILS ERROR","There are no Digitally signed documemts for this application ."); 
+
+        });
+    }
 
 }

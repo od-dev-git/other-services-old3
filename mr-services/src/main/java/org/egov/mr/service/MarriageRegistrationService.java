@@ -19,7 +19,9 @@ import org.egov.mr.service.notification.EditNotificationService;
 import org.egov.mr.util.MRConstants;
 import org.egov.mr.util.MarriageRegistrationUtil;
 import org.egov.mr.validator.MRValidator;
+import org.egov.mr.web.models.AuditDetails;
 import org.egov.mr.web.models.Difference;
+import org.egov.mr.web.models.DscDetails;
 import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.MarriageRegistrationRequest;
 import org.egov.mr.web.models.MarriageRegistrationSearchCriteria;
@@ -27,6 +29,7 @@ import org.egov.mr.web.models.workflow.BusinessService;
 import org.egov.mr.workflow.ActionValidator;
 import org.egov.mr.workflow.WorkflowIntegrator;
 import org.egov.mr.workflow.WorkflowService;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -241,6 +244,39 @@ public class MarriageRegistrationService {
 
 		}
 		return marriageRegistrationResponse;
+	}
+
+	public List<MarriageRegistration> updateDscDetails(@Valid MarriageRegistrationRequest marriageRegistrationRequest,String businessServicefromPath) {
+		if (businessServicefromPath == null)
+            businessServicefromPath = businessService_MR;
+
+    	if(businessServicefromPath!=businessService_MR)
+    	{
+    		throw new CustomException("BUSINESSSERVICE_NOTALLOWED", " The business service is not allowed in this api call");
+    	}
+    	
+    	AuditDetails auditDetails = util.getAuditDetails(marriageRegistrationRequest.getRequestInfo().getUserInfo().getUuid(), false);
+    	marriageRegistrationRequest.getMarriageRegistrations().forEach(marriageRegistration -> {
+            marriageRegistration.setAuditDetails(auditDetails);
+        });
+    	
+    	List<MarriageRegistration> searchResult = getMarriageRegistrationsWithOwnerInfo(marriageRegistrationRequest);
+    	mrValidator.validateDscDetails(marriageRegistrationRequest,searchResult);
+    	repository.updateDscDetails(marriageRegistrationRequest);
+    	
+    	
+		return marriageRegistrationRequest.getMarriageRegistrations();
+	}
+
+	public List<DscDetails> searchDscDetails(MarriageRegistrationSearchCriteria criteria,RequestInfo requestInfo, String servicename, HttpHeaders headers) {
+        List<DscDetails> pendingDigitalsignDocuments = new LinkedList<>();
+
+        mrValidator.validateDscSearch(criteria,requestInfo);
+
+        pendingDigitalsignDocuments = repository.getDscDetails(criteria);
+
+       return pendingDigitalsignDocuments;
+		
 	}
 
 

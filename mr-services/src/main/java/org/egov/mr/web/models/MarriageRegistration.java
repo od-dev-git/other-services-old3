@@ -131,6 +131,10 @@ public class MarriageRegistration {
       @JsonProperty("verificationDocuments")
       @Valid
       private List<Document> verificationDocuments = null;
+      
+      @JsonProperty("dscDetails")
+      @Valid
+      private List<DscDetails> dscDetails = null;
 	  
 	  @JsonProperty("coupleDetails")
       @Valid
@@ -214,4 +218,13 @@ public class MarriageRegistration {
           return this;
       }
     
+      public MarriageRegistration addDscDetailsItem(DscDetails dscDetailsItem) {
+          if (this.dscDetails == null) {
+          this.dscDetails = new ArrayList<>();
+          }
+          if(!this.dscDetails.contains(dscDetailsItem))
+              this.dscDetails.add(dscDetailsItem);
+          return this;
+      }
+      
 }
