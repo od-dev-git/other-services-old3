@@ -74,6 +74,8 @@ public class MRConfiguration {
     @Value("${persister.update.marriageregistration.workflow.topic}")
     private String updateWorkflowTopic;
 
+    @Value("${persister.update.marriageregistration.dscdetails.topic}")
+    private String updateDscDetailsTopic;
 
 
     //Location Config

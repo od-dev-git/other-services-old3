@@ -39,13 +39,14 @@ public class MRQueryBuilder {
 
 
     private static final String QUERY = "SELECT mr.*,mrp.*,mrc.*,mrca.*," +
-            "mrgd.*,mrapldoc.*,mrverdoc.*,mrw.*,mr.id as mr_originalId,mr.tenantid as mr_tenantId,mr.lastModifiedTime as " +
+            "mrgd.*,mrapldoc.*,mrdscdetails.*,mrverdoc.*,mrw.*,mr.id as mr_originalId,mr.tenantid as mr_tenantId,mr.applicationnumber as mr_applicationnumber,mr.lastModifiedTime as " +
             "mr_lastModifiedTime,mr.createdBy as mr_createdBy,mr.lastModifiedBy as mr_lastModifiedBy,mr.createdTime as " +
             "mr_createdTime,mrp.id as mrp_id,mrp.locality as mrp_locality,mrp.pincode as mrp_pincode,mrp.additionalDetail as mrp_additionalDetail,mrc.id as mrc_id,mrc.title as mrc_title,mrc.firstname as mrc_firstName," +
             "mrca.id as mrca_id,mrca.addressline1 as mrca_addressLine1,mrca.country as mrca_country,mrca.state as mrca_state,mrca.district as mrca_district,mrca.pincode as mrca_pincode,mrca.contact as mrca_contact,mrca.emailaddress as mrca_emailaddress," +
             "mrgd.id as mrgd_id,mrgd.addressline1 as mrgd_addressLine1,mrgd.country as mrgd_country,mrgd.state as mrgd_state,mrgd.district as mrgd_district,mrgd.pincode as mrgd_pincode,mrgd.contact as mrgd_contact,mrgd.emailaddress as mrgd_emailaddress," +
             "mrw.id as mrw_id,mrw.title as mrw_title,mrw.firstname as mrw_firstName,mrw.country as mrw_country,mrw.state as mrw_state,mrw.district as mrw_district,mrw.pincode as mrw_pincode,mrw.contact as mrw_contact," +
             "mrapldoc.id as mr_ap_doc_id,mrapldoc.documenttype as mr_ap_doc_documenttype,mrapldoc.filestoreid as mr_ap_doc_filestoreid,mrapldoc.active as mr_ap_doc_active," +
+            "mrdscdetails.id as mr_dsc_details_id,mrdscdetails.documenttype as mr_dsc_details_documenttype,mrdscdetails.documentid  as mr_dsc_details_documentid,mrdscdetails.additionaldetail as  mr_dsc_details_additionaldetail,mrdscdetails.applicationnumber as mr_dsc_details_applicationnumber," +
             "mraptdtl.id as mr_apt_dtl_id,mraptdtl.startTime as mr_apt_dtl_startTime,mraptdtl.endTime as mr_apt_dtl_endTime,mraptdtl.active as mr_apt_dtl_active,mraptdtl.description as mr_apt_dtl_description,mraptdtl.additionalDetail as mr_apt_dtl_additionalDetail," +
             "mrverdoc.id as mr_ver_doc_id,mrverdoc.documenttype as mr_ver_doc_documenttype,mrverdoc.filestoreid as mr_ver_doc_filestoreid,mrverdoc.active as mr_ver_doc_active FROM eg_mr_application mr " 
             +INNER_JOIN_STRING
@@ -61,9 +62,13 @@ public class MRQueryBuilder {
             +LEFT_OUTER_JOIN_STRING
             +"eg_mr_verificationdocument mrverdoc ON mrverdoc.mr_id = mr.id"
             +LEFT_OUTER_JOIN_STRING
+            +"eg_mr_dscdetails mrdscdetails ON mrdscdetails.mr_id = mr.id"
+            +LEFT_OUTER_JOIN_STRING
             +"eg_mr_applicationdocument mrapldoc ON mrapldoc.mr_id = mr.id"
             +LEFT_OUTER_JOIN_STRING
             +"eg_mr_appointmentdetails mraptdtl ON mraptdtl.mr_id = mr.id";
+    
+    private static final String DSC_PENDING_QUERY = "SELECT * FROM eg_mr_dscdetails";
 
 
       private final String paginationWrapper = "SELECT * FROM " +
@@ -72,6 +77,38 @@ public class MRQueryBuilder {
               " result) result_offset " +
               "WHERE offset_ > ? AND offset_ <= ?";
 
+      private final String dscPaginationWrapper = "SELECT * FROM " +
+              "(SELECT *, DENSE_RANK() OVER (ORDER BY lastModifiedTime DESC) offset_ FROM " +
+              "({})" +
+              " result) result_offset " +
+              "WHERE offset_ > ? AND offset_ <= ?";
+      
+      
+      
+      public String getMRDscDetailsQuery(MarriageRegistrationSearchCriteria criteria, List<Object> preparedStmtList) {
+
+      	StringBuilder builder = new StringBuilder(DSC_PENDING_QUERY);
+
+
+      	if (criteria.getTenantId() != null) {
+              addClauseIfRequired(preparedStmtList, builder);
+              builder.append(" tenantid = ? ");
+              preparedStmtList.add(criteria.getTenantId());
+          }
+
+      	if (criteria.getEmployeeUuid() != null) {
+              addClauseIfRequired(preparedStmtList, builder);
+              builder.append(" approvedby = ? ");
+              preparedStmtList.add(criteria.getEmployeeUuid());
+          }
+
+           builder.append(" AND  documentid is null ");
+
+
+
+      	return addDscPaginationWrapper(builder.toString(),preparedStmtList,criteria);
+
+      }
 
 
 
@@ -206,6 +243,26 @@ public class MRQueryBuilder {
        return finalQuery;
     }
 
+    
+    private String addDscPaginationWrapper(String query,List<Object> preparedStmtList,MarriageRegistrationSearchCriteria criteria){
+    	int limit = config.getDefaultLimit();
+    	int offset = config.getDefaultOffset();
+    	String finalQuery = dscPaginationWrapper.replace("{}",query);
+
+    	if(criteria.getLimit()!=null && criteria.getLimit()<=config.getMaxSearchLimit())
+    		limit = criteria.getLimit();
+
+    	if(criteria.getLimit()!=null && criteria.getLimit()>config.getMaxSearchLimit())
+    		limit = config.getMaxSearchLimit();
+
+    	if(criteria.getOffset()!=null)
+    		offset = criteria.getOffset();
+
+    	preparedStmtList.add(offset);
+    	preparedStmtList.add(limit+offset);
+
+    	return finalQuery;
+    }
 
     private static void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
         if (values.isEmpty())
@@ -215,7 +272,7 @@ public class MRQueryBuilder {
         }
     }
 
-    public String getTLPlainSearchQuery(MarriageRegistrationSearchCriteria criteria, List<Object> preparedStmtList) {
+    public String getMRPlainSearchQuery(MarriageRegistrationSearchCriteria criteria, List<Object> preparedStmtList) {
         StringBuilder builder = new StringBuilder(QUERY);
 
         List<String> ids = criteria.getIds();

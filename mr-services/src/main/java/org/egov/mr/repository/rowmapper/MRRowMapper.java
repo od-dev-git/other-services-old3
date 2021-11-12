@@ -15,6 +15,7 @@ import org.egov.mr.web.models.CoupleDetails;
 import org.egov.mr.web.models.Address;
 import org.egov.mr.web.models.AppointmentDetails;
 import org.egov.mr.web.models.Document;
+import org.egov.mr.web.models.DscDetails;
 import org.egov.mr.web.models.GuardianDetails;
 import org.egov.mr.web.models.MarriagePlace;
 import org.egov.mr.web.models.MarriageRegistration;
@@ -68,7 +69,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 				currentMarriageRegistration = MarriageRegistration.builder().auditDetails(auditdetails)
 						.workflowCode(rs.getString("workflowcode"))
 						.applicationDate(applicationDate)
-						.applicationNumber(rs.getString("applicationnumber"))
+						.applicationNumber(rs.getString("mr_applicationnumber"))
 						.applicationType(MarriageRegistration.ApplicationTypeEnum.fromValue(rs.getString( "applicationType")))
 						.mrNumber(rs.getString("mrnumber"))
 						.marriageDate(commencementDate)
@@ -336,6 +337,31 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 				currentMarriageRegistration.addVerificationDocumentsItem(verificationDocument);
 			}
 
+			if(rs.getString("mr_dsc_details_id")!=null) {
+
+	        	DscDetails dscDetail = DscDetails.builder()
+	                    .documentType(rs.getString("mr_dsc_details_documenttype"))
+	                    .documentId(rs.getString("mr_dsc_details_documentid"))
+	                    .applicationNumber(rs.getString("mr_dsc_details_applicationnumber"))
+	                    .id(rs.getString("mr_dsc_details_id"))
+	                    .tenantId(tenantId)
+	                    .approvedBy(rs.getString("approvedby"))
+	                    .build();
+
+	        	try {
+	        		PGobject pgObj  = (PGobject) rs.getObject("mr_dsc_details_additionaldetail");
+
+	        		if(pgObj!=null){
+	        			JsonNode additionalDetail = mapper.readTree(pgObj.getValue());
+	        			dscDetail.setAdditionalDetail(additionalDetail);
+	        		}
+	        	} catch (Exception e) {
+					throw new CustomException("PARSING ERROR","The DSC Details additionalDetail json cannot be parsed");
+				}
+
+
+	        	currentMarriageRegistration.addDscDetailsItem(dscDetail);
+	        }
 
 
 

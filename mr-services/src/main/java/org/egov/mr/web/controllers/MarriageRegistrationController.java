@@ -9,11 +9,13 @@ import io.swagger.annotations.*;
 
 import org.egov.mr.service.MarriageRegistrationService;
 import org.egov.mr.util.ResponseInfoFactory;
+import org.egov.mr.web.models.DigitalSignCertificateResponse;
 import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.MarriageRegistrationRequest;
 import org.egov.mr.web.models.MarriageRegistrationResponse;
 import org.egov.mr.web.models.MarriageRegistrationSearchCriteria;
 import org.egov.mr.web.models.RequestInfoWrapper;
+import org.egov.mr.web.models.DscDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -79,6 +81,30 @@ import javax.servlet.http.HttpServletRequest;
     public ResponseEntity<MarriageRegistrationResponse> update(@Valid @RequestBody MarriageRegistrationRequest marriageRegistrationRequest,
                                                        @PathVariable(required = false) String servicename) {
         List<MarriageRegistration> marriageRegistrations = marriageRegistrationService.update(marriageRegistrationRequest, servicename);
+
+        MarriageRegistrationResponse response = MarriageRegistrationResponse.builder().marriageRegistrations(marriageRegistrations).responseInfo(
+                responseInfoFactory.createResponseInfoFromRequestInfo(marriageRegistrationRequest.getRequestInfo(), true))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
+    @RequestMapping(value = {"/{servicename}/_searchdscdetails", "/_searchdscdetails"}, method = RequestMethod.POST)
+    public ResponseEntity<DigitalSignCertificateResponse> searchDscDetails(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                       @Valid @ModelAttribute MarriageRegistrationSearchCriteria criteria,
+                                                       @PathVariable(required = false) String servicename
+            , @RequestHeader HttpHeaders headers) {
+        List<DscDetails> dscDetails = marriageRegistrationService.searchDscDetails(criteria, requestInfoWrapper.getRequestInfo(), servicename, headers);
+
+        DigitalSignCertificateResponse response = DigitalSignCertificateResponse.builder().dscDetails(dscDetails).responseInfo(
+                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = {"/{servicename}/_updatedscdetails", "/_updatedscdetails"}, method = RequestMethod.POST)
+    public ResponseEntity<MarriageRegistrationResponse> updateDscDetails(@Valid @RequestBody MarriageRegistrationRequest marriageRegistrationRequest,
+                                                       @PathVariable(required = false) String servicename) {
+    	List<MarriageRegistration> marriageRegistrations  = marriageRegistrationService.updateDscDetails(marriageRegistrationRequest, servicename);
 
         MarriageRegistrationResponse response = MarriageRegistrationResponse.builder().marriageRegistrations(marriageRegistrations).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(marriageRegistrationRequest.getRequestInfo(), true))

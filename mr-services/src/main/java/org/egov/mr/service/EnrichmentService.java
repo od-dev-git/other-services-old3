@@ -15,6 +15,7 @@ import org.egov.mr.util.MarriageRegistrationUtil;
 import org.egov.mr.web.models.AuditDetails;
 import org.egov.mr.web.models.Couple;
 import org.egov.mr.web.models.CoupleDetails;
+import org.egov.mr.web.models.DscDetails;
 import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.MarriageRegistrationRequest;
 import org.egov.mr.web.models.MarriageRegistrationSearchCriteria;
@@ -450,6 +451,23 @@ public class EnrichmentService {
 					});
 
 				}
+				
+				if ((marriageRegistration.getStatus() != null) && marriageRegistration.getAction().equalsIgnoreCase(ACTION_APPROVE))
+                {
+                	List<DscDetails> dscDetailsList =  new ArrayList<>();
+                	DscDetails dscDetails = new DscDetails();
+                	dscDetails.setTenantId(marriageRegistration.getTenantId());
+                	dscDetails.setId(UUID.randomUUID().toString());
+                	dscDetails.setApplicationNumber(marriageRegistration.getApplicationNumber());
+                	dscDetails.setApprovedBy(requestInfo.getUserInfo().getUuid());
+                	dscDetailsList.add(dscDetails);
+                	marriageRegistration.setDscDetails(dscDetailsList);
+                }else
+                {
+                	marriageRegistration.setDscDetails(null);
+                }
+				
+				
 			}
 			
 			if (marriageRegistration.getAction().equalsIgnoreCase(ACTION_SCHEDULE) || marriageRegistration.getAction().equalsIgnoreCase(ACTION_RESCHEDULE)) {

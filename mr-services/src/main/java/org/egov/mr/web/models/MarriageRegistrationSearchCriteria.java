@@ -52,7 +52,9 @@ public class MarriageRegistrationSearchCriteria {
 
     @JsonProperty("businessService")
     private String businessService = null;
-
+    
+    @JsonProperty("employeeUuid")
+    private String employeeUuid;
 
     @JsonProperty("offset")
     private Integer offset;

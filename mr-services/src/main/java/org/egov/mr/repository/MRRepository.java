@@ -9,7 +9,9 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.mr.config.MRConfiguration;
 import org.egov.mr.producer.Producer;
 import org.egov.mr.repository.builder.MRQueryBuilder;
+import org.egov.mr.repository.rowmapper.MRDigitalSignedCertificateRowMapper;
 import org.egov.mr.repository.rowmapper.MRRowMapper;
+import org.egov.mr.web.models.DscDetails;
 import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.MarriageRegistrationRequest;
 import org.egov.mr.web.models.MarriageRegistrationSearchCriteria;
@@ -32,6 +34,8 @@ public class MRRepository {
     private MRQueryBuilder queryBuilder;
 
     private MRRowMapper rowMapper;
+    
+    private MRDigitalSignedCertificateRowMapper dscRowMapper;
 
     private Producer producer;
 
@@ -42,13 +46,14 @@ public class MRRepository {
 
     @Autowired
     public MRRepository(JdbcTemplate jdbcTemplate, MRQueryBuilder queryBuilder, MRRowMapper rowMapper,
-                        Producer producer, MRConfiguration config, WorkflowService workflowService) {
+                        Producer producer, MRConfiguration config, WorkflowService workflowService,MRDigitalSignedCertificateRowMapper dscRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.queryBuilder = queryBuilder;
         this.rowMapper = rowMapper;
         this.producer = producer;
         this.config = config;
         this.workflowService = workflowService;
+        this.dscRowMapper =dscRowMapper ;
     }
 
 
@@ -60,6 +65,14 @@ public class MRRepository {
         return registrations;
     }
 
+    
+    
+    public List<DscDetails> getDscDetails(MarriageRegistrationSearchCriteria criteria) {
+        List<Object> preparedStmtList = new ArrayList<>();
+        String query = queryBuilder.getMRDscDetailsQuery(criteria, preparedStmtList);
+        List<DscDetails> dscDetails =  jdbcTemplate.query(query, preparedStmtList.toArray(), dscRowMapper);
+        return dscDetails;
+    }
 
     public void save(MarriageRegistrationRequest marriageRegistrationRequest) {
         producer.push(config.getSaveTopic(), marriageRegistrationRequest);
@@ -95,6 +108,17 @@ public class MRRepository {
 
 
     }
+
+
+
+	public void updateDscDetails(MarriageRegistrationRequest marriageRegistrationRequest) {
+		
+		RequestInfo requestInfo = marriageRegistrationRequest.getRequestInfo();
+        List<MarriageRegistration> marriageRegistrations = marriageRegistrationRequest.getMarriageRegistrations();
+
+       producer.push(config.getUpdateDscDetailsTopic(), new MarriageRegistrationRequest(requestInfo, marriageRegistrations));
+		
+	}
 
 
 
