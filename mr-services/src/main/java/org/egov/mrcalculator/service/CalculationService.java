@@ -241,17 +241,17 @@ public class CalculationService {
 
 				LinkedHashMap<String,Object> mdmsMap =  ulbWiseRateslist.get(0);
 
-
+// Commenting the code for developmentFees,redcrossFees,userFees
 
 				LinkedHashMap<String,Object> challanFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_CHALLAN_FEE);
 				
 				LinkedHashMap<String,Object> registrationFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_REGISTRATION_FEE);
 				
-				LinkedHashMap<String,Object> developmentFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_DEVELOPMENT_FEE);
+//				LinkedHashMap<String,Object> developmentFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_DEVELOPMENT_FEE);
 				
-				LinkedHashMap<String,Object> redcrossFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_REDCROSS_FEE);
+//				LinkedHashMap<String,Object> redcrossFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_REDCROSS_FEE);
 				
-				LinkedHashMap<String,Object> userFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_USER_FEE);
+//				LinkedHashMap<String,Object> userFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_USER_FEE);
 
 
 
@@ -265,27 +265,27 @@ public class CalculationService {
 					throw new CustomException("BILLING ERROR","Registration Fee Not Found  ");	
 				}
 				
-				if(developmentFeesMap == null || developmentFeesMap.isEmpty())
-				{
-					throw new CustomException("BILLING ERROR","Development Fee Not Found  ");	
-				}
-				
-				if(redcrossFeesMap == null || redcrossFeesMap.isEmpty())
-				{
-					throw new CustomException("BILLING ERROR","Redcross Fee Not Found  ");	
-				}
-				
-				if(userFeesMap == null || userFeesMap.isEmpty())
-				{
-					throw new CustomException("BILLING ERROR","User Fee Not Found  ");	
-				}
+//				if(developmentFeesMap == null || developmentFeesMap.isEmpty())
+//				{
+//					throw new CustomException("BILLING ERROR","Development Fee Not Found  ");	
+//				}
+//				
+//				if(redcrossFeesMap == null || redcrossFeesMap.isEmpty())
+//				{
+//					throw new CustomException("BILLING ERROR","Redcross Fee Not Found  ");	
+//				}
+//				
+//				if(userFeesMap == null || userFeesMap.isEmpty())
+//				{
+//					throw new CustomException("BILLING ERROR","User Fee Not Found  ");	
+//				}
 
 				
 					BigDecimal challanFee ;
 					BigDecimal registrationFee ;
-					BigDecimal developmentFee ;
-					BigDecimal redcrossFee ;
-					BigDecimal userFee ;
+//					BigDecimal developmentFee ;
+//					BigDecimal redcrossFee ;
+//					BigDecimal userFee ;
 
 					Long marriageDate = marriageRegistration.getMarriageDate();
 
@@ -325,11 +325,11 @@ public class CalculationService {
 					}else
 						registrationFee = new BigDecimal(registrationFeesMap.get(MDMS_AFTER_ONE_YEAR_OF_MARRIAGE).toString());
 					
-					developmentFee =  new BigDecimal(developmentFeesMap.get(MDMS_COST).toString());
-					
-					redcrossFee = new BigDecimal(redcrossFeesMap.get(MDMS_COST).toString());
-					
-					userFee = new BigDecimal(userFeesMap.get(MDMS_COST).toString());
+//					developmentFee =  new BigDecimal(developmentFeesMap.get(MDMS_COST).toString());
+//					
+//					redcrossFee = new BigDecimal(redcrossFeesMap.get(MDMS_COST).toString());
+//					
+//					userFee = new BigDecimal(userFeesMap.get(MDMS_COST).toString());
 
 					if(challanFee.compareTo(BigDecimal.ZERO)==-1)
 						throw new CustomException("INVALID AMOUNT","Challan Fee amount is negative");
@@ -337,14 +337,14 @@ public class CalculationService {
 					if(registrationFee.compareTo(BigDecimal.ZERO)==-1)
 						throw new CustomException("INVALID AMOUNT","Registration Fee amount is negative");
 					
-					if(developmentFee.compareTo(BigDecimal.ZERO)==-1)
-						throw new CustomException("INVALID AMOUNT","Development Fee amount is negative");
-					
-					if(redcrossFee.compareTo(BigDecimal.ZERO)==-1)
-						throw new CustomException("INVALID AMOUNT","Redcross Fee amount is negative");
-					
-					if(userFee.compareTo(BigDecimal.ZERO)==-1)
-						throw new CustomException("INVALID AMOUNT","User Fee amount is negative");
+//					if(developmentFee.compareTo(BigDecimal.ZERO)==-1)
+//						throw new CustomException("INVALID AMOUNT","Development Fee amount is negative");
+//					
+//					if(redcrossFee.compareTo(BigDecimal.ZERO)==-1)
+//						throw new CustomException("INVALID AMOUNT","Redcross Fee amount is negative");
+//					
+//					if(userFee.compareTo(BigDecimal.ZERO)==-1)
+//						throw new CustomException("INVALID AMOUNT","User Fee amount is negative");
 
 					
 					
@@ -356,37 +356,55 @@ public class CalculationService {
 					challanFeeEstimate.setTaxHeadCode(config.getChallanFeeTaxHead());
 					estimateList.add(challanFeeEstimate);
 					
-					TaxHeadEstimate registrationFeeEstimate = new TaxHeadEstimate();
-
-					registrationFeeEstimate.setEstimateAmount(registrationFee);
-					registrationFeeEstimate.setCategory(Category.FEE);
-
-					registrationFeeEstimate.setTaxHeadCode(config.getRegistrationFeeTaxHead());
-					estimateList.add(registrationFeeEstimate);
 					
-					TaxHeadEstimate developmentFeeEstimate = new TaxHeadEstimate();
-
-					developmentFeeEstimate.setEstimateAmount(developmentFee);
-					developmentFeeEstimate.setCategory(Category.FEE);
-
-					developmentFeeEstimate.setTaxHeadCode(config.getDevelopmentFeeTaxHead());
-					estimateList.add(developmentFeeEstimate);
+					boolean isPHC = false ;
 					
-					TaxHeadEstimate redcrossFeeEstimate = new TaxHeadEstimate();
-
-					redcrossFeeEstimate.setEstimateAmount(redcrossFee);
-					redcrossFeeEstimate.setCategory(Category.FEE);
-
-					redcrossFeeEstimate.setTaxHeadCode(config.getRedcrossFeeTaxHead());
-					estimateList.add(redcrossFeeEstimate);
 					
-					TaxHeadEstimate userFeeEstimate = new TaxHeadEstimate();
+					if((marriageRegistration.getCoupleDetails().get(0).getBride().getIsDivyang()!= null && marriageRegistration.getCoupleDetails().get(0).getBride().getIsDivyang() == true) 
+							|| (marriageRegistration.getCoupleDetails().get(0).getGroom().getIsDivyang()!= null && marriageRegistration.getCoupleDetails().get(0).getGroom().getIsDivyang() == true))
+					{
+						isPHC = true ;
+					}
+					
+					
+					if(config.getPhcNoRegistrationFeesTenants()!= null && config.getPhcNoRegistrationFeesTenants().contains(marriageRegistration.getTenantId()) && isPHC)
+					{
+						log.info(" The bridge or groom is PHC so not adding Registration Fees ");
+					}else
+					{
+						TaxHeadEstimate registrationFeeEstimate = new TaxHeadEstimate();
 
-					userFeeEstimate.setEstimateAmount(userFee);
-					userFeeEstimate.setCategory(Category.FEE);
+						registrationFeeEstimate.setEstimateAmount(registrationFee);
+						registrationFeeEstimate.setCategory(Category.FEE);
 
-					userFeeEstimate.setTaxHeadCode(config.getUserFeeTaxHead());
-					estimateList.add(userFeeEstimate);
+						registrationFeeEstimate.setTaxHeadCode(config.getRegistrationFeeTaxHead());
+						estimateList.add(registrationFeeEstimate);
+						
+					}
+					
+//					TaxHeadEstimate developmentFeeEstimate = new TaxHeadEstimate();
+//
+//					developmentFeeEstimate.setEstimateAmount(developmentFee);
+//					developmentFeeEstimate.setCategory(Category.FEE);
+//
+//					developmentFeeEstimate.setTaxHeadCode(config.getDevelopmentFeeTaxHead());
+//					estimateList.add(developmentFeeEstimate);
+//					
+//					TaxHeadEstimate redcrossFeeEstimate = new TaxHeadEstimate();
+//
+//					redcrossFeeEstimate.setEstimateAmount(redcrossFee);
+//					redcrossFeeEstimate.setCategory(Category.FEE);
+//
+//					redcrossFeeEstimate.setTaxHeadCode(config.getRedcrossFeeTaxHead());
+//					estimateList.add(redcrossFeeEstimate);
+//					
+//					TaxHeadEstimate userFeeEstimate = new TaxHeadEstimate();
+//
+//					userFeeEstimate.setEstimateAmount(userFee);
+//					userFeeEstimate.setCategory(Category.FEE);
+//
+//					userFeeEstimate.setTaxHeadCode(config.getUserFeeTaxHead());
+//					estimateList.add(userFeeEstimate);
 					
 
 				
