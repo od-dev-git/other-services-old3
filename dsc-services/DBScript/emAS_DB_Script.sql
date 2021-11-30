@@ -139,4 +139,16 @@ CREATE TABLE public.cust_admin (
 
   ALTER TABLE public.cust_admin OWNER TO dsc;
   GRANT ALL ON TABLE public.cust_admin TO dsc;
+  
+-- Alter table script
+
+ALTER TABLE public.emas_DS_dtls alter COLUMN x500_isspncpl_b64e type VARCHAR(5000);
+ALTER TABLE public.emas_DS_dtls alter COLUMN x500_pncpl_b64e type VARCHAR(5000);
+ALTER TABLE public.emas_ds_dtls_hist alter COLUMN x500_isspncpl_b64e TYPE VARCHAR(5000);
+ALTER TABLE public.emas_ds_dtls_hist alter COLUMN x500_pncpl_b64e type VARCHAR(5000);
+ALTER TABLE public.emas_txn_status alter COLUMN expiry_status_dtl type VARCHAR(5000);
+ALTER TABLE public.emas_txn_status alter COLUMN signature_status_dtl type VARCHAR(5000);
+ALTER TABLE public.emas_txn_status alter COLUMN trust_store_status_dtl type VARCHAR(5000);
+ALTER TABLE public.emas_txn_status alter COLUMN ocsp_status_dtl type VARCHAR(5000);
+ALTER TABLE public.emas_txn_status alter COLUMN crl_status_dtl type VARCHAR(5000);
 
