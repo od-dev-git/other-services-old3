@@ -10,7 +10,6 @@ COPY *.war /opt/jboss/wildfly/standalone/deployments/
 COPY ds.zip /opt/jboss/wildfly/standalone/
 RUN cd /opt/jboss/wildfly/standalone/ && unzip ds.zip && rm ds.zip
 
-
 CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
 #CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0","-Ddb.migration.enabled=false", "-Ddev.mode=true", "-#Ddb.flyway.validateon.migrate=true"]
 
