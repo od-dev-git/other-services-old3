@@ -97,4 +97,8 @@ public class MRCalculatorConfigs {
     private String userUpdateEndpoint;
 
 
+    @Value("${phc.noregistrationfees.tenantid}")
+    private String phcNoRegistrationFeesTenants;
+    
+    
 }
