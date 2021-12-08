@@ -1,0 +1,57 @@
+-- Table: public.emas_cust_temp
+
+-- DROP TABLE public.emas_cust_temp;
+
+CREATE TABLE public.emas_cust_temp
+(
+    emas_cust_temp_id integer NOT NULL,
+    cert_serial_no character varying(255) COLLATE pg_catalog."default",
+    channel character varying(255) COLLATE pg_catalog."default",
+    common_name character varying(255) COLLATE pg_catalog."default",
+    country character varying(255) COLLATE pg_catalog."default",
+    created_dt timestamp without time zone,
+    crl_details character varying(40000) COLLATE pg_catalog."default",
+    crl_status integer,
+    crl_status_dtl character varying(40000) COLLATE pg_catalog."default",
+    custname character varying(255) COLLATE pg_catalog."default",
+    email_id character varying(255) COLLATE pg_catalog."default",
+    encoded_cert character varying(40000) COLLATE pg_catalog."default",
+    expiry_status integer,
+    expiry_status_dtl character varying(40000) COLLATE pg_catalog."default",
+    flexone character varying(255) COLLATE pg_catalog."default",
+    flextwo character varying(255) COLLATE pg_catalog."default",
+    given_name character varying(255) COLLATE pg_catalog."default",
+    initails character varying(255) COLLATE pg_catalog."default",
+    iss_common_name character varying(255) COLLATE pg_catalog."default",
+    iss_country character varying(255) COLLATE pg_catalog."default",
+    iss_org character varying(255) COLLATE pg_catalog."default",
+    iss_org_unit character varying(255) COLLATE pg_catalog."default",
+    location character varying(255) COLLATE pg_catalog."default",
+    modified_dt timestamp without time zone,
+    ocsp_status integer,
+    ocsp_status_dtl character varying(40000) COLLATE pg_catalog."default",
+    org character varying(255) COLLATE pg_catalog."default",
+    org_unit character varying(255) COLLATE pg_catalog."default",
+    request character varying(255) COLLATE pg_catalog."default",
+    signature_alg character varying(255) COLLATE pg_catalog."default",
+    signature_status integer,
+    signature_status_dtl character varying(40000) COLLATE pg_catalog."default",
+    signeddata character varying(40000) COLLATE pg_catalog."default",
+    state character varying(255) COLLATE pg_catalog."default",
+    status character varying(255) COLLATE pg_catalog."default",
+    sur_name character varying(255) COLLATE pg_catalog."default",
+    transresult character varying(255) COLLATE pg_catalog."default",
+    trust_store_status integer,
+    trust_store_status_dtl character varying(8000) COLLATE pg_catalog."default",
+    unique_id character varying(255) COLLATE pg_catalog."default",
+    valid_from timestamp without time zone,
+    valid_to timestamp without time zone,
+    CONSTRAINT emas_cust_temp_pkey PRIMARY KEY (emas_cust_temp_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.emas_cust_temp
+    OWNER to dsc;
