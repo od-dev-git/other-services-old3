@@ -85,6 +85,10 @@ CREATE TABLE public.emas_cust (
 	CONSTRAINT emas_cust_pkey PRIMARY KEY (emas_cust_id)
 );
 
+
+ALTER TABLE public.emas_auth_dtls ADD CONSTRAINT fk75a39b2911405f32 FOREIGN KEY (emas_cust_id) REFERENCES emas_cust(emas_cust_id);
+ALTER TABLE public.emas_auth_dtls ADD CONSTRAINT fk75a39b29b32ad1f3 FOREIGN KEY (emas_cust_id) REFERENCES emas_cust(emas_cust_id);
+
 --Permissions to given to the Production DB user
 
  ALTER TABLE public.emas_cust OWNER TO dsc;
