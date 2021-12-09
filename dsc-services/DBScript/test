@@ -1,104 +1,48 @@
-rVR5ULeASjlxtPrPn8Khm4PCgFczjDtCYwoFZPuQbd+0/VNW9g3OBVp0mvQNqUJe0I6xoe/M51kKOni/4EXLa0t6GPAZ+Drbp/bweiziwwrlukFI30I/rsHscjv7PviFIjrkIUcs8UJoZYraxrpuU2PhEy/vaPWzAch19RCnfQm7/niKVXR1PsjWQx2WzZ7KooJ1rNa1syI51FyObLunJNfsxggIqMIICJgIBATCBlzCBjjELMAkGA1UEBhMCSU4xKjAoBgNVBAoTIWVNdWRocmEgQ29uc3VtZXIgU2VydmljZXMgTGltaXRlZDEdMBsGA1UECxMUQ2VydGlmeWluZyBBdXRob3JpdHkxNDAyBgNVBAMTK2UtTXVkaHJhIFN1YiBDQSBmb3IgQ2xhc3MgMyBJbmRpdmlkdWFsIDIwMTQCBAFLL+QwCwYJYIZIAWUDBAIBoGkwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMjExMjA4MTczOTEyWjAvBgkqhkiG9w0BCQQxIgQgm4Bm7VjfnrS93XT8xA+Serkky+ff8e/03beaZGdMpWUwCwYJKoZIhvcNAQEBBIIBAGBF58z6B++nIpdav2oQuh2TxGtioMJQl5Lb/kgb01pgJi5bY6lUgKKwBuU05yvcjnlsvJ5CClYgdls/AK2DEGEmE3prWaOAYbAvCOTR05UQehlPeqxrwW7rn9+qWF70Y0Shmng7jCFhszuRVvySXlOM2aVl9pwCL04wETqagQygYEgu0h6HD3M0XKWp3Iq7tDZCyrx+JywbOzNLBc6I6TD9PuQdzo2KkRy/92PkiTQPmx7mnvjyJ8ozdy5u/IVwvNnBN24otSrhyKwgNTyTwYg1RDTV1RRTMlyDsFpGwK8T7o6uSs9fTcr83BatY0bvY8RVuChEmo1nIaBmxy6MyXw=', 'UTTAR PRADESH', 'HAUT', NULL, 'Success', '1000', 'successfully verified with the trust certificate', '2856023~ch4', '2021-11-30 08:04:50.000000 +00:00', '2023-11-30 08:04:50.000000 +00:00', '10') was aborted.  Call getNextException to see the cause.
-	at org.postgresql.jdbc2.AbstractJdbc2Statement$BatchResultHandler.handleError(AbstractJdbc2Statement.java:2569)
-	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:1796)
-	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:407)
-	at org.postgresql.jdbc2.AbstractJdbc2Statement.executeBatch(AbstractJdbc2Statement.java:2708)
-	at org.hibernate.jdbc.BatchingBatcher.doExecuteBatch(BatchingBatcher.java:70)
-	at org.hibernate.jdbc.AbstractBatcher.executeBatch(AbstractBatcher.java:268)
-	... 82 more
-2021-12-08 17:36:21,036 ERROR DSAuthenticationDAOHibernateImpl:2486 - Exception while saving details in database : 
-org.hibernate.exception.SQLGrammarException: Could not execute JDBC batch update
-	at org.hibernate.exception.SQLStateConverter.convert(SQLStateConverter.java:90)
-	at org.hibernate.exception.JDBCExceptionHelper.convert(JDBCExceptionHelper.java:66)
-	at org.hibernate.jdbc.AbstractBatcher.executeBatch(AbstractBatcher.java:275)
-	at org.hibernate.engine.ActionQueue.executeActions(ActionQueue.java:266)
-	at org.hibernate.engine.ActionQueue.executeActions(ActionQueue.java:167)
-	at org.hibernate.event.def.AbstractFlushingEventListener.performExecutions(AbstractFlushingEventListener.java:321)
-	at org.hibernate.event.def.DefaultFlushEventListener.onFlush(DefaultFlushEventListener.java:50)
-	at org.hibernate.impl.SessionImpl.flush(SessionImpl.java:1028)
-	at org.hibernate.impl.SessionImpl.managedFlush(SessionImpl.java:366)
-	at org.hibernate.transaction.JDBCTransaction.commit(JDBCTransaction.java:137)
-	at emas.ds.dao.authentication.impl.DSAuthenticationDAOHibernateImpl.saveCustTemp(DSAuthenticationDAOHibernateImpl.java:2483)
-	at emas.ds.services.DSAuthenticationService.register(DSAuthenticationService.java:637)
-	at emas.ws.ds.helpers.AuthenticationRequester.requestForward(AuthenticationRequester.java:544)
-	at emas.ws.ds.DSAuthenticateWSImpl.register(DSAuthenticateWSImpl.java:276)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:90)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:55)
-	at java.lang.reflect.Method.invoke(Method.java:508)
-	at org.apache.cxf.service.invoker.AbstractInvoker.performInvocation(AbstractInvoker.java:173)
-	at org.apache.cxf.service.invoker.AbstractInvoker.invoke(AbstractInvoker.java:89)
-	at org.apache.cxf.jaxws.JAXWSMethodInvoker.invoke(JAXWSMethodInvoker.java:60)
-	at org.apache.cxf.service.invoker.AbstractInvoker.invoke(AbstractInvoker.java:75)
-	at org.apache.cxf.interceptor.ServiceInvokerInterceptor$1.run(ServiceInvokerInterceptor.java:58)
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:522)
-	at java.util.concurrent.FutureTask.run(FutureTask.java:277)
-	at org.apache.cxf.workqueue.SynchronousExecutor.execute(SynchronousExecutor.java:37)
-	at org.apache.cxf.interceptor.ServiceInvokerInterceptor.handleMessage(ServiceInvokerInterceptor.java:106)
-	at org.apache.cxf.phase.PhaseInterceptorChain.doIntercept(PhaseInterceptorChain.java:243)
-	at org.apache.cxf.transport.ChainInitiationObserver.onMessage(ChainInitiationObserver.java:110)
-	at org.apache.cxf.transport.servlet.ServletDestination.invoke(ServletDestination.java:98)
-	at org.apache.cxf.transport.servlet.ServletController.invokeDestination(ServletController.java:423)
-	at org.apache.cxf.transport.servlet.ServletController.invoke(ServletController.java:178)
-	at org.apache.cxf.transport.servlet.AbstractCXFServlet.invoke(AbstractCXFServlet.java:142)
-	at org.apache.cxf.transport.servlet.AbstractHTTPServlet.handleRequest(AbstractHTTPServlet.java:179)
-	at org.apache.cxf.transport.servlet.AbstractHTTPServlet.doPost(AbstractHTTPServlet.java:103)
-	at javax.servlet.http.HttpServlet.service(HttpServlet.java:707)
-	at org.apache.cxf.transport.servlet.AbstractHTTPServlet.service(AbstractHTTPServlet.java:159)
-	at io.undertow.servlet.handlers.ServletHandler.handleRequest(ServletHandler.java:85)
-	at io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:129)
-	at emas.rest.resource.ApiOriginFilter.doFilter(ApiOriginFilter.java:17)
-	at io.undertow.servlet.core.ManagedFilter.doFilter(ManagedFilter.java:61)
-	at io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:131)
-	at io.undertow.servlet.handlers.FilterHandler.handleRequest(FilterHandler.java:84)
-	at io.undertow.servlet.handlers.security.ServletSecurityRoleHandler.handleRequest(ServletSecurityRoleHandler.java:62)
-	at io.undertow.servlet.handlers.ServletDispatchingHandler.handleRequest(ServletDispatchingHandler.java:36)
-	at org.wildfly.extension.undertow.security.SecurityContextAssociationHandler.handleRequest(SecurityContextAssociationHandler.java:78)
-	at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-	at io.undertow.servlet.handlers.security.SSLInformationAssociationHandler.handleRequest(SSLInformationAssociationHandler.java:131)
-	at io.undertow.servlet.handlers.security.ServletAuthenticationCallHandler.handleRequest(ServletAuthenticationCallHandler.java:57)
-	at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-	at io.undertow.security.handlers.AbstractConfidentialityHandler.handleRequest(AbstractConfidentialityHandler.java:46)
-	at io.undertow.servlet.handlers.security.ServletConfidentialityConstraintHandler.handleRequest(ServletConfidentialityConstraintHandler.java:64)
-	at io.undertow.security.handlers.AuthenticationMechanismsHandler.handleRequest(AuthenticationMechanismsHandler.java:60)
-	at io.undertow.servlet.handlers.security.CachedAuthenticatedSessionHandler.handleRequest(CachedAuthenticatedSessionHandler.java:77)
-	at io.undertow.security.handlers.NotificationReceiverHandler.handleRequest(NotificationReceiverHandler.java:50)
-	at io.undertow.security.handlers.AbstractSecurityContextAssociationHandler.handleRequest(AbstractSecurityContextAssociationHandler.java:43)
-	at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-	at org.wildfly.extension.undertow.security.jacc.JACCContextIdHandler.handleRequest(JACCContextIdHandler.java:61)
-	at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-	at org.wildfly.extension.undertow.deployment.GlobalRequestControllerHandler.handleRequest(GlobalRequestControllerHandler.java:68)
-	at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-	at io.undertow.servlet.handlers.ServletInitialHandler.handleFirstRequest(ServletInitialHandler.java:292)
-	at io.undertow.servlet.handlers.ServletInitialHandler.access$100(ServletInitialHandler.java:81)
-	at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:138)
-	at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:135)
-	at io.undertow.servlet.core.ServletRequestContextThreadSetupAction$1.call(ServletRequestContextThreadSetupAction.java:48)
-	at io.undertow.servlet.core.ContextClassLoaderSetupAction$1.call(ContextClassLoaderSetupAction.java:43)
-	at org.wildfly.extension.undertow.security.SecurityContextThreadSetupAction.lambda$create$0(SecurityContextThreadSetupAction.java:105)
-	at org.wildfly.extension.undertow.security.SecurityContextThreadSetupAction$$Lambda$686.0000000099075CC0.call(Unknown Source)
-	at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-	at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$687.00000000990762B0.call(Unknown Source)
-	at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-	at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$687.00000000990762B0.call(Unknown Source)
-	at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-	at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$687.00000000990762B0.call(Unknown Source)
-	at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-	at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$687.00000000990762B0.call(Unknown Source)
-	at io.undertow.servlet.handlers.ServletInitialHandler.dispatchRequest(ServletInitialHandler.java:272)
-	at io.undertow.servlet.handlers.ServletInitialHandler.access$000(ServletInitialHandler.java:81)
-	at io.undertow.servlet.handlers.ServletInitialHandler$1.handleRequest(ServletInitialHandler.java:104)
-	at io.undertow.server.Connectors.executeRootHandler(Connectors.java:326)
-	at io.undertow.server.HttpServerExchange$1.run(HttpServerExchange.java:812)
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1160)
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.lang.Thread.run(Thread.java:818)
-Caused by: java.sql.BatchUpdateException: Batch entry 0 insert into emas_cust_temp (cert_serial_no, channel, common_name, country, created_dt, crl_details, crl_status, crl_status_dtl, custName, email_id, encoded_cert, expiry_status, expiry_status_dtl, flexOne, flexTwo, given_name, initails, iss_common_name, iss_country, iss_org, iss_org_unit, location, modified_dt, ocsp_status, ocsp_status_dtl, org, org_unit, originalContent, request, signature_alg, signature_status, signature_status_dtl, signedData, state, status, sur_name, transResult, trust_store_status, trust_store_status_dtl, unique_id, valid_from, valid_to, emas_cust_temp_id) values ('21704676', 'ch4', 'ABINASH ROUTRAY', 'IN', '2021-12-08 17:36:20.937000 +00:00', '53D8~Wed Dec 08 12:39:38 GMT 2021~Sun Jan 02 12:39:38 GMT 2022', '1000', 'Certificate CRL status is GOOD for C=IN,O=Personal,Pseudonym=3262976a4cebea7986add1009e9a0a7ed6b0a1d45cfebba85b201f70028e5520,2.5.4.20=7666263030a3878a72184850ea5eefd37a5d89446031c9ee67c0ebc5e3a9cf83,PostalCode=201010,ST=UTTAR PRADESH,SERIALNUMBER=69186c466df8f9f86f1800afc763af21c60b5aa612afbb3462e1a77387115b23,CN=ABINASH ROUTRAY', '2856023', NULL, 'MIIGkzCCBXugAwIBAgIEAUsv5DANBgkqhkiG9w0BAQsFADCBjjELMAkGA1UEBhMCSU4xKjAoBgNVBAoTIWVNdWRocmEgQ29uc3VtZXIgU2VydmljZXMgTGltaXRlZDEdMBsGA1UECxMUQ2VydGlmeWluZyBBdXRob3JpdHkxNDAyBgNVBAMTK2UtTXVkaHJhIFN1YiBDQSBmb3IgQ2xhc3MgMyBJbmRpdmlkdWFsIDIwMTQwHhcNMjExMTMwMDgwNDUwWhcNMjMxMTMwMDgwNDUwWjCCAUQxCzAJBgNVBAYTAklOMREwDwYDVQQKEwhQZXJzb25hbDFJMEcGA1UEQRNAMzI2Mjk3NmE0Y2ViZWE3OTg2YWRkMTAwOWU5YTBhN2VkNmIwYTFkNDVjZmViYmE4NWIyMDFmNzAwMjhlNTUyMDFJMEcGA1UEFBNANzY2NjI2MzAzMGEzODc4YTcyMTg0ODUwZWE1ZWVmZDM3YTVkODk0NDYwMzFjOWVlNjdjMGViYzVlM2E5Y2Y4MzEPMA0GA1UEERMGMjAxMDEwMRYwFAYDVQQIEw1VVFRBUiBQUkFERVNIMUkwRwYDVQQFE0A2OTE4NmM0NjZkZjhmOWY4NmYxODAwYWZjNzYzYWYyMWM2MGI1YWE2MTJhZmJiMzQ2MmUxYTc3Mzg3MTE1YjIzMRgwFgYDVQQDEw9BQklOQVNIIFJPVVRSQVkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDSUbIepSiN8jIQewS2pICPmAsVqlzDvf_Mu0IhxFfyW0fDT1T4_zvZKCTpKcH0ugGL8japFqt_vhSQ3TIR90z7e-Ylbq_b5Q_Q_8e7DjkJroEzE9DH71ub1VA3DziWYxsuLVS3r-wbPX9FN4uUcnszKdZc3XDtcMAnwWnlXxxgtBbMK2wiQKnqO8_yMuf3A_xTTZWPJ8WOFnYGAd05jJ4OGBqZ2ZDCIWKQkuRphOJQEYyknDWhsCwjy_Tn6aOr4bFVTSbHex1_oPmdjdxnSBilX4IwA-LAfSmSOxgvdsZTwdaReJb-1QzV-F5jhTPJBsL9nQ85uxzmcavDY-IkRs0NAgMBAAGjggI-MIICOjATBgNVHSMEDDAKgAhLMU7hAKSpeTAdBgNVHQ4EFgQU3zPbcZPnzsjn2yogYN1Jh-dZw1UwDAYDVR0TAQH_BAIwADAOBgNVHQ8BAf8EBAMCBsAwIAYDVR0RBBkwF4EVYXZpLnJvdXRyYXlAZ21haWwuY29tMEAGA1UdJQQ5MDcGCCsGAQUFBwMEBgorBgEEAYI3CgMMBgkqhkiG9y8BAQUGCisGAQQBgjcUAgIGCCsGAQUFBwMCMIG7BgNVHSAEgbMwgbAwLQYGYIJkZAIDMCMwIQYIKwYBBQUHAgIwFRoTQ2xhc3MgMyBDZXJ0aWZpY2F0ZTAtBgZggmRkAgIwIzAhBggrBgEFBQcCAjAVGhNDbGFzcyAyIENlcnRpZmljYXRlMFAGB2CCZGQBCAIwRTBDBggrBgEFBQcCARY3aHR0cDovL3d3dy5lLW11ZGhyYS5jb20vcmVwb3NpdG9yeS9jcHMvZS1NdWRocmFfQ1BTLnBkZjB7BggrBgEFBQcBAQRvMG0wJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmUtbXVkaHJhLmNvbTBFBggrBgEFBQcwAoY5aHR0cDovL3d3dy5lLW11ZGhyYS5jb20vcmVwb3NpdG9yeS9jYWNlcnRzL0MzSVNDQTIwMTQuY3J0MEcGA1UdHwRAMD4wPKA6oDiGNmh0dHA6Ly93d3cuZS1tdWRocmEuY29tL3JlcG9zaXRvcnkvY3Jscy9DM0lTQ0EyMDE0LmNybDANBgkqhkiG9w0BAQsFAAOCAQEAptKuzRq4kNZbLuWtI6ml2ALEeiW3g5q1EblKFxxBbJwigjOE09F70aBVZKW5bihITVp-_femaoDAVzKnPBY1ORkSV9x9GwGhFeR5BvIGLYjyjO0D17PBGYSW7IvpRitVHlQt4BKOXG0-s-fwqGbg8KAVzOMO0JjCgVk-5Bt37T9U1b2Dc4FWnSa9A2pQl7QjrGh78znWQo6eL_gRctrS3oY8Bn4Otun9vB6LOLDCuW6QUjfQj-uwexyO_s--IUiOuQhRyzxQmhlitrGum5TY-ETL-9o9bMByHX1EKd9Cbv-eIpVdHU-yNZDHZbNnsqignWs1rWzIjnUXI5su6ck1-w', '1000', 'certificate is valid till Thu Nov 30 08:04:50 GMT 2023', 'registration', 'registration', NULL, NULL, 'e-Mudhra Sub CA for Class 3 Individual 2014', 'IN', 'eMudhra Consumer Services Limited', 'Certifying Authority', NULL, NULL, '999', 'OCSP check is disabled', 'Personal', NULL, NULL, 'Register', 'SHA256WithRSAEncryption', '1000', 'PKCS7 verification successfull with the certificate DN C=IN,O=Personal,Pseudonym=3262976a4cebea7986add1009e9a0a7ed6b0a1d45cfebba85b201f70028e5520,2.5.4.20=7666263030a3878a72184850ea5eefd37a5d89446031c9ee67c0ebc5e3a9cf83,PostalCode=201010,ST=UTTAR PRADESH,SERIALNUMBER=69186c466df8f9f86f1800afc763af21c60b5aa612afbb3462e1a77387115b23,CN=ABINASH ROUTRAY', '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', 'UTTAR PRADESH', 'HAUT', NULL, 'Success', '1000', 'successfully verified with the trust certificate', '2856023~ch4', '2021-11-30 08:04:50.000000 +00:00', '2023-11-30 08:04:50.000000 +00:00', '10') was aborted.  Call getNextException to see the cause.
-	at org.postgresql.jdbc2.AbstractJdbc2Statement$BatchResultHandler.handleError(AbstractJdbc2Statement.java:2569)
-	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:1796)
-	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:407)
-	at org.postgresql.jdbc2.AbstractJdbc2Statement.executeBatch(AbstractJdbc2Statement.java:2708)
-	at org.hibernate.jdbc.BatchingBatcher.doExecuteBatch(BatchingBatcher.java:70)
-	at org.hibernate.jdbc.AbstractBatcher.executeBatch(AbstractBatcher.java:268)
-	... 82 more
-2021-12-08 17:36:21,041 ERROR DSAuthenticationService:641 - Registration failed during saving detailsin database for 2856023~ch4--------org.hibernate.exception.SQLGrammarException: Could not execute JDBC batch update
+DROP TABLE public.emas_cust_temp;
+
+CREATE TABLE public.emas_cust_temp (
+	emas_cust_temp_id int4 NOT NULL,
+	cert_serial_no varchar(255) NULL,
+	channel varchar(255) NULL,
+	common_name varchar(255) NULL,
+	country varchar(255) NULL,
+	created_dt timestamp NULL,
+	crl_details varchar(4000) NULL,
+	crl_status int4 NULL,
+	crl_status_dtl varchar(4000) NULL,
+	custname varchar(255) NULL,
+	email_id varchar(255) NULL,
+	encoded_cert varchar(4000) NULL,
+	expiry_status int4 NULL,
+	expiry_status_dtl varchar(4000) NULL,
+	flexone varchar(255) NULL,
+	flextwo varchar(255) NULL,
+	given_name varchar(255) NULL,
+	initails varchar(255) NULL,
+	iss_common_name varchar(255) NULL,
+	iss_country varchar(255) NULL,
+	iss_org varchar(255) NULL,
+	iss_org_unit varchar(255) NULL,
+	"location" varchar(255) NULL,
+	modified_dt timestamp NULL,
+	ocsp_status int4 NULL,
+	ocsp_status_dtl varchar(4000) NULL,
+	org varchar(255) NULL,
+	org_unit varchar(255) NULL,
+	originalcontent varchar(255) NULL,
+	request varchar(255) NULL,
+	signature_alg varchar(255) NULL,
+	signature_status int4 NULL,
+	signature_status_dtl varchar(4000) NULL,
+	signeddata varchar(4000) NULL,
+	state varchar(255) NULL,
+	status varchar(255) NULL,
+	sur_name varchar(255) NULL,
+	transresult varchar(255) NULL,
+	trust_store_status int4 NULL,
+	trust_store_status_dtl varchar(4000) NULL,
+	unique_id varchar(255) NULL,
+	valid_from timestamp NULL,
+	valid_to timestamp NULL,
+	CONSTRAINT emas_cust_temp_pkey PRIMARY KEY (emas_cust_temp_id)
+);
