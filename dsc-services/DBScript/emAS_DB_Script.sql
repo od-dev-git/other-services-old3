@@ -97,7 +97,7 @@ ALTER TABLE public.emas_auth_dtls ADD CONSTRAINT fk75a39b29b32ad1f3 FOREIGN KEY 
 
 -- Drop table
 
--- DROP TABLE public.cust_admin;
+DROP TABLE public.cust_admin;
 
 CREATE TABLE public.cust_admin (
 	cust_admin_id int4 NOT NULL,
@@ -135,15 +135,11 @@ CREATE TABLE public.cust_admin (
 	temp_disable_end_time timestamp NULL,
 	temp_disable_start_time timestamp NULL,
 	unique_id varchar(255) NULL,
+	corp_name varchar(255) NULL DEFAULT NULL::character varying,
 	CONSTRAINT cust_admin_pkey PRIMARY KEY (cust_admin_id),
 	CONSTRAINT cust_admin_unique_id_key UNIQUE (unique_id)
 );
 
---Permissions to given to the Production DB user
-
-  ALTER TABLE public.cust_admin OWNER TO dsc;
-  GRANT ALL ON TABLE public.cust_admin TO dsc;
-  
 -- Alter table script
 
 ALTER TABLE public.emas_DS_dtls alter COLUMN x500_isspncpl_b64e type VARCHAR(5000);
