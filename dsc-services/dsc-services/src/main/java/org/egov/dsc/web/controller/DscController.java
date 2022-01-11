@@ -556,6 +556,7 @@ public class DscController {
 			if(apiResponse != null) {
 				resCodePdfSign = apiResponse.getErrorCode();
 				for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
+					System.out.println("doc.signedData::::: " + doc.getSignedData());
 					if(!checkPdfAuthentication(String.valueOf(userId),doc.getSignedData(),channelId))
 					{
 						break;
