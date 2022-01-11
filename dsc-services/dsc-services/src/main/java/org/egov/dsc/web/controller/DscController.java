@@ -453,7 +453,7 @@ public class DscController {
 		
 		String pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
 		//emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),dataSignRequest.getRequestInfo().getUserInfo().getName(),true, PageTobeSigned.All, Coordinates.BottomMiddle, applicationProperties.getPdfProprty4(), false);
-		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(), applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(), dataSignRequest.getRequestInfo().getUserInfo().getName(), true, "All-215,32,325,72", applicationProperties.getPdfProprty4(), false);
+		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(), applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(), dataSignRequest.getKeyStorePassPhrase(), true, "All-215,32,325,72", applicationProperties.getPdfProprty4(), false);
 	    inputs.add(input);
 		PKCSBulkPdfHashSignRequest pKCSBulkPdfHashSignRequest = new PKCSBulkPdfHashSignRequest();
 		pKCSBulkPdfHashSignRequest.setBulkInput(inputs);
@@ -489,6 +489,8 @@ public class DscController {
 			unsignedFileStrm.read(pdfBytes, 0, pdfBytes.length);
 			unsignedFileStrm.close();
 			pdfStr = Base64.encodeBase64String(pdfBytes);
+			System.out.println("pdfStr :::"+pdfStr);
+			System.out.println("pdfStr.length:::::"+pdfStr.length());
 		} catch (FileNotFoundException fe) {
 			fe.printStackTrace();
 		}catch (Exception e) {
@@ -521,6 +523,7 @@ public class DscController {
 			e.printStackTrace();
 		}
 		ResponseDataPKCSBulkSign apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(),tempFilePath);
+		
 		System.out.println("apiResponse.getErrorCode() - " +apiResponse.getErrorCode());
 		String fileId = null;
 		try {
@@ -669,7 +672,7 @@ public class DscController {
 			{
 				result=true;
 			}
-			else {
+			else if(authenticatePDF != null && !authenticatePDF.isEmpty()){
 				resCodePdfSign = authenticatePDF.split("^")[0];
 			}
 		} catch (RemoteException re) {
