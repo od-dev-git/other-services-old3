@@ -659,11 +659,10 @@ public class DscController {
 	    return restTemplate.postForObject(uri.toString(), request, StorageResponse.class);
 	}
 
-	private boolean checkPdfAuthentication(String userId, String signedData, String channelId) {
+	private boolean checkPdfAuthentication(String userId, String signedData, String channelId) throws Exception{
 		boolean result=false;
 		DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
 		String authenticatePDF =null;
-		try {
 			String uniqueId = userId+"~"+channelId;
 			authenticatePDF = authenticateWS.authenticatePDF(uniqueId, signedData , null, "authenticate");
 			System.out.println("authenticatePDF:: "+authenticatePDF);
@@ -675,12 +674,6 @@ public class DscController {
 			else if(authenticatePDF != null && !authenticatePDF.isEmpty()){
 				resCodePdfSign = authenticatePDF.split("^")[0];
 			}
-		} catch (RemoteException re) {
-			re.printStackTrace();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
 		return result;
 	}
 
