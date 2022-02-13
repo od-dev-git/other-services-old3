@@ -28,4 +28,7 @@ public class DataSignResponse {
     @Valid
     @JsonProperty("fileStoreId")
 	private String fileStoreId;
+    
+    @JsonProperty("errorCode")
+    private String errorCode;
 }

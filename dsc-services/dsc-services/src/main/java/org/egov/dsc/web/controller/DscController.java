@@ -71,6 +71,7 @@ import org.egov.dsc.emas.ws.ds.DSAuthenticateWSProxy;
 import org.egov.dsc.model.CertificateRequest;
 import org.egov.dsc.model.CertificateResponse;
 import org.egov.dsc.model.CertificateResponsePojo;
+import org.egov.dsc.model.DSCException;
 import org.egov.dsc.model.DataSignRequest;
 import org.egov.dsc.model.DataSignResponse;
 import org.egov.dsc.model.DetailRequestPojo;
@@ -142,10 +143,11 @@ public class DscController {
 	
     @RequestMapping(value = "/_getTokenInput", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<TokenInputResponse> token(@RequestBody  TokenRequest tokenRequest) throws IOException  {
+    public ResponseEntity<TokenInputResponse> token(@RequestBody  TokenRequest tokenRequest) throws DSCException  {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
+    	String errorCode="";
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -156,7 +158,9 @@ public class DscController {
 	            	
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 		} catch (IOException e) {
+			errorCode=errorCode+"DSC_ERR_01 ";
 			e.printStackTrace();
+			throw new DSCException("Error in accessing log file or lic file");
 		}
     	ListTokenRequest listTokenRequest = new ListTokenRequest();
     	listTokenRequest.setTokenStatus(Token_Status.CONNECTED);
@@ -165,7 +169,9 @@ public class DscController {
 		try {
 			data = bridge.encListToken(listTokenRequest);
 		} catch (Exception e) {
+			errorCode=errorCode+"DSC_ERR_02";
 			e.printStackTrace();
+			throw new DSCException("Error in getting r1 and r2 for token from embridge");
 		}
 		System.out.println("data.getErrorCode() :::"+data.getErrorCode());
     	System.out.println("Encrypted Data :"+data.getEncryptedData());
@@ -174,18 +180,19 @@ public class DscController {
     	DetailRequestPojo input=new DetailRequestPojo();
     	input.setEncryptedRequest(data.getEncryptedData());
     	input.setEncryptionKeyId(data.getEncryptionKeyID());
-    	
+    	input.setErrorCode(errorCode);
         return getSuccessTokenInputResponse(input, tokenRequest.getRequestInfo());
 
     }
     
     @RequestMapping(value = "/_getTokens", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<TokenResponse> tokens(@RequestBody  TokenRequest tokenRequest) throws IOException  {
+    public ResponseEntity<TokenResponse> tokens(@RequestBody  TokenRequest tokenRequest) throws DSCException  {
     	List<String> tokens=new ArrayList<String>();
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
+    	String errorCode="";
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -196,7 +203,9 @@ public class DscController {
 	            	
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 		} catch (IOException e) {
+			errorCode=errorCode+"DSC_ERR_01 ";
 			e.printStackTrace();
+			throw new DSCException("Error in accessing log file or lic file");
 		}
 
     	ResponseDataListProviderToken responseDataListProviderToken = bridge.decListToken(tokenRequest.getResponseData()); 
@@ -206,16 +215,17 @@ public class DscController {
     		tokens.add(token.getKeyStoreDisplayName());
     	}
     	
-        return getSuccessTokenResponse(tokens, tokenRequest.getRequestInfo());
+        return getSuccessTokenResponse(tokens, tokenRequest.getRequestInfo(),errorCode);
 
     }
     
     @RequestMapping(value = "/_getInputCertificate", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<TokenInputResponse> cert(@RequestBody CertificateRequest certificateRequest) throws IOException  {
+    public ResponseEntity<TokenInputResponse> cert(@RequestBody CertificateRequest certificateRequest) throws DSCException  {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
+    	String errorCode="";
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -226,7 +236,9 @@ public class DscController {
 	            	
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 		} catch (IOException e) {
+			errorCode=errorCode+"DSC_ERR_01 ";
 			e.printStackTrace();
+			throw new DSCException("Error in accessing log file or lic file");
 		}
 		ListCertificateRequest listCertRequest = new ListCertificateRequest();
 		listCertRequest.setKeyStoreDisplayName(certificateRequest.getTokenDisplayName());//Microsoft Windows Store//ePass V 
@@ -234,7 +246,9 @@ public class DscController {
 		try {
 			data = bridge.encListCertificate(listCertRequest);
 		} catch (Exception e) {
+			errorCode=errorCode+"DSC_ERR_03 ";
 			e.printStackTrace();
+			throw new DSCException("Error in getting r1 and r2 for certificate from embridge");
 		}
 
     	System.out.println("Encrypted Data :"+data.getEncryptedData());
@@ -243,16 +257,18 @@ public class DscController {
     	DetailRequestPojo input=new DetailRequestPojo();
     	input.setEncryptedRequest(data.getEncryptedData());
     	input.setEncryptionKeyId(data.getEncryptionKeyID());
+    	input.setErrorCode(errorCode);
     	
         return getSuccessTokenInputResponse(input, certificateRequest.getRequestInfo());
     }
     
     @RequestMapping(value = "/_getCertificate", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<CertificateResponse> certa(@RequestBody  CertificateRequest certificateRequest) throws IOException  {
+    public ResponseEntity<CertificateResponse> certa(@RequestBody  CertificateRequest certificateRequest) throws DSCException  {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
+    	String errorCode="";
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -262,21 +278,19 @@ public class DscController {
 			}
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 		} catch (IOException e) {
+			errorCode=errorCode+"DSC_ERR_01 ";
 			e.printStackTrace();
+			throw new DSCException("Error in accessing log file or lic file");
 		}
     	
     	 ResponseDataListPKCSCertificate responseDataListPKCSCertificate = null;
 		try {
 			responseDataListPKCSCertificate = bridge.decListCertificate(certificateRequest.getResponseData(),null);
-		} catch (NoSuchAlgorithmException e) {
+		} catch (Exception e) {
+			errorCode=errorCode+"DSC_ERR_04 ";
 			e.printStackTrace();
-		} catch (CertificateException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			throw new DSCException("Error in decrypting the list certificate");
+		} 
     	 List<PKCSCertificate> certificates = responseDataListPKCSCertificate.getCertificates();
     	 List<CertificateResponsePojo> certificatesList=new ArrayList<CertificateResponsePojo>();
     	 CertificateResponsePojo certificate=null;
@@ -290,16 +304,18 @@ public class DscController {
     				certificatesList.add(certificate);
     	 }
     	
-        return getSuccessCertResponse(certificatesList, certificateRequest.getRequestInfo());
+        return getSuccessCertResponse(certificatesList, certificateRequest.getRequestInfo(),errorCode);
 
     }
     
     @RequestMapping(value = "/_dataSignInput", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<TokenInputResponse> dataSignInput(@RequestBody DataSignRequest dataSignRequest) throws IOException  {
+    public ResponseEntity<TokenInputResponse> dataSignInput(@RequestBody DataSignRequest dataSignRequest) throws DSCException  {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
+    	String errorCode="";
+    	String randomNumber="";
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -308,8 +324,10 @@ public class DscController {
 	            licFile.mkdirs();
 			}
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			errorCode=errorCode+"DSC_ERR_01 ";
+			e.printStackTrace();
+			throw new DSCException("Error in accessing log file or lic file");
 		}
     	
 		PKCSSignRequest pKCSSignRequest = new PKCSSignRequest();
@@ -320,31 +338,42 @@ public class DscController {
 		pKCSSignRequest.setDataType(ContentType.TextPKCS7ATTACHED); 
 		
 		// emas random number execute
-		String randomNumber=populateRandom(dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getChannelId());
+		try
+		{
+			randomNumber=populateRandom(dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getChannelId());
+		}catch (DSCException e) {
+			errorCode=errorCode+"DSC_ERR_06 ";
+			throw new DSCException("Error in populating random number from Emas");
+		}
+		
 		pKCSSignRequest.setDataToSign(dataSignRequest.getRequestInfo().getUserInfo().getId()+"~"+randomNumber);  
 		pKCSSignRequest.setTimeStamp("");
 		Request data = null;
 		try {
 			data = bridge.encPKCSSign(pKCSSignRequest);
 		} catch (Exception e) {
+			errorCode=errorCode+"DSC_ERR_05 ";
 			e.printStackTrace();
+			throw new DSCException("Error in getting r1 and r2 for data sign from embridge");
 		}
 	    System.out.println("Encrypted Data :"+data.getEncryptedData());
 		System.out.println("Encrypted Key ID :"+data.getEncryptionKeyID());	
 		DetailRequestPojo input=new DetailRequestPojo();
 		input.setEncryptedRequest(data.getEncryptedData());
 		input.setEncryptionKeyId(data.getEncryptionKeyID());
-    	
+    	input.setErrorCode(errorCode);
         return getSuccessTokenInputResponse(input, dataSignRequest.getRequestInfo());
         
     }
     
     @RequestMapping(value = "/_dataSign", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<DataSignResponse> dataSign(@RequestBody  DataSignRequest dataSignRequest) throws IOException  {
+    public ResponseEntity<DataSignResponse> dataSign(@RequestBody  DataSignRequest dataSignRequest) throws DSCException  {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
+    	String errorCode="";
+    	String repsonse="";
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -354,22 +383,32 @@ public class DscController {
 			}
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 		} catch (IOException e) {
+			errorCode=errorCode+"DSC_ERR_01 ";
 			e.printStackTrace();
+			throw new DSCException("Error in accessing log file or lic file");
 		}
 		ResponseDataPKCSSign responseDataPKCSSign = null;
 		try {
 			responseDataPKCSSign = bridge.decPKCSSign(dataSignRequest.getResponseData());
 		} catch (EMBLException e) {
+			errorCode=errorCode+"DSC_ERR_07 ";
 			e.printStackTrace();
+			throw new DSCException("Error in accessing log file or lic file");
 		}
 		//register
-		String repsonse=populateRegisterSoapCall(dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getChannelId(),responseDataPKCSSign.getSignedText());
-    	
-        return getSuccessDataSignResponse(repsonse, null,dataSignRequest.getRequestInfo());
+		try
+		{
+			repsonse=populateRegisterSoapCall(dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getChannelId(),responseDataPKCSSign.getSignedText());
+		}catch (DSCException e) {
+			errorCode=errorCode+"DSC_ERR_08 ";
+			throw new DSCException("Error in register api from Emas");
+		}
+		
+        return getSuccessDataSignResponse(repsonse, null,dataSignRequest.getRequestInfo(),errorCode);
         
     }
 
-	private String populateRegisterSoapCall(Long id,String channel,String signedText) {
+	private String populateRegisterSoapCall(Long id,String channel,String signedText) throws DSCException {
 		  String result="";
 		  DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
 		  try {
@@ -377,11 +416,12 @@ public class DscController {
 			System.out.println("result after registration ::::"+result);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+			throw new DSCException("Error in register api from Emas");
 		}
 		  return result;
 	}
 	
-	private String populateRandom(Long id,String channel) {
+	private String populateRandom(Long id,String channel) throws DSCException {
 		  String result="";
 		  DSAuthenticateWS authenticateWS =null;
 		  try {
@@ -391,15 +431,16 @@ public class DscController {
 			  System.out.println("after result ::::"+result);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+			throw new DSCException("Error in populating random number from Emas");
 		}
 		  return result;
 		  }
 
-	private ResponseEntity<TokenResponse> getSuccessTokenResponse(List<String> tokens, RequestInfo requestInfo) {
+	private ResponseEntity<TokenResponse> getSuccessTokenResponse(List<String> tokens, RequestInfo requestInfo,String errorCode) {
         final ResponseInfo responseInfo = ResponseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true);
         responseInfo.setStatus(HttpStatus.OK.toString());
 
-        TokenResponse tokenResponse = new TokenResponse(responseInfo, tokens);
+        TokenResponse tokenResponse = new TokenResponse(responseInfo, tokens,errorCode);
         return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
     }
 	
@@ -412,29 +453,31 @@ public class DscController {
     }
 	
 	
-	private ResponseEntity<CertificateResponse> getSuccessCertResponse(List<CertificateResponsePojo> certs, RequestInfo requestInfo) {
+	private ResponseEntity<CertificateResponse> getSuccessCertResponse(List<CertificateResponsePojo> certs, RequestInfo requestInfo, String errorCode) {
         final ResponseInfo responseInfo = ResponseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true);
         responseInfo.setStatus(HttpStatus.OK.toString());
 
-        CertificateResponse certificateResponse = new CertificateResponse(responseInfo, certs);
+        CertificateResponse certificateResponse = new CertificateResponse(responseInfo, certs,errorCode);
         return new ResponseEntity<>(certificateResponse, HttpStatus.OK);
     }
 	
-	private ResponseEntity<DataSignResponse> getSuccessDataSignResponse(String responseString,String fileStoreId,  RequestInfo requestInfo) {
+	private ResponseEntity<DataSignResponse> getSuccessDataSignResponse(String responseString,String fileStoreId,  RequestInfo requestInfo, String errorCode) {
         final ResponseInfo responseInfo = ResponseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true);
         responseInfo.setStatus(HttpStatus.OK.toString());
 
-        DataSignResponse datasign = new DataSignResponse(responseInfo, responseString,fileStoreId);
+        DataSignResponse datasign = new DataSignResponse(responseInfo, responseString,fileStoreId,errorCode);
         return new ResponseEntity<>(datasign, HttpStatus.OK);
     }
 	
 	@RequestMapping(value = "/_pdfSignInput", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<TokenInputResponse> dpdfSignInput(@RequestBody DataSignRequest dataSignRequest) throws IOException  {
+    public ResponseEntity<TokenInputResponse> dpdfSignInput(@RequestBody DataSignRequest dataSignRequest) throws DSCException  {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
     	File tempFile=new File(tempPath);
+    	String errorCode="";
+    	String pdfStr = "";
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -446,18 +489,32 @@ public class DscController {
 				licFile.mkdirs();
 			}
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			errorCode=errorCode+"DSC_ERR_01 ";
+			e.printStackTrace();
+			throw new DSCException("Error in accessing log file or lic file");
 		}
 		List<emBridgeSignerInput> inputs = new ArrayList<>();
-		
-		String pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
+		try
+		{
+		pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
+		}catch (DSCException e) {
+			errorCode=errorCode+"DSC_ERR_12 ";
+			e.printStackTrace();
+			throw new DSCException("Error in extracting the pdf file from filestore");
+		}
 		//emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(),applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(),dataSignRequest.getRequestInfo().getUserInfo().getName(),true, PageTobeSigned.All, Coordinates.BottomMiddle, applicationProperties.getPdfProprty4(), false);
 		emBridgeSignerInput input = new emBridgeSignerInput(pdfStr,dataSignRequest.getFileName(), applicationProperties.getPdfProperty1(), applicationProperties.getPdfProperty2(), dataSignRequest.getRequestInfo().getUserInfo().getName(), true, "All-215,32,325,72", applicationProperties.getPdfProprty4(), false);
 	    inputs.add(input);
 		PKCSBulkPdfHashSignRequest pKCSBulkPdfHashSignRequest = new PKCSBulkPdfHashSignRequest();
 		pKCSBulkPdfHashSignRequest.setBulkInput(inputs);
-		pKCSBulkPdfHashSignRequest.setTempFolder(tempFile.getCanonicalPath());
+		try {
+			pKCSBulkPdfHashSignRequest.setTempFolder(tempFile.getCanonicalPath());
+		} catch (IOException e) {
+			errorCode=errorCode+"DSC_ERR_09 ";
+			e.printStackTrace();
+			throw new DSCException("Error in accessing the canonical path of temp file");
+		}
 		pKCSBulkPdfHashSignRequest.setKeyStoreDisplayName(dataSignRequest.getTokenDisplayName());
 		pKCSBulkPdfHashSignRequest.setKeyStorePassphrase(dataSignRequest.getKeyStorePassPhrase());
 		pKCSBulkPdfHashSignRequest.setKeyId(dataSignRequest.getKeyId());
@@ -465,48 +522,67 @@ public class DscController {
 		try {
 			bulkPKCSSignRequest = bridge.encPKCSBulkSign(pKCSBulkPdfHashSignRequest);
 		} catch (Exception e) {
+			errorCode=errorCode+"DSC_ERR_10 ";
 			e.printStackTrace();
+			throw new DSCException("Error in encrypting PKCSBulkSign for pdf sign in embridge");
 		}
 		String tempFilePath = bulkPKCSSignRequest.getTempFilePath();
 		System.out.println("Encrypted Data :" + bulkPKCSSignRequest.getEncryptedData());
 		System.out.println("Encrypted Key ID :" + bulkPKCSSignRequest.getEncryptionKeyID());
-    	
+		System.out.println("tempFilePath :" + tempFilePath);//if contains .sig
+    	if(!(tempFilePath != null && tempFilePath.contains(".sig")))
+    	{
+    		errorCode=errorCode+"DSC_ERR_11 ";
+    		throw new DSCException("Error in accessing .sig file from temp filelocation");
+    	}
 		DetailRequestPojo pojo=new DetailRequestPojo();
     	pojo.setEncryptedRequest(bulkPKCSSignRequest.getEncryptedData());
     	pojo.setEncryptionKeyId(bulkPKCSSignRequest.getEncryptionKeyID());
     	pojo.setFileName(dataSignRequest.getFileName());
     	pojo.setTempFilePath(tempFilePath);
+    	pojo.setErrorCode(errorCode);
         return getSuccessTokenInputResponse(pojo, dataSignRequest.getRequestInfo());
         
     }
     
-    private String getPdfBytes(String fileStoreId, String tenantId) {
-    	String pdfStr = null;
-    	try {
-    		File unsignedFile = fetchAsDigitPath(fileStoreId, tenantId).toFile();
-			InputStream unsignedFileStrm = new FileInputStream(unsignedFile);
+    private String getPdfBytes(String fileStoreId, String tenantId) throws DSCException {
+    		String pdfStr = null;
+    		
+    		InputStream unsignedFileStrm = null;
+    		File unsignedFile  = fetchAsDigitPath(fileStoreId, tenantId).toFile();
+			
+			try {
+				unsignedFileStrm = new FileInputStream(unsignedFile);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				throw new DSCException(e.getMessage());
+			}
 			byte[] pdfBytes = new byte[(int) unsignedFile.length()];
-			unsignedFileStrm.read(pdfBytes, 0, pdfBytes.length);
-			unsignedFileStrm.close();
+			try {
+				unsignedFileStrm.read(pdfBytes, 0, pdfBytes.length);
+			} catch (IOException e) {
+				throw new DSCException(e.getMessage());
+			}
+			try {
+				unsignedFileStrm.close();
+			} catch (IOException e) {
+				throw new DSCException(e.getMessage());
+			}
 			pdfStr = Base64.encodeBase64String(pdfBytes);
 			System.out.println("pdfStr :::"+pdfStr);
 			System.out.println("pdfStr.length:::::"+pdfStr.length());
-		} catch (FileNotFoundException fe) {
-			fe.printStackTrace();
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
     	return pdfStr;
 	}
 
 	@RequestMapping(value = "/_pdfSign", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<DataSignResponse> pdfSign(@RequestBody  DataSignRequest dataSignRequest) throws IOException  {
+    public ResponseEntity<DataSignResponse> pdfSign(@RequestBody  DataSignRequest dataSignRequest) throws DSCException  {
     	emBridge bridge = null;
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
     	String tempFilePath = dataSignRequest.getTempFilePath();
     	File tempFile=new File(tempPath);
+    	String errorCode="";
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -520,7 +596,9 @@ public class DscController {
 	            	
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 		} catch (IOException e) {
+			errorCode=errorCode+"DSC_ERR_01 ";
 			e.printStackTrace();
+			throw new DSCException("Error in accessing log file or lic file");
 		}
 		ResponseDataPKCSBulkSign apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(),tempFilePath);
 		
@@ -528,8 +606,10 @@ public class DscController {
 		String fileId = null;
 		try {
 			fileId = populateSignedPdfFileStoreId(apiResponse,tempFilePath,dataSignRequest.getFileName(),dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getTenantId(),dataSignRequest.getModuleName(), dataSignRequest.getChannelId());
-		} catch (IOException e) {
+		} catch (DSCException e) {
+			errorCode=errorCode+"DSC_ERR_13 ";
 			e.printStackTrace();
+			throw new DSCException("Error creating the signed pdf in filestore after pdf sign");
 		}
 		String result="";
 		if(fileId != null && !fileId.isEmpty() && !fileId.equalsIgnoreCase("0"))
@@ -546,12 +626,12 @@ public class DscController {
 			System.out.println("result - "+result);
 		}
     	
-        return getSuccessDataSignResponse(result,fileId,dataSignRequest.getRequestInfo());
+        return getSuccessDataSignResponse(result,fileId,dataSignRequest.getRequestInfo(),errorCode);
         
     }
 
 	private String populateSignedPdfFileStoreId(ResponseDataPKCSBulkSign apiResponse, String serverTempPath,
-			String fileName, Long userId,String tenantId, String moduleName, String channelId) throws IOException {
+			String fileName, Long userId,String tenantId, String moduleName, String channelId) throws DSCException  {
 		String fileStoreId="0";
 		File file =null;
 		File tempFile = new File(serverTempPath);
@@ -583,6 +663,7 @@ public class DscController {
 			resCodePdfSign = apiResponse.getErrorCode();
 			tempFile.delete();
 			e.printStackTrace();
+			throw new DSCException(e.getMessage());
 		}
 		return fileStoreId;
 	}
@@ -659,12 +740,17 @@ public class DscController {
 	    return restTemplate.postForObject(uri.toString(), request, StorageResponse.class);
 	}
 
-	private boolean checkPdfAuthentication(String userId, String signedData, String channelId) throws Exception{
+	private boolean checkPdfAuthentication(String userId, String signedData, String channelId) throws DSCException {
 		boolean result=false;
 		DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
 		String authenticatePDF =null;
 			String uniqueId = userId+"~"+channelId;
-			authenticatePDF = authenticateWS.authenticatePDF(uniqueId, signedData , null, "authenticate");
+			try {
+				authenticatePDF = authenticateWS.authenticatePDF(uniqueId, signedData , null, "authenticate");
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				throw new DSCException(e.getMessage());
+			}
 			System.out.println("authenticatePDF:: "+authenticatePDF);
 		
 			if(authenticatePDF != null && !authenticatePDF.isEmpty() && (authenticatePDF.contains("Success")|| authenticatePDF.contains("success")))
@@ -677,20 +763,20 @@ public class DscController {
 		return result;
 	}
 
-	private Path fetchAsDigitPath(String fileStoreId, String tenantId) {
+	private Path fetchAsDigitPath(String fileStoreId, String tenantId) throws DSCException {
         ResponseEntity<byte[]> responseEntity = fetchFilesFromDigitService(fileStoreId, tenantId);
         Path fileDirPath = Paths.get(fileStoreId);
         Path path = null;
         try {
             path = Files.write(fileDirPath, responseEntity.getBody());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new DSCException("Error in extracting pdf from filestore");
         }
         return path;
 
     }
 	
-	public ResponseEntity<byte[]> fetchFilesFromDigitService(String fileStoreId, String tenantId) throws RuntimeException {
+	public ResponseEntity<byte[]> fetchFilesFromDigitService(String fileStoreId, String tenantId) {
 	    Map<String, String> request = new HashMap<String, String>();
 	    request.put("tenantId", tenantId);
 	    request.put("fileStoreId", fileStoreId);

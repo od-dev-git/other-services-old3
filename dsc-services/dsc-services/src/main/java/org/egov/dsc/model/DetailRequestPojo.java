@@ -23,5 +23,8 @@ public class DetailRequestPojo {
 	
 	@JsonProperty("tempFilePath")
 	private String tempFilePath;
-
+	
+	@JsonProperty("errorCode")
+	private String errorCode;
+	
 }
