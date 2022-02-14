@@ -52,9 +52,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -193,6 +190,8 @@ public class DscController {
     	File logFile=new File(logPath);
     	File licFile=new File(licPath);
     	String errorCode="";
+    	ResponseDataListProviderToken responseDataListProviderToken = null;
+    	List<ProviderToken> tokens1 = null;
 		try {
 			if (!logFile.exists()) {
 	            logFile.mkdirs();
@@ -207,13 +206,20 @@ public class DscController {
 			e.printStackTrace();
 			throw new DSCException("Error in accessing log file or lic file");
 		}
-
-    	ResponseDataListProviderToken responseDataListProviderToken = bridge.decListToken(tokenRequest.getResponseData()); 
-    	List<ProviderToken> tokens1 = responseDataListProviderToken.getTokens();
-    	for(ProviderToken token : tokens1) {	
-    		System.out.println(token.getKeyStoreDisplayName());
-    		tokens.add(token.getKeyStoreDisplayName());
-    	}
+		try
+		{
+			responseDataListProviderToken = bridge.decListToken(tokenRequest.getResponseData()); 
+	    	 tokens1 = responseDataListProviderToken.getTokens();
+	    	for(ProviderToken token : tokens1) {	
+	    		System.out.println(token.getKeyStoreDisplayName());
+	    		tokens.add(token.getKeyStoreDisplayName());
+	    	}
+		}catch (Exception e) {
+			errorCode=errorCode+"DSC_ERR_13 ";
+			e.printStackTrace();
+			throw new DSCException("Error in decListToken to get the token details from embridge");
+		}
+    	 
     	
         return getSuccessTokenResponse(tokens, tokenRequest.getRequestInfo(),errorCode);
 
@@ -284,25 +290,36 @@ public class DscController {
 		}
     	
     	 ResponseDataListPKCSCertificate responseDataListPKCSCertificate = null;
+    	 List<PKCSCertificate> certificates = null;
+    	 List<CertificateResponsePojo> certificatesList=null;
 		try {
 			responseDataListPKCSCertificate = bridge.decListCertificate(certificateRequest.getResponseData(),null);
 		} catch (Exception e) {
 			errorCode=errorCode+"DSC_ERR_04 ";
 			e.printStackTrace();
 			throw new DSCException("Error in decrypting the list certificate");
-		} 
-    	 List<PKCSCertificate> certificates = responseDataListPKCSCertificate.getCertificates();
-    	 List<CertificateResponsePojo> certificatesList=new ArrayList<CertificateResponsePojo>();
-    	 CertificateResponsePojo certificate=null;
-    	 for(PKCSCertificate cert : certificates) {
-    				System.out.println("value of keyId :" + cert.getKeyId());
-    				System.out.println("value of common name :" + cert.getCommonName());
-    				certificate=new CertificateResponsePojo();
-    				certificate.setKeyId(cert.getKeyId());
-    				certificate.setCommonName(cert.getCommonName());
-    				certificate.setCertificateDate(cert.getCertificateData());
-    				certificatesList.add(certificate);
-    	 }
+		}
+		
+		try
+		{
+			certificates = responseDataListPKCSCertificate.getCertificates();
+	    	  certificatesList=new ArrayList<CertificateResponsePojo>();
+	    	 CertificateResponsePojo certificate=null;
+	    	 for(PKCSCertificate cert : certificates) {
+	    				System.out.println("value of keyId :" + cert.getKeyId());
+	    				System.out.println("value of common name :" + cert.getCommonName());
+	    				certificate=new CertificateResponsePojo();
+	    				certificate.setKeyId(cert.getKeyId());
+	    				certificate.setCommonName(cert.getCommonName());
+	    				certificate.setCertificateDate(cert.getCertificateData());
+	    				certificatesList.add(certificate);
+	    	 }
+		}catch (Exception e) {
+			errorCode=errorCode+"DSC_ERR_14 ";
+			e.printStackTrace();
+			throw new DSCException("Error in decrypting the list certificate response to get he certificate details");
+		}
+    	  
     	
         return getSuccessCertResponse(certificatesList, certificateRequest.getRequestInfo(),errorCode);
 
@@ -499,7 +516,7 @@ public class DscController {
 		{
 		pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
 		}catch (DSCException e) {
-			errorCode=errorCode+"DSC_ERR_12 ";
+			errorCode=errorCode+e.getMessage()+" ";
 			e.printStackTrace();
 			throw new DSCException("Error in extracting the pdf file from filestore");
 		}
@@ -555,18 +572,18 @@ public class DscController {
 				unsignedFileStrm = new FileInputStream(unsignedFile);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-				throw new DSCException(e.getMessage());
+				throw new DSCException("DSC_ERR_15");
 			}
 			byte[] pdfBytes = new byte[(int) unsignedFile.length()];
 			try {
 				unsignedFileStrm.read(pdfBytes, 0, pdfBytes.length);
 			} catch (IOException e) {
-				throw new DSCException(e.getMessage());
+				throw new DSCException("DSC_ERR_16");
 			}
 			try {
 				unsignedFileStrm.close();
 			} catch (IOException e) {
-				throw new DSCException(e.getMessage());
+				throw new DSCException("DSC_ERR_17");
 			}
 			pdfStr = Base64.encodeBase64String(pdfBytes);
 			System.out.println("pdfStr :::"+pdfStr);
@@ -600,14 +617,23 @@ public class DscController {
 			e.printStackTrace();
 			throw new DSCException("Error in accessing log file or lic file");
 		}
-		ResponseDataPKCSBulkSign apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(),tempFilePath);
+		ResponseDataPKCSBulkSign apiResponse = null;
+		try
+		{
+			apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(),tempFilePath);
+		}catch (Exception e) {
+			errorCode=errorCode+"DSC_ERR_18 ";
+			e.printStackTrace();
+			throw new DSCException("Error in decPKCSBulkSign for pdf sign in embridge");
+		}
+		
 		
 		System.out.println("apiResponse.getErrorCode() - " +apiResponse.getErrorCode());
 		String fileId = null;
 		try {
 			fileId = populateSignedPdfFileStoreId(apiResponse,tempFilePath,dataSignRequest.getFileName(),dataSignRequest.getRequestInfo().getUserInfo().getId(),dataSignRequest.getTenantId(),dataSignRequest.getModuleName(), dataSignRequest.getChannelId());
 		} catch (DSCException e) {
-			errorCode=errorCode+"DSC_ERR_13 ";
+			errorCode=errorCode+e.getMessage()+" ";
 			e.printStackTrace();
 			throw new DSCException("Error creating the signed pdf in filestore after pdf sign");
 		}
@@ -659,17 +685,18 @@ public class DscController {
 			}
 			tempFile.delete();
 		}
-		catch(Exception e) {
-			resCodePdfSign = apiResponse.getErrorCode();
-			tempFile.delete();
+		 catch (FileNotFoundException e) {
+			 e.printStackTrace();
+			throw new DSCException("DSC_ERR_20");
+		} catch (IOException e) {
 			e.printStackTrace();
-			throw new DSCException(e.getMessage());
+			throw new DSCException("DSC_ERR_20");
 		}
 		return fileStoreId;
 	}
 
 	public String store(InputStream fileStream, String fileName, String mimeType, String moduleName,
-            boolean closeStream,String tenantId) {
+            boolean closeStream,String tenantId) throws DSCException {
 		String fileStoreId=null;
         try {          
             byte[] fileSize = fileName.getBytes();
@@ -686,15 +713,15 @@ public class DscController {
             fileStoreId = storeFiles(Arrays.asList(multipartFile),
                     fileName,
                     mimeType, moduleName,false,tenantId);
-        } catch (IOException e) {
+        } catch (Exception e) {
         	resCodePdfSign = "Exe-FileStore";
-        	e.printStackTrace();
+        	throw new DSCException("DSC_ERR_21");
         }
         return fileStoreId;
     }
 	
 	private String storeFiles(List<MultipartFile> files, String fileName, String mimeType, String moduleName,
-            boolean deleteFile,String tenantId) {
+            boolean deleteFile,String tenantId) throws DSCException {
 			String fileStoreId=null;
         try {
             StorageResponse storageRes = getFileStorageService(files, moduleName,tenantId);
@@ -703,9 +730,9 @@ public class DscController {
             for (FileReq filesId : filesList) {
             	fileStoreId=filesId.getFileStoreId();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
         	resCodePdfSign = "Exe-FileStore";
-        	e.printStackTrace();
+        	throw new DSCException("DSC_ERR_21");
         }
         return fileStoreId;
     }
@@ -749,7 +776,7 @@ public class DscController {
 				authenticatePDF = authenticateWS.authenticatePDF(uniqueId, signedData , null, "authenticate");
 			} catch (RemoteException e) {
 				e.printStackTrace();
-				throw new DSCException(e.getMessage());
+				throw new DSCException("DSC_ERR_19");
 			}
 			System.out.println("authenticatePDF:: "+authenticatePDF);
 		
@@ -764,13 +791,15 @@ public class DscController {
 	}
 
 	private Path fetchAsDigitPath(String fileStoreId, String tenantId) throws DSCException {
-        ResponseEntity<byte[]> responseEntity = fetchFilesFromDigitService(fileStoreId, tenantId);
-        Path fileDirPath = Paths.get(fileStoreId);
+		ResponseEntity<byte[]> responseEntity = null;
+        Path fileDirPath = null;
         Path path = null;
         try {
+        	 responseEntity = fetchFilesFromDigitService(fileStoreId, tenantId);
+             fileDirPath = Paths.get(fileStoreId);
             path = Files.write(fileDirPath, responseEntity.getBody());
-        } catch (IOException e) {
-            throw new DSCException("Error in extracting pdf from filestore");
+        } catch (Exception e) {
+            throw new DSCException("DSC_ERR_12");
         }
         return path;
 
