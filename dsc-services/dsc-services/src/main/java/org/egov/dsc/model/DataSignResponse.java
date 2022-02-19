@@ -29,6 +29,9 @@ public class DataSignResponse {
     @JsonProperty("fileStoreId")
 	private String fileStoreId;
     
-    @JsonProperty("errorCode")
-    private String errorCode;
+	@JsonProperty("sujogErrorCode")
+	private String sujogErrorCode;
+	
+	@JsonProperty("emudhraErrorCode")
+	private String emudhraErrorCode;
 }
