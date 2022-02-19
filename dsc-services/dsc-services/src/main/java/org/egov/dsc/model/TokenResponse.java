@@ -24,8 +24,8 @@ public class TokenResponse {
     @JsonProperty("tokens")
     private List<String> tokens;
     
-	@JsonProperty("sujogErrorCode")
-	private String sujogErrorCode;
+	@JsonProperty("dscErrorCode")
+	private String dscErrorCode;
 	
 	@JsonProperty("emudhraErrorCode")
 	private String emudhraErrorCode;

@@ -26,8 +26,8 @@ public class CertificateResponse {
     @JsonProperty("certificates")
     private List<CertificateResponsePojo> certificates;
     
-	@JsonProperty("sujogErrorCode")
-	private String sujogErrorCode;
+	@JsonProperty("dscErrorCode")
+	private String dscErrorCode;
 	
 	@JsonProperty("emudhraErrorCode")
 	private String emudhraErrorCode;

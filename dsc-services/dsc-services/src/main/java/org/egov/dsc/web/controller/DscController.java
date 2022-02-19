@@ -197,7 +197,7 @@ public class DscController {
 			listTokenRequest.setTokenStatus(Token_Status.CONNECTED);
 	    	listTokenRequest.setTokenType(Token_Type.HARDWARE); 
 		} catch (IOException e) {
-			input.setSujogErrorCode(DSC_ERR_01);
+			input.setDscErrorCode(DSC_ERR_01);
 			e.printStackTrace();
 			return getSuccessTokenInputResponse(data,input, tokenRequest.getRequestInfo());
 		}
@@ -276,7 +276,7 @@ public class DscController {
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 			listCertRequest.setKeyStoreDisplayName(certificateRequest.getTokenDisplayName());//Microsoft Windows Store//ePass V
 		} catch (IOException e) {
-			input.setSujogErrorCode(DSC_ERR_01);
+			input.setDscErrorCode(DSC_ERR_01);
 			e.printStackTrace();
 			return getSuccessTokenInputResponse(data,input, certificateRequest.getRequestInfo());
 		}
@@ -364,7 +364,7 @@ public class DscController {
 			pKCSSignRequest.setKeyId(dataSignRequest.getKeyId());
 			pKCSSignRequest.setDataType(ContentType.TextPKCS7ATTACHED); 
 		} catch (IOException e) {
-			input.setSujogErrorCode(DSC_ERR_01);
+			input.setDscErrorCode(DSC_ERR_01);
 			e.printStackTrace();
 			return getSuccessTokenInputResponse(data,input, dataSignRequest.getRequestInfo());
 		}
@@ -460,11 +460,11 @@ public class DscController {
 		  return result;
 		  }
 
-	private ResponseEntity<TokenResponse> getSuccessTokenResponse(List<String> tokens, RequestInfo requestInfo,String sujogErrorCode,String emudhraErrorCode) {
+	private ResponseEntity<TokenResponse> getSuccessTokenResponse(List<String> tokens, RequestInfo requestInfo,String dscErrorCode,String emudhraErrorCode) {
         final ResponseInfo responseInfo = ResponseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true);
         responseInfo.setStatus(HttpStatus.OK.toString());
 
-        TokenResponse tokenResponse = new TokenResponse(responseInfo, tokens,sujogErrorCode,emudhraErrorCode);
+        TokenResponse tokenResponse = new TokenResponse(responseInfo, tokens,dscErrorCode,emudhraErrorCode);
         return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
     }
 	
@@ -484,19 +484,19 @@ public class DscController {
     }
 	
 	
-	private ResponseEntity<CertificateResponse> getSuccessCertResponse(List<CertificateResponsePojo> certs, RequestInfo requestInfo, String sujogErrorCode,String emudhraErrorCode) {
+	private ResponseEntity<CertificateResponse> getSuccessCertResponse(List<CertificateResponsePojo> certs, RequestInfo requestInfo, String dscErrorCode,String emudhraErrorCode) {
         final ResponseInfo responseInfo = ResponseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true);
         responseInfo.setStatus(HttpStatus.OK.toString());
 
-        CertificateResponse certificateResponse = new CertificateResponse(responseInfo, certs,sujogErrorCode,emudhraErrorCode);
+        CertificateResponse certificateResponse = new CertificateResponse(responseInfo, certs,dscErrorCode,emudhraErrorCode);
         return new ResponseEntity<>(certificateResponse, HttpStatus.OK);
     }
 	
-	private ResponseEntity<DataSignResponse> getSuccessDataSignResponse(String responseString,String fileStoreId,  RequestInfo requestInfo, String sujogErrorCode,String emudhraErrorCode) {
+	private ResponseEntity<DataSignResponse> getSuccessDataSignResponse(String responseString,String fileStoreId,  RequestInfo requestInfo, String dscErrorCode,String emudhraErrorCode) {
         final ResponseInfo responseInfo = ResponseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true);
         responseInfo.setStatus(HttpStatus.OK.toString());
 
-        DataSignResponse datasign = new DataSignResponse(responseInfo, responseString,fileStoreId,sujogErrorCode,emudhraErrorCode);
+        DataSignResponse datasign = new DataSignResponse(responseInfo, responseString,fileStoreId,dscErrorCode,emudhraErrorCode);
         return new ResponseEntity<>(datasign, HttpStatus.OK);
     }
 	
@@ -525,7 +525,7 @@ public class DscController {
 			}
 			bridge = new emBridge(licPath+"/OdishaUrban.lic",logFile.getCanonicalPath());
 		} catch (IOException e) {
-			pojo.setSujogErrorCode(DSC_ERR_01);
+			pojo.setDscErrorCode(DSC_ERR_01);
 			e.printStackTrace();
 			return getSuccessTokenInputResponse(bulkPKCSSignRequest,pojo, dataSignRequest.getRequestInfo());
 		}
@@ -534,7 +534,7 @@ public class DscController {
 		{
 		pdfStr = getPdfBytes(dataSignRequest.getFileBytes(), dataSignRequest.getTenantId());
 		}catch (DSCException e) {
-			pojo.setSujogErrorCode(e.getMessage());
+			pojo.setDscErrorCode(e.getMessage());
 			e.printStackTrace();
 			return getSuccessTokenInputResponse(bulkPKCSSignRequest,pojo, dataSignRequest.getRequestInfo());
 		}
