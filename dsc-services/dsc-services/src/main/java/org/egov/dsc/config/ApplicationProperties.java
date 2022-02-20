@@ -76,4 +76,81 @@ public class ApplicationProperties {
     @Value("${egov.services.filestore.service.download.file}")
     private String egovFileStoreDownloadFile;
     
+    @Value("${DSC_ERR_01}")
+    private String DSC_ERR_01;
+    
+    @Value("${DSC_ERR_02}")
+    private String DSC_ERR_02;
+    
+    @Value("${DSC_ERR_03}")
+    private String DSC_ERR_03;
+    
+    @Value("${DSC_ERR_04}")
+    private String DSC_ERR_04;
+    
+    @Value("${DSC_ERR_05}")
+    private String DSC_ERR_05;
+    
+    @Value("${DSC_ERR_06}")
+    private String DSC_ERR_06;
+    
+    @Value("${DSC_ERR_07}")
+    private String DSC_ERR_07;
+    
+    @Value("${DSC_ERR_08}")
+    private String DSC_ERR_08;
+    
+    @Value("${DSC_ERR_09}")
+    private String DSC_ERR_09;
+    
+    @Value("${DSC_ERR_10}")
+    private String DSC_ERR_10;
+    
+    @Value("${DSC_ERR_11}")
+    private String DSC_ERR_11;
+    
+    @Value("${DSC_ERR_12}")
+    private String DSC_ERR_12;
+    
+    @Value("${DSC_ERR_13}")
+    private String DSC_ERR_13;
+    
+    @Value("${DSC_ERR_14}")
+    private String DSC_ERR_14;
+    
+    @Value("${DSC_ERR_15}")
+    private String DSC_ERR_15;
+    
+    @Value("${DSC_ERR_16}")
+    private String DSC_ERR_16;
+    
+    @Value("${DSC_ERR_17}")
+    private String DSC_ERR_17;
+    
+    @Value("${DSC_ERR_18}")
+    private String DSC_ERR_18;
+    
+    @Value("${DSC_ERR_19}")
+    private String DSC_ERR_19;
+    
+    @Value("${DSC_ERR_20}")
+    private String DSC_ERR_20;
+    
+    @Value("${DSC_ERR_21}")
+    private String DSC_ERR_21;
+    
+    @Value("${DSC_ERR_22}")
+    private String DSC_ERR_22;
+    
+    @Value("${DSC_ERR_23}")
+    private String DSC_ERR_23;
+    		
+    @Value("${DSC_ERR_24}")
+    private String DSC_ERR_24;
+    
+    @Value("${DSC_ERR_25}")
+    private String DSC_ERR_25; 
+    
+    @Value("${DSC_ERR_26}")
+    private String DSC_ERR_26; 
 }
