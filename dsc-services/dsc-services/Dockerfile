@@ -12,6 +12,8 @@ RUN mkdir /DS/Temp
 
 RUN mkdir /DS/Lic
 
+RUN chmod -R 777 /DS/Temp
+
 COPY *.lic /DS/Lic
 
 COPY /target/dsc-services-1.1.0-SNAPSHOT.jar /opt/egov/dsc-services.jar
