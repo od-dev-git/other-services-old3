@@ -50,12 +50,15 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -518,6 +521,9 @@ public class DscController {
 		Request bulkPKCSSignRequest = null;
 		String tempFilePath = null;
 		DetailRequestPojo pojo = new DetailRequestPojo();
+		//Added to set file permission
+		File pdfSig = null;
+		Set<PosixFilePermission> pdfSigPermissions = null;
 		try {
 			if (!logFile.exists()) {
 				logFile.mkdirs();
@@ -586,6 +592,32 @@ public class DscController {
 			pojo.setDscErrorCode(applicationProperties.getDSC_ERR_11());
 			return getSuccessTokenInputResponse(bulkPKCSSignRequest, pojo, dataSignRequest.getRequestInfo());
 		}
+		else
+		{
+			System.out.println("File permission started for ::: "+tempFilePath);
+			try {
+				pdfSig = new File(tempFilePath);
+				pdfSig.setExecutable(true, false);
+				pdfSig.setReadable(true, false);
+				pdfSig.setWritable(true, false);
+				pdfSigPermissions = new HashSet<PosixFilePermission>();
+				pdfSigPermissions.add(PosixFilePermission.OWNER_READ);
+				pdfSigPermissions.add(PosixFilePermission.OWNER_WRITE);
+				pdfSigPermissions.add(PosixFilePermission.OWNER_EXECUTE);
+				pdfSigPermissions.add(PosixFilePermission.GROUP_READ);
+				pdfSigPermissions.add(PosixFilePermission.GROUP_WRITE);
+				pdfSigPermissions.add(PosixFilePermission.GROUP_EXECUTE);
+				pdfSigPermissions.add(PosixFilePermission.OTHERS_READ);
+				pdfSigPermissions.add(PosixFilePermission.OTHERS_WRITE);
+				pdfSigPermissions.add(PosixFilePermission.OTHERS_EXECUTE);
+				Files.setPosixFilePermissions(Paths.get(tempFilePath), pdfSigPermissions);
+				System.out.println("File permission set successfully...");
+			} catch (Exception e) {
+				e.printStackTrace();
+				pojo.setDscErrorCode(applicationProperties.getDSC_ERR_27());
+				return getSuccessTokenInputResponse(bulkPKCSSignRequest, pojo, dataSignRequest.getRequestInfo());
+			}
+		}
 
 		return getSuccessTokenInputResponse(bulkPKCSSignRequest, pojo, dataSignRequest.getRequestInfo());
 
@@ -651,7 +683,8 @@ public class DscController {
 			return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(),
 					applicationProperties.getDSC_ERR_01(), null);
 		}
-
+		//
+		
 		try {
 			apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(), tempFilePath);
 			System.out.println("apiResponse.getErrorCode() - " + apiResponse.getErrorCode());
