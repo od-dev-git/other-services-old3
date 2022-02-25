@@ -790,7 +790,7 @@ public class DscController {
 
 		}
 		try {
-			tempFile.delete();
+			//tempFile.delete(); commented for testing purpose on dev
 		} catch (Exception e) {
 			dsc = true;
 			e.printStackTrace();
