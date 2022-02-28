@@ -575,8 +575,30 @@ public class DscController {
 		}
 
 		try {
+			System.out.println("Retrying temp embridge call - 1st attempt");
 			bulkPKCSSignRequest = bridge.encPKCSBulkSign(pKCSBulkPdfHashSignRequest);
 			tempFilePath = bulkPKCSSignRequest.getTempFilePath();
+			pdfSig = new File(tempFilePath);
+			 if(!pdfSig.exists())
+			{
+				 System.out.println("Retrying temp embridge call - 2nd attempt");
+				 bulkPKCSSignRequest = bridge.encPKCSBulkSign(pKCSBulkPdfHashSignRequest);
+				 tempFilePath = bulkPKCSSignRequest.getTempFilePath();
+				 pdfSig = new File(tempFilePath);
+				 if(!pdfSig.exists())
+				 {
+					 System.out.println("Retrying temp embridge call - 3rd attempt");
+					 bulkPKCSSignRequest = bridge.encPKCSBulkSign(pKCSBulkPdfHashSignRequest);
+					 tempFilePath = bulkPKCSSignRequest.getTempFilePath();
+					 pdfSig = new File(tempFilePath);
+					 if(!pdfSig.exists())
+					 {
+						 System.out.println("Retrying temp embridge call - Failed");
+						 pojo.setDscErrorCode(applicationProperties.getDSC_ERR_28());
+							return getSuccessTokenInputResponse(bulkPKCSSignRequest, pojo, dataSignRequest.getRequestInfo());
+					 }
+				 }
+			}
 			System.out.println("Encrypted Data :" + bulkPKCSSignRequest.getEncryptedData());
 			System.out.println("Encrypted Key ID :" + bulkPKCSSignRequest.getEncryptionKeyID());
 			System.out.println("tempFilePath :" + tempFilePath);// if contains .sig
@@ -596,7 +618,7 @@ public class DscController {
 		{
 			System.out.println("File permission started for ::: "+tempFilePath);
 			try {
-				pdfSig = new File(tempFilePath);
+				
 				pdfSig.setExecutable(true, false);
 				pdfSig.setReadable(true, false);
 				pdfSig.setWritable(true, false);
@@ -648,7 +670,7 @@ public class DscController {
 		}
 		if (pdfBytes != null) {
 			pdfStr = Base64.encodeBase64String(pdfBytes);
-			System.out.println("pdfStr before sign:::" + pdfStr);
+			//System.out.println("pdfStr before sign:::" + pdfStr);
 			System.out.println("pdfStr.length before sign:::::" + pdfStr.length());
 		}
 		return pdfStr;

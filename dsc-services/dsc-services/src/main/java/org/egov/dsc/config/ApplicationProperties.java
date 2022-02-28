@@ -156,4 +156,7 @@ public class ApplicationProperties {
     
     @Value("${DSC_ERR_27}")
     private String DSC_ERR_27; 
+    
+    @Value("${DSC_ERR_28}")
+    private String DSC_ERR_28; 
 }
