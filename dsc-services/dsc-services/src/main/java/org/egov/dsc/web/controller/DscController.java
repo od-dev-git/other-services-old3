@@ -683,6 +683,7 @@ public class DscController {
 		File logFile = new File(logPath);
 		File licFile = new File(licPath);
 		String tempFilePath = dataSignRequest.getTempFilePath();
+		File tempSigFile=new File(tempFilePath);
 		File tempFile = new File(tempPath);
 		ResponseDataPKCSBulkSign apiResponse = null;
 		String fileId = null;
@@ -705,18 +706,23 @@ public class DscController {
 			return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(),
 					applicationProperties.getDSC_ERR_01(), null);
 		}
-		//
-		
 		try {
 			apiResponse = bridge.decPKCSBulkSign(dataSignRequest.getResponseData(), tempFilePath);
 			System.out.println("apiResponse.getErrorCode() - " + apiResponse.getErrorCode());
 		} catch (Exception e) {
+			if(tempSigFile != null)
+			{
+				tempSigFile.delete();
+			}
 			e.printStackTrace();
 			return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(),
 					applicationProperties.getDSC_ERR_18(), null);
 		}
 		if (apiResponse != null && apiResponse.getErrorCode() != null) {
-
+			if(tempSigFile != null)
+			{
+				tempSigFile.delete();
+			}
 			return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(), null,
 					apiResponse.getErrorCode() + " - " + apiResponse.getErrorMsg());
 		}
@@ -725,6 +731,10 @@ public class DscController {
 					dataSignRequest.getRequestInfo().getUserInfo().getId(), dataSignRequest.getTenantId(),
 					dataSignRequest.getModuleName(), dataSignRequest.getChannelId());
 		} catch (DSCException e) {
+			if(tempSigFile != null)
+			{
+				tempSigFile.delete();
+			}
 			e.printStackTrace();
 			if (dsc) {
 				return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(), e.getMessage(),
@@ -743,6 +753,10 @@ public class DscController {
 		} else {
 			fileId = null;
 			result = "Failure";
+			if(tempSigFile != null)
+			{
+				tempSigFile.delete();
+			}
 			return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(),
 					applicationProperties.getDSC_ERR_26(), null);
 		}
@@ -781,6 +795,16 @@ public class DscController {
 						os.write(signedDocBytes);
 						os.close();
 					} catch (Exception e) {
+						try {
+							if(file != null)
+							{
+								file.delete();
+							}
+						} catch (Exception ex) {
+							dsc = true;
+							ex.printStackTrace();
+							throw new DSCException(applicationProperties.getDSC_ERR_24());
+						}
 						dsc = true;
 						e.printStackTrace();
 						throw new DSCException(applicationProperties.getDSC_ERR_23());
@@ -799,6 +823,13 @@ public class DscController {
 				fileStoreId = store(new FileInputStream(file), file.getName(), "application/pdf", moduleName, true,
 						tenantId);
 			} catch (Exception e) {
+				try {
+					file.delete();
+				} catch (Exception ex) {
+					dsc = true;
+					ex.printStackTrace();
+					throw new DSCException(applicationProperties.getDSC_ERR_24());
+				}
 				dsc = true;
 				e.printStackTrace();
 				throw new DSCException(applicationProperties.getDSC_ERR_21());
