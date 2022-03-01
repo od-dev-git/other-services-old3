@@ -750,7 +750,7 @@ public class DscController {
 	}
 
 	private String populateSignedPdfFileStoreId(ResponseDataPKCSBulkSign apiResponse, String serverTempPath,
-			String fileName, Long userId, String tenantId, String moduleName, String channelId) throws DSCException {
+		String fileName, Long userId, String tenantId, String moduleName, String channelId) throws DSCException {
 		String fileStoreId = "0";
 		File file = null;
 		File tempFile = new File(serverTempPath);
@@ -762,7 +762,8 @@ public class DscController {
 		if (apiResponse != null) {
 			if (apiResponse.getBulkSignItems() != null && !apiResponse.getBulkSignItems().isEmpty()) {
 				for (BulkSignOutput doc : apiResponse.getBulkSignItems()) {
-					System.out.println("pdfStr after sign before authentication ::::: " + doc.getSignedData());
+					//System.out.println("pdfStr after sign before authentication ::::: " + doc.getSignedData());
+					System.out.println("PDF sign completed, Authentication pending::::: ");
 					try {
 						check = checkPdfAuthentication(String.valueOf(userId), doc.getSignedData(), channelId);
 					} catch (DSCException e) {
@@ -812,7 +813,7 @@ public class DscController {
 
 		}
 		try {
-			//tempFile.delete(); commented for testing purpose on dev
+			tempFile.delete(); //commented for testing purpose on dev
 		} catch (Exception e) {
 			dsc = true;
 			e.printStackTrace();
