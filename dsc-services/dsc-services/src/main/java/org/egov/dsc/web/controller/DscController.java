@@ -721,7 +721,7 @@ public class DscController {
 		if (apiResponse != null && apiResponse.getErrorCode() != null) {
 			if(tempSigFile != null)
 			{
-				tempSigFile.delete();
+				//tempSigFile.delete();
 			}
 			return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(), null,
 					apiResponse.getErrorCode() + " - " + apiResponse.getErrorMsg());
@@ -755,7 +755,7 @@ public class DscController {
 			result = "Failure";
 			if(tempSigFile != null)
 			{
-				tempSigFile.delete();
+				//tempSigFile.delete();
 			}
 			return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(),
 					applicationProperties.getDSC_ERR_26(), null);
@@ -844,7 +844,7 @@ public class DscController {
 
 		}
 		try {
-			tempFile.delete(); //commented for testing purpose on dev
+			//tempFile.delete(); //commented for testing purpose on dev
 		} catch (Exception e) {
 			dsc = true;
 			e.printStackTrace();
