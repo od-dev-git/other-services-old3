@@ -279,6 +279,29 @@ public class MarriageRegistrationService {
 		
 	}
 
+	public List<MarriageRegistration> Reportsearch(@Valid MarriageRegistrationSearchCriteria criteria,
+			RequestInfo requestInfo, String servicename, HttpHeaders headers) {
+		// TODO Auto-generated method stub
+		List<MarriageRegistration> marriageRegistrations;
+		// allow mobileNumber based search by citizen if interserviceCall
+		boolean isInterServiceCall = isInterServiceCall(headers);
+		mrValidator.validateReportSearch(requestInfo,criteria,servicename, isInterServiceCall);
+		criteria.setBusinessService(servicename);
+		//enrichmentService.enrichSearchCriteriaWithAccountId(requestInfo,criteria);
+
+		if(criteria.getMobileNumber()!=null){
+			marriageRegistrations = getMarriageRegistrationsFromMobileNumber(criteria, requestInfo);
+        }
+        else 
+        {
+        	marriageRegistrations = getMarriageRegistrationsWithOwnerInfo(criteria,requestInfo);
+        }
+		
+		
+
+		return marriageRegistrations;
+	}
+
 
 	
     
