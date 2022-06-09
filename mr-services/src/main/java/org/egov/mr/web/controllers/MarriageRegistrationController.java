@@ -112,7 +112,19 @@ import javax.servlet.http.HttpServletRequest;
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    
+    @PostMapping(value = "/_reportsearch")
+    public ResponseEntity<MarriageRegistrationResponse> Reportsearch(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                       @Valid @ModelAttribute MarriageRegistrationSearchCriteria criteria,
+                                                       @PathVariable(required = false) String servicename
+            , @RequestHeader HttpHeaders headers) {
+        List<MarriageRegistration> marriageRegistrations = marriageRegistrationService.Reportsearch(criteria, requestInfoWrapper.getRequestInfo(), servicename, headers);
 
+        MarriageRegistrationResponse response = MarriageRegistrationResponse.builder().marriageRegistrations(marriageRegistrations).responseInfo(
+                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
 
 
