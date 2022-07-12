@@ -219,6 +219,7 @@ public class DemandService {
                     .consumerType("marriageregistration")
                     .businessService(config.getBusinessServiceMR())
                     .additionalDetails(Collections.singletonMap(BILLINGSLAB_KEY, combinedBillingSlabs))
+                    .billExpiryTime(2629800000L)
                     .build();
 
             demands.add(singleDemand);
