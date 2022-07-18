@@ -1,6 +1,7 @@
 package org.egov.report.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
@@ -37,9 +38,10 @@ public class ReportServiceConfiguration {
     }
 
     @Bean
-    public ObjectMapper objectMapper(){
-    return new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).setTimeZone(TimeZone.getTimeZone(timeZone));
-    }
+	public ObjectMapper objectMapper() {
+		return new ObjectMapper().configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).setTimeZone(TimeZone.getTimeZone(timeZone));
+	}
 
     @Bean
     @Autowired
@@ -57,5 +59,10 @@ public class ReportServiceConfiguration {
     @Value("${egov.collection.search.endpoint}")
     private String collectionSearchEndPoint;
     
+    @Value("${egov.user.host}")
+	private String userHost;
+
+	@Value("${egov.user.search.path}")
+	private String userSearchEndpoint;
 
 }

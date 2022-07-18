@@ -1,6 +1,7 @@
 package org.egov.report.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 import org.egov.report.model.IncentiveAnalysis;
@@ -30,7 +31,7 @@ public class CalculatorService {
 
 	private void calculateWaterIncentive(Map<String, IncentiveAnalysis> incentiveAnalysis) {
 		incentiveAnalysis.values().stream().forEach(incentive -> {
-			incentive.setTotalIncentive(incentive.getTotalCollection().multiply(new BigDecimal(0.05)));
+			incentive.setTotalIncentive(incentive.getTotalCollection().multiply(new BigDecimal(0.05)).setScale(2, RoundingMode.HALF_UP));
 		});
 	}
 

@@ -1,6 +1,6 @@
 package org.egov.report.service;
 
-import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,10 +12,11 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.model.ExternalApiResponse;
 import org.egov.report.model.IncentiveAnalysis;
 import org.egov.report.model.Payment;
-import org.egov.report.util.ReportConstants;
 import org.egov.report.validator.ReportValidator;
 import org.egov.report.web.model.IncentiveReportCriteria;
 import org.egov.report.web.model.IncentiveResponse;
+import org.egov.report.web.model.OwnerInfo;
+import org.egov.report.web.model.UserDetailResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,9 @@ public class IncentiveService {
 	
 	@Autowired
 	private CalculatorService calculatorService;
+	
+	@Autowired
+	private UserService userService;
 
 	public IncentiveResponse getIncentiveReport(@Valid RequestInfo requestInfo,
 			IncentiveReportCriteria incentiveReportCriteria) {
@@ -37,14 +41,31 @@ public class IncentiveService {
 		reportValidator.validateIncentiveCriteria(incentiveReportCriteria);
 		ExternalApiResponse paymentApiResponse = paymentService.getPayments(requestInfo, incentiveReportCriteria);
 		List<Payment> payments = paymentApiResponse.getPayments();
+		if(payments.isEmpty()) {
+			return IncentiveResponse.builder().incentiveAnalysis(Collections.EMPTY_LIST).build();
+		}
 		
 		Map<String, IncentiveAnalysis> incentiveAnalysis = prepareCollectionReport(payments);
+		
 		calculatorService.calculateIncentives(incentiveReportCriteria.getModule(), incentiveAnalysis);
+		
+		List<Long> userIds = incentiveAnalysis.keySet().stream().map(key -> Long.valueOf(key)).collect(Collectors.toList());
+		UserDetailResponse userDetailResponse =userService.getUser(incentiveReportCriteria.getTenantId(), requestInfo, userIds);
+		enrichUserData(incentiveAnalysis, userDetailResponse);
 		
 		return IncentiveResponse.builder().incentiveAnalysis(incentiveAnalysis.values().stream().collect(Collectors.toList())).build();
 	}
 
 	
+
+	private void enrichUserData(Map<String, IncentiveAnalysis> incentiveAnalysisMap,
+			UserDetailResponse userDetailResponse) {
+		for (OwnerInfo user : userDetailResponse.getUser()) {
+			IncentiveAnalysis incentiveAnalysis = incentiveAnalysisMap.get(user.getId().toString());
+			incentiveAnalysis.setEmpName(user.getName());
+			incentiveAnalysis.setEmpId(user.getUserName());
+		}
+	}
 
 	private Map<String, IncentiveAnalysis> prepareCollectionReport(List<Payment> payments) {
 		Map<String, IncentiveAnalysis> incentiveReport = new HashMap<>();
@@ -53,6 +74,7 @@ public class IncentiveService {
 			IncentiveAnalysis incentive = incentiveReport.get(payment.getAuditDetails().getCreatedBy());
 			if(incentive == null) {
 				incentive = IncentiveAnalysis.builder().empId(payment.getAuditDetails().getCreatedBy()).build();
+				incentiveReport.put(payment.getAuditDetails().getCreatedBy(), incentive);
 			}
 			incentive.setTotalNoOfTransaction(incentive.getTotalNoOfTransaction()+1);
 			incentive.setTotalCollection(incentive.getTotalCollection().add(payment.getTotalAmountPaid()));

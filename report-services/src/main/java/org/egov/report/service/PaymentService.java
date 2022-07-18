@@ -7,6 +7,7 @@ import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.ExternalApiResponse;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.web.model.IncentiveReportCriteria;
+import org.egov.report.web.model.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class PaymentService {
 				.append("&toDate=").append(incentiveReportCriteria.getToDate());
 		
 		try {
-			Object response = repository.fetchResult(paymentSearchUrlBuilder, requestInfo);
+			Object response = repository.fetchResult(paymentSearchUrlBuilder, RequestInfoWrapper.builder().requestInfo(requestInfo).build());
 			return mapper.convertValue(response, ExternalApiResponse.class);
 		} catch (Exception ex) {
 			log.error("External Service call error", ex);
