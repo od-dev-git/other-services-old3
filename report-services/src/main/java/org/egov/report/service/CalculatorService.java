@@ -11,6 +11,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class CalculatorService {
 	
+	public static final BigDecimal Amt_15L = BigDecimal.valueOf(1500000);
+	public static final BigDecimal Amt_30L = BigDecimal.valueOf(3000000);
+	public static final BigDecimal Percentage2 = BigDecimal.valueOf(0.02);
+	public static final BigDecimal Percentage2_5 = BigDecimal.valueOf(0.025);
+	public static final BigDecimal Percentage3 = BigDecimal.valueOf(0.03);
+	public static final BigDecimal Percentage4 = BigDecimal.valueOf(0.04);
+	public static final BigDecimal Percentage5 = BigDecimal.valueOf(0.05);
+	
 	public void calculateIncentives(String module, Map<String, IncentiveAnalysis> incentiveAnalysis) {
 		
 		switch (module) {
@@ -25,13 +33,43 @@ public class CalculatorService {
 	}
 
 	private void calculatePropertyIncentive(Map<String, IncentiveAnalysis> incentiveAnalysis) {
-		// TODO Auto-generated method stub
+		incentiveAnalysis.values().stream().forEach(incentive -> {
+			incentive.setTotalIncentiveOnArrear(calculatePTArrearCollectionIncentive(incentive));
+			incentive.setTotalIncentiveOnCurrent(calculatePTCurrentCollectionIncentive(incentive));
+			incentive.setTotalIncentive(incentive.getTotalIncentiveOnArrear().add(incentive.getTotalIncentiveOnCurrent()));
+		});
 		
+	}
+
+	private BigDecimal calculatePTCurrentCollectionIncentive(IncentiveAnalysis incentive) {
+		BigDecimal currentIncentive = BigDecimal.ZERO;
+		if(incentive.getCollectionTowardsCurrent().compareTo(Amt_15L) < 1 ) {
+			currentIncentive = incentive.getCollectionTowardsCurrent().multiply(Percentage2).setScale(2, RoundingMode.UP);
+		} else if(incentive.getCollectionTowardsCurrent().compareTo(Amt_15L) >= 1 
+				&& incentive.getCollectionTowardsCurrent().compareTo(Amt_30L) < 1) {
+			currentIncentive = incentive.getCollectionTowardsCurrent().multiply(Percentage2_5).setScale(2, RoundingMode.UP);
+		} else {
+			currentIncentive = incentive.getCollectionTowardsCurrent().multiply(Percentage3).setScale(2, RoundingMode.UP);
+		}
+		return currentIncentive;
+	}
+
+	private BigDecimal calculatePTArrearCollectionIncentive(IncentiveAnalysis incentive) {
+		BigDecimal arrearIncentive = BigDecimal.ZERO;
+		if(incentive.getCollectionTowardsArrear().compareTo(Amt_15L) < 1 ) {
+			arrearIncentive = incentive.getCollectionTowardsArrear().multiply(Percentage3).setScale(2, RoundingMode.UP);
+		} else if(incentive.getCollectionTowardsArrear().compareTo(Amt_15L) >= 1 
+				&& incentive.getCollectionTowardsArrear().compareTo(Amt_30L) < 1) {
+			arrearIncentive = incentive.getCollectionTowardsArrear().multiply(Percentage4).setScale(2, RoundingMode.UP);
+		} else {
+			arrearIncentive = incentive.getCollectionTowardsArrear().multiply(Percentage5).setScale(2, RoundingMode.UP);
+		}
+		return arrearIncentive;
 	}
 
 	private void calculateWaterIncentive(Map<String, IncentiveAnalysis> incentiveAnalysis) {
 		incentiveAnalysis.values().stream().forEach(incentive -> {
-			incentive.setTotalIncentive(incentive.getTotalCollection().multiply(new BigDecimal(0.05)).setScale(2, RoundingMode.HALF_UP));
+			incentive.setTotalIncentive(incentive.getTotalCollection().multiply(Percentage5).setScale(2, RoundingMode.UP));
 		});
 	}
 
