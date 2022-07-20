@@ -1,6 +1,9 @@
 package org.egov.report.service;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +12,11 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.report.model.BillDetail;
 import org.egov.report.model.ExternalApiResponse;
 import org.egov.report.model.IncentiveAnalysis;
 import org.egov.report.model.Payment;
+import org.egov.report.model.PaymentDetails;
 import org.egov.report.validator.ReportValidator;
 import org.egov.report.web.model.IncentiveReportCriteria;
 import org.egov.report.web.model.IncentiveResponse;
@@ -78,9 +83,32 @@ public class IncentiveService {
 			}
 			incentive.setTotalNoOfTransaction(incentive.getTotalNoOfTransaction()+1);
 			incentive.setTotalCollection(incentive.getTotalCollection().add(payment.getTotalAmountPaid()));
+			
+			BigDecimal arrearCollected = getColletdArrearAmount(payment);
+			incentive.setCollectionTowardsArrear(incentive.getCollectionTowardsArrear().add(arrearCollected));
+			incentive.setCollectionTowardsCurrent(incentive.getCollectionTowardsCurrent().add(payment.getTotalAmountPaid().subtract(arrearCollected)));
 		}
 		
 		return incentiveReport;
+	}
+
+
+
+	private BigDecimal getColletdArrearAmount(Payment payment) {
+		
+		Comparator<BillDetail> billDetailComparator = (obj1, obj2) -> obj2.getFromPeriod().compareTo(obj1.getFromPeriod());
+		BigDecimal arrearCollected = BigDecimal.ZERO;
+		
+		for (PaymentDetails pd : payment.getPaymentDetails()) {
+			Collections.sort(pd.getBill().getBillDetails(), billDetailComparator);
+			for(int i=0; i<pd.getBill().getBillDetails().size(); i++) {
+				if(i != 0) {
+					arrearCollected = arrearCollected.add(pd.getBill().getBillDetails().get(i).getAmountPaid());
+				}
+			}
+		}
+		
+		return arrearCollected;
 	}
 
 }
