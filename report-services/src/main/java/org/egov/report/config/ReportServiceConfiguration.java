@@ -39,12 +39,6 @@ public class ReportServiceConfiguration {
     }
 
     @Bean
-	public ObjectMapper objectMapper() {
-		return new ObjectMapper().configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).setTimeZone(TimeZone.getTimeZone(timeZone));
-	}
-
-    @Bean
     @Autowired
     @Lazy
     public MappingJackson2HttpMessageConverter jacksonConverter(ObjectMapper objectMapper) {
