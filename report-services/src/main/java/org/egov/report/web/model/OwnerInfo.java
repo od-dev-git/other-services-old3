@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import org.aspectj.asm.internal.Relationship;
 import org.egov.common.contract.request.Role;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -52,10 +51,6 @@ public class OwnerInfo extends User{
 	@JsonProperty("institutionId")
 	private String institutionId;
 
-	@JsonProperty("relationship")
-	private Relationship relationship;
-
-
 	/**
 	 * Populates Owner fields from the given User object
 	 * 
@@ -99,7 +94,7 @@ public class OwnerInfo extends User{
 			String tenantId,
 			String ownerInfoUuid, String mobileNumber2, String gender2, String fatherOrHusbandName2,
 			String correspondenceAddress2, Boolean isPrimaryOwner, Double ownerShipPercentage, String ownerType,
-			String institutionId, Relationship relationship) {
+			String institutionId) {
 		super(id, uuid, userName, salutation, name, gender, mobileNumber, emailId, altContactNumber, pan,
 				aadhaarNumber, permanentAddress, permanentCity, permanentPincode, correspondenceCity,
 				correspondencePincode, correspondenceAddress, active, locale, type, signature,
@@ -113,7 +108,6 @@ public class OwnerInfo extends User{
 		this.ownerShipPercentage = ownerShipPercentage;
 		this.ownerType = ownerType;
 		this.institutionId = institutionId;
-		this.relationship = relationship;
 	}
 
 }
