@@ -1,11 +1,17 @@
 package org.egov.report.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.UserSearchRequest;
+import org.egov.report.repository.ReportDao;
 import org.egov.report.repository.ServiceRepository;
+import org.egov.report.web.model.OwnerInfo;
+import org.egov.report.web.model.User;
 import org.egov.report.web.model.UserDetailResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,26 +34,37 @@ public class UserService {
 	@Autowired
 	private ReportServiceConfiguration configuration;
 	
+	@Autowired
+	private ReportDao reportDao;
+	
 	private UserSearchRequest getBaseUserSearchRequest(String tenantId, RequestInfo requestInfo) {
 		return UserSearchRequest.builder().requestInfo(requestInfo).userType("EMPLOYEE").tenantId(tenantId).active(true)
 				.build();
 	}
 
-	public UserDetailResponse getUser(String tenantId, RequestInfo requestInfo, List<Long> userIds) {
+	public List<OwnerInfo> getUser(RequestInfo requestInfo, List<Long> userIds) {
+		List<User> users = reportDao.getEmployeeBaseTenant(userIds);
+		Map<String, List<Long>> tenantWiseEmployeeMap = users.stream().collect(Collectors.groupingBy(User::getTenantId, Collectors.mapping(User::getId, Collectors.toList())));
+		
 		StringBuilder uri = new StringBuilder(configuration.getUserHost())
 				.append(configuration.getUserSearchEndpoint());
 		
-		UserSearchRequest userSearchRequest = getBaseUserSearchRequest(tenantId, requestInfo);
-		userSearchRequest.setId(userIds);
+		List<OwnerInfo> usersInfo = new ArrayList<>();
 		
-		try {
-			Object response = repository.fetchResult(uri, userSearchRequest);
-			return mapper.convertValue(response, UserDetailResponse.class);
-		} catch (Exception ex) {
-			log.error("External Service call error", ex);
-			throw new CustomException("USER_FETCH_EXCEPTION", "Unable to fetch user information");
+		for (String tenantId : tenantWiseEmployeeMap.keySet()) {
+			UserSearchRequest userSearchRequest = getBaseUserSearchRequest(tenantId, requestInfo);
+			userSearchRequest.setId(tenantWiseEmployeeMap.get(tenantId));
+			try {
+				Object response = repository.fetchResult(uri, userSearchRequest);
+				UserDetailResponse userDetailResponse = mapper.convertValue(response, UserDetailResponse.class);
+				usersInfo.addAll(userDetailResponse.getUser());
+			} catch (Exception ex) {
+				log.error("External Service call error", ex);
+				throw new CustomException("USER_FETCH_EXCEPTION", "Unable to fetch user information");
+			}
 		}
 		
+		return usersInfo;
 	}
 
 }
