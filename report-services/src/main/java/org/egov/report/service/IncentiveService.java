@@ -1,7 +1,6 @@
 package org.egov.report.service;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -21,7 +20,6 @@ import org.egov.report.validator.ReportValidator;
 import org.egov.report.web.model.IncentiveReportCriteria;
 import org.egov.report.web.model.IncentiveResponse;
 import org.egov.report.web.model.OwnerInfo;
-import org.egov.report.web.model.UserDetailResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +37,7 @@ public class IncentiveService {
 	
 	@Autowired
 	private UserService userService;
-
+	
 	public IncentiveResponse getIncentiveReport(@Valid RequestInfo requestInfo,
 			IncentiveReportCriteria incentiveReportCriteria) {
 		
@@ -55,8 +53,8 @@ public class IncentiveService {
 		calculatorService.calculateIncentives(incentiveReportCriteria.getModule(), incentiveAnalysis);
 		
 		List<Long> userIds = incentiveAnalysis.keySet().stream().map(key -> Long.valueOf(key)).collect(Collectors.toList());
-		UserDetailResponse userDetailResponse =userService.getUser(incentiveReportCriteria.getTenantId(), requestInfo, userIds);
-		enrichUserData(incentiveAnalysis, userDetailResponse);
+		List<OwnerInfo> usersInfo =userService.getUser(requestInfo, userIds);
+		enrichUserData(incentiveAnalysis, usersInfo);
 		
 		return IncentiveResponse.builder().incentiveAnalysis(incentiveAnalysis.values().stream().collect(Collectors.toList())).build();
 	}
@@ -64,8 +62,8 @@ public class IncentiveService {
 	
 
 	private void enrichUserData(Map<String, IncentiveAnalysis> incentiveAnalysisMap,
-			UserDetailResponse userDetailResponse) {
-		for (OwnerInfo user : userDetailResponse.getUser()) {
+			List<OwnerInfo> users) {
+		for (OwnerInfo user : users) {
 			IncentiveAnalysis incentiveAnalysis = incentiveAnalysisMap.get(user.getId().toString());
 			incentiveAnalysis.setEmpName(user.getName());
 			incentiveAnalysis.setEmpId(user.getUserName());
