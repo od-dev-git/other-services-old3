@@ -1116,5 +1116,28 @@ public class MRValidator {
 
 		
 	}
+	public void validateApplication(MarriageRegistrationRequest marriageRegistrationRequest) {
+       List<MarriageRegistration> marriageRegistrations = marriageRegistrationRequest.getMarriageRegistrations(); 
+       MarriageRegistration marriageRegistration = marriageRegistrations.get(0);
+       MarriageRegistrationSearchCriteria criteria = MarriageRegistrationSearchCriteria.builder().
+				mrNumbers(Arrays.asList(marriageRegistration.getMrNumber())).
+				tenantId(marriageRegistration.getTenantId()).
+				build();
+		
+       
+		List<MarriageRegistration> result = mrRepository.getMarriageRegistartions(criteria);
+	
+		if(!CollectionUtils.isEmpty(result)) {
+			
+			List<String> mrCorrectionApplicationNumbers = result.stream().filter(mr -> !mr.getStatus().equalsIgnoreCase("APPROVED")).map(MarriageRegistration::getApplicationNumber).collect(Collectors.toList());
+			
+			if(!CollectionUtils.isEmpty(mrCorrectionApplicationNumbers)) {
+				throw new CustomException("WORKFLOW_ERROR"," Application :  " + mrCorrectionApplicationNumbers.toString()  +" is already in workflow. Please get it approved first.\n" );
+			}
+			
+		}
+       
+
+    }
 
 }

@@ -83,6 +83,7 @@ public class MarriageRegistrationService {
 		if(businessServicefromPath==null)
 			businessServicefromPath = businessService_MR;
 
+		mrValidator.validateApplication(marriageRegistrationRequest);
 		mrValidator.validateBusinessService(marriageRegistrationRequest,businessServicefromPath);
 		mrValidator.validateCreate(marriageRegistrationRequest);
 		enrichmentService.enrichMRCreateRequest(marriageRegistrationRequest);
