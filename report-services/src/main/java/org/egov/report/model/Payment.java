@@ -24,6 +24,8 @@ public class Payment {
 	
 	private String transactionNumber;
 	
+	private Long transactionDate;
+	
 	private String paymentMode;
 	
 	private Long instrumentDate;

@@ -1,0 +1,33 @@
+package org.egov.report.validator;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.egov.report.web.model.WSReportSearchCriteria;
+import org.egov.tracer.model.CustomException;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+@Component
+public class WSReportValidator {
+
+	private void createCustomException(Map<String, String> errorMap) {
+		if (!errorMap.isEmpty())
+			throw new CustomException(errorMap);
+	}
+	
+	public void validateEmployeeDateWiseWSCollectionReport(WSReportSearchCriteria searchCriteria) {
+		Map<String, String> errorMap = new HashMap<>();
+		
+		if(!StringUtils.hasText(searchCriteria.getTenantId())) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "Ulb can not be empty/blank");
+		}
+		
+		if(searchCriteria.getCollectionDate()==null || searchCriteria.getCollectionDate()==0) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "Collection date can not be empty/blank");
+		}
+		
+		createCustomException(errorMap);
+	}
+
+}
