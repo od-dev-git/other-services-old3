@@ -1,4 +1,6 @@
 package org.egov.report.web.model;
+import java.util.List;
+
 import org.egov.common.contract.response.ResponseInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -18,4 +20,7 @@ public class ReportResponse {
 	
 	@JsonProperty("IncentiveInfo")
 	private IncentiveResponse incentiveResponse;
+	
+	@JsonProperty("employeeDateWiseWSCollectionResponse")
+	private List<EmployeeDateWiseWSCollectionResponse> employeeDateWiseWSCollectionResponse;
 }

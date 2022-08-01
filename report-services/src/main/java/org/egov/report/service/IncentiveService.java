@@ -7,15 +7,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.model.BillDetail;
-import org.egov.report.model.ExternalApiResponse;
 import org.egov.report.model.IncentiveAnalysis;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentDetails;
+import org.egov.report.model.PaymentSearchCriteria;
 import org.egov.report.validator.ReportValidator;
 import org.egov.report.web.model.IncentiveReportCriteria;
 import org.egov.report.web.model.IncentiveResponse;
@@ -42,10 +43,17 @@ public class IncentiveService {
 			IncentiveReportCriteria incentiveReportCriteria) {
 		
 		reportValidator.validateIncentiveCriteria(incentiveReportCriteria);
-		ExternalApiResponse paymentApiResponse = paymentService.getPayments(requestInfo, incentiveReportCriteria);
-		List<Payment> payments = paymentApiResponse.getPayments();
+		
+		PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
+				.businessServices(Stream.of(incentiveReportCriteria.getModule()).collect(Collectors.toSet()))
+//				.businessServices(incentiveReportCriteria.getModule())
+				.tenantId(incentiveReportCriteria.getTenantId())
+				.fromDate(incentiveReportCriteria.getFromDate())
+				.toDate(incentiveReportCriteria.getToDate()).build();
+				
+		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
 		if(payments.isEmpty()) {
-			return IncentiveResponse.builder().incentiveAnalysis(Collections.EMPTY_LIST).build();
+			return IncentiveResponse.builder().incentiveAnalysis(Collections.emptyList()).build();
 		}
 		
 		Map<String, IncentiveAnalysis> incentiveAnalysis = prepareCollectionReport(payments);
