@@ -1,8 +1,6 @@
 package org.egov.report.repository.builder;
 
 import java.util.List;
-import java.util.Set;
-
 import org.springframework.stereotype.Component;
 
 @Component

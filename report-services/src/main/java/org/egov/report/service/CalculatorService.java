@@ -47,9 +47,12 @@ public class CalculatorService {
 			currentIncentive = incentive.getCollectionTowardsCurrent().multiply(Percentage2).setScale(2, RoundingMode.UP);
 		} else if(incentive.getCollectionTowardsCurrent().compareTo(Amt_15L) >= 1 
 				&& incentive.getCollectionTowardsCurrent().compareTo(Amt_30L) < 1) {
-			currentIncentive = incentive.getCollectionTowardsCurrent().multiply(Percentage2_5).setScale(2, RoundingMode.UP);
+			currentIncentive = Amt_15L.multiply(Percentage2).setScale(2, RoundingMode.UP);
+			currentIncentive = currentIncentive.add((incentive.getCollectionTowardsCurrent().subtract(Amt_15L)).multiply(Percentage2_5).setScale(2, RoundingMode.UP));
 		} else {
-			currentIncentive = incentive.getCollectionTowardsCurrent().multiply(Percentage3).setScale(2, RoundingMode.UP);
+			currentIncentive = Amt_15L.multiply(Percentage2).setScale(2, RoundingMode.UP);
+			currentIncentive = currentIncentive.add(Amt_15L.multiply(Percentage2_5).setScale(2, RoundingMode.UP));
+			currentIncentive = currentIncentive.add((incentive.getCollectionTowardsCurrent().subtract(Amt_30L)).multiply(Percentage3).setScale(2, RoundingMode.UP));
 		}
 		return currentIncentive;
 	}
@@ -60,9 +63,12 @@ public class CalculatorService {
 			arrearIncentive = incentive.getCollectionTowardsArrear().multiply(Percentage3).setScale(2, RoundingMode.UP);
 		} else if(incentive.getCollectionTowardsArrear().compareTo(Amt_15L) >= 1 
 				&& incentive.getCollectionTowardsArrear().compareTo(Amt_30L) < 1) {
-			arrearIncentive = incentive.getCollectionTowardsArrear().multiply(Percentage4).setScale(2, RoundingMode.UP);
+			arrearIncentive = Amt_15L.multiply(Percentage3).setScale(2, RoundingMode.UP);
+			arrearIncentive = arrearIncentive.add((incentive.getCollectionTowardsArrear().subtract(Amt_15L)).multiply(Percentage4).setScale(2, RoundingMode.UP));
 		} else {
-			arrearIncentive = incentive.getCollectionTowardsArrear().multiply(Percentage5).setScale(2, RoundingMode.UP);
+			arrearIncentive = Amt_15L.multiply(Percentage3).setScale(2, RoundingMode.UP);
+			arrearIncentive = arrearIncentive.add(Amt_15L.multiply(Percentage4).setScale(2, RoundingMode.UP));
+			arrearIncentive = arrearIncentive.add((incentive.getCollectionTowardsArrear().subtract(Amt_30L)).multiply(Percentage5).setScale(2, RoundingMode.UP));
 		}
 		return arrearIncentive;
 	}

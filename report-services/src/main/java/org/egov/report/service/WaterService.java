@@ -50,7 +50,7 @@ public class WaterService {
 				.map(payment -> EmployeeDateWiseWSCollectionResponse.builder()
 						.employeeId(payment.getAuditDetails().getCreatedBy())
 						.tenantId(payment.getTenantId()).ulb(payment.getTenantId().split("\\.")[1].toUpperCase())
-						.transactionDate(payment.getTransactionDate()).paymentMode(payment.getPaymentMode())
+						.transactionDate(payment.getTransactionDate()).paymentMode(payment.getPaymentMode().toString())
 						.consumerCode(payment.getPaymentDetails().get(0).getBill().getConsumerCode())
 						.receiptNo(payment.getPaymentDetails().get(0).getReceiptNumber())
 						.businessService(payment.getPaymentDetails().get(0).getBusinessService())
