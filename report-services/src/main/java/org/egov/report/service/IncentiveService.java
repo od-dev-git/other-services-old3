@@ -15,7 +15,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.model.BillDetail;
 import org.egov.report.model.IncentiveAnalysis;
 import org.egov.report.model.Payment;
-import org.egov.report.model.PaymentDetails;
+import org.egov.report.model.PaymentDetail;
 import org.egov.report.model.PaymentSearchCriteria;
 import org.egov.report.validator.ReportValidator;
 import org.egov.report.web.model.IncentiveReportCriteria;
@@ -44,9 +44,9 @@ public class IncentiveService {
 		
 		reportValidator.validateIncentiveCriteria(incentiveReportCriteria);
 		
+		
 		PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
 				.businessServices(Stream.of(incentiveReportCriteria.getModule()).collect(Collectors.toSet()))
-//				.businessServices(incentiveReportCriteria.getModule())
 				.tenantId(incentiveReportCriteria.getTenantId())
 				.fromDate(incentiveReportCriteria.getFromDate())
 				.toDate(incentiveReportCriteria.getToDate()).build();
@@ -105,7 +105,7 @@ public class IncentiveService {
 		Comparator<BillDetail> billDetailComparator = (obj1, obj2) -> obj2.getFromPeriod().compareTo(obj1.getFromPeriod());
 		BigDecimal arrearCollected = BigDecimal.ZERO;
 		
-		for (PaymentDetails pd : payment.getPaymentDetails()) {
+		for (PaymentDetail pd : payment.getPaymentDetails()) {
 			Collections.sort(pd.getBill().getBillDetails(), billDetailComparator);
 			for(int i=0; i<pd.getBill().getBillDetails().size(); i++) {
 				if(i != 0) {
