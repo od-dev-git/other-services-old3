@@ -23,6 +23,7 @@ import org.egov.report.web.model.IncentiveResponse;
 import org.egov.report.web.model.OwnerInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class IncentiveService {
@@ -64,7 +65,8 @@ public class IncentiveService {
 		List<OwnerInfo> usersInfo =userService.getUser(requestInfo, userIds);
 		enrichUserData(incentiveAnalysis, usersInfo);
 		
-		return IncentiveResponse.builder().incentiveAnalysis(incentiveAnalysis.values().stream().collect(Collectors.toList())).build();
+		return IncentiveResponse.builder().incentiveAnalysis(incentiveAnalysis.values().stream()
+				.filter(ia -> StringUtils.hasText(ia.getEmpName())).collect(Collectors.toList())).build();
 	}
 
 	
