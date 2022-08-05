@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.egov.report.service.WaterService;
 import org.egov.report.util.ResponseInfoFactory;
+import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.ReportResponse;
 import org.egov.report.web.model.RequestInfoWrapper;
@@ -13,6 +14,7 @@ import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +39,18 @@ public class WSReportController {
 		ReportResponse response = ReportResponse.builder().employeeDateWiseWSCollectionResponse(dateWiseWSCollectionResponses)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
 		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
+	}
+	
+	@PostMapping("/consumerMaster")
+	public ResponseEntity<ReportResponse> consumerMaster(@ModelAttribute WSReportSearchCriteria searchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper){
+		
+		List<ConsumerMasterWSReportResponse> consumerMasterWSReportResponses = waterService.consumerMasterWSReport(requestInfoWrapper.getRequestInfo(), searchCriteria);
+		
+		ReportResponse response = ReportResponse.builder().consumerMasterWSReportResponses(consumerMasterWSReportResponses)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
+		
 	}
 
 }
