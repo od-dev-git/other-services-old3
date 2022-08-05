@@ -30,4 +30,7 @@ public class WSReportSearchCriteria {
 	
 	@JsonProperty("paymentMode")
 	private String paymentMode;
+	
+	@JsonProperty("monthYear")
+	private Long monthYear;
 }

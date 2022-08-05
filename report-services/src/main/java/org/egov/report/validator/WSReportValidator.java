@@ -6,7 +6,10 @@ import java.util.Map;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.tracer.model.CustomException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.Long;
 
 @Component
 public class WSReportValidator {
@@ -29,5 +32,13 @@ public class WSReportValidator {
 		
 		createCustomException(errorMap);
 	}
-
+	public void validateBillSummary(WSReportSearchCriteria searchCriteria) {
+		Map<String, String> errorMap = new HashMap<>();
+		
+		if((searchCriteria.getMonthYear()) == null) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "monthYear can not be empty/blank");
+		}
+		
+		createCustomException(errorMap);
+	}
 }

@@ -1,6 +1,9 @@
 package org.egov.report.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -10,7 +13,11 @@ import java.util.stream.Stream;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
+import org.egov.report.repository.ServiceRepository;
+import org.egov.report.repository.WSReportRepository;
 import org.egov.report.validator.WSReportValidator;
+import org.egov.report.web.model.BillSummaryQueryResponse;
+import org.egov.report.web.model.BillSummaryResponses;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.WSReportSearchCriteria;
@@ -22,6 +29,12 @@ public class WaterService {
 	
 	@Autowired
 	private WSReportValidator wsValidator;
+	
+	@Autowired
+    private ServiceRepository repository;
+	
+	@Autowired
+	private WSReportRepository wsRepository;
 	
 	@Autowired
 	private PaymentService paymentService;
@@ -71,6 +84,47 @@ public class WaterService {
 		});
 		
 		return response;
+	
+	}
+	
+	
+public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportSearchCriteria searchCriteria) {
+	
+	 
+	    HashMap<String, Integer> hash = new LinkedHashMap<>();
+		 wsValidator.validateBillSummary(searchCriteria);
+		 List<BillSummaryQueryResponse> response = wsRepository.getBillSummaryDetails(searchCriteria);
+		 List<BillSummaryResponses> billSummResponse = new ArrayList<>();
+		 
+		 if(!response.isEmpty()) {
+		 String myResponseMonth = response.get(0).getMonthYear();
+		 for(BillSummaryQueryResponse res: response) {
+			 if(hash.containsKey(res.getTenantId()))
+			 {
+				 Integer count = hash.get(res.getTenantId());
+				 hash.put(res.getTenantId(),count+1);
+			 }
+			 else
+			 {
+			 hash.put(res.getTenantId(), 1);
+			 }
+			
+		 }
+		 
+		 
+		 hash.forEach((key, value)->
+		           {
+			          BillSummaryResponses res = new BillSummaryResponses();
+			          res.setCount(value);
+			          res.setUlb(key);
+			          res.setMonthYear(myResponseMonth);
+			          
+			          billSummResponse.add(res);
+		           }
+				 );
+		 
+		 }
+		 return billSummResponse;
 	}
 
 }

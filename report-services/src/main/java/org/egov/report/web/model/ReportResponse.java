@@ -23,4 +23,9 @@ public class ReportResponse {
 	
 	@JsonProperty("employeeDateWiseWSCollectionResponse")
 	private List<EmployeeDateWiseWSCollectionResponse> employeeDateWiseWSCollectionResponse;
+	
+	@JsonProperty("billSummaryResponses")
+	private List<BillSummaryResponses> billSummaryResponses;
+	
+	
 }
