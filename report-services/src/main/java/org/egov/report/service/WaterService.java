@@ -8,13 +8,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.jws.soap.SOAPBinding.Use;
-
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
-import org.egov.report.repository.ReportDao;
-import org.egov.report.repository.ServiceRepository;
 import org.egov.report.repository.WSReportRepository;
 import org.egov.report.validator.WSReportValidator;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
@@ -25,6 +21,7 @@ import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 public class WaterService {
@@ -47,11 +44,13 @@ public class WaterService {
 		
 		PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
 				.businessServices(Stream.of("WS","WS.ONE_TIME_FEE").collect(Collectors.toSet()))
-//				.businessServices("WS")
-				.paymentModes(Stream.of(searchCriteria.getPaymentMode()).collect(Collectors.toSet()))
 				.tenantId(searchCriteria.getTenantId())
 				.fromDate(searchCriteria.getCollectionDate())
 				.toDate(searchCriteria.getCollectionDate()).build();
+		
+		if(StringUtils.hasText(searchCriteria.getPaymentMode())) {
+			paymentSearchCriteria.setPaymentModes(Stream.of(searchCriteria.getPaymentMode().split(",")).collect(Collectors.toSet()));
+		}
 		
 		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
 		if(payments.isEmpty()) {
@@ -84,9 +83,8 @@ public class WaterService {
 		
 		return response;
 	}
-
 	
-	public List<ConsumerMasterWSReportResponse> consumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
+	public List<ConsumerMasterWSReportResponse> consumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria) {
 		
 		List<Long> userIds = new ArrayList<>();
 		

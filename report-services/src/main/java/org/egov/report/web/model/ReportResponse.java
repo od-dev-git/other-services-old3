@@ -26,4 +26,10 @@ public class ReportResponse {
 	
 	@JsonProperty("ComsumerMasterWSReports")
 	private List<ConsumerMasterWSReportResponse> consumerMasterWSReportResponses;
+
+	@JsonProperty("consumerPaymentHistoryResponse")
+	private List<ConsumerPaymentHistoryResponse> consumerPaymentHistoryResponse; 
+	
+	@JsonProperty("waterMonthlyDemandResponse")
+	private List<WaterMonthlyDemandResponse> waterMonthlyDemandResponse;
 }

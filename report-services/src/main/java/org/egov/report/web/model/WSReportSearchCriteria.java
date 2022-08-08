@@ -31,6 +31,9 @@ public class WSReportSearchCriteria {
 	@JsonProperty("paymentMode")
 	private String paymentMode;
 	
+	@JsonProperty("consumerNumber")
+	private String consumerCode;
+	
 	@JsonProperty("connectionType")
 	private String connectionType;
 	
