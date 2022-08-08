@@ -13,11 +13,13 @@ import org.egov.report.repository.ServiceRepository;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.User;
 import org.egov.report.web.model.UserDetailResponse;
+import org.egov.report.web.model.UserResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,5 +68,28 @@ public class UserService {
 		
 		return usersInfo;
 	}
+	
+	public List<User> getUserDetails(RequestInfo requestInfo, List<Long> userIds){
+	
+		List<User> usersInfo = new ArrayList<>();
+		
+		StringBuilder uri = new StringBuilder(configuration.getUserHost())
+				.append(configuration.getUserSearchEndpoint());
+		
+		UserSearchRequest request = UserSearchRequest.builder().requestInfo(requestInfo).id(userIds).build();
+			
+		try {
+		Object response = repository.fetchResult(uri, request);
+		UserResponse userResponse = mapper.convertValue(response, UserResponse.class);
+		usersInfo.addAll(userResponse.getUserInfo());
+		}catch(Exception ex) {
+			log.error("External Service Call Erorr", ex);
+			throw new CustomException("USER_FETCH_EXCEPTION", "Unable to fetch User Information");
+		}
+		
+		return usersInfo;
+		
+	}
+	
 
 }
