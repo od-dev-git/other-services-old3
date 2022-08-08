@@ -1,5 +1,6 @@
 package org.egov.report.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -7,15 +8,23 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.jws.soap.SOAPBinding.Use;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
+import org.egov.report.repository.ReportDao;
+import org.egov.report.repository.ServiceRepository;
+import org.egov.report.repository.WSReportRepository;
 import org.egov.report.validator.WSReportValidator;
+import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.OwnerInfo;
+import org.egov.report.web.model.User;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class WaterService {
@@ -28,6 +37,9 @@ public class WaterService {
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private WSReportRepository reportRepository;
 
 	public List<EmployeeDateWiseWSCollectionResponse> employeeDateWiseWSCollection(RequestInfo requestInfo, WSReportSearchCriteria searchCriteria) {
 		
@@ -73,4 +85,37 @@ public class WaterService {
 		return response;
 	}
 
+	
+	public List<ConsumerMasterWSReportResponse> consumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
+		
+		List<Long> userIds = new ArrayList<>();
+		
+		//validate the search criteria
+		wsValidator.validateconsumerMasterWSReport(criteria);
+		
+		 
+		List<ConsumerMasterWSReportResponse> response = reportRepository.getComsumerMasterWSReport(requestInfo,criteria);
+		
+		//Extracting user info from userService
+		if(!CollectionUtils.isEmpty(response)) {
+			response.forEach(res -> userIds.add(res.getUserId()));
+			
+			 List<User> info = userService.getUserDetails(requestInfo, userIds);
+			
+			for(ConsumerMasterWSReportResponse res : response) {
+				
+				info.forEach(
+						item -> {
+							if(res.getUserId() == item.getId()) {
+								res.setUserMobile(item.getMobileNumber());
+								res.setUserName(item.getName());
+								res.setUserAddress(item.getCorrespondenceAddress());
+								res.setUserId(null);
+							}
+						});
+				}
+			}
+		return response;
+	}
+	
 }
