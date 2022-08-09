@@ -32,4 +32,8 @@ public class ReportResponse {
 	
 	@JsonProperty("waterMonthlyDemandResponse")
 	private List<WaterMonthlyDemandResponse> waterMonthlyDemandResponse;
+	
+	@JsonProperty("billSummaryResponses")
+	private List<BillSummaryResponses> billSummaryResponses;
+
 }

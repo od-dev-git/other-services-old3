@@ -30,7 +30,7 @@ public class WSReportSearchCriteria {
 	
 	@JsonProperty("paymentMode")
 	private String paymentMode;
-	
+
 	@JsonProperty("consumerNumber")
 	private String consumerCode;
 	
@@ -39,4 +39,8 @@ public class WSReportSearchCriteria {
 	
 	@JsonProperty("ward")
 	private String ward;
+
+	@JsonProperty("monthYear")
+	private Long monthYear;
+
 }
