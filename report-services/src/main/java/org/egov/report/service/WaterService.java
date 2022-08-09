@@ -16,7 +16,6 @@ import org.egov.report.model.PaymentSearchCriteria;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.repository.WSReportRepository;
 import org.egov.report.validator.WSReportValidator;
-import org.egov.report.web.model.BillSummaryQueryResponse;
 import org.egov.report.web.model.BillSummaryResponses;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
@@ -102,20 +101,20 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 	 
 	    HashMap<String, Integer> hash = new LinkedHashMap<>();
 		 wsValidator.validateBillSummary(searchCriteria);
-		 List<BillSummaryQueryResponse> response = wsRepository.getBillSummaryDetails(searchCriteria);
+		 List<BillSummaryResponses> response = wsRepository.getBillSummaryDetails(searchCriteria);
 		 List<BillSummaryResponses> billSummResponse = new ArrayList<>();
 		 
 		 if(!response.isEmpty()) {
 		 String myResponseMonth = response.get(0).getMonthYear();
-		 for(BillSummaryQueryResponse res: response) {
-			 if(hash.containsKey(res.getTenantId()))
+		 for(BillSummaryResponses res: response) {
+			 if(hash.containsKey(res.getUlb()))
 			 {
-				 Integer count = hash.get(res.getTenantId());
-				 hash.put(res.getTenantId(),count+1);
+				 Integer count = hash.get(res.getUlb());
+				 hash.put(res.getUlb(),count+1);
 			 }
 			 else
 			 {
-			 hash.put(res.getTenantId(), 1);
+			 hash.put(res.getUlb(), 1);
 			 }
 			
 		 }
