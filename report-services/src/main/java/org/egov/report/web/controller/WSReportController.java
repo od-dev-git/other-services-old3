@@ -9,6 +9,7 @@ import org.egov.report.service.WaterService;
 import org.egov.report.util.ResponseInfoFactory;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
+import org.egov.report.web.model.BillSummaryResponses;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.ReportResponse;
 import org.egov.report.web.model.RequestInfoWrapper;
@@ -106,4 +107,13 @@ public class WSReportController {
 		return new ResponseEntity<ReportResponse>( HttpStatus.OK);
 	}
 
+	@PostMapping("/billSummary")
+	public ResponseEntity<ReportResponse> billSummary(@ModelAttribute WSReportSearchCriteria searchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		List<BillSummaryResponses> billSummaryResponses = waterService.billSummary(requestInfoWrapper.getRequestInfo() ,searchCriteria);
+		
+		ReportResponse response = ReportResponse.builder().billSummaryResponses(billSummaryResponses)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
+	}
 }
