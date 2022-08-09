@@ -8,7 +8,7 @@ import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
 import org.egov.report.repository.rowmapper.ConsumerMasterRowMapper;
 import org.egov.report.service.UserService;
-import org.egov.report.web.model.BillSummaryQueryResponse;
+import org.egov.report.web.model.BillSummaryResponses;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class WSReportRepository {
 		}
 
 
-	public List<BillSummaryQueryResponse> getBillSummaryDetails(WSReportSearchCriteria criteria)
+	public List<BillSummaryResponses> getBillSummaryDetails(WSReportSearchCriteria criteria)
 	{
 		List<Object> preparedStmtList = new ArrayList<>();
 		
