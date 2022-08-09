@@ -15,6 +15,7 @@ import org.egov.report.web.model.ReportResponse;
 import org.egov.report.web.model.RequestInfoWrapper;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterMonthlyDemandResponse;
+import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -90,7 +91,16 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> waterNewConsumerMonthlyReport(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		return new ResponseEntity<ReportResponse>( HttpStatus.OK);
+		List<WaterNewConsumerMonthlyResponse> waterNewConsumerMonthlyResponseList = Arrays.asList(
+				WaterNewConsumerMonthlyResponse.builder().ulb("Cuttack").ward("01").connectionNo("WS/CTC/012111")
+				.connectionType("Non-Metered").userName("Mohan").applicationNo("WS_AP/CTC/2022-23/000001").connectionCategory("Permanent")
+				.connectionFacility("Water").connectionPurpose("Domestic").userAddress("Address").date(1660043998000L).sanctionDate(1660043998000L)
+				.mobile("9779689189").build());
+		
+		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.waterNewConsumerMonthlyResponses(waterNewConsumerMonthlyResponseList).build();
+		
+		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
 	}
 	
 	@PostMapping("/wsConsumerHistoryReport")
