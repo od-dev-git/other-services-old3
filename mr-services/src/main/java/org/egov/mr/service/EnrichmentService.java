@@ -377,10 +377,10 @@ public class EnrichmentService {
 
 				if(!CollectionUtils.isEmpty(marriageRegistration.getApplicationDocuments())){
 					marriageRegistration.getApplicationDocuments().forEach(document -> {
-						if(document.getId()==null){
+						if(document.getId()==null)
 							document.setId(UUID.randomUUID().toString());
+						if(document.getActive()==null)
 							document.setActive(true);
-						}
 					});
 
 				}
