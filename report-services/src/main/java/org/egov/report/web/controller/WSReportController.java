@@ -10,9 +10,11 @@ import org.egov.report.util.ResponseInfoFactory;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.BillSummaryResponses;
+import org.egov.report.web.model.ConsumerBillHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.ReportResponse;
 import org.egov.report.web.model.RequestInfoWrapper;
+import org.egov.report.web.model.WSConsumerHistoryResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterMonthlyDemandResponse;
 import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
@@ -107,14 +109,33 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> wsConsumerHistoryReport(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		return new ResponseEntity<ReportResponse>( HttpStatus.OK);
+		List<WSConsumerHistoryResponse> wsConsumerHistoryResponseList = Arrays.asList(
+				WSConsumerHistoryResponse.builder().ulb("Aska").oldConnectionNo("1023").month("April").ward("01")
+				.consumerNo("WS/CTC/012111").connectionType("Permanent").currentDemand("120").collectionAmt("10").rebateAmt("10")
+				.penalty("0").advance("0").arrear("0").totalDue("110").paymentDate("1660043998000").paymentMode("CASH").receiptNo("101").build());
+				
+		ReportResponse response = ReportResponse.builder().wsConsumerHistoryReport(wsConsumerHistoryResponseList).responseInfo(
+				responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		
+		
+		return new ResponseEntity<ReportResponse>(response,HttpStatus.OK);
 	}
 	
 	@PostMapping("/consumerBillHistoryReport")
 	public ResponseEntity<ReportResponse> consumerBillHistoryReport(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		return new ResponseEntity<ReportResponse>( HttpStatus.OK);
+		List<ConsumerBillHistoryResponse> consumerBillHistoryResponse = Arrays.asList(
+				ConsumerBillHistoryResponse.builder().ulb("Aska").oldConnectionNo("1023").monthYear(1660043998000L)
+				.billNo("0").previousDue("0").adjustedAmt("0").previousPayment("0").rebateAvailed("0").fineLevied("0")
+				.currentWSDemand("122").currentWSDemand("0").netPayment("0").NPR("128").NPF("120").billDate(1660043998000L)
+				.rebateDate(1660043998000L).previousReading("0").currentReading("0").totalUnitsConsumed("0").build()
+				);
+		
+		ReportResponse response = ReportResponse.builder().consumerBillHistoryResponse(consumerBillHistoryResponse)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		
+		return new ResponseEntity<ReportResponse>(response,HttpStatus.OK);
 	}
 
 	@PostMapping("/billSummary")

@@ -40,6 +40,9 @@ public class ReportResponse {
 	private List<WaterNewConsumerMonthlyResponse> waterNewConsumerMonthlyResponses;
 	
 	@JsonProperty("consumerBillHistoryResponse")
-	private ConsumerBillHistoryResponse consumerBillHistoryResponse;
+	private List<ConsumerBillHistoryResponse> consumerBillHistoryResponse;
+	
+	@JsonProperty("wsConsumerHistoryReport")
+	private List<WSConsumerHistoryResponse> wsConsumerHistoryReport;
 
 }

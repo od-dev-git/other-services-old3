@@ -30,7 +30,7 @@ public class ConsumerBillHistoryResponse {
 	private String billNo;
 	
 	@JsonProperty("previousDue")
-	private Long previousDue;
+	private String previousDue;
 	
 	@JsonProperty("adjustedAmt")
 	private String adjustedAmt;
@@ -42,7 +42,7 @@ public class ConsumerBillHistoryResponse {
 	private String rebateAvailed;
 	
 	@JsonProperty("fineLevied")
-	private Long fineLevied;
+	private String fineLevied;
 	
 	@JsonProperty("currentWSDemand")
 	private String currentWSDemand;
@@ -60,10 +60,10 @@ public class ConsumerBillHistoryResponse {
 	private String NPF;
 	
 	@JsonProperty("billDate")
-	private String billDate;
+	private Long billDate;
 	
 	@JsonProperty("rebateDate")
-	private String rebateDate;
+	private Long rebateDate;
 	
 	@JsonProperty("previousReading")
 	private String previousReading;
