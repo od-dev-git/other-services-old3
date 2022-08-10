@@ -44,5 +44,9 @@ public class ReportResponse {
 	
 	@JsonProperty("wsConsumerHistoryReport")
 	private List<WSConsumerHistoryResponse> wsConsumerHistoryReport;
+	
+	@JsonProperty("propertyDetailsInfo")
+	private PropertyDetailsResponse propertyDetailsResponse;
+
 
 }

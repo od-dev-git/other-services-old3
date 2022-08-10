@@ -3,6 +3,7 @@ package org.egov.report.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
@@ -89,6 +90,29 @@ public class UserService {
 		
 		return usersInfo;
 		
+	}
+	
+
+	public List<User> getUserDetails(RequestInfo requestInfo, Set<String> userIds){
+
+		List<User> usersInfo = new ArrayList<>();
+
+		StringBuilder uri = new StringBuilder(configuration.getUserHost())
+				.append(configuration.getUserSearchEndpoint());
+
+		UserSearchRequest request = UserSearchRequest.builder().requestInfo(requestInfo).uuid(userIds).build();
+
+		try {
+		Object response = repository.fetchResult(uri, request);
+		UserResponse userResponse = mapper.convertValue(response, UserResponse.class);
+		usersInfo.addAll(userResponse.getUserInfo());
+		}catch(Exception ex) {
+			log.error("External Service Call Erorr", ex);
+			throw new CustomException("USER_FETCH_EXCEPTION", "Unable to fetch User Information");
+		}
+
+		return usersInfo;
+
 	}
 	
 

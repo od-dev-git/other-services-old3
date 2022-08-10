@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
+import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -43,6 +44,7 @@ public class ReportQueryBuilder {
 	private static final String DEMAND_TABLE_COLUMNS = "tenantid,edv.consumercode,to_char(to_timestamp(edv.taxperiodfrom / 1000), 'MM-YYYY') as monthYear ";
 	private static final String ULB_AND_MONTH = "demand.TENANTID as ulb,demand.monthYear ";
 	private static final String MONTH_YEAR_CLAUSE = "(to_char(to_timestamp(edv.taxperiodfrom / 1000), 'MM')= ? and to_char(to_timestamp(edv.taxperiodfrom / 1000), 'YYYY')= ? ) ";
+	private static final String LEFT_OUTER_JOIN = "left outer join ";
 	
 	private static final String BILL_SUMMARY_QUERY2 = SELECT
 			+ ULB_AND_MONTH + FROM +"( "
@@ -59,6 +61,16 @@ public class ReportQueryBuilder {
 			+ "rtable.connectionno = edv.consumercode " + WHERE + MONTH_YEAR_CLAUSE + ") "
 			+ AS + "demand ";
 	
+	private static final String PROPERTY_DETAILS_SUMMARY_QUERY = SELECT
+			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,epo.userid,"
+			+ "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
+			+ FROM
+			+ "eg_pt_property epp "
+			+ INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id "
+			+ LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
+			+ INNER_JOIN + "eg_pt_address epa on epa.propertyid = epp.id "
+			+ WHERE + "epp.status <> 'INACTIVE' "
+			+ AND + "epp.tenantid = ? ";
 
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -148,6 +160,21 @@ public class ReportQueryBuilder {
      }
      
      return query.toString();
+	}
+
+	
+	public String getPropertyDetailsQuery(PropertyDetailsSearchCriteria criteria, List<Object> preparedPropStmtList) {
+
+		 StringBuilder query = new StringBuilder(PROPERTY_DETAILS_SUMMARY_QUERY);
+
+	     preparedPropStmtList.add(criteria.getUlbName());
+
+	     if(criteria.getWardNo() != null) {
+				query.append(AND);
+				query.append(" epa.ward = '").append(criteria.getWardNo()).append("'");
+	     }
+
+	     return query.toString();
 	}
 
 }
