@@ -10,10 +10,10 @@ import java.util.Set;
 import org.springframework.util.CollectionUtils;
 import org.egov.report.web.model.User;
 import org.egov.common.contract.request.RequestInfo;
-import org.egov.report.model.PropertyDetailsResponseList;
+import org.egov.report.web.model.PropertyDetailsResponse;
+import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.repository.PropertyDetailsReportRepository;
 import org.egov.report.validator.PropertyReportValidator;
-import org.egov.report.web.model.PropertyDetailsResponse;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -31,24 +31,27 @@ public class PropertyService {
 	@Autowired
 	private UserService userService;
 
-	public PropertyDetailsResponse getPropertyDetails(RequestInfo requestInfo,
+	public List<PropertyDetailsResponse> getPropertyDetails(RequestInfo requestInfo,
 			PropertyDetailsSearchCriteria searchCriteria) {
 		// TODO Auto-generated method stub
 
 		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
-		List<PropertyDetailsResponseList> propDetlResponse = pdRepository.getPropertyDetails(searchCriteria);
+		List<PropertyDetailsResponse> propDetlResponse = pdRepository.getPropertyDetails(searchCriteria);
 
 
 		//Extracting user info from userService
 
-		Set<String> userIds = new HashSet<>();
+		Set<String> uuIds = new HashSet<>();
+		UserSearchCriteria usCriteria = new UserSearchCriteria();
 
 				if(!CollectionUtils.isEmpty(propDetlResponse)) {
-					propDetlResponse.forEach(res -> userIds.add(res.getUserId()));
+					propDetlResponse.forEach(res -> uuIds.add((res.getUserId())));
+					
+					usCriteria.setUuId(uuIds);
 
-					 List<User> info = userService.getUserDetails(requestInfo, userIds);
-					for(PropertyDetailsResponseList res : propDetlResponse) {
+					 List<User> info = userService.getUserDetails(requestInfo, usCriteria);
+					for(PropertyDetailsResponse res : propDetlResponse) {
 						info.forEach(
 								item -> {
 									if(res.getUserId().equalsIgnoreCase(item.getUuid())) {
@@ -59,10 +62,7 @@ public class PropertyService {
 						}
 					}
 
-		 
-		 PropertyDetailsResponse pdr = new PropertyDetailsResponse(propDetlResponse);
-
-		 return pdr;
+		return	propDetlResponse ;	
 	}
 
 

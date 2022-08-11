@@ -5,24 +5,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.egov.report.model.PropertyDetailsResponseList;
+import org.egov.report.web.model.PropertyDetailsResponse;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class PropertyDetailsRowMapper implements ResultSetExtractor<List<PropertyDetailsResponseList>>{
+public class PropertyDetailsRowMapper implements ResultSetExtractor<List<PropertyDetailsResponse>>{
 
-List<PropertyDetailsResponseList> pdrList = new ArrayList<>();
+List<PropertyDetailsResponse> pdrList = new ArrayList<>();
 
 
 
 	@Override
-	public List<PropertyDetailsResponseList> extractData(ResultSet rs) throws SQLException, DataAccessException {
+	public List<PropertyDetailsResponse> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
 		while(rs.next()) {
 
-			PropertyDetailsResponseList pdr = new PropertyDetailsResponseList();
+			PropertyDetailsResponse pdr = new PropertyDetailsResponse();
 
 			String ti = rs.getString("tenantid");
 			String tiNew = ti.replace("od.", "");

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.model.UserSearchRequest;
 import org.egov.report.repository.ReportDao;
 import org.egov.report.repository.ServiceRepository;
@@ -18,6 +19,7 @@ import org.egov.report.web.model.UserResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -93,14 +95,14 @@ public class UserService {
 	}
 	
 
-	public List<User> getUserDetails(RequestInfo requestInfo, Set<String> userIds){
+	public List<User> getUserDetails(RequestInfo requestInfo, UserSearchCriteria usCriteria){
 
 		List<User> usersInfo = new ArrayList<>();
 
 		StringBuilder uri = new StringBuilder(configuration.getUserHost())
 				.append(configuration.getUserSearchEndpoint());
 
-		UserSearchRequest request = UserSearchRequest.builder().requestInfo(requestInfo).uuid(userIds).build();
+		UserSearchRequest request = generateUserSearchRequest(requestInfo,usCriteria);
 
 		try {
 		Object response = repository.fetchResult(uri, request);
@@ -113,6 +115,19 @@ public class UserService {
 
 		return usersInfo;
 
+	}
+
+	private UserSearchRequest generateUserSearchRequest(RequestInfo requestInfo, UserSearchCriteria usCriteria) {
+		
+		UserSearchRequest request = UserSearchRequest.builder().requestInfo(requestInfo).build();
+		if(!CollectionUtils.isEmpty(usCriteria.getUuId())) {
+			request.setUuid(usCriteria.getUuId().stream().collect(Collectors.toSet()));
+		}
+		
+		if(!CollectionUtils.isEmpty(usCriteria.getUserId())) {
+			request.setId(usCriteria.getUserId().stream().collect(Collectors.toList()));
+		}
+		return request;
 	}
 	
 

@@ -2,6 +2,8 @@ package org.egov.report.web.model;
 import java.util.List;
 
 import org.egov.common.contract.response.ResponseInfo;
+import org.egov.report.web.model.PropertyDetailsResponse;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -46,7 +48,7 @@ public class ReportResponse {
 	private List<WSConsumerHistoryResponse> wsConsumerHistoryReport;
 	
 	@JsonProperty("propertyDetailsInfo")
-	private PropertyDetailsResponse propertyDetailsResponse;
+	private List<PropertyDetailsResponse> propertyDetailsResponse;
 
 
 }

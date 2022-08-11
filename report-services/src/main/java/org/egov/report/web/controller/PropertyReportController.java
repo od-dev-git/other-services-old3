@@ -4,10 +4,10 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.egov.report.web.model.PropertyDetailsResponse;
 import org.egov.report.service.PropertyService;
 import org.egov.report.util.ResponseInfoFactory;
 import org.egov.report.web.model.BillSummaryResponses;
-import org.egov.report.web.model.PropertyDetailsResponse;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.ReportResponse;
 import org.egov.report.web.model.RequestInfoWrapper;
@@ -35,7 +35,7 @@ public class PropertyReportController {
 	@PostMapping("/propertyDetails")
 	public ResponseEntity<ReportResponse> propertyDetails(@ModelAttribute PropertyDetailsSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
-		PropertyDetailsResponse propertyDetailsResponses = propertyService.getPropertyDetails(requestInfoWrapper.getRequestInfo() ,searchCriteria);
+		List<PropertyDetailsResponse> propertyDetailsResponses = propertyService.getPropertyDetails(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 
 		ReportResponse response = ReportResponse.builder().propertyDetailsResponse(propertyDetailsResponses)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();

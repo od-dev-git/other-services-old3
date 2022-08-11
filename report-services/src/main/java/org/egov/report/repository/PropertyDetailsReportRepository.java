@@ -3,7 +3,7 @@ package org.egov.report.repository;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.egov.report.model.PropertyDetailsResponseList;
+import org.egov.report.web.model.PropertyDetailsResponse;
 
 import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
@@ -25,7 +25,7 @@ public class PropertyDetailsReportRepository {
 	@Autowired
 	private ReportQueryBuilder queryBuilder;
 	
-	public List<PropertyDetailsResponseList> getPropertyDetails(PropertyDetailsSearchCriteria criteria)
+	public List<PropertyDetailsResponse> getPropertyDetails(PropertyDetailsSearchCriteria criteria)
 	{
 		List<Object> preparedPropStmtList = new ArrayList<>();
 
