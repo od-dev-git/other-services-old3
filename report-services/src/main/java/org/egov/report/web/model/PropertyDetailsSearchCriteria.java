@@ -19,4 +19,16 @@ public class PropertyDetailsSearchCriteria {
 	@JsonProperty("wardNo")
 	private String wardNo;
 
+	@JsonProperty("propertyId")
+	private String propertyId;
+	
+	@JsonProperty("oldPropertyId")
+	private String oldPropertyId;
+	
+	@JsonProperty("startDate")
+	private long startdate;
+	
+	@JsonProperty("endDate")
+	private long enddate;
+
 }

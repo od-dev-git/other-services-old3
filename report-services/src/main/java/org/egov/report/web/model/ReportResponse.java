@@ -50,5 +50,16 @@ public class ReportResponse {
 	@JsonProperty("propertyDetailsInfo")
 	private List<PropertyDetailsResponse> propertyDetailsResponse;
 
+	@JsonProperty("propertyWiseCollectionResponse")
+	private List<PropertyWiseCollectionResponse> propertyWiseCollectionResponse;
+	
+	@JsonProperty("propertyWiseDemandResponse")
+	private List<PropertyWiseDemandResponse> propertyWiseDemandResponse;
+	
+	@JsonProperty("ulbWiseTaxCollectionResponse")
+	private List<ULBWiseTaxCollectionResponse> ulbWiseTaxCollectionResponse;
 
+	@JsonProperty("taxCollectorWiseCollectionResponse")
+	private List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse;
+		
 }
