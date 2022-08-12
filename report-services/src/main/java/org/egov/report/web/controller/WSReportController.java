@@ -61,17 +61,8 @@ public class WSReportController {
 	@PostMapping("/consumerPaymentHistory")
 	public ResponseEntity<ReportResponse> consumerPaymentHistory(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
-		List<ConsumerPaymentHistoryResponse> consumerPaymentHistoryList = Arrays.asList(ConsumerPaymentHistoryResponse.builder()
-				.ulb("Cuttack")
-				.ward("01")
-				.consumerCode("WS/CTC/019911")
-				.conumerName("Test")
-				.consumerAddress("Address, Cuttack")
-				.head("Water")
-				.transactionDate(1659119399000L)
-				.transactionId("txn9881188191")
-				.employeeId("262552")
-				.employeeName("Test_Employee").build());
+		
+		List<ConsumerPaymentHistoryResponse> consumerPaymentHistoryList = waterService.consumerPaymentHistory(requestInfoWrapper.getRequestInfo(), searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().consumerPaymentHistoryResponse(consumerPaymentHistoryList)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
