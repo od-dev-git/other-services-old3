@@ -1,0 +1,39 @@
+package org.egov.report.repository;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.egov.report.web.model.PropertyDetailsResponse;
+
+import org.egov.report.repository.builder.ReportQueryBuilder;
+import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
+import org.egov.report.repository.rowmapper.PropertyDetailsRowMapper;
+import org.egov.report.repository.rowmapper.UserRowMapper;
+import org.egov.report.web.model.PropertyDetailsSearchCriteria;
+import org.egov.report.web.model.User;
+import org.egov.report.web.model.WSReportSearchCriteria;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class PropertyDetailsReportRepository {
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	private ReportQueryBuilder queryBuilder;
+	
+	public List<PropertyDetailsResponse> getPropertyDetails(PropertyDetailsSearchCriteria criteria)
+	{
+		List<Object> preparedPropStmtList = new ArrayList<>();
+
+		String query = queryBuilder.getPropertyDetailsQuery(criteria, preparedPropStmtList);
+
+		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());
+
+	}
+
+
+}

@@ -3,10 +3,12 @@ package org.egov.report.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.model.UserSearchRequest;
 import org.egov.report.repository.ReportDao;
 import org.egov.report.repository.ServiceRepository;
@@ -17,6 +19,7 @@ import org.egov.report.web.model.UserResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -89,6 +92,42 @@ public class UserService {
 		
 		return usersInfo;
 		
+	}
+	
+
+	public List<User> getUserDetails(RequestInfo requestInfo, UserSearchCriteria usCriteria){
+
+		List<User> usersInfo = new ArrayList<>();
+
+		StringBuilder uri = new StringBuilder(configuration.getUserHost())
+				.append(configuration.getUserSearchEndpoint());
+
+		UserSearchRequest request = generateUserSearchRequest(requestInfo,usCriteria);
+
+		try {
+		Object response = repository.fetchResult(uri, request);
+		UserResponse userResponse = mapper.convertValue(response, UserResponse.class);
+		usersInfo.addAll(userResponse.getUserInfo());
+		}catch(Exception ex) {
+			log.error("External Service Call Erorr", ex);
+			throw new CustomException("USER_FETCH_EXCEPTION", "Unable to fetch User Information");
+		}
+
+		return usersInfo;
+
+	}
+
+	private UserSearchRequest generateUserSearchRequest(RequestInfo requestInfo, UserSearchCriteria usCriteria) {
+		
+		UserSearchRequest request = UserSearchRequest.builder().requestInfo(requestInfo).build();
+		if(!CollectionUtils.isEmpty(usCriteria.getUuId())) {
+			request.setUuid(usCriteria.getUuId().stream().collect(Collectors.toSet()));
+		}
+		
+		if(!CollectionUtils.isEmpty(usCriteria.getUserId())) {
+			request.setId(usCriteria.getUserId().stream().collect(Collectors.toList()));
+		}
+		return request;
 	}
 	
 
