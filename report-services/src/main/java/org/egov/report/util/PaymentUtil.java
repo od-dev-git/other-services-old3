@@ -26,5 +26,11 @@ public class PaymentUtil {
 		cal.set( Calendar.AM_PM, Calendar.PM);
 		return cal.getTimeInMillis();
 	}
+	
+	public String getMonthYear(Long date) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("IST"));
+		cal.setTimeInMillis(date);
+		return cal.get(Calendar.MONTH)+"/"+cal.get(Calendar.YEAR);	
+	}
 
 }
