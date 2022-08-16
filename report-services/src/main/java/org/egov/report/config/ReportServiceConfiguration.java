@@ -58,5 +58,11 @@ public class ReportServiceConfiguration {
 
 	@Value("${egov.user.search.path}")
 	private String userSearchEndpoint;
+	
+	@Value("${egov.ws.service.host}")
+	private String wsHost;
+	
+	@Value("${egov.ws.search.path}")
+	private String wsSearchEndpoint;
 
 }

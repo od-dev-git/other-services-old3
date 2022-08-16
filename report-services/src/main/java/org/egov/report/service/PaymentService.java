@@ -59,8 +59,10 @@ public class PaymentService {
 //	}
 	
 	public List<Payment> getPayments(@Valid RequestInfo requestInfo, PaymentSearchCriteria paymentSearchCriteria) {
+		if(paymentSearchCriteria.getFromDate() != null && paymentSearchCriteria.getToDate() != null) {
 		paymentSearchCriteria.setFromDate(paymentUtil.enrichFormDate(paymentSearchCriteria.getFromDate()));
 		paymentSearchCriteria.setToDate(paymentUtil.enrichToDate(paymentSearchCriteria.getToDate()));
+		}
 		
 		List<Payment> payments = paymentRepository.fetchPayments(paymentSearchCriteria);
 		payments = payments.stream().filter(payment -> payment.getPaymentStatus() != PaymentStatusEnum.CANCELLED).collect(Collectors.toList());
