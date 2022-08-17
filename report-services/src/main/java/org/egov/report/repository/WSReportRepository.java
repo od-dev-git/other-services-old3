@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.report.model.WSSearchCriteria;
 import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
 import org.egov.report.repository.rowmapper.ConsumerMasterRowMapper;
+import org.egov.report.repository.rowmapper.WaterNewConsumerMonthlyRowMapper;
 import org.egov.report.service.UserService;
 import org.egov.report.web.model.BillSummaryResponses;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
+import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -48,4 +51,13 @@ public class WSReportRepository {
 		return jdbcTemplate.query(query,preparedStmtList.toArray(), new BillSummaryRowMapper());
 		
 	}
+	
+		public List<WaterNewConsumerMonthlyResponse> getWaterNewConsumerMonthlyReport(WSReportSearchCriteria criteria){
+			
+			List<Object> preparedStmtList = new ArrayList<>();
+			
+			String query = queryBuilder.getWaterNewConsumerQuery(criteria, preparedStmtList);
+
+			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterNewConsumerMonthlyRowMapper());
+		}
 }

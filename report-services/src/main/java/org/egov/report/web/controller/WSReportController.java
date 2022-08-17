@@ -84,11 +84,7 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> waterNewConsumerMonthlyReport(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		List<WaterNewConsumerMonthlyResponse> waterNewConsumerMonthlyResponseList = Arrays.asList(
-				WaterNewConsumerMonthlyResponse.builder().ulb("Cuttack").ward("01").connectionNo("WS/CTC/012111")
-				.connectionType("Non-Metered").userName("Mohan").applicationNo("WS_AP/CTC/2022-23/000001").connectionCategory("Permanent")
-				.connectionFacility("Water").connectionPurpose("Domestic").userAddress("Address").date(1660043998000L).sanctionDate(1660043998000L)
-				.mobile("9779689189").build());
+		List<WaterNewConsumerMonthlyResponse> waterNewConsumerMonthlyResponseList = waterService.waterNewConsumerMonthlyReport(requestInfoWrapper.getRequestInfo(), searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
 				.waterNewConsumerMonthlyResponses(waterNewConsumerMonthlyResponseList).build();

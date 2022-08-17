@@ -4,8 +4,10 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
+import org.egov.report.util.WSReportUtils;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.WSReportSearchCriteria;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -14,6 +16,9 @@ import org.springframework.util.CollectionUtils;
 @Component
 public class ReportQueryBuilder {
 	
+	@Autowired
+	WSReportUtils wsReportUtils;
+	
 	private static final String SELECT = "SELECT ";
 	private static final String INNER_JOIN = " INNER JOIN ";
 	private static final String AND_QUERY = " AND ";
@@ -21,6 +26,9 @@ public class ReportQueryBuilder {
 	private static final String serviceSelectValues = " ews.connectiontype,ews.connectioncategory,ews.usagecategory,ews.connectionfacility,";
 	private static final String userSelectValues = " ch.id ";
 	
+	private static final String connectionSelect = " ewc.tenantid,ewc.additionaldetails->>'ward' as ward,ewc.connectionno, ewc.applicationno, ewc.additionaldetails ->> 'estimationLetterDate' as estimationletterdate, ";
+	private static final String serviceSelect = " ews.connectiontype, ews.connectionexecutiondate, ews.connectioncategory, ews.usagecategory, ews.connectionfacility, ";
+	private static final String connectionHolderSelect = " holder.userid ";
 	
 	
 	private static final String HRMS_QUERY = "select id, tenantid from eg_hrms_employee ";
@@ -71,6 +79,15 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + "eg_pt_address epa on epa.propertyid = epp.id "
 			+ WHERE + "epp.status <> 'INACTIVE' "
 			+ AND + "epp.tenantid = ? ";
+	
+	private static final String QUERY_FOR_WATER_NEW_CONSUMER = SELECT 
+			+ connectionSelect
+			+ serviceSelect 
+			+ connectionHolderSelect
+			+ FROM + " eg_ws_connection ewc "
+			+ INNER_JOIN + " eg_ws_service ews on ewc.id = ews.connection_id "
+			+ INNER_JOIN + " eg_ws_connectionholder holder on holder.connectionid = ewc.id "
+			+ WHERE + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' and ewc.applicationtype = 'NEW_CONNECTION' ";
 
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -177,4 +194,25 @@ public class ReportQueryBuilder {
 	     return query.toString();
 	}
 
+	public String getWaterNewConsumerQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
+		
+		StringBuilder query = new StringBuilder(QUERY_FOR_WATER_NEW_CONSUMER);
+		
+		if(criteria.getWard() != null && !criteria.getWard().equalsIgnoreCase("nil")) {
+			query.append(AND_QUERY);
+			query.append("ewc.additionaldetails->> 'ward' = ? ");
+			preparedStmtList.add(criteria.getWard());
+		}
+		
+		query.append(AND_QUERY).append(" ewc.tenantid = ? ");
+		preparedStmtList.add(criteria.getTenantId());
+		
+		query.append(AND_QUERY).append(" ews.connectionexecutiondate >= ? ");
+		preparedStmtList.add(criteria.getMonthYear());
+		
+		query.append(AND_QUERY).append(" ews.connectionexecutiondate <= ? ");
+		preparedStmtList.add(wsReportUtils.addOneMonth(criteria.getMonthYear()));
+		
+		return query.toString();
+	}
 }
