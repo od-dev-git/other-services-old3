@@ -26,9 +26,9 @@ public class PropertyDetailsSearchCriteria {
 	private String oldPropertyId;
 	
 	@JsonProperty("startDate")
-	private long startdate;
+	private Long startdate;
 	
 	@JsonProperty("endDate")
-	private long enddate;
+	private Long enddate;
 
 }
