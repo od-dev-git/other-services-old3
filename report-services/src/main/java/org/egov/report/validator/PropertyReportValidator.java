@@ -32,10 +32,10 @@ Map<String, String> errorMap = new HashMap<>();
 		if(!StringUtils.hasText(searchCriteria.getUlbName())) {
 			errorMap.put("INVALID_CRITERIA", "ULB Name can not be blank/empty");
 		}
-		if(searchCriteria.getStartdate() == null ) {
+		if(searchCriteria.getStartDate() == null ) {
 			errorMap.put("INVALID_CRITERIA", "Start Date can not be blank/empty");
 		}
-		if(searchCriteria.getEnddate() == null ) {
+		if(searchCriteria.getEndDate() == null ) {
 			errorMap.put("INVALID_CRITERIA", "End Date can not be blank/empty");
 		}
 		if (!errorMap.isEmpty())
