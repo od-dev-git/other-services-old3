@@ -15,31 +15,52 @@ import lombok.Setter;
 @Builder
 public class TaxCollectorWiseCollectionResponse {
 	
+	@JsonProperty("uuId")
+    private String uuid ;
+	
+	@JsonProperty("userId")
+    private String userid ;
+	
+	@JsonProperty("tenantId")
+    private String tenantid ;
+	
+	@JsonProperty("type")
+    private String type ;
+	
+	@JsonProperty("propertyId")
+	private String consumercode ;
+
+    @JsonProperty("oldPropertyId")
+    private String oldpropertyid ;
+    
+    @JsonProperty("collectorEmployeeId")
+    private String employeeid ;
+	
 	@JsonProperty("collectorName")
     private String name ;
 	
-	@JsonProperty("collectorEmployeeId")
-    private String employeeid ;
-	
 	@JsonProperty("mobileNumber")
     private String mobilenumber ;
+
+	@JsonProperty("paymentDate")
+    private String paymentdate ;
+
+	@JsonProperty("paymentMode")
+    private String paymentMode ;
+	
+	@JsonProperty("paymentStatus")
+    private String paymentStatus ;
+	
+	@JsonProperty("paidBy")
+    private String paidby ;
+	
+	@JsonProperty("createdTime")
+    private String createdtime ;
 	
 	@JsonProperty("ammountCollected")
     private String amountpaid ;
 	
-	@JsonProperty("paymentMode")
-    private String paymentMode ;
-	
 	@JsonProperty("receiptNumber")
     private String receiptnumber ;
-	
-	@JsonProperty("paymentDate")
-    private String paymentdate ;
-	
-	@JsonProperty("propertyId")
-	private String consumercode ;
- 
-    @JsonProperty("oldPropertyId")
-    private String oldpropertyid ;
-
+    
 }
