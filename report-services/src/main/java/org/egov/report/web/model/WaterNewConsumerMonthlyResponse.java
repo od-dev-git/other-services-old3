@@ -31,8 +31,8 @@ public class WaterNewConsumerMonthlyResponse {
 	@JsonProperty("applicationNo")
 	private String applicationNo;
 	
-	@JsonProperty("date")
-	private Long date;
+	@JsonProperty("executionDate")
+	private String executionDate;
 	
 	@JsonProperty("userName")
 	private String userName;
@@ -44,7 +44,7 @@ public class WaterNewConsumerMonthlyResponse {
 	private String mobile;
 	
 	@JsonProperty("sanctionDate")
-	private Long sanctionDate;
+	private String sanctionDate;
 	
 	@JsonProperty("connectionType")
 	private String connectionType;
@@ -57,5 +57,8 @@ public class WaterNewConsumerMonthlyResponse {
 	
 	@JsonProperty("connectionPurpose")
 	private String connectionPurpose;
+	
+	@JsonProperty("userId")
+	private String userId;
 	
 }

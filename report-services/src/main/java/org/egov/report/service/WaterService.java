@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,6 +15,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
+import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.model.UserSearchRequest;
 import org.egov.report.model.WSConnection;
 import org.egov.report.model.WSConnectionRequest;
@@ -23,6 +25,7 @@ import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.PaymentUtil;
 import org.egov.report.validator.WSReportValidator;
 import org.egov.report.web.model.BillSummaryResponses;
+import org.egov.report.web.model.ConsumerBillHistoryResponse;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
@@ -32,6 +35,7 @@ import org.egov.report.web.model.UserDetailResponse;
 import org.egov.report.web.model.UserResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterConnectionDetailResponse;
+import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -265,5 +269,39 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		return wsConnections;	
 	}
+	
+	public List<WaterNewConsumerMonthlyResponse> waterNewConsumerMonthlyReport(RequestInfo requestInfo,WSReportSearchCriteria criteria){
+		
+		wsValidator.validateWaterNewConsumerMonthlyReport(criteria);
+		
+		List<WaterNewConsumerMonthlyResponse> response = reportRepository.getWaterNewConsumerMonthlyReport(criteria);
+		
+		if(!CollectionUtils.isEmpty(response)) {
+		Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct().collect(Collectors.toSet());
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuId(userIds).build();
+		List<User> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
+		
+		response.stream().forEach(item -> {
+			User user = userMap.get(item.getUserId());
+			if(user!=null) {
+				item.setMobile(user.getMobileNumber());
+				item.setUserName(user.getName());
+				item.setUserAddress(user.getCorrespondenceAddress());
+			}
+		});	
+		}
+		
+		return response;
+	}
+	
+	public List<ConsumerBillHistoryResponse> consumerBillHistoryReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
+		
+		wsValidator.validateConsumerBillHistoryReport(criteria);
+		
+		return reportRepository.getConsumerBillHistoryReport(criteria);
+		
+	}
+		
 	
 }

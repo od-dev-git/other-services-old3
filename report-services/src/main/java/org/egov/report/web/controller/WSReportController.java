@@ -84,11 +84,7 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> waterNewConsumerMonthlyReport(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		List<WaterNewConsumerMonthlyResponse> waterNewConsumerMonthlyResponseList = Arrays.asList(
-				WaterNewConsumerMonthlyResponse.builder().ulb("Cuttack").ward("01").connectionNo("WS/CTC/012111")
-				.connectionType("Non-Metered").userName("Mohan").applicationNo("WS_AP/CTC/2022-23/000001").connectionCategory("Permanent")
-				.connectionFacility("Water").connectionPurpose("Domestic").userAddress("Address").date(1660043998000L).sanctionDate(1660043998000L)
-				.mobile("9779689189").build());
+		List<WaterNewConsumerMonthlyResponse> waterNewConsumerMonthlyResponseList = waterService.waterNewConsumerMonthlyReport(requestInfoWrapper.getRequestInfo(), searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
 				.waterNewConsumerMonthlyResponses(waterNewConsumerMonthlyResponseList).build();
@@ -116,12 +112,7 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> consumerBillHistoryReport(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		List<ConsumerBillHistoryResponse> consumerBillHistoryResponse = Arrays.asList(
-				ConsumerBillHistoryResponse.builder().ulb("Aska").oldConnectionNo("1023").monthYear(1660043998000L)
-				.billNo("0").previousDue("0").adjustedAmt("0").previousPayment("0").rebateAvailed("0").fineLevied("0")
-				.currentWSDemand("122").currentWSDemand("0").netPayment("0").NPR("128").NPF("120").billDate(1660043998000L)
-				.rebateDate(1660043998000L).previousReading("0").currentReading("0").totalUnitsConsumed("0").build()
-				);
+		List<ConsumerBillHistoryResponse> consumerBillHistoryResponse = waterService.consumerBillHistoryReport(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().consumerBillHistoryResponse(consumerBillHistoryResponse)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
