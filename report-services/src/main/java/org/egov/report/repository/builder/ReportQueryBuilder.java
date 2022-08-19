@@ -10,6 +10,7 @@ import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 
 
@@ -22,6 +23,8 @@ public class ReportQueryBuilder {
 	private static final String SELECT = "SELECT ";
 	private static final String INNER_JOIN = " INNER JOIN ";
 	private static final String AND_QUERY = " AND ";
+	private static final String GROUP_BY = " group by ";
+	private static final String ORDER_BY = " order by ";
 	private static final String connectionSelectValues = " ewc.tenantid,ewc.additionaldetails->>'ward' as ward,ewc.connectionno,ewc.oldconnectionno,";
 	private static final String serviceSelectValues = " ews.connectiontype,ews.connectioncategory,ews.usagecategory,ews.connectionfacility,";
 	private static final String userSelectValues = " ch.id ";
@@ -30,6 +33,8 @@ public class ReportQueryBuilder {
 	private static final String serviceSelect = " ews.connectiontype, ews.connectionexecutiondate, ews.connectioncategory, ews.usagecategory, ews.connectionfacility, ";
 	private static final String connectionHolderSelect = " holder.userid ";
 	
+	private static final String demandSelectValues = " d.tenantid ,d.consumercode, d.taxperiodfrom , d.taxperiodto ,d.ispaymentcompleted,";
+	private static final String demanddetailSelect = " sum(dd.taxamount) as totalTax,sum(dd.collectionamount) as totalCollected ";
 	
 	private static final String HRMS_QUERY = "select id, tenantid from eg_hrms_employee ";
 	
@@ -89,6 +94,13 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " eg_ws_connectionholder holder on holder.connectionid = ewc.id "
 			+ WHERE + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' and ewc.applicationtype = 'NEW_CONNECTION' ";
 
+	private static final String QUERY_FOR_CONSUMER_BILL_HISTORY = SELECT
+			+ demandSelectValues 
+			+ demanddetailSelect 
+			+ FROM + " egbs_demand_v1 d "
+			+ INNER_JOIN + " egbs_demanddetail_v1 dd on d.id = dd.demandid "
+			+ WHERE ;
+	
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
 			queryString.append(" WHERE ");
@@ -212,6 +224,20 @@ public class ReportQueryBuilder {
 		
 		query.append(AND_QUERY).append(" ews.connectionexecutiondate <= ? ");
 		preparedStmtList.add(wsReportUtils.addOneMonth(criteria.getMonthYear()));
+		
+		return query.toString();
+	}
+	
+	public String getConsumerBillHistoryQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
+		
+		StringBuilder query = new StringBuilder(QUERY_FOR_CONSUMER_BILL_HISTORY);
+		
+		query.append(" d.businessservice ='WS' ");
+		query.append(AND_QUERY).append(" d.consumercode = ? ");
+		preparedStmtList.add(criteria.getConsumerCode());
+		
+		query.append(GROUP_BY).append(demandSelectValues.substring(0,demandSelectValues.length()-1));
+		query.append(ORDER_BY).append(" d.taxperiodto ");
 		
 		return query.toString();
 	}

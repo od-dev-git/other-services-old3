@@ -1,5 +1,7 @@
 package org.egov.report.web.model;
 
+import java.math.BigDecimal;
+
 import org.egov.report.web.model.WaterNewConsumerMonthlyResponse.WaterNewConsumerMonthlyResponseBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,58 +22,25 @@ public class ConsumerBillHistoryResponse {
 	@JsonProperty("ulb")
 	private String ulb;
 	
-	@JsonProperty("oldConnectionNo")
-	private String oldConnectionNo;
+	@JsonProperty("consumerCode")
+	private String consumerCode;
 	
-	@JsonProperty("monthYear")
-	private Long monthYear;
+	@JsonProperty("periodFrom")
+	private String periodFrom;
 	
-	@JsonProperty("billNo")
-	private String billNo;
+	@JsonProperty("periodTo")
+	private String periodTo;
 	
-	@JsonProperty("previousDue")
-	private String previousDue;
+	@JsonProperty("paymentCompleted")
+	private String paymentCompleted;
 	
-	@JsonProperty("adjustedAmt")
-	private String adjustedAmt;
+	@JsonProperty("taxAmount")
+	private BigDecimal taxAmount;
 	
-	@JsonProperty("previousPayment")
-	private String previousPayment;
+	@JsonProperty("collectedAmount")
+	private BigDecimal collectedAmount;
 	
-	@JsonProperty("rebateAvailed")
-	private String rebateAvailed;
+	@JsonProperty("dueAmount")
+	private BigDecimal dueAmount;
 	
-	@JsonProperty("fineLevied")
-	private String fineLevied;
-	
-	@JsonProperty("currentWSDemand")
-	private String currentWSDemand;
-	
-	@JsonProperty("currentSWDemand")
-	private String currentSWDemand;
-	
-	@JsonProperty("netPayment")
-	private String netPayment;
-	
-	@JsonProperty("NPR")
-	private String NPR;
-	
-	@JsonProperty("NPF")
-	private String NPF;
-	
-	@JsonProperty("billDate")
-	private Long billDate;
-	
-	@JsonProperty("rebateDate")
-	private Long rebateDate;
-	
-	@JsonProperty("previousReading")
-	private String previousReading;
-	
-	@JsonProperty("currentReading")
-	private String currentReading;
-	
-	@JsonProperty("totalUnitsConsumed")
-	private String totalUnitsConsumed;
-
 }

@@ -25,6 +25,7 @@ import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.PaymentUtil;
 import org.egov.report.validator.WSReportValidator;
 import org.egov.report.web.model.BillSummaryResponses;
+import org.egov.report.web.model.ConsumerBillHistoryResponse;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
@@ -292,6 +293,13 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		}
 		
 		return response;
+	}
+	
+	public List<ConsumerBillHistoryResponse> consumerBillHistoryReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
+		
+		wsValidator.validateConsumerBillHistoryReport(criteria);
+		
+		return reportRepository.getConsumerBillHistoryReport(criteria);
 		
 	}
 		

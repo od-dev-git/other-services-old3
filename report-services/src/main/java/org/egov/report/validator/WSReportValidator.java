@@ -86,5 +86,16 @@ public class WSReportValidator {
 		
 		createCustomException(errorMap);
 	}
+	
+	public void validateConsumerBillHistoryReport(WSReportSearchCriteria searchCriteria) {
+		
+		Map<String, String> errorMap = new HashMap<>();
+		
+		if(!StringUtils.hasText(searchCriteria.getConsumerCode())) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "Connection No can not be empty/blank");
+		}
+		
+		createCustomException(errorMap);
+	}
 
 }

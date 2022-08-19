@@ -112,12 +112,7 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> consumerBillHistoryReport(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		List<ConsumerBillHistoryResponse> consumerBillHistoryResponse = Arrays.asList(
-				ConsumerBillHistoryResponse.builder().ulb("Aska").oldConnectionNo("1023").monthYear(1660043998000L)
-				.billNo("0").previousDue("0").adjustedAmt("0").previousPayment("0").rebateAvailed("0").fineLevied("0")
-				.currentWSDemand("122").currentWSDemand("0").netPayment("0").NPR("128").NPF("120").billDate(1660043998000L)
-				.rebateDate(1660043998000L).previousReading("0").currentReading("0").totalUnitsConsumed("0").build()
-				);
+		List<ConsumerBillHistoryResponse> consumerBillHistoryResponse = waterService.consumerBillHistoryReport(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().consumerBillHistoryResponse(consumerBillHistoryResponse)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();

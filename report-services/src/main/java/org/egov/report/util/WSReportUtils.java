@@ -1,5 +1,8 @@
 package org.egov.report.util;
 
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -21,8 +24,10 @@ public class WSReportUtils {
 		if(time == 0 || time == null )
 			return null;
 		
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("IST")); 
-		cal.setTimeInMillis(time);
-		return cal.get(Calendar.DATE)+"/"+cal.get(Calendar.MONTH)+"/"+cal.get(Calendar.YEAR);
+		Date date = new Date(time);
+		DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+		format.setTimeZone(TimeZone.getTimeZone("IST"));
+		String formatted = format.format(date);
+		return formatted;
 	}
 }

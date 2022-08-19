@@ -7,10 +7,12 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.model.WSSearchCriteria;
 import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
+import org.egov.report.repository.rowmapper.ConsumerBillHistoryRowMapper;
 import org.egov.report.repository.rowmapper.ConsumerMasterRowMapper;
 import org.egov.report.repository.rowmapper.WaterNewConsumerMonthlyRowMapper;
 import org.egov.report.service.UserService;
 import org.egov.report.web.model.BillSummaryResponses;
+import org.egov.report.web.model.ConsumerBillHistoryResponse;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
@@ -59,5 +61,14 @@ public class WSReportRepository {
 			String query = queryBuilder.getWaterNewConsumerQuery(criteria, preparedStmtList);
 
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterNewConsumerMonthlyRowMapper());
+		}
+		
+		public List<ConsumerBillHistoryResponse> getConsumerBillHistoryReport(WSReportSearchCriteria criteria){
+			
+			List<Object> preparedStmtList = new ArrayList<>();
+			
+			String query = queryBuilder.getConsumerBillHistoryQuery(criteria, preparedStmtList);
+
+			return jdbcTemplate.query(query,preparedStmtList.toArray(), new ConsumerBillHistoryRowMapper());
 		}
 }
