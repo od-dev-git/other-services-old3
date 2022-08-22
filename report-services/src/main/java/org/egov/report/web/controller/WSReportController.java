@@ -72,8 +72,8 @@ public class WSReportController {
 	@PostMapping("/waterMonthlyDemandReport")
 	public ResponseEntity<ReportResponse> waterMonthlyDemandReport(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
-		List<WaterMonthlyDemandResponse> waterMonthlyDemandResponseList = Arrays.asList(
-				WaterMonthlyDemandResponse.builder().ulb("Cuttack").ward("01").connectionNo("WS/CTC/012111").connectionType("Non-Metered").connectionHolderName("Atul Sahoo").mobile("992822037").addrss("Address").taxPriodFrom(1656617731000L).taxPeriodTo(1659289291000L).build());
+		
+		List<WaterMonthlyDemandResponse> waterMonthlyDemandResponseList = waterService.waterMonthlyDemandReport(requestInfoWrapper.getRequestInfo(),searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().waterMonthlyDemandResponse(waterMonthlyDemandResponseList)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
