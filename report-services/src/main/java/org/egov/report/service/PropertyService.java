@@ -1,5 +1,7 @@
 package org.egov.report.service;
 
+import java.awt.event.ItemEvent;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,12 +13,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.annotation.JacksonInject.Value;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.egov.report.web.model.User;
@@ -24,6 +28,7 @@ import org.egov.report.web.model.UserResponse;
 import org.egov.tracer.model.CustomException;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.web.model.IncentiveResponse;
+import org.egov.report.web.model.PropertyDemandResponse;
 import org.egov.report.web.model.PropertyDetailsResponse;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.Payment;
@@ -34,6 +39,7 @@ import org.egov.report.validator.PropertyReportValidator;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.PropertyResponse;
 import org.egov.report.web.model.TaxCollectorWiseCollectionResponse;
+import org.egov.report.web.model.ULBWiseTaxCollectionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.egov.report.repository.ServiceRepository;
 
@@ -210,6 +216,96 @@ public class PropertyService {
 			}
 		
 		return	prop ;	
+	}
+
+	public List<ULBWiseTaxCollectionResponse> getulbWiseTaxCollections(RequestInfo requestInfo,
+			PropertyDetailsSearchCriteria searchCriteria) {
+		
+		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
+
+		List<ULBWiseTaxCollectionResponse> propResponse= new ArrayList<ULBWiseTaxCollectionResponse>();
+		
+		Map<String,List<PropertyDemandResponse>> propDemResponse = pdRepository.getPropertyDemandDetails(searchCriteria);
+		
+		if(!CollectionUtils.isEmpty(propDemResponse)) {
+
+			 
+			 propDemResponse.forEach((key,value)->
+			 {
+				 ULBWiseTaxCollectionResponse pr = new ULBWiseTaxCollectionResponse();
+				 BigDecimal cyda = BigDecimal.ZERO;
+				 BigDecimal tada = BigDecimal.ZERO;
+				 BigDecimal tca = BigDecimal.ZERO;
+				 BigDecimal da = BigDecimal.ZERO;
+			
+				 value.forEach(item->
+				 {
+					 if(item.getTaxperiodto()<System.currentTimeMillis()) {
+						 tada.add(item.getTaxamount());
+					 }
+					 
+					 else {
+						 cyda.add(item.getTaxamount());
+					 }
+					 
+					 tca.add(item.getCollectionamount());
+					 
+				 });
+				 da.add(tada);
+				 da.add(cyda);
+				 da.subtract(tca);
+		
+				 pr.setPropertyId(key);
+				 pr.setTotaltaxamount(tada.toString());
+				 pr.setTotalarreartaxamount(cyda.toString());
+				 pr.setTotalcollectionamount(tca.toString());
+				 pr.setDueamount(da.toString());
+				 pr.setUlb(value.get(0).getTenantid());
+				 pr.setOldpropertyid(null);
+				 pr.setWard(null);
+				 
+				 
+					propResponse.add(pr);
+			 });
+			
+          
+			 Set<String> Propertys = new HashSet<>();
+				PropertySearchingCriteria pdsCriteria = new PropertySearchingCriteria();
+			 propResponse.forEach(res -> Propertys.add((res.getPropertyId())));
+				
+				PropertySearchingCriteria propsCriteria = PropertySearchingCriteria.builder()
+						.tenantid(searchCriteria.getUlbName())
+						.property(Propertys).build();
+				Set<String> Prop = Propertys.stream().distinct().collect(Collectors.toSet());
+				
+				 List<Property> propinfo = getProperty(requestInfo, propsCriteria);
+				for(ULBWiseTaxCollectionResponse res : propResponse) {
+					propinfo.forEach(
+							item -> {
+								if(res.getPropertyId().equalsIgnoreCase(item.getPropertyId())) {
+									res.setOldpropertyid(item.getOldPropertyId());
+									res.setWard(item.getWard());
+								}
+							});
+					}
+					
+				if(searchCriteria.getWardNo() != null) {
+					for (int i = 0 ; i < propResponse.size();i++) {
+
+						if (propResponse.get(i).getWard() != searchCriteria.getWardNo() ) {
+							propResponse.remove(propResponse.get(i));
+							i--;
+
+						}
+
+					}
+				}
+				
+			
+		}
+		
+		
+		return propResponse;
 	}
 
 

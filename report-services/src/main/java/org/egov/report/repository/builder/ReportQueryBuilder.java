@@ -103,6 +103,14 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " egbs_demanddetail_v1 dd on d.id = dd.demandid "
 			+ WHERE ;
 	
+	private static final String DEMANDS_QUERY = SELECT 
+			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,"
+			+ "edv.tenantid ,status,edv2.taxamount ,edv2.collectionamount "
+			+ FROM + " egbs_demand_v1 edv "
+			+ INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.tenantid= ?  "
+			+ AND + "edv2.tenantid= ? " + AND + " edv.id=edv2.demandid  " + AND + " edv.status <> 'CANCELLED' "
+			+ AND ;
+      
 	private static final String QUERY_FOR_WATER_MONTHLY_DEMAND = SELECT 
 			+ demandSelectValues + " d.id, "
 			+ detailsSelectValues 
@@ -179,13 +187,6 @@ public class ReportQueryBuilder {
 		return query.toString();
 	}
 	
-	
-	
-	
-	
-	
-	
-
 	public String getBillSummaryDetailsQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
 		
        StringBuilder query = new StringBuilder(BILL_SUMMARY_QUERY2);
@@ -210,7 +211,6 @@ public class ReportQueryBuilder {
      return query.toString();
 	}
 
-	
 	public String getPropertyDetailsQuery(PropertyDetailsSearchCriteria criteria, List<Object> preparedPropStmtList) {
 
 		 StringBuilder query = new StringBuilder(PROPERTY_DETAILS_SUMMARY_QUERY);
@@ -260,6 +260,18 @@ public class ReportQueryBuilder {
 		
 		return query.toString();
 	}
+
+	public String getPropertyDemandQuery(PropertyDetailsSearchCriteria searchCriteria,List<Object> preparedPropStmtList) {
+		
+StringBuilder query = new StringBuilder(DEMANDS_QUERY);
+		
+		query.append(" edv.businessservice ='PT' ;");
+		preparedPropStmtList.add(searchCriteria.getUlbName());
+		preparedPropStmtList.add(searchCriteria.getUlbName());
+	
+		return query.toString();
+	}
+
 	
 	public String getWaterMonthlyDemandQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
 
