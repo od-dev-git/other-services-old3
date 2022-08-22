@@ -42,10 +42,10 @@ public class WaterMonthlyDemandResponse {
 	private String addrss;
 	
 	@JsonProperty("demandPeriodFrom")
-	private Long taxPriodFrom;
+	private String taxPriodFrom;
 	
 	@JsonProperty("demandPriodTo")
-	private Long taxPeriodTo; 
+	private String taxPeriodTo; 
 	
 	@JsonProperty("currentDemandAmount")
 	@Default
