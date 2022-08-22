@@ -254,7 +254,7 @@ public class PropertyService {
 				 da.add(tada);
 				 da.add(cyda);
 				 da.subtract(tca);
-				// )
+		
 				 pr.setPropertyId(key);
 				 pr.setTotaltaxamount(tada.toString());
 				 pr.setTotalarreartaxamount(cyda.toString());
@@ -289,8 +289,7 @@ public class PropertyService {
 							});
 					}
 					
-				if(!searchCriteria.getWardNo().isEmpty()) {
-					int k = propResponse.size();
+				if(searchCriteria.getWardNo() != null) {
 					for (int i = 0 ; i < propResponse.size();i++) {
 
 						if (propResponse.get(i).getWard() != searchCriteria.getWardNo() ) {
