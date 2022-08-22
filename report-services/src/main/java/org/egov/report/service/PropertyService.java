@@ -113,8 +113,8 @@ public class PropertyService {
 			PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
 					.businessServices(s)
 					.tenantId(searchCriteria.getUlbName())
-					.fromDate(searchCriteria.getStartdate())
-					.toDate(searchCriteria.getEnddate()).build();
+					.fromDate(searchCriteria.getStartDate())
+					.toDate(searchCriteria.getEndDate()).build();
 		
 		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
 		List<TaxCollectorWiseCollectionResponse> tcwcResponse = new ArrayList<TaxCollectorWiseCollectionResponse>();
