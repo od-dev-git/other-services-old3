@@ -17,13 +17,13 @@ import org.egov.report.model.IncentiveAnalysis;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentDetail;
 import org.egov.report.model.PaymentSearchCriteria;
+import org.egov.report.util.ReportConstants;
 import org.egov.report.validator.ReportValidator;
 import org.egov.report.web.model.IncentiveReportCriteria;
 import org.egov.report.web.model.IncentiveResponse;
 import org.egov.report.web.model.OwnerInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 @Service
 public class IncentiveService {
@@ -63,10 +63,11 @@ public class IncentiveService {
 		
 		List<Long> userIds = incentiveAnalysis.keySet().stream().map(key -> Long.valueOf(key)).collect(Collectors.toList());
 		List<OwnerInfo> usersInfo =userService.getUser(requestInfo, userIds);
+		usersInfo = usersInfo.stream().filter(user -> user.getRoles().stream().map(role -> role.getCode()).collect(Collectors.toList()).contains(ReportConstants.ROLE_JALSATHI)).collect(Collectors.toList());
 		enrichUserData(incentiveAnalysis, usersInfo);
 		
 		return IncentiveResponse.builder().incentiveAnalysis(incentiveAnalysis.values().stream()
-				.filter(ia -> StringUtils.hasText(ia.getEmpName())).collect(Collectors.toList())).build();
+				.filter(ia -> ia.getIsJalsathiCollection()).collect(Collectors.toList())).build();
 	}
 
 	
@@ -77,6 +78,7 @@ public class IncentiveService {
 			IncentiveAnalysis incentiveAnalysis = incentiveAnalysisMap.get(user.getId().toString());
 			incentiveAnalysis.setEmpName(user.getName());
 			incentiveAnalysis.setEmpId(user.getUserName());
+			incentiveAnalysis.setIsJalsathiCollection(Boolean.TRUE);
 		}
 	}
 
