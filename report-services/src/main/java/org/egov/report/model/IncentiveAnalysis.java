@@ -2,6 +2,7 @@ package org.egov.report.model;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -39,13 +40,18 @@ public class IncentiveAnalysis {
 	
 	@JsonProperty("totalIncentiveOnArrear")
 	@Builder.Default
-	private BigDecimal totalIncentiveOnArrear = BigDecimal.ZERO;;
+	private BigDecimal totalIncentiveOnArrear = BigDecimal.ZERO;
 	
 	@JsonProperty("totalIncentiveOnCurrent")
 	@Builder.Default
-	private BigDecimal totalIncentiveOnCurrent = BigDecimal.ZERO;;
+	private BigDecimal totalIncentiveOnCurrent = BigDecimal.ZERO;
 	
 	@JsonProperty("totalIncentive")
 	@Builder.Default
-	private BigDecimal totalIncentive = BigDecimal.ZERO;;
+	private BigDecimal totalIncentive = BigDecimal.ZERO;
+	
+	@JsonIgnore
+	@Builder.Default
+	private Boolean isJalsathiCollection = false;
+	
 }
