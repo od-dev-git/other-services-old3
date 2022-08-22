@@ -1,12 +1,15 @@
 package org.egov.report.repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import org.egov.report.web.model.PropertyDemandResponse;
 import org.egov.report.web.model.PropertyDetailsResponse;
 
 import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
+import org.egov.report.repository.rowmapper.DemandsRowMapper;
 import org.egov.report.repository.rowmapper.PropertyDetailsRowMapper;
 import org.egov.report.repository.rowmapper.UserRowMapper;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
@@ -33,6 +36,15 @@ public class PropertyDetailsReportRepository {
 
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());
 
+	}
+
+	public HashMap<String,List<PropertyDemandResponse>> getPropertyDemandDetails(PropertyDetailsSearchCriteria searchCriteria) {
+
+		List<Object> preparedPropStmtList = new ArrayList<>();
+
+		String query = queryBuilder.getPropertyDemandQuery(searchCriteria, preparedPropStmtList);
+
+		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandsRowMapper());
 	}
 
 

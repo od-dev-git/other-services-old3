@@ -101,6 +101,14 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " egbs_demanddetail_v1 dd on d.id = dd.demandid "
 			+ WHERE ;
 	
+	private static final String DEMANDS_QUERY = SELECT 
+			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,"
+			+ "edv.tenantid ,status,edv2.taxamount ,edv2.collectionamount "
+			+ FROM + " egbs_demand_v1 edv "
+			+ INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.tenantid= ?  "
+			+ AND + "edv2.tenantid= ? " + AND + " edv.id=edv2.demandid  " + AND + " edv.status <> 'CANCELLED' "
+			+ AND ;
+	
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
 			queryString.append(" WHERE ");
@@ -239,6 +247,17 @@ public class ReportQueryBuilder {
 		query.append(GROUP_BY).append(demandSelectValues.substring(0,demandSelectValues.length()-1));
 		query.append(ORDER_BY).append(" d.taxperiodto ");
 		
+		return query.toString();
+	}
+
+	public String getPropertyDemandQuery(PropertyDetailsSearchCriteria searchCriteria,List<Object> preparedPropStmtList) {
+		
+StringBuilder query = new StringBuilder(DEMANDS_QUERY);
+		
+		query.append(" edv.businessservice ='PT' ;");
+		preparedPropStmtList.add(searchCriteria.getUlbName());
+		preparedPropStmtList.add(searchCriteria.getUlbName());
+	
 		return query.toString();
 	}
 }
