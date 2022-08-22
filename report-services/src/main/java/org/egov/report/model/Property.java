@@ -84,4 +84,7 @@ public class Property {
 	@JsonProperty("additionaldetails")
 	private String additionaldetails;
 	
+	@JsonProperty("ward")
+	private String ward;
+	
 }

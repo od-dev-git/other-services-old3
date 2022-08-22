@@ -89,11 +89,7 @@ public class PropertyReportController {
 	public ResponseEntity<ReportResponse> ulbWiseTaxCollectionReport(@ModelAttribute PropertyDetailsSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		List<ULBWiseTaxCollectionResponse> ulbBWiseTaxCollectionResponse = Arrays.asList(
-				ULBWiseTaxCollectionResponse.builder().ulb("od.cuttack").propertyId("107-FKM-2021-04-05-000002")
-				.oldpropertyid("12298556").ward("12").totaltaxamount("1107").totalcollectionamount("2214")
-				.totalarreartaxamount("3321").dueamount("2214").build()
-				);
+		List<ULBWiseTaxCollectionResponse> ulbBWiseTaxCollectionResponse = propertyService.getulbWiseTaxCollections(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().ulbWiseTaxCollectionResponse(ulbBWiseTaxCollectionResponse)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
@@ -105,12 +101,7 @@ public class PropertyReportController {
 	public ResponseEntity<ReportResponse> taxCollectorWiseCollectionReport(@ModelAttribute PropertyDetailsSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse = Arrays.asList(
-				TaxCollectorWiseCollectionResponse.builder().name("Mohan")
-				.employeeid("123345").mobilenumber("9098909765").amountpaid("990").paymentMode("CASH")
-				.receiptnumber("67675-CUTTACK").paymentdate("13-Dec-2021 11:12:35")
-				.consumercode("PT-CTC-1007399").oldpropertyid("011000098/yyg").build()
-				);
+		List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse = propertyService.gettaxCollectorWiseCollections(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().taxCollectorWiseCollectionResponse(taxCollectorWiseCollectionResponse)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
