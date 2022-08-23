@@ -1,5 +1,6 @@
 package org.egov.report.util;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -29,5 +30,42 @@ public class WSReportUtils {
 		format.setTimeZone(TimeZone.getTimeZone("IST"));
 		String formatted = format.format(date);
 		return formatted;
+	}
+	
+	public BigDecimal CalculateAmtAfterDueDate(BigDecimal taxAmt, BigDecimal collectedAmt, BigDecimal penaltyAmt,
+			BigDecimal advanceAmt, BigDecimal arrears, BigDecimal arrearsCollectedAmt) {
+
+		BigDecimal multiplyingFactor = new BigDecimal(1.05);
+		BigDecimal amtAfterDueDate = ((taxAmt.subtract(collectedAmt)).multiply(multiplyingFactor)).add(advanceAmt)
+				.add(penaltyAmt).add(arrears).subtract(arrearsCollectedAmt);
+
+		if (amtAfterDueDate.compareTo(BigDecimal.ZERO) == 1)
+			return amtAfterDueDate.setScale(2, BigDecimal.ROUND_CEILING);
+		else
+			return BigDecimal.ZERO;
+	}
+
+	public BigDecimal CalculateAmtBeforeDueDate(BigDecimal taxAmt, BigDecimal collectedAmt, BigDecimal penaltyAmt,
+			BigDecimal advanceAmt, BigDecimal arrears, BigDecimal rebateAmt, BigDecimal arrearsCollectedAmt) {
+
+		BigDecimal multiplyingFactor = new BigDecimal(0.98);
+		BigDecimal amtBeforeDueDate = ((taxAmt.subtract(collectedAmt)).multiply(multiplyingFactor)).add(advanceAmt)
+				.add(rebateAmt).add(arrears).subtract(arrearsCollectedAmt);
+
+		if (amtBeforeDueDate.compareTo(BigDecimal.ZERO) == 1)
+			return amtBeforeDueDate.setScale(2, BigDecimal.ROUND_CEILING);
+		else
+			return BigDecimal.ZERO;
+	}
+
+	public BigDecimal calculateTotalDue(BigDecimal taxAmt, BigDecimal collectedAmt, BigDecimal penaltyAmt,
+			BigDecimal advanceAmt, BigDecimal arrears, BigDecimal arrearsCollectedAmt) {
+
+		BigDecimal totalDue = taxAmt.add(penaltyAmt).add(advanceAmt).add(arrears).subtract(collectedAmt).subtract(arrearsCollectedAmt);
+
+		if (totalDue.compareTo(BigDecimal.ZERO) == 1)
+			return totalDue.setScale(2, BigDecimal.ROUND_CEILING);
+		else
+			return BigDecimal.ZERO;
 	}
 }
