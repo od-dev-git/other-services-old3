@@ -302,6 +302,11 @@ StringBuilder query = new StringBuilder(DEMANDS_QUERY);
 			query.append(AND_QUERY).append(" ews.connectiontype = ? ");
 			preparedStmtList.add(criteria.getConnectionType());
 		}
+		
+		if(criteria.getOldConnectionNo() != null) {
+			query.append(AND_QUERY).append(" ewc.oldconnectionno = ? ");
+			preparedStmtList.add(criteria.getOldConnectionNo());
+		}
 
 		return query.toString();
 

@@ -38,25 +38,25 @@ public class WSConsumerHistoryResponse {
 	private String connectionType;
 	
 	@JsonProperty("currentDemand")
-	private String currentDemand;
+	private BigDecimal currentDemand = BigDecimal.ZERO;
 
 	@JsonProperty("collectionAmt")
-	private String collectionAmt;
+	private BigDecimal collectionAmt = BigDecimal.ZERO;
 	
 	@JsonProperty("rebateAmt")
-	private String rebateAmt;
+	private BigDecimal rebateAmt = BigDecimal.ZERO;
 	
 	@JsonProperty("penalty")
-	private String penalty;
+	private BigDecimal penalty = BigDecimal.ZERO;
 	
 	@JsonProperty("advance")
-	private String advance;
+	private BigDecimal advance = BigDecimal.ZERO;
 	
 	@JsonProperty("arrear")
-	private String arrear;
+	private BigDecimal arrear = BigDecimal.ZERO;
 	
 	@JsonProperty("totalDue")
-	private String totalDue;
+	private BigDecimal totalDue = BigDecimal.ZERO;
 	
 	@JsonProperty("paymentDate")
 	private String paymentDate;

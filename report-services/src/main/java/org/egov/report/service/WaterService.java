@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -15,6 +16,8 @@ import java.util.stream.Stream;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.model.BillAccountDetail;
+import org.egov.report.model.BillDetail;
 import org.egov.report.model.DemandDetails;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
@@ -37,6 +40,7 @@ import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.User;
 import org.egov.report.web.model.UserDetailResponse;
 import org.egov.report.web.model.UserResponse;
+import org.egov.report.web.model.WSConsumerHistoryResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterConnectionDetailResponse;
 import org.egov.report.web.model.WaterConnectionDetails;
@@ -418,6 +422,88 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 			}
 		});
 		}
+		return response;
+	}
+	
+	public List<WSConsumerHistoryResponse> wsConsumerHistoryReport(RequestInfo requestInfo, WSReportSearchCriteria criteria) {
+		
+		List<WSConsumerHistoryResponse> response = new ArrayList<>();
+		
+		wsValidator.validateWsConsumerHistoryReport(criteria);
+		
+		Map<String, WaterConnectionDetails> responseConnection = reportRepository.getWaterMonthlyDemandConnection(criteria);
+		
+		if(!StringUtils.isEmpty(responseConnection)) {
+		
+			PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
+					.businessServices(Stream.of("WS","WS.ONE_TIME_FEE").collect(Collectors.toSet()))
+					.tenantId(criteria.getTenantId())
+					.fromDate(criteria.getFromDate())
+					.toDate(criteria.getToDate())
+					.consumerCodes(responseConnection.keySet()).build();
+			
+			List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+			
+			Comparator<BillDetail> comparator = (obj1, obj2) -> obj2.getFromPeriod().compareTo(obj1.getFromPeriod());
+			
+			String consumerCode = responseConnection.keySet().stream().findFirst().get();
+			
+			payments.forEach(item -> 
+			{
+				WSConsumerHistoryResponse res = new WSConsumerHistoryResponse();
+				res.setPaymentMode(item.getPaymentMode().toString());
+				res.setPaymentDate(wsReportUtils.getConvertedDate(item.getTransactionDate()));
+				res.setTotalDue(item.getTotalDue());
+				res.setCollectionAmt(item.getTotalAmountPaid());
+				res.setConsumerNo(consumerCode);
+				res.setConnectionType(responseConnection.get(consumerCode).getConnectiontype());
+				res.setOldConnectionNo(responseConnection.get(consumerCode).getOldconnectionno());
+				res.setUlb(responseConnection.get(consumerCode).getTenantid().substring(3));
+				res.setWard(responseConnection.get(consumerCode).getWard());
+				res.setMonth(wsReportUtils.getConvertedDate(item.getTransactionDate()).substring(3,5));
+				item.getPaymentDetails().forEach(paymentDetail -> {
+					
+					res.setReceiptNo(paymentDetail.getReceiptNumber());
+					
+					List<BillDetail> billDetails = paymentDetail.getBill().getBillDetails();
+					Collections.sort(billDetails ,comparator);
+					
+					Long fromDateCurrentDemand = billDetails.get(0).getFromPeriod();
+					Long toDateCurrentDemand = billDetails.get(0).getToPeriod();
+					
+					billDetails.forEach(billDetail -> 
+					{
+						if(billDetail.getToPeriod() == toDateCurrentDemand && billDetail.getFromPeriod() == fromDateCurrentDemand) {
+							
+							List<BillAccountDetail> billAccountDetails = billDetail.getBillAccountDetails();
+							billAccountDetails.forEach(billAccountDetail -> {
+								
+								if(billAccountDetail.getTaxHeadCode().equalsIgnoreCase("SW_ADVANCE_CARRYFORWARD")) {
+									res.setAdvance(billAccountDetail.getAmount());
+								}
+								if(billAccountDetail.getTaxHeadCode().equalsIgnoreCase("WS_TIME_REBATE")) {
+									res.setRebateAmt(billAccountDetail.getAmount());
+								}
+								if(billAccountDetail.getTaxHeadCode().equalsIgnoreCase("WS_TIME_PENALTY")) {
+									res.setPenalty(billAccountDetail.getAmount());
+								}
+								if(billAccountDetail.getTaxHeadCode().equalsIgnoreCase("WS_CHARGE")) {
+									res.setCurrentDemand(billAccountDetail.getAmount());
+								}
+								
+							});
+						}
+						else {
+							
+							res.setArrear(billDetail.getAmount());
+						}
+					});
+				});
+				
+				response.add(res);
+			});
+		}
+		
 		return response;
 	}
 		

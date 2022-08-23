@@ -42,5 +42,8 @@ public class WSReportSearchCriteria {
 
 	@JsonProperty("monthYear")
 	private Long monthYear;
+	
+	@JsonProperty("oldConnectionNo")
+	private String oldConnectionNo;
 
 }
