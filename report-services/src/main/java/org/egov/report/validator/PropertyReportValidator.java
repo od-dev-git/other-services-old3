@@ -43,5 +43,17 @@ Map<String, String> errorMap = new HashMap<>();
 	
 
 }
+
+	public void validatepwcSearchCriteria(PropertyDetailsSearchCriteria searchCriteria) {
+		
+		Map<String, String> errorMap = new HashMap<>();
+
+		if(!StringUtils.hasText(searchCriteria.getUlbName())) {
+			errorMap.put("INVALID_CRITERIA", "ULB Name can not be blank/empty");
+		}
+		if (!errorMap.isEmpty())
+			throw new CustomException(errorMap);
+		
+	}
 }
 

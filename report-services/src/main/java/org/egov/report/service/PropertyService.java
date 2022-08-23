@@ -38,6 +38,7 @@ import org.egov.report.repository.PropertyDetailsReportRepository;
 import org.egov.report.validator.PropertyReportValidator;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.PropertyResponse;
+import org.egov.report.web.model.PropertyWiseCollectionResponse;
 import org.egov.report.web.model.PropertyWiseDemandResponse;
 import org.egov.report.web.model.TaxCollectorWiseCollectionResponse;
 import org.egov.report.web.model.ULBWiseTaxCollectionResponse;
@@ -46,6 +47,7 @@ import org.egov.report.repository.ServiceRepository;
 
 import org.springframework.stereotype.Service;
 import org.egov.report.model.Property;
+
 import org.egov.report.model.PropertyConnectionRequest;
 import org.egov.report.model.PropertySearchingCriteria;
 
@@ -252,15 +254,16 @@ public class PropertyService {
 					 tca.add(item.getCollectionamount());
 					 
 				 });
-				 da.add(tada);
-				 da.add(cyda);
-				 da.subtract(tca);
+				 
+				 BigDecimal daa = da.add(tada);
+				 BigDecimal dac = daa.add(cyda);
+				 BigDecimal dat = dac.add(dac);
 		
 				 pr.setPropertyId(key);
 				 pr.setTotaltaxamount(tada.toString());
 				 pr.setTotalarreartaxamount(cyda.toString());
 				 pr.setTotalcollectionamount(tca.toString());
-				 pr.setDueamount(da.toString());
+				 pr.setDueamount(dat.toString());
 				 pr.setUlb(value.get(0).getTenantid());
 				 pr.setOldpropertyid(null);
 				 pr.setWard(null);
@@ -438,23 +441,132 @@ public class PropertyService {
 				
 				if(searchCriteria.getWardNo() != null) {
 					for (int i = 0 ; i<propResponse.size();i++) {
-						if(propResponse.get(i).getWard() != searchCriteria.getWardNo()) {
-							propResponse.remove(i);
-							i--;
+						if(propResponse.get(i).getWard() != null) {
+							if(!propResponse.get(i).getWard().equals(searchCriteria.getWardNo())) {
+								propResponse.remove(i);
+								i--;
+							}	
 						}
+						
 					}
 					}
 				if(searchCriteria.getOldPropertyId() != null) {
 					for (int i = 0 ; i<propResponse.size();i++) {
-						if(propResponse.get(i).getOldpropertyid() != searchCriteria.getOldPropertyId()) {
-							propResponse.remove(i);
-							i--;
+						if(propResponse.get(i).getOldpropertyid() != null) {
+							if(!propResponse.get(i).getOldpropertyid().equals(searchCriteria.getOldPropertyId())) {
+								propResponse.remove(i);
+								i--;
+							}
 						}
+						
 					}
 					}
 		
 		
 		return propResponse;
+	}
+
+	public List<PropertyWiseCollectionResponse> getpropertyCollectionReport(RequestInfo requestInfo,
+			PropertyDetailsSearchCriteria searchCriteria) {
+		
+        prValidator.validatepwcSearchCriteria(searchCriteria);
+		
+		Set<String> s = new HashSet<String>();
+        s.add("PT");
+        Set<String> p = new HashSet<String>();
+        if(searchCriteria.getPropertyId() == null) {
+        	p = null;
+        }else {
+        	p.add(searchCriteria.getPropertyId());
+        }
+			PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
+					.businessServices(s)
+					.tenantId(searchCriteria.getUlbName())
+					.consumerCodes(p)
+					.build();
+		
+		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+		List<PropertyWiseCollectionResponse> pwcResponse = new ArrayList<PropertyWiseCollectionResponse>();
+		
+for(Payment res : payments) {
+			
+	PropertyWiseCollectionResponse pwcr = new PropertyWiseCollectionResponse();
+	
+	pwcr.setConsumercode(res.getPaymentDetails().get(0).getBill().getConsumerCode());
+	pwcr.setDue(res.getTotalDue().toString());
+	pwcr.setAmountpaid(res.getTotalAmountPaid().toString());
+	BigDecimal d = res.getTotalDue();
+	BigDecimal ap = res.getTotalAmountPaid();
+	BigDecimal cd = BigDecimal.ZERO;
+	BigDecimal cda = cd.add(d);
+	BigDecimal cdb = cda.subtract(ap);
+	pwcr.setCurrentdue(cdb.toString());
+	pwcr.setReceiptdate(res.getPaymentDetails().get(0).getReceiptDate().toString());
+	pwcr.setReceiptnumber(res.getPaymentDetails().get(0).getReceiptNumber());
+	pwcr.setPaymentMode(res.getPaymentMode().name());
+							
+	pwcResponse.add(pwcr);
+						
+			}
+
+List<Long> uids = new ArrayList<>();
+UserSearchCriteria usCriteria = new UserSearchCriteria();
+Set<String> Propertys = new HashSet<>();
+PropertySearchingCriteria pdsCriteria = new PropertySearchingCriteria();
+
+if(!CollectionUtils.isEmpty(pwcResponse)) {
+	pwcResponse.forEach(res -> Propertys.add((res.getConsumercode())));
+	pdsCriteria.setProperty(Propertys);
+	
+	PropertySearchingCriteria propsCriteria = PropertySearchingCriteria.builder()
+			.tenantid(searchCriteria.getUlbName())
+			.property(Propertys).build();
+	Set<String> Prop = Propertys.stream().distinct().collect(Collectors.toSet());
+	
+	 List<Property> propinfo = getProperty(requestInfo, propsCriteria);
+	for(PropertyWiseCollectionResponse res : pwcResponse) {
+		propinfo.forEach(
+				item -> {
+					if(res.getConsumercode().equalsIgnoreCase(item.getPropertyId())) {
+						res.setOldpropertyid(item.getOldPropertyId());
+						res.setWard(item.getWard());
+						res.setName(item.getOwners().get(0).getName());
+						res.setMobilenumber(item.getOwners().get(0).getMobileNumber());
+						
+					}
+				});
+		}
+	
+	
+	
+	}
+
+    if(searchCriteria.getWardNo() != null) {
+    	for(int i = 0;i < pwcResponse.size();i++) {
+    		if(pwcResponse.get(i).getWard() != null) {
+    			if(!pwcResponse.get(i).getWard().equals(searchCriteria.getWardNo())) {
+        			pwcResponse.remove(i);
+        			i--;
+        		}	
+    		}
+    		
+    	}
+    }
+    
+    if(searchCriteria.getOldPropertyId() != null) {
+    	for(int i = 0;i < pwcResponse.size();i++) {
+    		if(pwcResponse.get(i).getOldpropertyid() != null) {
+    			if(!pwcResponse.get(i).getOldpropertyid().equals(searchCriteria.getOldPropertyId())) {
+        			pwcResponse.remove(i);
+        			i--;
+        		}
+    		}
+    		
+    	}
+    }
+
+		
+		return pwcResponse;
 	}
 
 

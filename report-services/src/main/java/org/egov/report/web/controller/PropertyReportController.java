@@ -55,12 +55,7 @@ public class PropertyReportController {
 	public ResponseEntity<ReportResponse> propertyWiseCollectionReport(@ModelAttribute PropertyDetailsSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		List<PropertyWiseCollectionResponse> propertyWiseCollectionResponse = Arrays.asList(
-				PropertyWiseCollectionResponse.builder().consumercode("107-FKM-2021-04-05-000002")
-				.oldpropertyid("12234556").ward("05").name("Shahrukh").mobilenumber("9090909098")
-				.due("87").amountpaid("32").currentdue("55").receiptnumber("04/2021-22/0001892")
-				.receiptdate("06-Apr-2021 11:09:28").paymentMode("CASH").build()
-				);
+		List<PropertyWiseCollectionResponse> propertyWiseCollectionResponse = propertyService.getpropertyCollectionReport(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().propertyWiseCollectionResponse(propertyWiseCollectionResponse)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();

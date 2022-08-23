@@ -1,5 +1,10 @@
 package org.egov.report.model;
 
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -86,5 +91,10 @@ public class Property {
 	
 	@JsonProperty("ward")
 	private String ward;
+	
+	@JsonProperty("owners")
+	private List<OwnerInfo> owners;
+	
+	
 	
 }
