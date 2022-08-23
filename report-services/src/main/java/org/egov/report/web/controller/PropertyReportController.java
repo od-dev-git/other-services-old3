@@ -72,12 +72,7 @@ public class PropertyReportController {
 	public ResponseEntity<ReportResponse> propertyWiseDemandReport(@ModelAttribute PropertyDetailsSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		List<PropertyWiseDemandResponse> propertyWiseDemandResponse = Arrays.asList(
-				PropertyWiseDemandResponse.builder().ulb("od.anandpur").propertyId("107-FKM-2021-04-05-000002")
-				.oldpropertyid("12298556").ward("12").name("Nitin").mobilenumber("6789876789")
-				.taxperiodfrom("Apr-2021").taxperiodto("Mar-2022").taxamount("100")
-				.collectionamount("50").dueamount("50").build()
-				);
+		List<PropertyWiseDemandResponse> propertyWiseDemandResponse = propertyService.getpropertyWiseDemandReport(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().propertyWiseDemandResponse(propertyWiseDemandResponse)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
