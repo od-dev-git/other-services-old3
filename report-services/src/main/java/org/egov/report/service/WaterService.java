@@ -188,7 +188,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		if(!CollectionUtils.isEmpty(response)) {
 			userIds = response.stream().map(ConsumerMasterWSReportResponse::getUserId).collect(Collectors.toList());
 			
-			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().id(userIds).tenantId(criteria.getTenantId()).build();
+			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().id(userIds).build();
 			List<OwnerInfo> info = userService.getUserDetails(requestInfo, userSearchCriteria);
 			
 			for(ConsumerMasterWSReportResponse res : response) {
@@ -289,7 +289,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		if(!CollectionUtils.isEmpty(response)) {
 		Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().tenantId(criteria.getTenantId()).uuid(userIds).build();
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds).build();
 		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 		
@@ -377,7 +377,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		Map<String, WaterConnectionDetails> responseConnection = reportRepository.getWaterMonthlyDemandConnection(criteria);
 
 		Set<String> userIds = responseConnection.values().stream().map(item -> item.getUserid()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds).tenantId(criteria.getTenantId()).build();
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds).build();
 		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 

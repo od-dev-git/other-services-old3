@@ -73,7 +73,7 @@ public class PropertyService {
 		// Extracting user info from userService
 
 		Set<String> uuIds = new HashSet<>();
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName()).build();
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().build();
 
 		if (!CollectionUtils.isEmpty(propDetlResponse)) {
 			propDetlResponse.forEach(res -> uuIds.add((res.getUserId())));
@@ -135,7 +135,7 @@ public class PropertyService {
 			pdsCriteria.setProperty(Propertys);
 
 			List<Long> ids = uids.stream().distinct().collect(Collectors.toList());
-			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName())
+			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder()
 					.id(ids).build();
 			List<OwnerInfo> info = userService.getUserDetails(requestInfo, userSearchCriteria);
 			for (TaxCollectorWiseCollectionResponse res : tcwcResponse) {
@@ -351,7 +351,7 @@ public class PropertyService {
 		// Extracting user info from userService
 
 		Set<String> uuIds = new HashSet<>();
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName()).build();
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().build();
 
 		if (!CollectionUtils.isEmpty(propDetlResponse)) {
 			for (int i = 0; i < propDetlResponse.size(); i++) {
