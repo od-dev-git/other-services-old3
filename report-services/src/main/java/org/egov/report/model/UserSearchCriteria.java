@@ -3,19 +3,34 @@ package org.egov.report.model;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSearchCriteria {
 	
-	List<Long> userId;
-	
-	Set<String> uuId;
+	@JsonProperty("id")
+    private List<Long> id;
 
+    @JsonProperty("uuid")
+    private Set<String> uuid;
+	
+	@JsonProperty("tenantId")
+    private String tenantId;
+	
+	@JsonProperty("active")
+    private Boolean active;
+	
+	@JsonProperty("userType")
+    private String userType;
+	
 }

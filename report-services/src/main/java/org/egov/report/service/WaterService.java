@@ -15,11 +15,12 @@ import java.util.stream.Stream;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.model.BillAccountDetail;
+import org.egov.report.model.BillDetail;
 import org.egov.report.model.DemandDetails;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
 import org.egov.report.model.UserSearchCriteria;
-import org.egov.report.model.UserSearchRequest;
 import org.egov.report.model.WSConnection;
 import org.egov.report.model.WSConnectionRequest;
 import org.egov.report.model.WSSearchCriteria;
@@ -35,8 +36,7 @@ import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.User;
-import org.egov.report.web.model.UserDetailResponse;
-import org.egov.report.web.model.UserResponse;
+import org.egov.report.web.model.WSConsumerHistoryResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterConnectionDetailResponse;
 import org.egov.report.web.model.WaterConnectionDetails;
@@ -186,9 +186,10 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		//Extracting user info from userService
 		if(!CollectionUtils.isEmpty(response)) {
-			response.forEach(res -> userIds.add(res.getUserId()));
+			userIds = response.stream().map(ConsumerMasterWSReportResponse::getUserId).collect(Collectors.toList());
 			
-			 List<User> info = userService.getUserDetails(requestInfo, userIds);
+			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().id(userIds).build();
+			List<OwnerInfo> info = userService.getUserDetails(requestInfo, userSearchCriteria);
 			
 			for(ConsumerMasterWSReportResponse res : response) {
 				
@@ -288,8 +289,8 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		if(!CollectionUtils.isEmpty(response)) {
 		Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuId(userIds).build();
-		List<User> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds).build();
+		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 		
 		response.stream().forEach(item -> {
@@ -376,8 +377,8 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		Map<String, WaterConnectionDetails> responseConnection = reportRepository.getWaterMonthlyDemandConnection(criteria);
 
 		Set<String> userIds = responseConnection.values().stream().map(item -> item.getUserid()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuId(userIds).build();
-		List<User> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds).build();
+		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 
 		responseConnection.values().stream().forEach(item -> {
@@ -418,6 +419,90 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 			}
 		});
 		}
+		return response;
+	}
+	
+	public List<WSConsumerHistoryResponse> wsConsumerHistoryReport(RequestInfo requestInfo, WSReportSearchCriteria criteria) {
+		
+		List<WSConsumerHistoryResponse> response = new ArrayList<>();
+		
+		wsValidator.validateWsConsumerHistoryReport(criteria);
+		
+		Map<String, WaterConnectionDetails> responseConnection = reportRepository.getWaterMonthlyDemandConnection(criteria);
+		
+		if(!StringUtils.isEmpty(responseConnection)) {
+		
+			PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
+					.businessServices(Stream.of("WS").collect(Collectors.toSet()))
+					.tenantId(criteria.getTenantId())
+					.fromDate(criteria.getFromDate())
+					.toDate(criteria.getToDate())
+					.consumerCodes(responseConnection.keySet()).build();
+			
+			List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+			
+			Comparator<BillDetail> comparator = (obj1, obj2) -> obj2.getFromPeriod().compareTo(obj1.getFromPeriod());
+			
+			String consumerCode = responseConnection.keySet().stream().findFirst().get();
+			
+			payments.forEach(item -> 
+			{
+				WSConsumerHistoryResponse res = WSConsumerHistoryResponse.builder()
+						.paymentMode(item.getPaymentMode().toString())
+						.paymentDate(wsReportUtils.getConvertedDate(item.getTransactionDate()))
+						.totalDue(item.getTotalDue())
+						.collectionAmt(item.getTotalAmountPaid())
+						.consumerNo(consumerCode)
+						.connectionType(responseConnection.get(consumerCode).getConnectiontype())
+						.oldConnectionNo(responseConnection.get(consumerCode).getOldconnectionno())
+						.ulb(responseConnection.get(consumerCode).getTenantid().substring(3))
+						.ward(responseConnection.get(consumerCode).getWard())
+						.month(wsReportUtils.getConvertedDate(item.getTransactionDate()).substring(3,5))
+						.build();
+				
+				item.getPaymentDetails().forEach(paymentDetail -> {
+					
+					res.setReceiptNo(paymentDetail.getReceiptNumber());
+					
+					List<BillDetail> billDetails = paymentDetail.getBill().getBillDetails();
+					Collections.sort(billDetails ,comparator);
+					
+					Long fromDateCurrentDemand = billDetails.get(0).getFromPeriod();
+					Long toDateCurrentDemand = billDetails.get(0).getToPeriod();
+					
+					billDetails.forEach(billDetail -> 
+					{
+						if(billDetail.getToPeriod() == toDateCurrentDemand && billDetail.getFromPeriod() == fromDateCurrentDemand) {
+							
+							List<BillAccountDetail> billAccountDetails = billDetail.getBillAccountDetails();
+							billAccountDetails.forEach(billAccountDetail -> {
+								
+								if(billAccountDetail.getTaxHeadCode().equalsIgnoreCase("SW_ADVANCE_CARRYFORWARD")) {
+									res.setAdvance(billAccountDetail.getAmount());
+								}
+								if(billAccountDetail.getTaxHeadCode().equalsIgnoreCase("WS_TIME_REBATE")) {
+									res.setRebateAmt(billAccountDetail.getAmount());
+								}
+								if(billAccountDetail.getTaxHeadCode().equalsIgnoreCase("WS_TIME_PENALTY")) {
+									res.setPenalty(billAccountDetail.getAmount());
+								}
+								if(billAccountDetail.getTaxHeadCode().equalsIgnoreCase("WS_CHARGE")) {
+									res.setCurrentDemand(billAccountDetail.getAmount());
+								}
+								
+							});
+						}
+						else {
+							
+							res.setArrear(billDetail.getAmount());
+						}
+					});
+				});
+				
+				response.add(res);
+			});
+		}
+		
 		return response;
 	}
 		
