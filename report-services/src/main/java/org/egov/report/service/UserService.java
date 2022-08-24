@@ -91,10 +91,6 @@ public class UserService {
 		
 		UserSearchRequest request = UserSearchRequest.builder().requestInfo(requestInfo).active(Boolean.TRUE).build();
 		
-		if(StringUtils.hasText(criteria.getTenantId())) {
-			request.setTenantId(criteria.getTenantId());
-		}
-		
 		if(!CollectionUtils.isEmpty(criteria.getUuid())) {
 			request.setUuid(criteria.getUuid().stream().collect(Collectors.toSet()));
 		}
