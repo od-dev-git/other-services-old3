@@ -1,23 +1,18 @@
 package org.egov.report.web.controller;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.validation.Valid;
 
-import org.egov.report.web.model.PropertyDetailsResponse;
 import org.egov.report.service.PropertyService;
 import org.egov.report.util.ResponseInfoFactory;
-import org.egov.report.web.model.BillSummaryResponses;
-import org.egov.report.web.model.ConsumerBillHistoryResponse;
+import org.egov.report.web.model.PropertyDetailsResponse;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.PropertyWiseCollectionResponse;
 import org.egov.report.web.model.PropertyWiseDemandResponse;
 import org.egov.report.web.model.ReportResponse;
 import org.egov.report.web.model.RequestInfoWrapper;
 import org.egov.report.web.model.TaxCollectorWiseCollectionResponse;
-import org.egov.report.web.model.ULBWiseTaxCollectionResponse;
-import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.ULBWiseTaxCollectionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/reports/pt")
 public class PropertyReportController {
 	
-
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
 
@@ -48,8 +42,6 @@ public class PropertyReportController {
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
 		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
 	}
-
-	
 	
 	@PostMapping("/propertyWiseCollectionReport")
 	public ResponseEntity<ReportResponse> propertyWiseCollectionReport(@ModelAttribute PropertyDetailsSearchCriteria searchCriteria,
@@ -91,7 +83,7 @@ public class PropertyReportController {
 	public ResponseEntity<ReportResponse> taxCollectorWiseCollectionReport(@ModelAttribute PropertyDetailsSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
-		List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse = propertyService.gettaxCollectorWiseCollections(requestInfoWrapper.getRequestInfo() ,searchCriteria);
+		List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse = propertyService.getTaxCollectorWiseCollections(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().taxCollectorWiseCollectionResponse(taxCollectorWiseCollectionResponse)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();

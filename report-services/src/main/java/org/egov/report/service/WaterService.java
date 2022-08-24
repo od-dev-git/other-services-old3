@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,7 +21,6 @@ import org.egov.report.model.DemandDetails;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
 import org.egov.report.model.UserSearchCriteria;
-import org.egov.report.model.UserSearchRequest;
 import org.egov.report.model.WSConnection;
 import org.egov.report.model.WSConnectionRequest;
 import org.egov.report.model.WSSearchCriteria;
@@ -38,8 +36,6 @@ import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.User;
-import org.egov.report.web.model.UserDetailResponse;
-import org.egov.report.web.model.UserResponse;
 import org.egov.report.web.model.WSConsumerHistoryResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterConnectionDetailResponse;
@@ -190,9 +186,10 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		//Extracting user info from userService
 		if(!CollectionUtils.isEmpty(response)) {
-			response.forEach(res -> userIds.add(res.getUserId()));
+			userIds = response.stream().map(ConsumerMasterWSReportResponse::getUserId).collect(Collectors.toList());
 			
-			 List<User> info = userService.getUserDetails(requestInfo, userIds);
+			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().id(userIds).tenantId(criteria.getTenantId()).build();
+			List<OwnerInfo> info = userService.getUserDetails(requestInfo, userSearchCriteria);
 			
 			for(ConsumerMasterWSReportResponse res : response) {
 				
@@ -292,8 +289,8 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		if(!CollectionUtils.isEmpty(response)) {
 		Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuId(userIds).build();
-		List<User> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().tenantId(criteria.getTenantId()).uuid(userIds).build();
+		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 		
 		response.stream().forEach(item -> {
@@ -380,8 +377,8 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		Map<String, WaterConnectionDetails> responseConnection = reportRepository.getWaterMonthlyDemandConnection(criteria);
 
 		Set<String> userIds = responseConnection.values().stream().map(item -> item.getUserid()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuId(userIds).build();
-		List<User> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds).tenantId(criteria.getTenantId()).build();
+		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 
 		responseConnection.values().stream().forEach(item -> {
