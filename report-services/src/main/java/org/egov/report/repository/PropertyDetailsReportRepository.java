@@ -3,6 +3,7 @@ package org.egov.report.repository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.egov.report.web.model.PropertyDemandResponse;
 import org.egov.report.web.model.PropertyDetailsResponse;
@@ -45,6 +46,17 @@ public class PropertyDetailsReportRepository {
 		String query = queryBuilder.getPropertyDemandQuery(searchCriteria, preparedPropStmtList);
 
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandsRowMapper());
+	}
+
+	public HashMap<String, List<PropertyDemandResponse>> getPropertyWiseDemandDetails(
+			PropertyDetailsSearchCriteria searchCriteria) {
+		
+		List<Object> preparedPropStmtList = new ArrayList<>();
+
+		String query = queryBuilder.getPropertyWiseDemandQuery(searchCriteria, preparedPropStmtList);
+
+		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandsRowMapper());
+		
 	}
 
 
