@@ -436,7 +436,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		if(!StringUtils.isEmpty(responseConnection)) {
 		
 			PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
-					.businessServices(Stream.of("WS","WS.ONE_TIME_FEE").collect(Collectors.toSet()))
+					.businessServices(Stream.of("WS").collect(Collectors.toSet()))
 					.tenantId(criteria.getTenantId())
 					.fromDate(criteria.getFromDate())
 					.toDate(criteria.getToDate())
@@ -450,17 +450,19 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 			
 			payments.forEach(item -> 
 			{
-				WSConsumerHistoryResponse res = new WSConsumerHistoryResponse();
-				res.setPaymentMode(item.getPaymentMode().toString());
-				res.setPaymentDate(wsReportUtils.getConvertedDate(item.getTransactionDate()));
-				res.setTotalDue(item.getTotalDue());
-				res.setCollectionAmt(item.getTotalAmountPaid());
-				res.setConsumerNo(consumerCode);
-				res.setConnectionType(responseConnection.get(consumerCode).getConnectiontype());
-				res.setOldConnectionNo(responseConnection.get(consumerCode).getOldconnectionno());
-				res.setUlb(responseConnection.get(consumerCode).getTenantid().substring(3));
-				res.setWard(responseConnection.get(consumerCode).getWard());
-				res.setMonth(wsReportUtils.getConvertedDate(item.getTransactionDate()).substring(3,5));
+				WSConsumerHistoryResponse res = WSConsumerHistoryResponse.builder()
+						.paymentMode(item.getPaymentMode().toString())
+						.paymentDate(wsReportUtils.getConvertedDate(item.getTransactionDate()))
+						.totalDue(item.getTotalDue())
+						.collectionAmt(item.getTotalAmountPaid())
+						.consumerNo(consumerCode)
+						.connectionType(responseConnection.get(consumerCode).getConnectiontype())
+						.oldConnectionNo(responseConnection.get(consumerCode).getOldconnectionno())
+						.ulb(responseConnection.get(consumerCode).getTenantid().substring(3))
+						.ward(responseConnection.get(consumerCode).getWard())
+						.month(wsReportUtils.getConvertedDate(item.getTransactionDate()).substring(3,5))
+						.build();
+				
 				item.getPaymentDetails().forEach(paymentDetail -> {
 					
 					res.setReceiptNo(paymentDetail.getReceiptNumber());
