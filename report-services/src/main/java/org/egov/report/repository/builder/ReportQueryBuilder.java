@@ -91,8 +91,8 @@ public class ReportQueryBuilder {
 			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,"
 			+ "edv.tenantid ,status,edv2.taxamount ,edv2.collectionamount "
 			+ FROM + " egbs_demand_v1 edv "
-			+ INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.tenantid= ?  "
-			+ AND + "edv2.tenantid= ? " + AND + " edv.id=edv2.demandid "
+			+ INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.id=edv2.demandid  "
+			+ WHERE + "edv2.tenantid= ? " + AND + " edv2.tenantid= ? " + AND + " edv.status <> 'CANCELLED' "
 			+ AND ;
 	
 	private static final String QUERY_FOR_WATER_NEW_CONSUMER = SELECT 
@@ -285,7 +285,7 @@ StringBuilder query = new StringBuilder(DEMANDS_QUERY);
 		
 StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		
-		query.append(" edv.businessservice ='PT' ;");
+        query.append(" edv.businessservice ='PT' ;");
 		preparedPropStmtList.add(searchCriteria.getUlbName());
 		preparedPropStmtList.add(searchCriteria.getUlbName());
 	

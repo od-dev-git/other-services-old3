@@ -236,34 +236,34 @@ public class PropertyService {
 			 propDemResponse.forEach((key,value)->
 			 {
 				 ULBWiseTaxCollectionResponse pr = new ULBWiseTaxCollectionResponse();
-				 BigDecimal cyda = BigDecimal.ZERO;
-				 BigDecimal tada = BigDecimal.ZERO;
-				 BigDecimal tca = BigDecimal.ZERO;
-				 BigDecimal da = BigDecimal.ZERO;
+				 BigDecimal currentYearDemandAmount = BigDecimal.ZERO;
+				 BigDecimal totalArrearDemandAmount = BigDecimal.ZERO;
+				 BigDecimal totalCollectionAmount = BigDecimal.ZERO;
+				 BigDecimal dueAmount = BigDecimal.ZERO;
 			
 				 value.forEach(item->
 				 {
 					 if(item.getTaxperiodto()<System.currentTimeMillis()) {
-						 tada.add(item.getTaxamount());
+						 totalArrearDemandAmount.add(item.getTaxamount());
 					 }
 					 
 					 else {
-						 cyda.add(item.getTaxamount());
+						 currentYearDemandAmount.add(item.getTaxamount());
 					 }
 					 
-					 tca.add(item.getCollectionamount());
+					 totalCollectionAmount.add(item.getCollectionamount());
 					 
 				 });
 				 
-				 BigDecimal daa = da.add(tada);
-				 BigDecimal dac = daa.add(cyda);
-				 BigDecimal dat = dac.add(dac);
+				 BigDecimal dueAmountWithTotalArrear = dueAmount.add(totalArrearDemandAmount);
+				 BigDecimal dueAmountWithCurrentYearDemand = dueAmountWithTotalArrear .add(currentYearDemandAmount);
+				 BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemand.subtract(totalCollectionAmount);
 		
 				 pr.setPropertyId(key);
-				 pr.setTotaltaxamount(tada.toString());
-				 pr.setTotalarreartaxamount(cyda.toString());
-				 pr.setTotalcollectionamount(tca.toString());
-				 pr.setDueamount(dat.toString());
+				 pr.setTotaltaxamount(currentYearDemandAmount.toString());
+				 pr.setTotalarreartaxamount(totalArrearDemandAmount.toString());
+				 pr.setTotalcollectionamount(totalCollectionAmount.toString());
+				 pr.setDueamount(dueAmountFinal.toString());
 				 pr.setUlb(value.get(0).getTenantid());
 				 pr.setOldpropertyid(null);
 				 pr.setWard(null);
@@ -332,26 +332,26 @@ public class PropertyService {
 				 value.forEach(item->
 				 {
 					 PropertyWiseDemandResponse pr = new PropertyWiseDemandResponse();
-					 BigDecimal cyda = BigDecimal.ZERO;
-					 BigDecimal tca = BigDecimal.ZERO;
-					 BigDecimal da = BigDecimal.ZERO;
+					 BigDecimal currentYearDemandAmount = BigDecimal.ZERO;
+					 BigDecimal totalCollectionAmount = BigDecimal.ZERO;
+					 BigDecimal dueAmount = BigDecimal.ZERO;
 					 
 					 if(item.getTaxamount() == null) {
-						 pr.setTaxamount(cyda.toString());
+						 pr.setTaxamount(currentYearDemandAmount.toString());
 					 }else {
-						 cyda = item.getTaxamount();
-						 pr.setTaxamount(cyda.toString());
+						 currentYearDemandAmount = item.getTaxamount();
+						 pr.setTaxamount(currentYearDemandAmount.toString());
 					 }
 					 
 					 if(item.getCollectionamount() == null) {
-						 pr.setCollectionamount(tca.toString());
+						 pr.setCollectionamount(totalCollectionAmount.toString());
 					 }else {
-						 tca = item.getCollectionamount();
-						 pr.setCollectionamount(tca.toString());
+						 totalCollectionAmount = item.getCollectionamount();
+						 pr.setCollectionamount(totalCollectionAmount.toString());
 					 }
-					 da.add(cyda);
-					 da.subtract(tca);
-					 pr.setDueamount(da.toString());
+					 BigDecimal dueAmountWithCurrentYearDemandAmount = dueAmount.add(currentYearDemandAmount);
+					 BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemandAmount.subtract(totalCollectionAmount);
+					 pr.setDueamount(dueAmountFinal.toString());
 					 pr.setPropertyId(key);
 					 pr.setTaxperiodfrom(item.getTaxperiodfrom().toString());
 					 pr.setTaxperiodto(item.getTaxperiodto().toString());
@@ -495,12 +495,12 @@ for(Payment res : payments) {
 	pwcr.setConsumercode(res.getPaymentDetails().get(0).getBill().getConsumerCode());
 	pwcr.setDue(res.getTotalDue().toString());
 	pwcr.setAmountpaid(res.getTotalAmountPaid().toString());
-	BigDecimal d = res.getTotalDue();
-	BigDecimal ap = res.getTotalAmountPaid();
-	BigDecimal cd = BigDecimal.ZERO;
-	BigDecimal cda = cd.add(d);
-	BigDecimal cdb = cda.subtract(ap);
-	pwcr.setCurrentdue(cdb.toString());
+	BigDecimal due = res.getTotalDue();
+	BigDecimal amountPaid = res.getTotalAmountPaid();
+	BigDecimal currentDueInitial = BigDecimal.ZERO;
+	BigDecimal currentDueWithTotalDue = currentDueInitial.add(due);
+	BigDecimal finalCurrentDue = currentDueWithTotalDue.subtract(amountPaid);
+	pwcr.setCurrentdue(finalCurrentDue.toString());
 	pwcr.setReceiptdate(res.getPaymentDetails().get(0).getReceiptDate().toString());
 	pwcr.setReceiptnumber(res.getPaymentDetails().get(0).getReceiptNumber());
 	pwcr.setPaymentMode(res.getPaymentMode().name());
