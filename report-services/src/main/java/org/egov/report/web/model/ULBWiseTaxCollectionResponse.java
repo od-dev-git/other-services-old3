@@ -1,5 +1,7 @@
 package org.egov.report.web.model;
 
+import java.math.BigDecimal;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -28,16 +30,19 @@ public class ULBWiseTaxCollectionResponse {
     private String ward ;
     
     @JsonProperty("currentYearDemandAmount")
-    private String totaltaxamount ;
+    @Builder.Default
+    private BigDecimal totaltaxamount = BigDecimal.ZERO;
     
     @JsonProperty("totalArrearDemandAmount")
-    private String totalarreartaxamount ;
+    @Builder.Default
+    private BigDecimal totalarreartaxamount = BigDecimal.ZERO ;
     
-   
     @JsonProperty("totalCollectedAmount")
-    private String totalcollectionamount ;
+    @Builder.Default
+    private BigDecimal totalcollectionamount = BigDecimal.ZERO ;
     
     @JsonProperty("dueAmount")
-    private String dueamount ;
+    @Builder.Default
+    private BigDecimal dueamount = BigDecimal.ZERO ;
 	
 }
