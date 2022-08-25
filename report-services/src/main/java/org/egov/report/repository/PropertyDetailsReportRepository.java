@@ -43,7 +43,7 @@ public class PropertyDetailsReportRepository {
 
 		List<Object> preparedPropStmtList = new ArrayList<>();
 
-		String query = queryBuilder.getPropertyDemandQuery(searchCriteria, preparedPropStmtList);
+		String query = queryBuilder.getPropertyWiseDemandQuery(searchCriteria, preparedPropStmtList);
 
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandsRowMapper());
 	}
@@ -58,6 +58,5 @@ public class PropertyDetailsReportRepository {
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandsRowMapper());
 		
 	}
-
 
 }

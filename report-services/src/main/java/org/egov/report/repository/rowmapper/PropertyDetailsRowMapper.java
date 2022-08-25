@@ -35,7 +35,7 @@ List<PropertyDetailsResponse> pdrList = new ArrayList<>();
 
 			pdr.setPropertyId(rs.getString("propertyId"));
 
-			pdr.setUserId(rs.getString("userId"));
+			pdr.setUuid(rs.getString("uuid"));
 
 			String dn = rs.getString("doorNo");
 			pdr.setDoorNo(rs.getString("doorNo"));

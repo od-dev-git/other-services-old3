@@ -29,7 +29,7 @@ public class ConsumerMasterRowMapper implements ResultSetExtractor<List<Consumer
 			response.setOldConnectionNo(rs.getString("oldconnectionno"));
 			response.setConnectionType(rs.getString("connectiontype"));
 			response.setUsageCategory(rs.getString("usagecategory"));
-			response.setUserId(rs.getLong("id"));
+			response.setUserId(rs.getString("uuid"));
 			
 			responseList.add(response);
 		}
