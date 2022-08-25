@@ -176,8 +176,6 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 	
 	public List<ConsumerMasterWSReportResponse> consumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria) {
 		
-		List<Long> userIds = new ArrayList<>();
-		
 		//validate the search criteria
 		wsValidator.validateconsumerMasterWSReport(criteria);
 		
@@ -186,24 +184,27 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		//Extracting user info from userService
 		if(!CollectionUtils.isEmpty(response)) {
-			userIds = response.stream().map(ConsumerMasterWSReportResponse::getUserId).collect(Collectors.toList());
 			
-			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().id(userIds).build();
-			List<OwnerInfo> info = userService.getUserDetails(requestInfo, userSearchCriteria);
+			Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct().collect(Collectors.toSet());
 			
-			for(ConsumerMasterWSReportResponse res : response) {
-				
-				info.forEach(
-						item -> {
-							if(res.getUserId() == item.getId()) {
-								res.setUserMobile(item.getMobileNumber());
-								res.setUserName(item.getName());
-								res.setUserAddress(item.getCorrespondenceAddress());
-								res.setUserId(null);
-							}
-						});
+			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().uuid(userIds)
+					.active(true)
+					.userType(UserSearchCriteria.CITIZEN)
+					.tenantId(criteria.getTenantId())
+					.build();
+			
+			List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, userSearchCriteria);
+			Map<String, OwnerInfo> userMap = usersInfo.stream().collect(Collectors.toMap(OwnerInfo::getUuid, Function.identity()));
+			
+			response.stream().forEach(item -> {
+				OwnerInfo user = userMap.get(item.getUserId());
+				if(user!=null) {
+					item.setUserName(user.getName());
+					item.setUserMobile(user.getMobileNumber());
+					item.setUserAddress(user.getCorrespondenceAddress());
 				}
-			}
+			});
+		}
 		return response;
 	}
 	
@@ -289,7 +290,11 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		if(!CollectionUtils.isEmpty(response)) {
 		Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds).build();
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+				.active(true)
+				.userType(UserSearchCriteria.CITIZEN)
+				.tenantId(criteria.getTenantId())
+				.build();
 		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 		
@@ -377,7 +382,11 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		Map<String, WaterConnectionDetails> responseConnection = reportRepository.getWaterMonthlyDemandConnection(criteria);
 
 		Set<String> userIds = responseConnection.values().stream().map(item -> item.getUserid()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds).build();
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+				.active(true)
+				.userType(UserSearchCriteria.CITIZEN)
+				.tenantId(criteria.getTenantId())
+				.build();
 		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 
@@ -430,7 +439,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		Map<String, WaterConnectionDetails> responseConnection = reportRepository.getWaterMonthlyDemandConnection(criteria);
 		
-		if(!StringUtils.isEmpty(responseConnection)) {
+		if(!CollectionUtils.isEmpty(responseConnection)) {
 		
 			PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
 					.businessServices(Stream.of("WS").collect(Collectors.toSet()))
