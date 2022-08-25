@@ -11,6 +11,7 @@ import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.model.UserSearchRequest;
 import org.egov.report.repository.ReportDao;
 import org.egov.report.repository.ServiceRepository;
+import org.egov.report.util.ReportConstants;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.User;
 import org.egov.report.web.model.UserDetailResponse;
@@ -92,7 +93,10 @@ public class UserService {
 		UserSearchRequest request = UserSearchRequest.builder().requestInfo(requestInfo).active(Boolean.TRUE).build();
 		
 		if(StringUtils.hasText(criteria.getTenantId())) {
-			request.setTenantId(criteria.getTenantId());
+			if(StringUtils.hasText(criteria.getUserType()) && UserSearchCriteria.CITIZEN.equals(criteria.getUserType()))
+				request.setTenantId(ReportConstants.STATE_TENANT);
+			else
+				request.setTenantId(criteria.getTenantId());
 		}
 		
 		if(!CollectionUtils.isEmpty(criteria.getUuid())) {
@@ -101,6 +105,10 @@ public class UserService {
 		
 		if(!CollectionUtils.isEmpty(criteria.getId())) {
 			request.setId(criteria.getId().stream().collect(Collectors.toList()));
+		}
+		
+		if(StringUtils.hasText(criteria.getUserType())) {
+			request.setUserType(criteria.getUserType());
 		}
 		return request;
 	}

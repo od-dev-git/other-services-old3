@@ -45,7 +45,7 @@ public class ConsumerMasterWSReportResponse {
 	private String connectionFacility;
 	
 	@JsonProperty("userId")
-	private Long userId;
+	private String userId;
 	
 	@JsonProperty("userName")
 	private String userName;

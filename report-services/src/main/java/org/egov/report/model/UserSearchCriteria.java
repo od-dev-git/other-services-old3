@@ -18,6 +18,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserSearchCriteria {
 	
+	public static final String CITIZEN="CITIZEN";
+	public static final String EMPLOYEE="EMPLOYEE";
+	
 	@JsonProperty("id")
     private List<Long> id;
 

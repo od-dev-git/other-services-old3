@@ -28,8 +28,8 @@ public class PropertyDetailsResponse {
 	@JsonProperty("propertyId")
 	private String propertyId;
 	
-	@JsonProperty("userId")
-	private String userId;
+	@JsonProperty("uuid")
+	private String uuid;
 
 	@JsonProperty("name")
 	private String name;

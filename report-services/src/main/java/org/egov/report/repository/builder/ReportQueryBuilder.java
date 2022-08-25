@@ -27,7 +27,7 @@ public class ReportQueryBuilder {
 	private static final String ORDER_BY = " order by ";
 	private static final String connectionSelectValues = " ewc.tenantid,ewc.additionaldetails->>'ward' as ward,ewc.connectionno,ewc.oldconnectionno,";
 	private static final String serviceSelectValues = " ews.connectiontype,ews.connectioncategory,ews.usagecategory,ews.connectionfacility,";
-	private static final String userSelectValues = " ch.id ";
+	private static final String userSelectValues = " ch.uuid ";
 	
 	private static final String connectionSelect = " ewc.tenantid,ewc.additionaldetails->>'ward' as ward,ewc.connectionno, ewc.applicationno, ewc.additionaldetails ->> 'estimationLetterDate' as estimationletterdate, ";
 	private static final String serviceSelect = " ews.connectiontype, ews.connectionexecutiondate, ews.connectioncategory, ews.usagecategory, ews.connectionfacility, ";
@@ -77,7 +77,7 @@ public class ReportQueryBuilder {
 			+ AS + "demand ";
 	
 	private static final String PROPERTY_DETAILS_SUMMARY_QUERY = SELECT
-			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,epo.userid,"
+			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,eu.uuid,"
 			+ "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
 			+ FROM
 			+ "eg_pt_property epp "
@@ -89,8 +89,10 @@ public class ReportQueryBuilder {
 	
 	private static final String PROPERTY_DEMANDS_QUERY = SELECT 
 			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,"
-			+ "edv.tenantid ,status,edv2.taxamount ,edv2.collectionamount "
+			+ "edv.tenantid ,edv.status,edv2.taxamount ,edv2.collectionamount "
 			+ FROM + " egbs_demand_v1 edv "
+			+ INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid "
+			+ INNER_JOIN +" eg_pt_address epa on epp.id =epa.propertyid "
 			+ INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.id=edv2.demandid  "
 			+ WHERE + "edv2.tenantid= ? " + AND + " edv2.tenantid= ? " + AND + " edv.status <> 'CANCELLED' "
 			+ AND ;
@@ -285,9 +287,24 @@ StringBuilder query = new StringBuilder(DEMANDS_QUERY);
 		
 StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		
-        query.append(" edv.businessservice ='PT' ;");
+        query.append(" edv.businessservice ='PT' ");
 		preparedPropStmtList.add(searchCriteria.getUlbName());
 		preparedPropStmtList.add(searchCriteria.getUlbName());
+		if(searchCriteria.getPropertyId() != null) {
+			query.append(AND_QUERY).append(" edv.consumercode = ? ");
+			preparedPropStmtList.add(searchCriteria.getPropertyId());
+		}
+
+		if(searchCriteria.getOldPropertyId() != null) {
+			query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
+			preparedPropStmtList.add(searchCriteria.getOldPropertyId());
+		}
+		
+		if(searchCriteria.getWardNo() != null) {
+			query.append(AND_QUERY).append(" epa.ward  = ? ");
+			preparedPropStmtList.add(searchCriteria.getWardNo());
+		}
+		
 	
 		return query.toString();
 	}

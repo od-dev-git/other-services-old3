@@ -87,7 +87,7 @@ public class Property {
 	private String lastmodifiedtime;
 	
 	@JsonProperty("additionaldetails")
-	private String additionaldetails;
+	private Object additionaldetails;
 	
 	@JsonProperty("ward")
 	private String ward;
