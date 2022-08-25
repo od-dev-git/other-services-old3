@@ -73,17 +73,18 @@ public class PropertyService {
 		// Extracting user info from userService
 
 		Set<String> uuIds = new HashSet<>();
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().build();
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName())
+				.active(true).userType(UserSearchCriteria.CITIZEN).build();
 
 		if (!CollectionUtils.isEmpty(propDetlResponse)) {
-			propDetlResponse.forEach(res -> uuIds.add((res.getUserId())));
+			propDetlResponse.forEach(res -> uuIds.add((res.getUuid())));
 
 			usCriteria.setUuid(uuIds);
 
 			List<OwnerInfo> info = userService.getUserDetails(requestInfo, usCriteria);
 			for (PropertyDetailsResponse res : propDetlResponse) {
 				info.forEach(item -> {
-					if (res.getUserId().equalsIgnoreCase(item.getUuid())) {
+					if (res.getUuid().equalsIgnoreCase(item.getUuid())) {
 						res.setMobileNumber(item.getMobileNumber());
 						res.setName(item.getName());
 					}
@@ -97,7 +98,7 @@ public class PropertyService {
 	public List<TaxCollectorWiseCollectionResponse> getTaxCollectorWiseCollections(RequestInfo requestInfo,
 			PropertyDetailsSearchCriteria searchCriteria) {
 
-		prValidator.validatetcwcSearchCriteria(searchCriteria);
+prValidator.validatetcwcSearchCriteria(searchCriteria);
 
 		Set<String> s = new HashSet<String>();
 		s.add("PT");
@@ -135,7 +136,8 @@ public class PropertyService {
 			pdsCriteria.setProperty(Propertys);
 
 			List<Long> ids = uids.stream().distinct().collect(Collectors.toList());
-			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder()
+			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName())
+					.userType(UserSearchCriteria.EMPLOYEE).active(true)
 					.id(ids).build();
 			List<OwnerInfo> info = userService.getUserDetails(requestInfo, userSearchCriteria);
 			for (TaxCollectorWiseCollectionResponse res : tcwcResponse) {
@@ -154,7 +156,6 @@ public class PropertyService {
 
 			PropertySearchingCriteria propsCriteria = PropertySearchingCriteria.builder()
 					.tenantid(searchCriteria.getUlbName()).property(Propertys).build();
-//			Set<String> Prop = Propertys.stream().distinct().collect(Collectors.toSet());
 
 			List<Property> propinfo = getProperty(requestInfo, propsCriteria);
 			for (TaxCollectorWiseCollectionResponse res : tcwcResponse) {
@@ -200,6 +201,7 @@ public class PropertyService {
 
 		List<ULBWiseTaxCollectionResponse> propResponse = new ArrayList<ULBWiseTaxCollectionResponse>();
 
+		
 		Map<String, List<PropertyDemandResponse>> propDemResponse = pdRepository
 				.getPropertyDemandDetails(searchCriteria);
 
@@ -207,33 +209,36 @@ public class PropertyService {
 
 			propDemResponse.forEach((key, value) -> {
 				ULBWiseTaxCollectionResponse pr = new ULBWiseTaxCollectionResponse();
-				BigDecimal currentYearDemandAmount = BigDecimal.ZERO;
-				BigDecimal totalArrearDemandAmount = BigDecimal.ZERO;
-				BigDecimal totalCollectionAmount = BigDecimal.ZERO;
-				BigDecimal dueAmount = BigDecimal.ZERO;
+//				BigDecimal currentYearDemandAmount = BigDecimal.ZERO;
+//				BigDecimal totalArrearDemandAmount = BigDecimal.ZERO;
+//				BigDecimal totalCollectionAmount = BigDecimal.ZERO;
+//				BigDecimal dueAmount = BigDecimal.ZERO;
 
-				value.forEach(item -> {
-					if (item.getTaxperiodto() < System.currentTimeMillis()) {
-						totalArrearDemandAmount.add(item.getTaxamount());
+				value.forEach(item -> {// changes here
+					if (item.getTaxperiodto() < System.currentTimeMillis()) { 
+					//	totalArrearDemandAmount.add(item.getTaxamount());
+						pr.setTotalarreartaxamount((pr.getTotalarreartaxamount()).add(item.getTaxamount()));
 					}
 
 					else {
-						currentYearDemandAmount.add(item.getTaxamount());
+					//	currentYearDemandAmount.add(item.getTaxamount());
+						pr.setTotaltaxamount((pr.getTotaltaxamount()).add(item.getTaxamount()));
 					}
 
-					totalCollectionAmount.add(item.getCollectionamount());
+				//	totalCollectionAmount.add(item.getCollectionamount());
+					pr.setTotalcollectionamount((pr.getTotalcollectionamount()).add(item.getCollectionamount()));
 
 				});
 
-				BigDecimal dueAmountWithTotalArrear = dueAmount.add(totalArrearDemandAmount);
-				BigDecimal dueAmountWithCurrentYearDemand = dueAmountWithTotalArrear.add(currentYearDemandAmount);
-				BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemand.subtract(totalCollectionAmount);
+				BigDecimal dueAmountWithTotalArrear = pr.getDueamount().add(pr.getTotalarreartaxamount());
+				BigDecimal dueAmountWithCurrentYearDemand = dueAmountWithTotalArrear.add(pr.getTotaltaxamount());
+				BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemand.subtract(pr.getTotalcollectionamount());
 
 				pr.setPropertyId(key);
-				pr.setTotaltaxamount(currentYearDemandAmount.toString());
-				pr.setTotalarreartaxamount(totalArrearDemandAmount.toString());
-				pr.setTotalcollectionamount(totalCollectionAmount.toString());
-				pr.setDueamount(dueAmountFinal.toString());
+//				pr.setTotaltaxamount(currentYearDemandAmount);
+//				pr.setTotalarreartaxamount(totalArrearDemandAmount);
+//				pr.setTotalcollectionamount(totalCollectionAmount);
+				pr.setDueamount(dueAmountFinal);
 				pr.setUlb(value.get(0).getTenantid());
 				pr.setOldpropertyid(null);
 				pr.setWard(null);
@@ -242,7 +247,6 @@ public class PropertyService {
 			});
 
 			Set<String> Propertys = new HashSet<>();
-//			 PropertySearchingCriteria pdsCriteria = new PropertySearchingCriteria();
 			propResponse.forEach(res -> Propertys.add((res.getPropertyId())));
 
 			PropertySearchingCriteria propsCriteria = PropertySearchingCriteria.builder()
@@ -258,17 +262,6 @@ public class PropertyService {
 				});
 			}
 
-			if (searchCriteria.getWardNo() != null) {
-				for (int i = 0; i < propResponse.size(); i++) {
-
-					if (propResponse.get(i).getWard() != searchCriteria.getWardNo()) {
-						propResponse.remove(propResponse.get(i));
-						i--;
-
-					}
-
-				}
-			}
 
 		}
 
@@ -287,9 +280,9 @@ public class PropertyService {
 
 		if (!CollectionUtils.isEmpty(propDemResponse)) {
 
-			if (searchCriteria.getPropertyId() != null) {
-				propDemResponse.keySet().removeIf(k -> !(k.equals(searchCriteria.getPropertyId())));
-			}
+//			if (searchCriteria.getPropertyId() != null) {
+//				propDemResponse.keySet().removeIf(k -> !(k.equals(searchCriteria.getPropertyId())));
+//			}
 
 			propDemResponse.forEach((key, value) -> {
 				value.forEach(item -> {
@@ -351,31 +344,18 @@ public class PropertyService {
 		// Extracting user info from userService
 
 		Set<String> uuIds = new HashSet<>();
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().build();
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().active(true)
+				.userType(UserSearchCriteria.CITIZEN).tenantId(searchCriteria.getUlbName()).build();
 
 		if (!CollectionUtils.isEmpty(propDetlResponse)) {
-			for (int i = 0; i < propDetlResponse.size(); i++) {
-				boolean flag = false;
-				for (int j = 0; j < propResponse.size(); j++) {
-					if (propDetlResponse.get(i).getPropertyId() == propResponse.get(j).getPropertyId()) {
-						flag = true;
-						break;
-					}
-
-				}
-				if (flag == false) {
-					propDetlResponse.remove(i);
-					i--;
-				}
-			}
-			propDetlResponse.forEach(res -> uuIds.add((res.getUserId())));
+			propDetlResponse.forEach(res -> uuIds.add((res.getUuid())));
 
 			usCriteria.setUuid(uuIds);
 
 			List<OwnerInfo> info = userService.getUserDetails(requestInfo, usCriteria);
 			for (PropertyDetailsResponse res : propDetlResponse) {
 				info.forEach(item -> {
-					if (res.getUserId().equalsIgnoreCase(item.getUuid())) {
+					if (res.getUuid().equalsIgnoreCase(item.getUuid())) {
 						res.setMobileNumber(item.getMobileNumber());
 						res.setName(item.getName());
 					}
@@ -393,28 +373,6 @@ public class PropertyService {
 
 		}
 
-		if (searchCriteria.getWardNo() != null) {
-			for (int i = 0; i < propResponse.size(); i++) {
-				if (propResponse.get(i).getWard() != null) {
-					if (!propResponse.get(i).getWard().equals(searchCriteria.getWardNo())) {
-						propResponse.remove(i);
-						i--;
-					}
-				}
-
-			}
-		}
-		if (searchCriteria.getOldPropertyId() != null) {
-			for (int i = 0; i < propResponse.size(); i++) {
-				if (propResponse.get(i).getOldpropertyid() != null) {
-					if (!propResponse.get(i).getOldpropertyid().equals(searchCriteria.getOldPropertyId())) {
-						propResponse.remove(i);
-						i--;
-					}
-				}
-
-			}
-		}
 
 		return propResponse;
 	}
