@@ -26,6 +26,9 @@ public class DemandsRowMapper implements ResultSetExtractor<HashMap<String,List<
 			pdr.setConsumercode(cc);
 			pdr.setId(rs.getString("id"));
 			pdr.setPayer(rs.getString("payer"));
+			pdr.setOldpropertyid(rs.getString("oldpropertyid"));
+			pdr.setWard(rs.getString("ward"));
+			pdr.setUuid(rs.getString("uuid"));
 			pdr.setCreatedby(rs.getString("createdby"));
 			pdr.setTaxperiodfrom(rs.getLong("taxperiodfrom"));
 			pdr.setTaxperiodto(rs.getLong("taxperiodto"));

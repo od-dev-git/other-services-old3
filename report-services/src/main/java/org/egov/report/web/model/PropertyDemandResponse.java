@@ -17,6 +17,15 @@ public class PropertyDemandResponse {
 	
 	@JsonProperty("consumercode")
 	private String consumercode;
+	
+	@JsonProperty("oldpropertyid")
+	private String oldpropertyid;
+	
+	@JsonProperty("uuid")
+	private String uuid;
+	
+	@JsonProperty("ward")
+	private String ward;
 
 	@JsonProperty("id")
 	private String id;

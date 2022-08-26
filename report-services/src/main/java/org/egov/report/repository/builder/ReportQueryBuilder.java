@@ -88,11 +88,13 @@ public class ReportQueryBuilder {
 			+ AND + "epp.tenantid = ? ";
 	
 	private static final String PROPERTY_DEMANDS_QUERY = SELECT 
-			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,"
-			+ "edv.tenantid ,edv.status,edv2.taxamount ,edv2.collectionamount "
+			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,eu.uuid,"
+			+ "edv.tenantid ,edv.status,edv2.taxamount ,edv2.collectionamount,epp.oldpropertyid,epa.ward "
 			+ FROM + " egbs_demand_v1 edv "
 			+ INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid "
 			+ INNER_JOIN +" eg_pt_address epa on epp.id =epa.propertyid "
+			+ INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id "
+			+ LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
 			+ INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.id=edv2.demandid  "
 			+ WHERE + "edv2.tenantid= ? " + AND + " edv2.tenantid= ? " + AND + " edv.status <> 'CANCELLED' "
 			+ AND ;
