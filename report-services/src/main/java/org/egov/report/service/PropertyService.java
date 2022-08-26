@@ -220,13 +220,12 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 
 		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
-		log.info( "getting Property Demand Details");
 		List<ULBWiseTaxCollectionResponse> propResponse = new ArrayList<ULBWiseTaxCollectionResponse>();
 
 		
 		Map<String, List<PropertyDemandResponse>> propDemResponse = pdRepository
 				.getPropertyDemandDetails(searchCriteria);
-		log.info( "got Property Demand Details");
+
 		if (!CollectionUtils.isEmpty(propDemResponse)) {
 
 			propDemResponse.forEach((key, value) -> {
