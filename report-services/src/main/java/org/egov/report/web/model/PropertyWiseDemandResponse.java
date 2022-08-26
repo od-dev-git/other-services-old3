@@ -21,6 +21,9 @@ public class PropertyWiseDemandResponse {
 	@JsonProperty("propertyId")
     private String propertyId ;
  
+	@JsonProperty("uuid")
+	private String uuid;
+	
     @JsonProperty("oldPropertyId")
     private String oldpropertyid ;
 

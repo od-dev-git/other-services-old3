@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
@@ -28,6 +29,7 @@ import org.egov.report.web.model.PropertyWiseCollectionResponse;
 import org.egov.report.web.model.PropertyWiseDemandResponse;
 import org.egov.report.web.model.TaxCollectorWiseCollectionResponse;
 import org.egov.report.web.model.ULBWiseTaxCollectionResponse;
+import org.egov.report.web.model.User;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,26 +74,45 @@ public class PropertyService {
 
 		// Extracting user info from userService
 
-		Set<String> uuIds = new HashSet<>();
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName())
-				.active(true).userType(UserSearchCriteria.CITIZEN).build();
+//		Set<String> uuIds = new HashSet<>();
+//		UserSearchCriteria usCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName())
+//				.active(true).userType(UserSearchCriteria.CITIZEN).build();
+//
+//		if (!CollectionUtils.isEmpty(propDetlResponse)) {
+//			propDetlResponse.forEach(res -> uuIds.add((res.getUuid())));
+//
+//			usCriteria.setUuid(uuIds);
+//
+//			List<OwnerInfo> info = userService.getUserDetails(requestInfo, usCriteria);
+//			for (PropertyDetailsResponse res : propDetlResponse) {
+//				info.forEach(item -> {
+//					if (res.getUuid().equalsIgnoreCase(item.getUuid())) {
+//						res.setMobileNumber(item.getMobileNumber());
+//						res.setName(item.getName());
+//					}
+//				});
+//			}
+//		}
 
-		if (!CollectionUtils.isEmpty(propDetlResponse)) {
-			propDetlResponse.forEach(res -> uuIds.add((res.getUuid())));
+		
+		// Extracting user info from userService
 
-			usCriteria.setUuid(uuIds);
+				Set<String> userIds = propDetlResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
+				UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+						.active(true)
+						.userType(UserSearchCriteria.CITIZEN)
+						.tenantId(searchCriteria.getUlbName())
+						.build();
+				List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+				Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 
-			List<OwnerInfo> info = userService.getUserDetails(requestInfo, usCriteria);
-			for (PropertyDetailsResponse res : propDetlResponse) {
-				info.forEach(item -> {
-					if (res.getUuid().equalsIgnoreCase(item.getUuid())) {
-						res.setMobileNumber(item.getMobileNumber());
-						res.setName(item.getName());
+				propDetlResponse.stream().forEach(item -> {
+					User user = userMap.get(item.getUuid());
+					if(user!=null) {
+						item.setMobileNumber(user.getMobileNumber());
+						item.setName(user.getName());
 					}
 				});
-			}
-		}
-
 		return propDetlResponse;
 	}
 
@@ -209,23 +230,17 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 
 			propDemResponse.forEach((key, value) -> {
 				ULBWiseTaxCollectionResponse pr = new ULBWiseTaxCollectionResponse();
-//				BigDecimal currentYearDemandAmount = BigDecimal.ZERO;
-//				BigDecimal totalArrearDemandAmount = BigDecimal.ZERO;
-//				BigDecimal totalCollectionAmount = BigDecimal.ZERO;
-//				BigDecimal dueAmount = BigDecimal.ZERO;
 
-				value.forEach(item -> {// changes here
+				value.forEach(item -> {
 					if (item.getTaxperiodto() < System.currentTimeMillis()) { 
-					//	totalArrearDemandAmount.add(item.getTaxamount());
+						
 						pr.setTotalarreartaxamount((pr.getTotalarreartaxamount()).add(item.getTaxamount()));
 					}
 
 					else {
-					//	currentYearDemandAmount.add(item.getTaxamount());
 						pr.setTotaltaxamount((pr.getTotaltaxamount()).add(item.getTaxamount()));
 					}
 
-				//	totalCollectionAmount.add(item.getCollectionamount());
 					pr.setTotalcollectionamount((pr.getTotalcollectionamount()).add(item.getCollectionamount()));
 
 				});
@@ -235,32 +250,13 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 				BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemand.subtract(pr.getTotalcollectionamount());
 
 				pr.setPropertyId(key);
-//				pr.setTotaltaxamount(currentYearDemandAmount);
-//				pr.setTotalarreartaxamount(totalArrearDemandAmount);
-//				pr.setTotalcollectionamount(totalCollectionAmount);
 				pr.setDueamount(dueAmountFinal);
 				pr.setUlb(value.get(0).getTenantid());
-				pr.setOldpropertyid(null);
-				pr.setWard(null);
+				pr.setOldpropertyid(value.get(0).getOldpropertyid());
+				pr.setWard(value.get(0).getWard());
 
 				propResponse.add(pr);
 			});
-
-			Set<String> Propertys = new HashSet<>();
-			propResponse.forEach(res -> Propertys.add((res.getPropertyId())));
-
-			PropertySearchingCriteria propsCriteria = PropertySearchingCriteria.builder()
-					.tenantid(searchCriteria.getUlbName()).property(Propertys).build();
-
-			List<Property> propinfo = getProperty(requestInfo, propsCriteria);
-			for (ULBWiseTaxCollectionResponse res : propResponse) {
-				propinfo.forEach(item -> {
-					if (res.getPropertyId().equalsIgnoreCase(item.getPropertyId())) {
-						res.setOldpropertyid(item.getOldPropertyId());
-						res.setWard(item.getWard());
-					}
-				});
-			}
 
 
 		}
@@ -279,10 +275,6 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 				.getPropertyWiseDemandDetails(searchCriteria);
 
 		if (!CollectionUtils.isEmpty(propDemResponse)) {
-
-//			if (searchCriteria.getPropertyId() != null) {
-//				propDemResponse.keySet().removeIf(k -> !(k.equals(searchCriteria.getPropertyId())));
-//			}
 
 			propDemResponse.forEach((key, value) -> {
 				value.forEach(item -> {
@@ -311,67 +303,38 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 					pr.setTaxperiodfrom(item.getTaxperiodfrom().toString());
 					pr.setTaxperiodto(item.getTaxperiodto().toString());
 					pr.setUlb(item.getTenantid());
+					pr.setUuid(item.getUuid());
 					pr.setName(null);
 					pr.setMobilenumber(null);
-					pr.setOldpropertyid(null);
-					pr.setWard(null);
+					pr.setOldpropertyid(item.getOldpropertyid());
+					pr.setWard(item.getWard());
 
 					propResponse.add(pr);
 
 				});
 			});
 
-			Set<String> Propertys = new HashSet<>();
-			propResponse.forEach(res -> Propertys.add((res.getPropertyId())));
-
-			PropertySearchingCriteria propsCriteria = PropertySearchingCriteria.builder()
-					.tenantid(searchCriteria.getUlbName()).property(Propertys).build();
-
-			List<Property> propinfo = getProperty(requestInfo, propsCriteria);
-			for (PropertyWiseDemandResponse res : propResponse) {
-				propinfo.forEach(item -> {
-					if (res.getPropertyId().equalsIgnoreCase(item.getPropertyId())) {
-						res.setOldpropertyid(item.getOldPropertyId());
-						res.setWard(item.getWard());
-					}
-				});
-			}
 
 		}
-
-		List<PropertyDetailsResponse> propDetlResponse = pdRepository.getPropertyDetails(searchCriteria);
 
 		// Extracting user info from userService
 
-		Set<String> uuIds = new HashSet<>();
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().active(true)
-				.userType(UserSearchCriteria.CITIZEN).tenantId(searchCriteria.getUlbName()).build();
+		Set<String> userIds = propResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+				.active(true)
+				.userType(UserSearchCriteria.CITIZEN)
+				.tenantId(searchCriteria.getUlbName())
+				.build();
+		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 
-		if (!CollectionUtils.isEmpty(propDetlResponse)) {
-			propDetlResponse.forEach(res -> uuIds.add((res.getUuid())));
-
-			usCriteria.setUuid(uuIds);
-
-			List<OwnerInfo> info = userService.getUserDetails(requestInfo, usCriteria);
-			for (PropertyDetailsResponse res : propDetlResponse) {
-				info.forEach(item -> {
-					if (res.getUuid().equalsIgnoreCase(item.getUuid())) {
-						res.setMobileNumber(item.getMobileNumber());
-						res.setName(item.getName());
-					}
-				});
+		propResponse.stream().forEach(item -> {
+			User user = userMap.get(item.getUuid());
+			if(user!=null) {
+				item.setMobilenumber(user.getMobileNumber());
+				item.setName(user.getName());
 			}
-
-			for (PropertyWiseDemandResponse res : propResponse) {
-				propDetlResponse.forEach(item -> {
-					if (res.getPropertyId().equalsIgnoreCase(item.getPropertyId())) {
-						res.setMobilenumber(item.getMobileNumber());
-						res.setName(item.getName());
-					}
-				});
-			}
-
-		}
+		});
 
 
 		return propResponse;
@@ -432,7 +395,7 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 				propinfo.forEach(item -> {
 					if (res.getConsumercode().equalsIgnoreCase(item.getPropertyId())) {
 						res.setOldpropertyid(item.getOldPropertyId());
-						res.setWard(item.getWard());
+						res.setWard(item.getAddress().getWard());//change
 						res.setName(item.getOwners().get(0).getName());
 						res.setMobilenumber(item.getOwners().get(0).getMobileNumber());
 
