@@ -105,7 +105,6 @@ public class PropertyService {
 						.build();
 				List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 				Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
-
 				propDetlResponse.stream().forEach(item -> {
 					User user = userMap.get(item.getUuid());
 					if(user!=null) {
@@ -113,6 +112,7 @@ public class PropertyService {
 						item.setName(user.getName());
 					}
 				});
+			
 		return propDetlResponse;
 	}
 
@@ -220,12 +220,13 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 
 		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
+		log.info( "getting Property Demand Details");
 		List<ULBWiseTaxCollectionResponse> propResponse = new ArrayList<ULBWiseTaxCollectionResponse>();
 
 		
 		Map<String, List<PropertyDemandResponse>> propDemResponse = pdRepository
 				.getPropertyDemandDetails(searchCriteria);
-
+		log.info( "got Property Demand Details");
 		if (!CollectionUtils.isEmpty(propDemResponse)) {
 
 			propDemResponse.forEach((key, value) -> {
@@ -260,7 +261,6 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 
 
 		}
-
 		return propResponse;
 	}
 
@@ -315,28 +315,26 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 			});
 
 
+			// Extracting user info from userService
+
+			Set<String> userIds = propResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
+			UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+					.active(true)
+					.userType(UserSearchCriteria.CITIZEN)
+					.tenantId(searchCriteria.getUlbName())
+					.build();
+			List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+			Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
+
+			propResponse.stream().forEach(item -> {
+				User user = userMap.get(item.getUuid());
+				if(user!=null) {
+					item.setMobilenumber(user.getMobileNumber());
+					item.setName(user.getName());
+				}
+			});
 		}
-
-		// Extracting user info from userService
-
-		Set<String> userIds = propResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
-				.active(true)
-				.userType(UserSearchCriteria.CITIZEN)
-				.tenantId(searchCriteria.getUlbName())
-				.build();
-		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
-
-		propResponse.stream().forEach(item -> {
-			User user = userMap.get(item.getUuid());
-			if(user!=null) {
-				item.setMobilenumber(user.getMobileNumber());
-				item.setName(user.getName());
-			}
-		});
-
-
+		
 		return propResponse;
 	}
 
@@ -395,7 +393,7 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 				propinfo.forEach(item -> {
 					if (res.getConsumercode().equalsIgnoreCase(item.getPropertyId())) {
 						res.setOldpropertyid(item.getOldPropertyId());
-						res.setWard(item.getAddress().getWard());//change
+						res.setWard(item.getAddress().getWard());
 						res.setName(item.getOwners().get(0).getName());
 						res.setMobilenumber(item.getOwners().get(0).getMobileNumber());
 

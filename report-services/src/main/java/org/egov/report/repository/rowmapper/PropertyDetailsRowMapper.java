@@ -54,21 +54,22 @@ List<PropertyDetailsResponse> pdrList = new ArrayList<>();
 
 			StringBuilder address = new StringBuilder();
 			if(dn != null) {
-				address.append(dn +" , ");
+				address.append(dn +", ");
 	     }
 			if(bn != null) {
-				address.append(bn +" , ");
+				address.append(bn +", ");
 		     }
 			if(str != null) {
-				address.append(str+" , ");
+				address.append(str+", ");
 		     }
 			if(cty != null) {
-				address.append(cty+" , ");
+				address.append(cty+", ");
 		     }
 			if(pc != null) {
-				address.append(pc);
+				address.append(pc+", ");
 		     }
 
+			address = address.delete(address.length()-2, address.length());
 			pdr.setAddress(address.toString());
 
 			pdrList.add(pdr);
