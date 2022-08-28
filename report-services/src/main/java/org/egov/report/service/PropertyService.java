@@ -341,92 +341,88 @@ prValidator.validatetcwcSearchCriteria(searchCriteria);
 			PropertyDetailsSearchCriteria searchCriteria) {
 
 		prValidator.validatepwcSearchCriteria(searchCriteria);
+		
+		List<PropertyWiseCollectionResponse> propertyWiseCollectionResponses = new ArrayList<PropertyWiseCollectionResponse>();
 
-		Set<String> s = new HashSet<String>();
-		s.add("PT");
-		Set<String> p = new HashSet<String>();
-		if (searchCriteria.getPropertyId() == null) {
-			p = null;
-		} else {
-			p.add(searchCriteria.getPropertyId());
-		}
-		PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder().businessServices(s)
-				.tenantId(searchCriteria.getUlbName()).consumerCodes(p).build();
+		// Search property by criteria
+		List<PropertyDetailsResponse> properties = pdRepository.getPropertiesDetail(searchCriteria);
+		
+		if(!CollectionUtils.isEmpty(properties)) {
+			
+			
+			//getting payments
+			Set<String> propertyIds = properties.stream().map(item -> item.getPropertyId()).distinct().collect(Collectors.toSet());
+			
+			Set<String> businessService = new HashSet<String>();
+			businessService.add("PT");
+		
+			PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
+					                                      .businessServices(businessService)
+					                                      .tenantId(searchCriteria.getUlbName())
+					                                      .consumerCodes(propertyIds)
+					                                      .build();
+			
+			
+			List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
 
-		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
-		List<PropertyWiseCollectionResponse> pwcResponse = new ArrayList<PropertyWiseCollectionResponse>();
+			for (Payment res : payments)  {
+				
+				PropertyWiseCollectionResponse propertyWiseCollectionResponse = new PropertyWiseCollectionResponse();
 
-		for (Payment res : payments) {
+				propertyWiseCollectionResponse.setConsumercode(res.getPaymentDetails().get(0).getBill().getConsumerCode());
+				propertyWiseCollectionResponse.setDue(res.getTotalDue().toString());
+				propertyWiseCollectionResponse.setAmountpaid(res.getTotalAmountPaid().toString());
+				BigDecimal due = res.getTotalDue();
+				BigDecimal amountPaid = res.getTotalAmountPaid();
+				BigDecimal currentDueInitial = BigDecimal.ZERO;
+				BigDecimal currentDueWithTotalDue = currentDueInitial.add(due);
+				BigDecimal finalCurrentDue = currentDueWithTotalDue.subtract(amountPaid);
+				propertyWiseCollectionResponse.setCurrentdue(finalCurrentDue.toString());
+				propertyWiseCollectionResponse.setReceiptdate(res.getPaymentDetails().get(0).getReceiptDate().toString());
+				propertyWiseCollectionResponse.setReceiptnumber(res.getPaymentDetails().get(0).getReceiptNumber());
+				propertyWiseCollectionResponse.setPaymentMode(res.getPaymentMode().name());
 
-			PropertyWiseCollectionResponse pwcr = new PropertyWiseCollectionResponse();
-
-			pwcr.setConsumercode(res.getPaymentDetails().get(0).getBill().getConsumerCode());
-			pwcr.setDue(res.getTotalDue().toString());
-			pwcr.setAmountpaid(res.getTotalAmountPaid().toString());
-			BigDecimal due = res.getTotalDue();
-			BigDecimal amountPaid = res.getTotalAmountPaid();
-			BigDecimal currentDueInitial = BigDecimal.ZERO;
-			BigDecimal currentDueWithTotalDue = currentDueInitial.add(due);
-			BigDecimal finalCurrentDue = currentDueWithTotalDue.subtract(amountPaid);
-			pwcr.setCurrentdue(finalCurrentDue.toString());
-			pwcr.setReceiptdate(res.getPaymentDetails().get(0).getReceiptDate().toString());
-			pwcr.setReceiptnumber(res.getPaymentDetails().get(0).getReceiptNumber());
-			pwcr.setPaymentMode(res.getPaymentMode().name());
-
-			pwcResponse.add(pwcr);
-
-		}
-
-		Set<String> Propertys = new HashSet<>();
-		PropertySearchingCriteria pdsCriteria = new PropertySearchingCriteria();
-
-		if (!CollectionUtils.isEmpty(pwcResponse)) {
-			pwcResponse.forEach(res -> Propertys.add((res.getConsumercode())));
-			pdsCriteria.setProperty(Propertys);
-
-			PropertySearchingCriteria propsCriteria = PropertySearchingCriteria.builder()
-					.tenantid(searchCriteria.getUlbName()).property(Propertys).build();
-
-			List<Property> propinfo = getProperty(requestInfo, propsCriteria);
-			for (PropertyWiseCollectionResponse res : pwcResponse) {
-				propinfo.forEach(item -> {
+				propertyWiseCollectionResponses.add(propertyWiseCollectionResponse);
+				
+			}
+			
+			//setting property data
+			
+			for (PropertyWiseCollectionResponse res : propertyWiseCollectionResponses) {
+				properties.forEach(item -> {
 					if (res.getConsumercode().equalsIgnoreCase(item.getPropertyId())) {
 						res.setOldpropertyid(item.getOldPropertyId());
-						res.setWard(item.getAddress().getWard());
-						res.setName(item.getOwners().get(0).getName());
-						res.setMobilenumber(item.getOwners().get(0).getMobileNumber());
-
+						res.setWard(item.getWardNumber());
+						res.setUuid(item.getUuid());
 					}
 				});
 			}
 
-		}
-
-		if (searchCriteria.getWardNo() != null) {
-			for (int i = 0; i < pwcResponse.size(); i++) {
-				if (pwcResponse.get(i).getWard() != null) {
-					if (!pwcResponse.get(i).getWard().equals(searchCriteria.getWardNo())) {
-						pwcResponse.remove(i);
-						i--;
-					}
+				
+			//Getting user data
+			Set<String> userIds = properties.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
+			
+			UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+					.active(true)
+					.userType(UserSearchCriteria.CITIZEN)
+					.tenantId(searchCriteria.getUlbName())
+					.build();
+			List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+			Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
+			propertyWiseCollectionResponses.stream().forEach(item -> {
+				User user = userMap.get(item.getUuid());
+				if(user!=null) {
+					item.setMobilenumber(user.getMobileNumber());
+					item.setName(user.getName());
 				}
+			});
+			
 
-			}
+
+
 		}
-
-		if (searchCriteria.getOldPropertyId() != null) {
-			for (int i = 0; i < pwcResponse.size(); i++) {
-				if (pwcResponse.get(i).getOldpropertyid() != null) {
-					if (!pwcResponse.get(i).getOldpropertyid().equals(searchCriteria.getOldPropertyId())) {
-						pwcResponse.remove(i);
-						i--;
-					}
-				}
-
-			}
-		}
-
-		return pwcResponse;
+		
+		return propertyWiseCollectionResponses;
 	}
 
 }
