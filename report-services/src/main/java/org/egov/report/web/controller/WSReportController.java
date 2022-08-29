@@ -21,7 +21,6 @@ import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterMonthlyDemandResponse;
 import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
 import org.egov.report.web.model.WsSchedulerBasedDemandsGenerationReponse;
-import org.egov.report.web.model.monthWisePendingBillGenerationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +29,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.twitter.zipkin.thriftjava.Response;
 
 @RestController
 @RequestMapping("/reports/ws")
