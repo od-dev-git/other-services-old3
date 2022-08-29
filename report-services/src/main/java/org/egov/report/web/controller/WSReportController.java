@@ -29,6 +29,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.egov.report.web.model.PlatformUsage;
+import org.egov.report.web.model.ULBWiseWaterConnectionDetails;
+import org.egov.report.web.model.WaterConnectionDetailResponse;
 
 @RestController
 @RequestMapping("/reports/ws")
@@ -179,5 +182,35 @@ public class WSReportController {
 		
 		return new ResponseEntity<ReportResponse>(response,HttpStatus.OK);
 	}
+	@PostMapping("/wsConnectionsEligibleForDemandGeneration")
+	public ResponseEntity<ReportResponse> wsConnectionsEligibleForDemandGeneration(@ModelAttribute WSReportSearchCriteria searchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		List<ULBWiseWaterConnectionDetails> noOfConnectionsEligibleForDemandGeneration = Arrays.asList(ULBWiseWaterConnectionDetails.builder()
+				.tenantid("Cuttack").ward("02").numberofconnections("89").build());
+
+		ReportResponse response = ReportResponse.builder().wsConnectionsEligibleForDemandGeneration(noOfConnectionsEligibleForDemandGeneration)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
+	}
+
+	@PostMapping("/platformUsage")
+	public ResponseEntity<ReportResponse> platformUsage(@ModelAttribute WSReportSearchCriteria searchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		List<PlatformUsage> platformUsageResponse = Arrays.asList(PlatformUsage.builder()
+				.serviceAvailed("W&S")
+				.personName("Shahrukh Khan")
+				.contactNumber("9090989890")
+				.contactEmail("srk00@yahoo.com")
+				.Address("Mumbai")
+				.dateOfServiceAvailedOrApproved("17-08-2022")
+				.applicationNo("WS_SRK/CTC/2022-23/1925505")
+				.consumerOrPermitNo("WS/CTC/1956")
+				.build());
+
+		ReportResponse response = ReportResponse.builder().platformUsageResponse(platformUsageResponse)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
+	}
+
 	
 }
