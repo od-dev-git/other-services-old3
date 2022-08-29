@@ -12,12 +12,15 @@ import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.BillSummaryResponses;
 import org.egov.report.web.model.ConsumerBillHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
+import org.egov.report.web.model.EmployeeWiseWSCollectionResponse;
+import org.egov.report.web.model.MonthWisePendingBillGenerationResponse;
 import org.egov.report.web.model.ReportResponse;
 import org.egov.report.web.model.RequestInfoWrapper;
 import org.egov.report.web.model.WSConsumerHistoryResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterMonthlyDemandResponse;
 import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
+import org.egov.report.web.model.WsSchedulerBasedDemandsGenerationReponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.egov.report.web.model.PlatformUsage;
+import org.egov.report.web.model.ULBWiseWaterConnectionDetails;
+import org.egov.report.web.model.WaterConnectionDetailResponse;
 
 @RestController
 @RequestMapping("/reports/ws")
@@ -126,4 +132,85 @@ public class WSReportController {
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
 		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
 	}
+	
+	@PostMapping("/employeeWiseWSCollection")
+	public ResponseEntity<ReportResponse> employeeWiseWSCollection(@ModelAttribute WSReportSearchCriteria searchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper){
+		
+		List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollectionResponses = Arrays.asList(EmployeeWiseWSCollectionResponse
+				.builder()
+				.ulb("cuttack").tenantId("od.cuttack").amount("500").employeeId("Prasun").employeeName("Prasun Naiya")
+				.head("Water").consumerCode("WS/CTC/1956006").oldConsumerNo("10001").paymentDate("1660043998000")
+				.paymentMode("CASH").receiptNo("07/2022-23/006116").build());
+		
+		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.employeeWiseWSCollectionResponse(employeeWiseWSCollectionResponses).build();
+		
+		return new ResponseEntity<ReportResponse>(response,HttpStatus.OK);
+	}
+	
+	@PostMapping("/monthWisePendingBillGeneration")
+	public ResponseEntity<ReportResponse> monthWisePendingBillGeneration(@ModelAttribute WSReportSearchCriteria searchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper){
+		
+		List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGenerationResponses = Arrays.asList(
+				MonthWisePendingBillGenerationResponse.builder()
+				.ulb("cuttack").tenantId("od.cuttack")
+				.consumerCode("WS/CTC/1956006").build()
+				);
+		
+		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.monthWisePendingBillGenerationResponse(monthWisePendingBillGenerationResponses).build();
+		
+		return new ResponseEntity<ReportResponse>(response,HttpStatus.OK);
+	}
+	
+	@PostMapping("/wsSchedulerBasedDemandsGeneration")
+	public ResponseEntity<ReportResponse> wsSchedulerBasedDemandsGeneration(@ModelAttribute WSReportSearchCriteria searchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper){
+		
+		List<WsSchedulerBasedDemandsGenerationReponse> wsSchedulerBasedDemandsGenerationReponses = Arrays.asList(
+				WsSchedulerBasedDemandsGenerationReponse.builder()
+				.ulb("cuttack").tenantId("od.cuttack")
+				.ward("01").consumerCode("WS/CTC/1956006").oldConnectionNo("10001")
+				.demandGenerationDate("1660043998000").taxPeriodFrom("1660043998000").taxPeriodto("1660043998000")
+				.connectionType("Meteted")
+				.build());
+		
+		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.wsSchedulerBasedDemandsGenerationReponse(wsSchedulerBasedDemandsGenerationReponses).build();
+		
+		return new ResponseEntity<ReportResponse>(response,HttpStatus.OK);
+	}
+	@PostMapping("/wsConnectionsEligibleForDemandGeneration")
+	public ResponseEntity<ReportResponse> wsConnectionsEligibleForDemandGeneration(@ModelAttribute WSReportSearchCriteria searchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		List<ULBWiseWaterConnectionDetails> noOfConnectionsEligibleForDemandGeneration = Arrays.asList(ULBWiseWaterConnectionDetails.builder()
+				.tenantid("Cuttack").ward("02").numberofconnections("89").build());
+
+		ReportResponse response = ReportResponse.builder().wsConnectionsEligibleForDemandGeneration(noOfConnectionsEligibleForDemandGeneration)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
+	}
+
+	@PostMapping("/platformUsage")
+	public ResponseEntity<ReportResponse> platformUsage(@ModelAttribute WSReportSearchCriteria searchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		List<PlatformUsage> platformUsageResponse = Arrays.asList(PlatformUsage.builder()
+				.serviceAvailed("W&S")
+				.personName("Shahrukh Khan")
+				.contactNumber("9090989890")
+				.contactEmail("srk00@yahoo.com")
+				.Address("Mumbai")
+				.dateOfServiceAvailedOrApproved("17-08-2022")
+				.applicationNo("WS_SRK/CTC/2022-23/1925505")
+				.consumerOrPermitNo("WS/CTC/1956")
+				.build());
+
+		ReportResponse response = ReportResponse.builder().platformUsageResponse(platformUsageResponse)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
+	}
+
+	
 }
