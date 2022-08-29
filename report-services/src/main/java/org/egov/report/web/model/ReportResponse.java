@@ -70,5 +70,11 @@ public class ReportResponse {
 	
 	@JsonProperty("wsSchedulerBasedDemandsGenerationReponse")
 	private List<WsSchedulerBasedDemandsGenerationReponse> wsSchedulerBasedDemandsGenerationReponse;
+
+	@JsonProperty("wsConnectionsEligibleForDemandGeneration")
+	private List<ULBWiseWaterConnectionDetails> wsConnectionsEligibleForDemandGeneration;
+
+	@JsonProperty("platformUsageResponse")
+	private List<PlatformUsage> platformUsageResponse;
 		
 }

@@ -70,50 +70,29 @@ public class PropertyService {
 
 		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
-		List<PropertyDetailsResponse> propDetlResponse = pdRepository.getPropertyDetails(searchCriteria);
+		List<PropertyDetailsResponse> propertyDetailResponse = pdRepository.getPropertyDetails(searchCriteria);
 
-		// Extracting user info from userService
-
-//		Set<String> uuIds = new HashSet<>();
-//		UserSearchCriteria usCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName())
-//				.active(true).userType(UserSearchCriteria.CITIZEN).build();
-//
-//		if (!CollectionUtils.isEmpty(propDetlResponse)) {
-//			propDetlResponse.forEach(res -> uuIds.add((res.getUuid())));
-//
-//			usCriteria.setUuid(uuIds);
-//
-//			List<OwnerInfo> info = userService.getUserDetails(requestInfo, usCriteria);
-//			for (PropertyDetailsResponse res : propDetlResponse) {
-//				info.forEach(item -> {
-//					if (res.getUuid().equalsIgnoreCase(item.getUuid())) {
-//						res.setMobileNumber(item.getMobileNumber());
-//						res.setName(item.getName());
-//					}
-//				});
-//			}
-//		}
-
-		
-		// Extracting user info from userService
-
-				Set<String> userIds = propDetlResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
-				UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
-						.active(true)
-						.userType(UserSearchCriteria.CITIZEN)
-						.tenantId(searchCriteria.getUlbName())
-						.build();
-				List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-				Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
-				propDetlResponse.stream().forEach(item -> {
-					User user = userMap.get(item.getUuid());
-					if(user!=null) {
-						item.setMobileNumber(user.getMobileNumber());
-						item.setName(user.getName());
-					}
-				});
+		if (!CollectionUtils.isEmpty(propertyDetailResponse)) {
 			
-		return propDetlResponse;
+		// Extracting user info from userService
+
+		Set<String> userIds = propertyDetailResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
+		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+				.active(true)
+				.userType(UserSearchCriteria.CITIZEN)
+				.tenantId(searchCriteria.getUlbName())
+				.build();
+		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
+		propertyDetailResponse.stream().forEach(item -> {
+			User user = userMap.get(item.getUuid());
+			if(user!=null) {
+				item.setMobileNumber(user.getMobileNumber());
+				item.setName(user.getName());
+			}
+		});
+		}			
+		return propertyDetailResponse;
 	}
 
 	public List<TaxCollectorWiseCollectionResponse> getTaxCollectorWiseCollections(RequestInfo requestInfo,
