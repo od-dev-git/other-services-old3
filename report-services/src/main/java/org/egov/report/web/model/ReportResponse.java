@@ -61,5 +61,14 @@ public class ReportResponse {
 
 	@JsonProperty("taxCollectorWiseCollectionResponse")
 	private List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse;
+	
+	@JsonProperty("employeeWiseWSCollectionResponse")
+	private List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollectionResponse;
+	
+	@JsonProperty("monthWisePendingBillGenerationResponse")
+	private List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGenerationResponse;
+	
+	@JsonProperty("wsSchedulerBasedDemandsGenerationReponse")
+	private List<WsSchedulerBasedDemandsGenerationReponse> wsSchedulerBasedDemandsGenerationReponse;
 		
 }
