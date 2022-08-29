@@ -24,7 +24,7 @@ Map<String, String> errorMap = new HashMap<>();
 			throw new CustomException(errorMap);
 	}
 
-	public void validatetcwcSearchCriteria(PropertyDetailsSearchCriteria searchCriteria) {
+	public void validateTaxCollectorWiseCollectionSearchCriteria(PropertyDetailsSearchCriteria searchCriteria) {
 		// TODO Auto-generated method stub
 
 Map<String, String> errorMap = new HashMap<>();
@@ -44,7 +44,7 @@ Map<String, String> errorMap = new HashMap<>();
 
 }
 
-	public void validatepwcSearchCriteria(PropertyDetailsSearchCriteria searchCriteria) {
+	public void validatePropertyWiseCollectionSearchCriteria(PropertyDetailsSearchCriteria searchCriteria) {
 		
 		Map<String, String> errorMap = new HashMap<>();
 

@@ -348,4 +348,29 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		return query.toString();
 
 	}
+
+	public String getPropertiesDetail(PropertyDetailsSearchCriteria searchCriteria, List<Object> preparedPropStmtList) {
+
+
+		 StringBuilder query = new StringBuilder(PROPERTY_DETAILS_SUMMARY_QUERY);
+
+	     preparedPropStmtList.add(searchCriteria.getUlbName());
+
+	     if(searchCriteria.getWardNo() != null) {
+				query.append(AND).append(" epa.ward = ? ");
+				preparedPropStmtList.add(searchCriteria.getWardNo());
+	     }
+
+		if(searchCriteria.getPropertyId() != null) {
+			query.append(AND_QUERY).append(" epp.propertyid = ? ");
+			preparedPropStmtList.add(searchCriteria.getPropertyId());
+		}
+		
+		if(searchCriteria.getOldPropertyId() != null) {
+			query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
+			preparedPropStmtList.add(searchCriteria.getOldPropertyId());
+		}
+
+		return query.toString();
+	}
 }
