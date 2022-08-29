@@ -20,6 +20,9 @@ public class PropertyWiseCollectionResponse {
  
     @JsonProperty("oldPropertyId")
     private String oldpropertyid ;
+    
+    @JsonProperty("uuid")
+    private String uuid ;
 
     @JsonProperty("ward")
     private String ward ;

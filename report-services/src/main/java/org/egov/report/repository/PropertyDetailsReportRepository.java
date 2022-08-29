@@ -59,4 +59,13 @@ public class PropertyDetailsReportRepository {
 		
 	}
 
+	public List<PropertyDetailsResponse> getPropertiesDetail(PropertyDetailsSearchCriteria searchCriteria) {
+		// TODO Auto-generated method stub
+		List<Object> preparedPropStmtList = new ArrayList<>();
+
+		String query = queryBuilder.getPropertiesDetail(searchCriteria, preparedPropStmtList);
+
+		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());
+	}
+
 }
