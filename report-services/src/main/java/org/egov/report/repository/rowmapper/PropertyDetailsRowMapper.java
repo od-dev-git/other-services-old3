@@ -37,36 +37,36 @@ List<PropertyDetailsResponse> pdrList = new ArrayList<>();
 
 			pdr.setUuid(rs.getString("uuid"));
 
-			String dn = rs.getString("doorNo");
+			String doorNo = rs.getString("doorNo");
 			pdr.setDoorNo(rs.getString("doorNo"));
 
-			String bn = rs.getString("buildingName");
+			String buildingName = rs.getString("buildingName");
 			pdr.setBuildingName(rs.getString("buildingName"));
 
-			String str = rs.getString("street");
+			String street = rs.getString("street");
 			pdr.setStreet(rs.getString("street"));
 
-			String cty = rs.getString("city"); 
+			String city = rs.getString("city"); 
 			pdr.setCity(rs.getString("city"));
 
-			String pc = rs.getString("pincode");
+			String pinCode = rs.getString("pincode");
 			pdr.setPincode(rs.getString("pincode"));
 
 			StringBuilder address = new StringBuilder();
-			if(dn != null) {
-				address.append(dn +", ");
+			if(doorNo != null) {
+				address.append(doorNo +", ");
 	     }
-			if(bn != null) {
-				address.append(bn +", ");
+			if(buildingName != null) {
+				address.append(buildingName +", ");
 		     }
-			if(str != null) {
-				address.append(str+", ");
+			if(street != null) {
+				address.append(street+", ");
 		     }
-			if(cty != null) {
-				address.append(cty+", ");
+			if(city != null) {
+				address.append(city+", ");
 		     }
-			if(pc != null) {
-				address.append(pc+", ");
+			if(pinCode != null) {
+				address.append(pinCode+", ");
 		     }
 
 			address = address.delete(address.length()-2, address.length());
