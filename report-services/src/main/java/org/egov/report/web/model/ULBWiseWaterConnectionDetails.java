@@ -21,7 +21,7 @@ public class ULBWiseWaterConnectionDetails {
 	@JsonProperty("ward")
 	private String ward;
 
-	@JsonProperty("numberofconnections")
-	private String numberofconnections;
+	@JsonProperty("numberOfConnections")
+	private String numberOfConnections;
 
 }

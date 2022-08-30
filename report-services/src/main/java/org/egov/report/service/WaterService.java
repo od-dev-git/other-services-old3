@@ -36,6 +36,7 @@ import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.EmployeeWiseWSCollectionResponse;
 import org.egov.report.web.model.OwnerInfo;
+import org.egov.report.web.model.ULBWiseWaterConnectionDetails;
 import org.egov.report.web.model.User;
 import org.egov.report.web.model.WSConsumerHistoryResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
@@ -538,6 +539,17 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		});
 		}
 		
+		return response;
+	}
+	
+	public List<ULBWiseWaterConnectionDetails> getNoOfWSConnectionsElegibleForDemand(RequestInfo requestInfo,
+			WSReportSearchCriteria searchCriteria) {
+
+		wsValidator.validateWSConnectionElegibleForDemand(searchCriteria);
+
+		List<ULBWiseWaterConnectionDetails> response = reportRepository.getNoOfWSDemandConnections(requestInfo,searchCriteria);
+
+
 		return response;
 	}
 		

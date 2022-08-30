@@ -153,6 +153,14 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " egcl_payment payment on payment.id = paymentd.paymentid "
 			+ WHERE + " ewc.isoldapplication = false ";
 	
+	private static final String WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY = SELECT
+			+ "EWC.TENANTID ,EWC.ADDITIONALDETAILS->>'ward' as ward,count(distinct ewc.connectionno) as connectionscount "
+			+ FROM + " eg_ws_connection ewc "
+			+ INNER_JOIN + " eg_ws_service ews  on ewc.id = ews.connection_id "
+			+ WHERE + " ews.connectiontype ='Non Metered' "
+			+ AND + " ewc.applicationstatus ='CONNECTION_ACTIVATED' "+ AND +" ewc.isoldapplication =false "+ AND +" ewc.tenantid = ?"
+			+ GROUP_BY + " ewc.tenantid,EWC.ADDITIONALDETAILS->>'ward'; ";
+	
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
 			queryString.append(" WHERE ");
@@ -406,6 +414,15 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			preparedStmtList.add(searchCriteria.getWard());
 		}
 		
+		return query.toString();
+	}
+	
+	public String getElegibleWSConnectionsQuery(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList) {
+
+		StringBuilder query = new StringBuilder(WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY);
+
+		preparedStmtList.add(searchCriteria.getTenantId());
+
 		return query.toString();
 	}
 }

@@ -187,8 +187,8 @@ public class WSReportController {
 	@PostMapping("/wsConnectionsEligibleForDemandGeneration")
 	public ResponseEntity<ReportResponse> wsConnectionsEligibleForDemandGeneration(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
-		List<ULBWiseWaterConnectionDetails> noOfConnectionsEligibleForDemandGeneration = Arrays.asList(ULBWiseWaterConnectionDetails.builder()
-				.tenantid("Cuttack").ward("02").numberofconnections("89").build());
+		
+		List<ULBWiseWaterConnectionDetails> noOfConnectionsEligibleForDemandGeneration = waterService.getNoOfWSConnectionsElegibleForDemand(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 
 		ReportResponse response = ReportResponse.builder().wsConnectionsEligibleForDemandGeneration(noOfConnectionsEligibleForDemandGeneration)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
