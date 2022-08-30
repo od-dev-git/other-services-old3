@@ -10,6 +10,7 @@ import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
 import org.egov.report.repository.rowmapper.ConsumerBillHistoryRowMapper;
 import org.egov.report.repository.rowmapper.ConsumerMasterRowMapper;
+import org.egov.report.repository.rowmapper.EmployeeWiseWSCollectionRowMapper;
 import org.egov.report.repository.rowmapper.WaterConnectionRowMapper;
 import org.egov.report.repository.rowmapper.WaterMonthlyDemandRowMapper;
 import org.egov.report.repository.rowmapper.WaterNewConsumerMonthlyRowMapper;
@@ -17,6 +18,7 @@ import org.egov.report.service.UserService;
 import org.egov.report.web.model.BillSummaryResponses;
 import org.egov.report.web.model.ConsumerBillHistoryResponse;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
+import org.egov.report.web.model.EmployeeWiseWSCollectionResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterConnectionDetails;
 import org.egov.report.web.model.WaterDemandResponse;
@@ -95,5 +97,17 @@ public class WSReportRepository {
 
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterConnectionRowMapper());
 
+		}
+
+
+		public List<EmployeeWiseWSCollectionResponse> getEmployeeWiseCollectionReport(
+				WSReportSearchCriteria searchCriteria) {
+			
+			List<Object> preparedStmtList = new ArrayList<>();
+
+			String query = queryBuilder.getEmployeeWiseWSCollectionQuery(searchCriteria, preparedStmtList);
+
+			return jdbcTemplate.query(query,preparedStmtList.toArray(), new EmployeeWiseWSCollectionRowMapper());
+			
 		}
 }

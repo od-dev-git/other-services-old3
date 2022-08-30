@@ -34,6 +34,7 @@ import org.egov.report.web.model.ConsumerBillHistoryResponse;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
+import org.egov.report.web.model.EmployeeWiseWSCollectionResponse;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.User;
 import org.egov.report.web.model.WSConsumerHistoryResponse;
@@ -510,6 +511,31 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 				
 				response.add(res);
 			});
+		}
+		
+		return response;
+	}
+
+
+	public List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollection(RequestInfo requestInfo,
+			WSReportSearchCriteria searchCriteria) {
+		
+		wsValidator.validateEmployeeWiseCollectionReport(searchCriteria);
+		
+		List<EmployeeWiseWSCollectionResponse> response = wsRepository.getEmployeeWiseCollectionReport(searchCriteria);
+		
+		if(!CollectionUtils.isEmpty(response)) {
+		List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct().collect(Collectors.toList());
+		List<OwnerInfo> usersInfo = userService.getUser(requestInfo, userIds);
+		Map<Long, OwnerInfo> userMap = usersInfo.stream().collect(Collectors.toMap(OwnerInfo::getId, Function.identity()));
+		
+		response.stream().forEach(item -> {
+			OwnerInfo user = userMap.get(Long.valueOf(item.getEmployeeId()));
+			if(user!=null) {
+				item.setEmployeeId(user.getUserName());
+				item.setEmployeeName(user.getName());
+			}
+		});
 		}
 		
 		return response;
