@@ -14,12 +14,36 @@ public class WSReportUtils {
 	
 	public Long addOneMonth(Long time) {
 		
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("IST")); 
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT")); 
 		cal.setTimeInMillis(time);
 		cal.add(Calendar.MONTH, 1);
+		cal.add(Calendar.DATE, -1);
+		cal.set(Calendar.HOUR, 11);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+		cal.set( Calendar.AM_PM, Calendar.PM);
 		return cal.getTimeInMillis();
 	}
-
+	
+	public Long formatFromDate(Long fromDate) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+		cal.setTimeInMillis(fromDate);
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 1);
+		return cal.getTimeInMillis();
+	}
+	
+	public Long getFirstDayOfMonthYear(Long date) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+		cal.setTimeInMillis(date);
+		cal.set(Calendar.DATE,1);
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 1);
+		return cal.getTimeInMillis();	
+	}
+	
 	public String getConvertedDate(Long time) {
 		
 		if(time == 0 || time == null )
