@@ -35,6 +35,7 @@ import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.EmployeeWiseWSCollectionResponse;
+import org.egov.report.web.model.MonthWisePendingBillGenerationResponse;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.ULBWiseWaterConnectionDetails;
 import org.egov.report.web.model.User;
@@ -551,6 +552,44 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
 
 		return response;
+	}
+
+
+	public List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGeneration(RequestInfo requestInfo,
+			WSReportSearchCriteria searchCriteria) {
+		
+		List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
+		
+		wsValidator.validateMonthWisePendingBillGeneration(searchCriteria);
+		
+		searchCriteria.setConnectionType(WSReportSearchCriteria.NON_METERED);
+		
+		Map<String, WaterConnectionDetails> connectionResponse = reportRepository.getWaterMonthlyDemandConnection(searchCriteria);
+		
+		if(!CollectionUtils.isEmpty(connectionResponse)) {
+		List<String> demandResponses = reportRepository.getDemands(searchCriteria);
+		
+		demandResponses.stream().forEach(item -> {
+			
+			if(connectionResponse.containsKey(item))
+				connectionResponse.remove(item);
+			
+		});
+		
+		connectionResponse.forEach((key, value) -> {
+			
+			MonthWisePendingBillGenerationResponse response = MonthWisePendingBillGenerationResponse.builder()
+					.consumerCode(key)
+					.tenantId(value.getTenantid())
+					.ulb(value.getTenantid().substring(3))
+					.build();
+			
+			responseList.add(response);
+			
+		});
+		}
+		
+		return responseList;
 	}
 		
 	

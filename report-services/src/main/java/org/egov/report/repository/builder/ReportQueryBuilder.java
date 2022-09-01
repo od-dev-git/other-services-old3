@@ -161,6 +161,9 @@ public class ReportQueryBuilder {
 			+ AND + " ewc.applicationstatus ='CONNECTION_ACTIVATED' "+ AND +" ewc.isoldapplication =false "+ AND +" ewc.tenantid = ?"
 			+ GROUP_BY + " ewc.tenantid,EWC.ADDITIONALDETAILS->>'ward'; ";
 	
+	private static final String QUERY_TO_GET_DEMANDS =  SELECT + " distinct(consumercode)" + 
+			"from egbs_demand_v1 demand " ;
+	
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
 			queryString.append(" WHERE ");
@@ -347,9 +350,11 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 	public String getWaterMonthlyDemandConnectionQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
 
 		StringBuilder query = new StringBuilder(QUERY_FOR_WS_CONNECTION);
-
-		query.append(AND_QUERY).append(" ewc.tenantid = ? ");
-		preparedStmtList.add(criteria.getTenantId());
+		
+		if(criteria.getTenantId() != null) {
+			query.append(AND_QUERY).append(" ewc.tenantid = ? ");
+			preparedStmtList.add(criteria.getTenantId());
+		}
 
 		if(criteria.getWard() != null) {
 			query.append(AND_QUERY).append(" ewc.additionaldetails->> 'ward' = ? ");
@@ -364,6 +369,13 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		if(criteria.getOldConnectionNo() != null) {
 			query.append(AND_QUERY).append(" ewc.oldconnectionno = ? ");
 			preparedStmtList.add(criteria.getOldConnectionNo());
+		}
+		
+		if(criteria.getFromDate() != null) {
+			query.append(AND_QUERY).append(" ews.connectionexecutiondate >= ? ");
+			query.append(AND_QUERY).append(" ews.connectionexecutiondate <= ? ");
+			preparedStmtList.add(wsReportUtils.formatFromDate(criteria.getFromDate()));
+			preparedStmtList.add(wsReportUtils.addOneMonth(criteria.getFromDate()));
 		}
 
 		return query.toString();
@@ -424,5 +436,20 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		preparedStmtList.add(searchCriteria.getTenantId());
 
 		return query.toString();
+	}
+	
+	public String getDemandsQuery(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList) {
+		
+		StringBuilder query = new StringBuilder(QUERY_TO_GET_DEMANDS);
+		
+		query.append(WHERE).append(" taxperiodfrom >= ? and taxperiodfrom <= ? ");
+		preparedStmtList.add(wsReportUtils.formatFromDate(searchCriteria.getFromDate()));
+		preparedStmtList.add(wsReportUtils.addOneMonth(searchCriteria.getFromDate()));
+		
+		query.append(AND_QUERY).append(" businessservice = ?");
+		preparedStmtList.add("WS");
+		
+		return query.toString();
+		
 	}
 }

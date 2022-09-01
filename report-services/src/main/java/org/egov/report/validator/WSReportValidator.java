@@ -170,4 +170,15 @@ public class WSReportValidator {
 
 	}
 
+	public void validateMonthWisePendingBillGeneration(WSReportSearchCriteria searchCriteria) {
+		
+		Map<String, String> errorMap = new HashMap<>();
+		
+		if(searchCriteria.getFromDate() == null){
+			errorMap.put("INVALID_SEARCH_CRITERIA", "From Date can not be empty/blank");
+		}
+		
+		createCustomException(errorMap);
+	}
+
 }

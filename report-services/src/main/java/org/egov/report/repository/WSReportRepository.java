@@ -3,6 +3,7 @@ package org.egov.report.repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.model.WSSearchCriteria;
@@ -121,5 +122,15 @@ public class WSReportRepository {
 			String query = queryBuilder.getElegibleWSConnectionsQuery(searchCriteria, preparedStmtList);
 
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WSConnectionsElegibleForDemandRowMapper());
+		}
+		
+		public List<String> getDemands(WSReportSearchCriteria searchCriteria){
+			
+			List<Object> preparedStmtList = new ArrayList<>();
+			
+			String query =  queryBuilder.getDemandsQuery(searchCriteria, preparedStmtList);
+			
+			return jdbcTemplate.queryForList(query, preparedStmtList.toArray(), String.class);
+			
 		}
 }

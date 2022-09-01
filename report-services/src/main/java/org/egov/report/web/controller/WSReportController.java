@@ -155,11 +155,8 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> monthWisePendingBillGeneration(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper){
 		
-		List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGenerationResponses = Arrays.asList(
-				MonthWisePendingBillGenerationResponse.builder()
-				.ulb("cuttack").tenantId("od.cuttack")
-				.consumerCode("WS/CTC/1956006").build()
-				);
+		List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGenerationResponses = 
+				waterService.monthWisePendingBillGeneration(requestInfoWrapper.getRequestInfo(), searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
 				.monthWisePendingBillGenerationResponse(monthWisePendingBillGenerationResponses).build();
