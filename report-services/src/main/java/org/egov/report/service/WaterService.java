@@ -27,6 +27,7 @@ import org.egov.report.model.WSSearchCriteria;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.PaymentUtil;
+import org.egov.report.util.ReportConstants;
 import org.egov.report.util.WSReportUtils;
 import org.egov.report.validator.WSReportValidator;
 import org.egov.report.web.model.BillSummaryResponses;
@@ -563,9 +564,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		wsValidator.validateMonthWisePendingBillGeneration(searchCriteria);
 		
-		searchCriteria.setConnectionType(WSReportSearchCriteria.NON_METERED);
+		searchCriteria.setConnectionType(ReportConstants.NON_METERED);
 		
-		Map<String, WaterConnectionDetails> connectionResponse = reportRepository.getWaterMonthlyDemandConnection(searchCriteria);
+		Map<String, WaterConnectionDetails> connectionResponse = reportRepository.getWaterConnections(searchCriteria);
 		
 		if(!CollectionUtils.isEmpty(connectionResponse)) {
 		List<String> demandResponses = reportRepository.getDemands(searchCriteria);

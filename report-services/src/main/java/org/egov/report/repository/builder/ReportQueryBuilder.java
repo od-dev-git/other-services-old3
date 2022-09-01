@@ -398,13 +398,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			query.append(AND_QUERY).append(" ewc.oldconnectionno = ? ");
 			preparedStmtList.add(criteria.getOldConnectionNo());
 		}
-		
-		if(criteria.getFromDate() != null) {
-			query.append(AND_QUERY).append(" ews.connectionexecutiondate >= ? ");
-			query.append(AND_QUERY).append(" ews.connectionexecutiondate <= ? ");
-			preparedStmtList.add(wsReportUtils.formatFromDate(criteria.getFromDate()));
-			preparedStmtList.add(wsReportUtils.addOneMonth(criteria.getFromDate()));
-		}
 
 		return query.toString();
 
@@ -470,9 +463,11 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		
 		StringBuilder query = new StringBuilder(QUERY_TO_GET_DEMANDS);
 		
+		Long firstDate = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getFromDate());
+		
 		query.append(WHERE).append(" taxperiodfrom >= ? and taxperiodfrom <= ? ");
-		preparedStmtList.add(wsReportUtils.formatFromDate(searchCriteria.getFromDate()));
-		preparedStmtList.add(wsReportUtils.addOneMonth(searchCriteria.getFromDate()));
+		preparedStmtList.add(firstDate);
+		preparedStmtList.add(wsReportUtils.addOneMonth(firstDate));
 		
 		query.append(AND_QUERY).append(" businessservice = ?");
 		preparedStmtList.add("WS");
@@ -480,6 +475,30 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		return query.toString();
 		
 	}
+	
+	public String getWaterConnectionQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
+
+		StringBuilder query = new StringBuilder(QUERY_FOR_WS_CONNECTION);
+		
+		if(criteria.getFromDate() != null) {
+			
+			if(criteria.getConnectionType() != null) {
+				query.append(AND_QUERY).append(" ews.connectiontype = ? ");
+				preparedStmtList.add(criteria.getConnectionType());
+			}
+			
+			Long firstDate = wsReportUtils.getFirstDayOfMonthYear(criteria.getFromDate());
+			query.append(AND_QUERY).append(" ews.connectionexecutiondate >= ? ");
+			query.append(AND_QUERY).append(" ews.connectionexecutiondate <= ? ");
+			preparedStmtList.add(firstDate);
+			preparedStmtList.add(wsReportUtils.addOneMonth(firstDate));
+		}
+
+		return query.toString();
+
+	}
+	
+	
 	
 	public String getSchedulerGeneratedDemandQuery(WSReportSearchCriteria searchCriteria,
 			List<Object> preparedStmtList) {
