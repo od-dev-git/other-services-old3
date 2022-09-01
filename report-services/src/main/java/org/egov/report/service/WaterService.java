@@ -27,6 +27,7 @@ import org.egov.report.model.WSSearchCriteria;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.PaymentUtil;
+import org.egov.report.util.ReportConstants;
 import org.egov.report.util.WSReportUtils;
 import org.egov.report.validator.WSReportValidator;
 import org.egov.report.web.model.BillSummaryResponses;
@@ -34,7 +35,10 @@ import org.egov.report.web.model.ConsumerBillHistoryResponse;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
+import org.egov.report.web.model.EmployeeWiseWSCollectionResponse;
+import org.egov.report.web.model.MonthWisePendingBillGenerationResponse;
 import org.egov.report.web.model.OwnerInfo;
+import org.egov.report.web.model.ULBWiseWaterConnectionDetails;
 import org.egov.report.web.model.User;
 import org.egov.report.web.model.WSConsumerHistoryResponse;
 import org.egov.report.web.model.WSReportSearchCriteria;
@@ -43,6 +47,7 @@ import org.egov.report.web.model.WaterConnectionDetails;
 import org.egov.report.web.model.WaterDemandResponse;
 import org.egov.report.web.model.WaterMonthlyDemandResponse;
 import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
+import org.egov.report.web.model.WsSchedulerBasedDemandsGenerationReponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -512,6 +517,89 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 			});
 		}
 		
+		return response;
+	}
+
+
+	public List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollection(RequestInfo requestInfo,
+			WSReportSearchCriteria searchCriteria) {
+		
+		wsValidator.validateEmployeeWiseCollectionReport(searchCriteria);
+		
+		List<EmployeeWiseWSCollectionResponse> response = wsRepository.getEmployeeWiseCollectionReport(searchCriteria);
+		
+		if(!CollectionUtils.isEmpty(response)) {
+		List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct().collect(Collectors.toList());
+		List<OwnerInfo> usersInfo = userService.getUser(requestInfo, userIds);
+		Map<Long, OwnerInfo> userMap = usersInfo.stream().collect(Collectors.toMap(OwnerInfo::getId, Function.identity()));
+		
+		response.stream().forEach(item -> {
+			OwnerInfo user = userMap.get(Long.valueOf(item.getEmployeeId()));
+			if(user!=null) {
+				item.setEmployeeId(user.getUserName());
+				item.setEmployeeName(user.getName());
+			}
+		});
+		}
+		
+		return response;
+	}
+	
+	public List<ULBWiseWaterConnectionDetails> getNoOfWSConnectionsElegibleForDemand(RequestInfo requestInfo,
+			WSReportSearchCriteria searchCriteria) {
+
+		wsValidator.validateWSConnectionElegibleForDemand(searchCriteria);
+
+		List<ULBWiseWaterConnectionDetails> response = reportRepository.getNoOfWSDemandConnections(requestInfo,searchCriteria);
+
+
+		return response;
+	}
+
+
+	public List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGeneration(RequestInfo requestInfo,
+			WSReportSearchCriteria searchCriteria) {
+		
+		List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
+		
+		wsValidator.validateMonthWisePendingBillGeneration(searchCriteria);
+		
+		searchCriteria.setConnectionType(ReportConstants.NON_METERED);
+		
+		Map<String, WaterConnectionDetails> connectionResponse = reportRepository.getWaterConnections(searchCriteria);
+		
+		if(!CollectionUtils.isEmpty(connectionResponse)) {
+		List<String> demandResponses = reportRepository.getDemands(searchCriteria);
+		
+		demandResponses.stream().forEach(item -> {
+			
+			if(connectionResponse.containsKey(item))
+				connectionResponse.remove(item);
+			
+		});
+		
+		connectionResponse.forEach((key, value) -> {
+			
+			MonthWisePendingBillGenerationResponse response = MonthWisePendingBillGenerationResponse.builder()
+					.consumerCode(key)
+					.tenantId(value.getTenantid())
+					.ulb(value.getTenantid().substring(3))
+					.build();
+			
+			responseList.add(response);
+			
+		});
+		}
+		
+		return responseList;
+	}
+	
+	public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedDemands(RequestInfo requestInfo,
+			WSReportSearchCriteria searchCriteria) {
+		wsValidator.validateSchedulerDemandGeneration(searchCriteria);
+
+		List<WsSchedulerBasedDemandsGenerationReponse> response = reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria);
+
 		return response;
 	}
 		
