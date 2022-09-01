@@ -16,8 +16,7 @@ public class WSReportUtils {
 		
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT")); 
 		cal.setTimeInMillis(time);
-		cal.add(Calendar.MONTH, 1);
-		cal.add(Calendar.DATE, -1);
+		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
 		cal.set(Calendar.HOUR, 11);
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.SECOND, 59);

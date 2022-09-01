@@ -13,8 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WSReportSearchCriteria {
 	
-	public static final String NON_METERED = "Non Metered";
-	
 	@JsonProperty("tenantId")
 	private String tenantId;
 

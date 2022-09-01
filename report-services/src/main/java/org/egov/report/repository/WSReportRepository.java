@@ -145,4 +145,16 @@ public class WSReportRepository {
 
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new SchedulerGeneratedDemandsRowMapper());
 		}
+		
+		public Map<String, WaterConnectionDetails> getWaterConnections(WSReportSearchCriteria criteria) {
+
+			List<Object> preparedStmtList = new ArrayList<>();
+
+			String query = queryBuilder.getWaterConnectionQuery(criteria, preparedStmtList);
+
+			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterConnectionRowMapper());
+
+		}
+		
+		
 }
