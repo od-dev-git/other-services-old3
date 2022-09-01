@@ -137,11 +137,13 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> employeeWiseWSCollection(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper){
 		
-		List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollectionResponses = Arrays.asList(EmployeeWiseWSCollectionResponse
+		/*List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollectionResponses = Arrays.asList(EmployeeWiseWSCollectionResponse
 				.builder()
 				.ulb("cuttack").tenantId("od.cuttack").amount("500").employeeId("Prasun").employeeName("Prasun Naiya")
 				.head("Water").consumerCode("WS/CTC/1956006").oldConsumerNo("10001").paymentDate("1660043998000")
-				.paymentMode("CASH").receiptNo("07/2022-23/006116").build());
+				.paymentMode("CASH").receiptNo("07/2022-23/006116").build());*/
+		
+		List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollectionResponses = waterService.employeeWiseWSCollection(requestInfoWrapper.getRequestInfo(),searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
 				.employeeWiseWSCollectionResponse(employeeWiseWSCollectionResponses).build();
@@ -185,8 +187,8 @@ public class WSReportController {
 	@PostMapping("/wsConnectionsEligibleForDemandGeneration")
 	public ResponseEntity<ReportResponse> wsConnectionsEligibleForDemandGeneration(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
-		List<ULBWiseWaterConnectionDetails> noOfConnectionsEligibleForDemandGeneration = Arrays.asList(ULBWiseWaterConnectionDetails.builder()
-				.tenantid("Cuttack").ward("02").numberofconnections("89").build());
+		
+		List<ULBWiseWaterConnectionDetails> noOfConnectionsEligibleForDemandGeneration = waterService.getNoOfWSConnectionsElegibleForDemand(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 
 		ReportResponse response = ReportResponse.builder().wsConnectionsEligibleForDemandGeneration(noOfConnectionsEligibleForDemandGeneration)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();

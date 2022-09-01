@@ -1,5 +1,7 @@
 package org.egov.report.web.model;
 
+import java.math.BigDecimal;
+
 import org.egov.report.web.model.BillSummaryResponses.BillSummaryResponsesBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,7 +38,7 @@ public class EmployeeWiseWSCollectionResponse {
 	private String head;
 	
 	@JsonProperty("paymentDate")
-	private String paymentDate;
+	private Long paymentDate;
 	
 	@JsonProperty("paymentMode")
 	private String paymentMode;
@@ -48,7 +50,7 @@ public class EmployeeWiseWSCollectionResponse {
 	private String consumerCode;
 	
 	@JsonProperty("amount")
-	private String amount;
+	private BigDecimal amount;
 	
 	@JsonProperty("oldConsumerNo")
 	private String oldConsumerNo;

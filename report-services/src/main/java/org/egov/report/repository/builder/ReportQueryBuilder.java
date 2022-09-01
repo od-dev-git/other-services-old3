@@ -38,6 +38,9 @@ public class ReportQueryBuilder {
 	
 	private static final String detailsSelectValues = " demanddetails.taxheadcode, demanddetails.taxamount, demanddetails.collectionamount ";
 	
+	private static final String paymentSelectValues = " payment.transactiondate, payment.paymentmode, payment.totalamountpaid, ";
+	private static final String paymentDetailsSelectValues = " paymentd.createdby, paymentd.receiptnumber ";
+	
 	private static final String HRMS_QUERY = "select id, tenantid from eg_hrms_employee ";
 	
 	private static final String QUERY_FOR_CONSUMER_MASTER_WS_REPORT = SELECT 
@@ -139,6 +142,24 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " eg_ws_service ews on ewc.id = ews.connection_id "
 			+ INNER_JOIN + " eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid "
 			+ WHERE + " ewc.isoldapplication = false " + AND_QUERY + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' ";
+	
+	private static final String QUERY_FOR_EMPLOYEE_WISE_WS = SELECT 
+			+ connectionSelectValues
+			+ paymentSelectValues 
+			+ paymentDetailsSelectValues
+			+ FROM + " eg_ws_connection ewc "
+			+ INNER_JOIN + " egcl_bill bill on ewc.connectionno = bill.consumercode "
+			+ INNER_JOIN + " egcl_paymentdetail paymentd on paymentd.billid = bill.id "
+			+ INNER_JOIN + " egcl_payment payment on payment.id = paymentd.paymentid "
+			+ WHERE + " ewc.isoldapplication = false ";
+	
+	private static final String WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY = SELECT
+			+ "EWC.TENANTID ,EWC.ADDITIONALDETAILS->>'ward' as ward,count(distinct ewc.connectionno) as connectionscount "
+			+ FROM + " eg_ws_connection ewc "
+			+ INNER_JOIN + " eg_ws_service ews  on ewc.id = ews.connection_id "
+			+ WHERE + " ews.connectiontype ='Non Metered' "
+			+ AND + " ewc.applicationstatus ='CONNECTION_ACTIVATED' "+ AND +" ewc.isoldapplication =false "+ AND +" ewc.tenantid = ?"
+			+ GROUP_BY + " ewc.tenantid,EWC.ADDITIONALDETAILS->>'ward'; ";
 	
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -370,6 +391,37 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
 			preparedPropStmtList.add(searchCriteria.getOldPropertyId());
 		}
+
+		return query.toString();
+	}
+
+	public String getEmployeeWiseWSCollectionQuery(WSReportSearchCriteria searchCriteria,
+			List<Object> preparedStmtList) {
+		
+		StringBuilder query =  new StringBuilder(QUERY_FOR_EMPLOYEE_WISE_WS);
+		
+		query.append(AND_QUERY).append(" ewc.tenantid = ? ");
+		preparedStmtList.add(searchCriteria.getTenantId());
+		
+		query.append(AND_QUERY).append(" payment.transactiondate >= ? ");
+		preparedStmtList.add(searchCriteria.getFromDate());
+		
+		query.append(AND_QUERY).append(" payment.transactiondate <= ? ");
+		preparedStmtList.add(searchCriteria.getToDate());
+		
+		if(searchCriteria.getWard() != null) {
+			query.append(AND).append(" ewc.additionaldetails->> 'ward' = ? ");
+			preparedStmtList.add(searchCriteria.getWard());
+		}
+		
+		return query.toString();
+	}
+	
+	public String getElegibleWSConnectionsQuery(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList) {
+
+		StringBuilder query = new StringBuilder(WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY);
+
+		preparedStmtList.add(searchCriteria.getTenantId());
 
 		return query.toString();
 	}
