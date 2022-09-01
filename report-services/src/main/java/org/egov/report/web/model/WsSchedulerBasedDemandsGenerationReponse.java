@@ -20,9 +20,6 @@ public class WsSchedulerBasedDemandsGenerationReponse {
 	@JsonProperty("ulb")
 	private String ulb;
 	
-	@JsonProperty("tenantId")
-	private String tenantId;
-	
 	@JsonProperty("consumerCode")
 	private String consumerCode;
 	

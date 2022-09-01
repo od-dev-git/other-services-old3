@@ -34,6 +34,16 @@ public class WSReportUtils {
 		return cal.getTimeInMillis();
 	}
 	
+	public Long getFirstDayOfMonthYear(Long date) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+		cal.setTimeInMillis(date);
+		cal.set(Calendar.DATE,1);
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 1);
+		return cal.getTimeInMillis();	
+	}
+	
 	public String getConvertedDate(Long time) {
 		
 		if(time == 0 || time == null )

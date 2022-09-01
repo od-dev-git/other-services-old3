@@ -46,6 +46,7 @@ import org.egov.report.web.model.WaterConnectionDetails;
 import org.egov.report.web.model.WaterDemandResponse;
 import org.egov.report.web.model.WaterMonthlyDemandResponse;
 import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
+import org.egov.report.web.model.WsSchedulerBasedDemandsGenerationReponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -590,6 +591,15 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		}
 		
 		return responseList;
+	}
+	
+	public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedDemands(RequestInfo requestInfo,
+			WSReportSearchCriteria searchCriteria) {
+		wsValidator.validateSchedulerDemandGeneration(searchCriteria);
+
+		List<WsSchedulerBasedDemandsGenerationReponse> response = reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria);
+
+		return response;
 	}
 		
 	

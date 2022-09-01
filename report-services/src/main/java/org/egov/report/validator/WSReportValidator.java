@@ -180,5 +180,21 @@ public class WSReportValidator {
 		
 		createCustomException(errorMap);
 	}
+	
+	public void validateSchedulerDemandGeneration(WSReportSearchCriteria searchCriteria) {
+
+        Map<String, String> errorMap = new HashMap<>();
+
+		if(!StringUtils.hasText(searchCriteria.getTenantId())) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "Ulb can not be empty/blank");
+		}
+
+		if(searchCriteria.getMonthYear()==null){
+			errorMap.put("INVALID_SEARCH_CRITERIA", "Month Year can not be empty/blank");
+		}
+
+		createCustomException(errorMap);
+
+	}
 
 }

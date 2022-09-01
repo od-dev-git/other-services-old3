@@ -53,16 +53,42 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " eg_user ch on ch.uuid = esc.userid "
 			+ " WHERE " + "ewc.applicationstatus = 'CONNECTION_ACTIVATED' and ewc.isoldapplication = false ";
 
-	private static final String FROM = "from ";
+	private static final String FROM = " from ";
 	private static final String WHERE = "where ";
 	private static final String AND = "and ";
 	private static final String ON = "on ";
 	private static final String AS = "as ";
+	private static final String IN = "in ";
 //	private static final String INNER_JOIN = "join ";
 	private static final String DEMAND_TABLE_COLUMNS = "tenantid,edv.consumercode,to_char(to_timestamp(edv.taxperiodfrom / 1000), 'MM-YYYY') as monthYear ";
 	private static final String ULB_AND_MONTH = "demand.TENANTID as ulb,demand.monthYear ";
 	private static final String MONTH_YEAR_CLAUSE = "(to_char(to_timestamp(edv.taxperiodfrom / 1000), 'MM')= ? and to_char(to_timestamp(edv.taxperiodfrom / 1000), 'YYYY')= ? ) ";
 	private static final String LEFT_OUTER_JOIN = "left outer join ";
+	private static final String TENANT_ID = "ewc.tenantid ";
+	
+	private static final String wsSelectValues = "connectionno";
+	
+	private static final String DEMAND_QUERY =  "edv.consumercode,edv.taxperiodfrom,edv.taxperiodto,"
+			+ "edv.createdtime from egbs_demand_v1 edv ";
+	
+	private static final String WS_CONNECTION_DETAILS_QUERY = SELECT + wsSelectValues 
+			+ FROM + " eg_ws_connection ewc "
+			+ INNER_JOIN + " eg_ws_service ews on ewc.tenantid= ? "
+			+ AND +" ewc.id = ews.connection_id "
+			+ WHERE + " ews.connectiontype = 'Non Metered' and ewc.applicationstatus = 'CONNECTION_ACTIVATED' and ewc.isoldapplication = false ";
+	
+	private static final String SCHEDULER_GENERATED_DEMANDS_QUERY = SELECT 
+			+ "ewc2.tenantid ,EWC2.ADDITIONALDETAILS->>'ward' as ward,"
+			+ "ewc2.oldconnectionno,ews2.connectiontype, "
+			+ DEMAND_QUERY 
+			+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE "
+			+ INNER_JOIN + " eg_ws_service ews2 on ewc2.id = ews2.connection_id "
+			+ WHERE + " businessservice = ? "
+			+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY 
+			+ AND + TENANT_ID +" = ? " +" )"
+			+ AND + " edv.tenantid = ? "
+			+ AND +" ( taxperiodfrom >= ? "
+			+ AND + "taxperiodfrom <= ? ) ";
 	
 	private static final String BILL_SUMMARY_QUERY2 = SELECT
 			+ ULB_AND_MONTH + FROM +"( "
@@ -163,6 +189,8 @@ public class ReportQueryBuilder {
 	
 	private static final String QUERY_TO_GET_DEMANDS =  SELECT + " distinct(consumercode)" + 
 			"from egbs_demand_v1 demand " ;
+	
+	
 	
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -451,5 +479,28 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		
 		return query.toString();
 		
+	}
+	
+	public String getSchedulerGeneratedDemandQuery(WSReportSearchCriteria searchCriteria,
+			List<Object> preparedStmtList) {
+
+		StringBuilder query = new StringBuilder(SCHEDULER_GENERATED_DEMANDS_QUERY);
+
+		preparedStmtList.add(searchCriteria.getTenantId());
+		preparedStmtList.add("WS");
+		preparedStmtList.add(searchCriteria.getTenantId());
+		preparedStmtList.add(searchCriteria.getTenantId());
+		preparedStmtList.add(searchCriteria.getTenantId());
+		Long firstDay = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear());
+		preparedStmtList.add(wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear()));
+		Long lastDay = wsReportUtils.addOneMonth(firstDay);
+		preparedStmtList.add(lastDay);
+
+		if(searchCriteria.getWard() != null) {
+			query.append(AND).append(" EWC2.ADDITIONALDETAILS ->> 'ward' = ? ");
+			preparedStmtList.add(searchCriteria.getWard());
+     }
+
+		return query.toString();
 	}
 }

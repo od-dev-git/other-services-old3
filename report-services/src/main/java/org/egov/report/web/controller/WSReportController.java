@@ -137,12 +137,6 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> employeeWiseWSCollection(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper){
 		
-		/*List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollectionResponses = Arrays.asList(EmployeeWiseWSCollectionResponse
-				.builder()
-				.ulb("cuttack").tenantId("od.cuttack").amount("500").employeeId("Prasun").employeeName("Prasun Naiya")
-				.head("Water").consumerCode("WS/CTC/1956006").oldConsumerNo("10001").paymentDate("1660043998000")
-				.paymentMode("CASH").receiptNo("07/2022-23/006116").build());*/
-		
 		List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollectionResponses = waterService.employeeWiseWSCollection(requestInfoWrapper.getRequestInfo(),searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
@@ -168,13 +162,7 @@ public class WSReportController {
 	public ResponseEntity<ReportResponse> wsSchedulerBasedDemandsGeneration(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper){
 		
-		List<WsSchedulerBasedDemandsGenerationReponse> wsSchedulerBasedDemandsGenerationReponses = Arrays.asList(
-				WsSchedulerBasedDemandsGenerationReponse.builder()
-				.ulb("cuttack").tenantId("od.cuttack")
-				.ward("01").consumerCode("WS/CTC/1956006").oldConnectionNo("10001")
-				.demandGenerationDate("1660043998000").taxPeriodFrom("1660043998000").taxPeriodto("1660043998000")
-				.connectionType("Meteted")
-				.build());
+		List<WsSchedulerBasedDemandsGenerationReponse> wsSchedulerBasedDemandsGenerationReponses = waterService.getSchedulerBasedDemands(requestInfoWrapper.getRequestInfo() ,searchCriteria);
 		
 		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
 				.wsSchedulerBasedDemandsGenerationReponse(wsSchedulerBasedDemandsGenerationReponses).build();

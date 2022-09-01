@@ -12,6 +12,7 @@ import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
 import org.egov.report.repository.rowmapper.ConsumerBillHistoryRowMapper;
 import org.egov.report.repository.rowmapper.ConsumerMasterRowMapper;
 import org.egov.report.repository.rowmapper.EmployeeWiseWSCollectionRowMapper;
+import org.egov.report.repository.rowmapper.SchedulerGeneratedDemandsRowMapper;
 import org.egov.report.repository.rowmapper.WSConnectionsElegibleForDemandRowMapper;
 import org.egov.report.repository.rowmapper.WaterConnectionRowMapper;
 import org.egov.report.repository.rowmapper.WaterMonthlyDemandRowMapper;
@@ -26,6 +27,7 @@ import org.egov.report.web.model.WSReportSearchCriteria;
 import org.egov.report.web.model.WaterConnectionDetails;
 import org.egov.report.web.model.WaterDemandResponse;
 import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
+import org.egov.report.web.model.WsSchedulerBasedDemandsGenerationReponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -132,5 +134,15 @@ public class WSReportRepository {
 			
 			return jdbcTemplate.queryForList(query, preparedStmtList.toArray(), String.class);
 			
+		}
+		
+		public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedWSDemands(RequestInfo requestInfo,
+				WSReportSearchCriteria searchCriteria) {
+
+			List<Object> preparedStmtList = new ArrayList<>();
+
+			String query = queryBuilder.getSchedulerGeneratedDemandQuery(searchCriteria, preparedStmtList);
+
+			return jdbcTemplate.query(query,preparedStmtList.toArray(), new SchedulerGeneratedDemandsRowMapper());
 		}
 }
