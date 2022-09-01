@@ -482,6 +482,11 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		
 		if(criteria.getFromDate() != null) {
 			
+			if(criteria.getConnectionType() != null) {
+				query.append(AND_QUERY).append(" ews.connectiontype = ? ");
+				preparedStmtList.add(criteria.getConnectionType());
+			}
+			
 			Long firstDate = wsReportUtils.getFirstDayOfMonthYear(criteria.getFromDate());
 			query.append(AND_QUERY).append(" ews.connectionexecutiondate >= ? ");
 			query.append(AND_QUERY).append(" ews.connectionexecutiondate <= ? ");
