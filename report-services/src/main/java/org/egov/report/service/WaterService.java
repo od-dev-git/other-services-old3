@@ -596,10 +596,15 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 	
 	public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedDemands(RequestInfo requestInfo,
 			WSReportSearchCriteria searchCriteria) {
+		log.info("inside water service");
+		log.info("validating");
 		wsValidator.validateSchedulerDemandGeneration(searchCriteria);
+		log.info("validated");
+		log.info("entering into query");
 
 		List<WsSchedulerBasedDemandsGenerationReponse> response = reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria);
 
+		log.info("back from query");
 		return response;
 	}
 		
