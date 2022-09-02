@@ -155,6 +155,7 @@ public class WSReportRepository {
 			log.info("going in query builder");
 			String query = queryBuilder.getSchedulerGeneratedDemandQuery(searchCriteria, preparedStmtList);
 			
+			log.info("query: "+query);
 			log.info("returned from query builder");
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new SchedulerGeneratedDemandsRowMapper());
 		}
