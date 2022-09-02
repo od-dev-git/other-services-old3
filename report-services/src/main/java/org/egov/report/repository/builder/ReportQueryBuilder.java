@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
+import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.WSReportUtils;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.WSReportSearchCriteria;
@@ -12,9 +13,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
 
 
 @Component
+@Slf4j
 public class ReportQueryBuilder {
 	
 	@Autowired
@@ -503,8 +507,9 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 	public String getSchedulerGeneratedDemandQuery(WSReportSearchCriteria searchCriteria,
 			List<Object> preparedStmtList) {
 
+		log.info("inside query");
 		StringBuilder query = new StringBuilder(SCHEDULER_GENERATED_DEMANDS_QUERY);
-
+		log.info("building query");
 		preparedStmtList.add(searchCriteria.getTenantId());
 		preparedStmtList.add("WS");
 		preparedStmtList.add(searchCriteria.getTenantId());
@@ -519,7 +524,8 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			query.append(AND).append(" EWC2.ADDITIONALDETAILS ->> 'ward' = ? ");
 			preparedStmtList.add(searchCriteria.getWard());
      }
-
+		log.info(query.toString());
+		log.info("returning query from query builder");
 		return query.toString();
 	}
 }
