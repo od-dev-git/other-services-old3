@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.WSSearchCriteria;
 import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
@@ -18,6 +20,7 @@ import org.egov.report.repository.rowmapper.WaterConnectionRowMapper;
 import org.egov.report.repository.rowmapper.WaterMonthlyDemandRowMapper;
 import org.egov.report.repository.rowmapper.WaterNewConsumerMonthlyRowMapper;
 import org.egov.report.service.UserService;
+import org.egov.report.service.WaterService;
 import org.egov.report.web.model.BillSummaryResponses;
 import org.egov.report.web.model.ConsumerBillHistoryResponse;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
@@ -28,11 +31,15 @@ import org.egov.report.web.model.WaterConnectionDetails;
 import org.egov.report.web.model.WaterDemandResponse;
 import org.egov.report.web.model.WaterNewConsumerMonthlyResponse;
 import org.egov.report.web.model.WsSchedulerBasedDemandsGenerationReponse;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Repository
+@Slf4j
 public class WSReportRepository {
 	
 		@Autowired
@@ -43,6 +50,9 @@ public class WSReportRepository {
 		
 		@Autowired
 		UserService userService;
+		
+		@Autowired
+		private ReportServiceConfiguration configuration;
 	
 	
 		public List<ConsumerMasterWSReportResponse> getComsumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
@@ -138,11 +148,15 @@ public class WSReportRepository {
 		
 		public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedWSDemands(RequestInfo requestInfo,
 				WSReportSearchCriteria searchCriteria) {
-
+            
+			log.info("in report repository");
 			List<Object> preparedStmtList = new ArrayList<>();
 
+			log.info("going in query builder");
 			String query = queryBuilder.getSchedulerGeneratedDemandQuery(searchCriteria, preparedStmtList);
-
+			
+			log.info("query: "+query);
+			log.info("returned from query builder");
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new SchedulerGeneratedDemandsRowMapper());
 		}
 		

@@ -29,11 +29,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.egov.report.web.model.PlatformUsage;
 import org.egov.report.web.model.ULBWiseWaterConnectionDetails;
 import org.egov.report.web.model.WaterConnectionDetailResponse;
 
 @RestController
+@Slf4j
 @RequestMapping("/reports/ws")
 public class WSReportController {
 	
@@ -161,9 +165,10 @@ public class WSReportController {
 	@PostMapping("/wsSchedulerBasedDemandsGeneration")
 	public ResponseEntity<ReportResponse> wsSchedulerBasedDemandsGeneration(@ModelAttribute WSReportSearchCriteria searchCriteria,
 			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper){
-		
+		log.info("inside controller");
+		log.info("going in water service");
 		List<WsSchedulerBasedDemandsGenerationReponse> wsSchedulerBasedDemandsGenerationReponses = waterService.getSchedulerBasedDemands(requestInfoWrapper.getRequestInfo() ,searchCriteria);
-		
+		log.info("returned from water service");
 		ReportResponse response = ReportResponse.builder().responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
 				.wsSchedulerBasedDemandsGenerationReponse(wsSchedulerBasedDemandsGenerationReponses).build();
 		
