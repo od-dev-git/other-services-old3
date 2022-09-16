@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class PaymentUtil {
 	
 	public Long enrichFormDate(Long fromDate) {
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("IST"));
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 		cal.setTimeInMillis(fromDate);
 		cal.set(Calendar.HOUR, 0);
 		cal.set(Calendar.MINUTE, 0);
@@ -18,7 +18,7 @@ public class PaymentUtil {
 	}
 	
 	public Long enrichToDate(Long toDate) {
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("IST"));
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 		cal.setTimeInMillis(toDate);
 		cal.set(Calendar.HOUR, 11);
 		cal.set(Calendar.MINUTE, 59);
@@ -28,7 +28,7 @@ public class PaymentUtil {
 	}
 	
 	public String getMonthYear(Long date) {
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("IST"));
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 		cal.setTimeInMillis(date);
 		return cal.get(Calendar.MONTH)+"/"+cal.get(Calendar.YEAR);	
 	}
