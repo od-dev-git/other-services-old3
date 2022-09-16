@@ -42,6 +42,16 @@ public class PaymentQueryBuilder {
 			+ "LEFT OUTER JOIN egcl_billaccountdetail ad ON bd.id = ad.billdetailid AND bd.tenantid = ad.tenantid "
 			+ "WHERE b.id IN (:id);"; 
 
+	public static final String COLLECTION_BY_USAGE_QUERY = "SELECT epp.usagecategory , sum(pay.totalamountpaid) amount "
+			+ "FROM egcl_payment pay "
+			+ "INNER JOIN egcl_paymentdetail pd on pd.paymentid = pay.id "
+			+ "INNER JOIN egcl_billdetial bd on bd.billid = pd.billid "
+			+ "INNER JOIN egcl_bill eb on eb.id = bd.billid "
+			+ "INNER JOIN eg_pt_property epp on epp.propertyid = eb.consumercode "
+			+ "WHERE ";
+	
+	public static final String AND = " AND ";
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -192,5 +202,31 @@ public class PaymentQueryBuilder {
 	private static String addOrderByClause(StringBuilder selectQuery) {
 		return selectQuery.append(" ORDER BY py.transactiondate DESC ").toString();
 
+	}
+
+	public String getCollectionByUsageQuery(PaymentSearchCriteria paymentSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		
+		StringBuilder query = new StringBuilder(COLLECTION_BY_USAGE_QUERY);
+		
+		query.append(" pd.businessservice = :businessService ");
+		preparedStatementValues.put("businessService", "PT");
+		
+		query.append(AND).append(" pd.tenantid <> 'od.testing' ");
+		query.append(AND).append(" pay.paymentstatus <> 'CANCELLED' ");
+		
+		if(paymentSearchCriteria.getFromDate() != null) {
+			query.append(AND).append(" pay.transactiondate  >= :fromDate ");
+			preparedStatementValues.put("fromDate", paymentSearchCriteria.getFromDate());
+		}
+		
+		if(paymentSearchCriteria.getToDate() != null) {
+			query.append(AND).append(" pay.transactiondate  <= :toDate ");
+			preparedStatementValues.put("toDate", paymentSearchCriteria.getToDate());
+		}
+		
+		query.append(" GROUP BY epp.usagecategory ");
+		
+		return query.toString();
 	}
 }

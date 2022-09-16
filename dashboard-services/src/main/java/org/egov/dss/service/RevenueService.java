@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.catalina.mapper.Mapper;
+import org.egov.dss.model.CollectionByUsageResponse;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.enums.PaymentStatusEnum;
@@ -176,8 +177,20 @@ public class RevenueService {
 	}
 
 	public List<Data> collectionByUsageType(ChartCriteria chartCriteria) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		
+		List<CollectionByUsageResponse> response = paymentRepository.getCollectionByUsageType(paymentSearchCriteria);
+		
+		List<Data> responseList = new ArrayList<>();
+		
+		response.parallelStream().forEach(item -> {
+			
+			List<Plot> plots = Arrays.asList(Plot.builder().name(item.getUsageCategory()).value(item.getAmount()).build());
+			responseList.add(Data.builder().plots(plots).build());
+		});
+		
+		return responseList;
 	}
 
 	public List<Data> demandCollectionIndexDDRRevenue(ChartCriteria chartCriteria) {
