@@ -25,7 +25,7 @@ public class CollectionByUsageRowMapper implements ResultSetExtractor<List<Colle
 			responseList.add(response);			
 		}
 		
-		return null;
+		return responseList;
 	}
 
 }
