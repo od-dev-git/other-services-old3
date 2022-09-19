@@ -152,10 +152,10 @@ public class PaymentQueryBuilder {
 		if (searchCriteria.getToDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.transactionDate <= :toDate");
-			Calendar c = Calendar.getInstance();
+			/*Calendar c = Calendar.getInstance();
 			c.setTime(new Date(searchCriteria.getToDate()));
 			c.add(Calendar.DATE, 1);
-			searchCriteria.setToDate(c.getTime().getTime());
+			searchCriteria.setToDate(c.getTime().getTime());*/
 
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
 		}
