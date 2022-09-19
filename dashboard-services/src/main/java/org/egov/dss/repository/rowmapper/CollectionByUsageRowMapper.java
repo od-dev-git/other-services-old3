@@ -5,21 +5,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.egov.dss.model.CollectionByUsageResponse;
+import org.egov.dss.model.UsageTypeResponse;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-public class CollectionByUsageRowMapper implements ResultSetExtractor<List<CollectionByUsageResponse>>{
+public class CollectionByUsageRowMapper implements ResultSetExtractor<List<UsageTypeResponse>>{
 
 	@Override
-	public List<CollectionByUsageResponse> extractData(ResultSet rs) throws SQLException, DataAccessException {
+	public List<UsageTypeResponse> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
-		List<CollectionByUsageResponse> responseList = new ArrayList();
+		List<UsageTypeResponse> responseList = new ArrayList();
 		
 		while(rs.next()) {
 			
-			CollectionByUsageResponse response = new CollectionByUsageResponse();
-			response.setAmount(rs.getBigDecimal("amount"));
+			UsageTypeResponse response = new UsageTypeResponse();
+			response.setConsumerCode(rs.getString("propertyid"));
 			response.setUsageCategory(rs.getString("usagecategory"));
 			
 			responseList.add(response);			

@@ -12,9 +12,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.egov.dss.model.Bill;
-import org.egov.dss.model.CollectionByUsageResponse;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.UsageTypeResponse;
 import org.egov.dss.repository.builder.PaymentQueryBuilder;
 import org.egov.dss.repository.rowmapper.BillRowMapper;
 import org.egov.dss.repository.rowmapper.CollectionByUsageRowMapper;
@@ -96,11 +96,11 @@ public class PaymentRepository {
 
     }
 
-	public List<CollectionByUsageResponse> getCollectionByUsageType(PaymentSearchCriteria paymentSearchCriteria) {
+	public List<UsageTypeResponse> getUsageTypes(PaymentSearchCriteria paymentSearchCriteria) {
 		
 		Map<String, Object> preparedStatementValues = new HashMap<>();
 		
-		String query = paymentQueryBuilder.getCollectionByUsageQuery(paymentSearchCriteria, preparedStatementValues);
+		String query = paymentQueryBuilder.getUsageTypeQuery(paymentSearchCriteria, preparedStatementValues);
 		
 		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new CollectionByUsageRowMapper());
 	}

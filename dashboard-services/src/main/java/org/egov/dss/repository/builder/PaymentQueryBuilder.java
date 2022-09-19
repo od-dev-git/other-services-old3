@@ -42,15 +42,8 @@ public class PaymentQueryBuilder {
 			+ "LEFT OUTER JOIN egcl_billaccountdetail ad ON bd.id = ad.billdetailid AND bd.tenantid = ad.tenantid "
 			+ "WHERE b.id IN (:id);"; 
 
-	public static final String COLLECTION_BY_USAGE_QUERY = "SELECT epp.usagecategory , sum(pay.totalamountpaid) amount "
-			+ "FROM egcl_payment pay "
-			+ "INNER JOIN egcl_paymentdetail pd on pd.paymentid = pay.id "
-			+ "INNER JOIN egcl_billdetial bd on bd.billid = pd.billid "
-			+ "INNER JOIN egcl_bill eb on eb.id = bd.billid "
-			+ "INNER JOIN eg_pt_property epp on epp.propertyid = eb.consumercode "
-			+ "WHERE ";
-	
-	public static final String AND = " AND ";
+	public static final String USAGE_TYPE_QUERY = "SELECT epp.propertyid, epp.usagecategory  "
+			+ "FROM eg_pt_property epp ";
 	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
@@ -144,10 +137,10 @@ public class PaymentQueryBuilder {
 		if (searchCriteria.getToDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.transactionDate <= :toDate");
-			Calendar c = Calendar.getInstance();
+			/*Calendar c = Calendar.getInstance();
 			c.setTime(new Date(searchCriteria.getToDate()));
 			c.add(Calendar.DATE, 1);
-			searchCriteria.setToDate(c.getTime().getTime());
+			searchCriteria.setToDate(c.getTime().getTime());*/
 
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
 		}
@@ -204,28 +197,28 @@ public class PaymentQueryBuilder {
 
 	}
 
-	public String getCollectionByUsageQuery(PaymentSearchCriteria paymentSearchCriteria,
+	public String getUsageTypeQuery(PaymentSearchCriteria paymentSearchCriteria,
 			Map<String, Object> preparedStatementValues) {
 		
-		StringBuilder query = new StringBuilder(COLLECTION_BY_USAGE_QUERY);
+		StringBuilder query = new StringBuilder(USAGE_TYPE_QUERY);
 		
-		query.append(" pd.businessservice = :businessService ");
-		preparedStatementValues.put("businessService", "PT");
-		
-		query.append(AND).append(" pd.tenantid <> 'od.testing' ");
-		query.append(AND).append(" pay.paymentstatus <> 'CANCELLED' ");
+		if(paymentSearchCriteria.getTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, query);
+			query.append(" epp.tenantid = :tenantId ");
+			preparedStatementValues.put("tenantId", paymentSearchCriteria.getTenantId());
+		}
 		
 		if(paymentSearchCriteria.getFromDate() != null) {
-			query.append(AND).append(" pay.transactiondate  >= :fromDate ");
+			addClauseIfRequired(preparedStatementValues, query);
+			query.append(" epp.createdtime  >= :fromDate ");
 			preparedStatementValues.put("fromDate", paymentSearchCriteria.getFromDate());
 		}
 		
 		if(paymentSearchCriteria.getToDate() != null) {
-			query.append(AND).append(" pay.transactiondate  <= :toDate ");
+			addClauseIfRequired(preparedStatementValues, query);
+			query.append(" epp.createdtime  <= :toDate ");
 			preparedStatementValues.put("toDate", paymentSearchCriteria.getToDate());
 		}
-		
-		query.append(" GROUP BY epp.usagecategory ");
 		
 		return query.toString();
 	}

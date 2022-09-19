@@ -21,10 +21,13 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CollectionByUsageResponse {
+public class UsageTypeResponse {
 
 	@JsonProperty("usageCategory")
 	private String usageCategory;
+	
+	@JsonProperty("consumerCode")
+	private String consumerCode;
 	
 	@JsonProperty("amount")
 	@Builder.Default

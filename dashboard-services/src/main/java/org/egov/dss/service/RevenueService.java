@@ -9,13 +9,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.catalina.mapper.Mapper;
-import org.egov.dss.model.CollectionByUsageResponse;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.UsageTypeResponse;
 import org.egov.dss.model.enums.PaymentStatusEnum;
 import org.egov.dss.repository.PaymentRepository;
 import org.egov.dss.util.DashboardUtils;
@@ -179,18 +180,42 @@ public class RevenueService {
 	public List<Data> collectionByUsageType(ChartCriteria chartCriteria) {
 		
 		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
+		Map<String, List<Payment>> consumerCodeWisePayments = payments.parallelStream()
+				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
+				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
+				.collect(Collectors.groupingBy(pay -> pay.getPaymentDetails().get(0).getBill().getConsumerCode()));
 		
-		List<CollectionByUsageResponse> response = paymentRepository.getCollectionByUsageType(paymentSearchCriteria);
-		
-		List<Data> responseList = new ArrayList<>();
-		
-		response.parallelStream().forEach(item -> {
+		HashMap<String, BigDecimal> consumerCodeWiseAmountPaid = new HashMap<>();
+		consumerCodeWisePayments.forEach((key,value) -> {
+			BigDecimal sum = value.stream().collect(Collectors.mapping(Payment::getTotalAmountPaid, Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)));
+			consumerCodeWiseAmountPaid.put(key, sum);
+		});
 			
-			List<Plot> plots = Arrays.asList(Plot.builder().name(item.getUsageCategory()).value(item.getAmount()).build());
-			responseList.add(Data.builder().plots(plots).build());
+		List<UsageTypeResponse> usageTypeResponses = paymentRepository.getUsageTypes(paymentSearchCriteria);
+		
+		usageTypeResponses.parallelStream().forEach(item -> {
+			if(consumerCodeWiseAmountPaid.containsKey(item.getConsumerCode())) {
+				item.setAmount(consumerCodeWiseAmountPaid.get(item.getConsumerCode()));
+			}
 		});
 		
-		return responseList;
+		 Map<String, List<UsageTypeResponse>> usageCategoryWisePayments= usageTypeResponses.parallelStream()
+				 .collect(Collectors.groupingBy(UsageTypeResponse::getUsageCategory));
+		 
+		 HashMap<String, BigDecimal> usageCategoryWiseAmount = new HashMap<>();
+		 usageCategoryWisePayments.forEach((key,value) -> {
+				BigDecimal sum = value.stream().collect(Collectors.mapping(UsageTypeResponse::getAmount, Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)));
+				usageCategoryWiseAmount.put(key, sum);
+			});
+		 
+		 List<Plot> plots = new ArrayList<>();
+		 usageCategoryWiseAmount.forEach((key, value) -> {
+	     	Plot plot = Plot.builder().name(key).value(value).build();
+	     	plots.add(plot);
+			});
+		
+		return Arrays.asList(Data.builder().plots(plots).build()) ;
 	}
 
 	public List<Data> demandCollectionIndexDDRRevenue(ChartCriteria chartCriteria) {
