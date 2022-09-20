@@ -14,9 +14,12 @@ import java.util.stream.Collectors;
 import org.egov.dss.model.Bill;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.UsageTypeResponse;
 import org.egov.dss.repository.builder.PaymentQueryBuilder;
 import org.egov.dss.repository.rowmapper.BillRowMapper;
+import org.egov.dss.repository.rowmapper.CollectionByUsageRowMapper;
 import org.egov.dss.repository.rowmapper.PaymentRowMapper;
+import org.egov.dss.web.model.ChartCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -92,5 +95,14 @@ public class PaymentRepository {
         return mapOfIdAndBills;
 
     }
+
+	public List<UsageTypeResponse> getUsageTypes(PaymentSearchCriteria paymentSearchCriteria) {
+		
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		
+		String query = paymentQueryBuilder.getUsageTypeQuery(paymentSearchCriteria, preparedStatementValues);
+		
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new CollectionByUsageRowMapper());
+	}
 	
 }

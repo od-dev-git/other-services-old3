@@ -42,6 +42,9 @@ public class PaymentQueryBuilder {
 			+ "LEFT OUTER JOIN egcl_billaccountdetail ad ON bd.id = ad.billdetailid AND bd.tenantid = ad.tenantid "
 			+ "WHERE b.id IN (:id);"; 
 
+	public static final String USAGE_TYPE_QUERY = "SELECT epp.propertyid, epp.usagecategory  "
+			+ "FROM eg_pt_property epp ";
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -134,10 +137,10 @@ public class PaymentQueryBuilder {
 		if (searchCriteria.getToDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.transactionDate <= :toDate");
-			Calendar c = Calendar.getInstance();
+			/*Calendar c = Calendar.getInstance();
 			c.setTime(new Date(searchCriteria.getToDate()));
 			c.add(Calendar.DATE, 1);
-			searchCriteria.setToDate(c.getTime().getTime());
+			searchCriteria.setToDate(c.getTime().getTime());*/
 
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
 		}
@@ -192,5 +195,31 @@ public class PaymentQueryBuilder {
 	private static String addOrderByClause(StringBuilder selectQuery) {
 		return selectQuery.append(" ORDER BY py.transactiondate DESC ").toString();
 
+	}
+
+	public String getUsageTypeQuery(PaymentSearchCriteria paymentSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		
+		StringBuilder query = new StringBuilder(USAGE_TYPE_QUERY);
+		
+		if(paymentSearchCriteria.getTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, query);
+			query.append(" epp.tenantid = :tenantId ");
+			preparedStatementValues.put("tenantId", paymentSearchCriteria.getTenantId());
+		}
+		
+		if(paymentSearchCriteria.getFromDate() != null) {
+			addClauseIfRequired(preparedStatementValues, query);
+			query.append(" epp.createdtime  >= :fromDate ");
+			preparedStatementValues.put("fromDate", paymentSearchCriteria.getFromDate());
+		}
+		
+		if(paymentSearchCriteria.getToDate() != null) {
+			addClauseIfRequired(preparedStatementValues, query);
+			query.append(" epp.createdtime  <= :toDate ");
+			preparedStatementValues.put("toDate", paymentSearchCriteria.getToDate());
+		}
+		
+		return query.toString();
 	}
 }
