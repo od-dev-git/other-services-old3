@@ -10,8 +10,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.text.DateFormat;  
+import java.text.SimpleDateFormat;  
+import java.util.Date;  
+import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 
 import org.apache.catalina.mapper.Mapper;
 import org.egov.dss.model.Payment;
@@ -112,8 +121,55 @@ public class RevenueService {
 	}
 
 	public List<Data> cumulativeCollection(ChartCriteria chartCriteria) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		List<Plot> cumulativeMonthCollections = new ArrayList<>();
+		BigDecimal addedCumulativeCollection = BigDecimal.ZERO;
+		
+		
+//		Calendar startDay = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+//		startDay.setTimeInMillis(paymentSearchCriteria.getFromDate());
+//		Calendar lastDay = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+//		lastDay.setTimeInMillis(paymentSearchCriteria.getToDate());
+//		Calendar endDay = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+//		endDay.setTimeInMillis(startDay.getTimeInMillis());
+//		endDay.add(Calendar.MONTH, 1);
+//		endDay.add(Calendar.SECOND, -1);
+		
+		
+		  Calendar startDay = dashboardUtils.getDayFromLong(paymentSearchCriteria.getFromDate());
+		  Calendar lastDay = dashboardUtils.getDayFromLong(paymentSearchCriteria.getToDate());
+		  Calendar endDay = dashboardUtils.addOneMonth(startDay.getTimeInMillis());
+		
+		for(int i = 0; startDay.getTimeInMillis() < lastDay.getTimeInMillis() ; i++) {
+		
+            paymentSearchCriteria.setFromDate(startDay.getTimeInMillis());
+			paymentSearchCriteria.setToDate(endDay.getTimeInMillis());
+
+			Plot cumulativeMonthCollection = new Plot();
+			List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
+			BigDecimal cumulativeCollection = payments.parallelStream()
+					.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
+					.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
+					.map(pay -> pay.getTotalAmountPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);	
+			
+			addedCumulativeCollection=addedCumulativeCollection.add(cumulativeCollection);	
+			
+			DateFormat dateFormat = new SimpleDateFormat("MMMM-yyyy");  
+			String strDate = dateFormat.format(startDay.getTime());
+			
+			cumulativeMonthCollection.setName(strDate);
+			cumulativeMonthCollection.setSymbol("amount");
+			cumulativeMonthCollection.setValue(addedCumulativeCollection);
+			
+			cumulativeMonthCollections.add(cumulativeMonthCollection);
+
+			startDay.add(Calendar.MONTH, 1);
+			endDay = dashboardUtils.addOneMonth(startDay.getTimeInMillis());
+			
+		}
+		
+		return Arrays.asList(Data.builder().headerValue(addedCumulativeCollection.setScale(2, RoundingMode.HALF_UP)).plots(cumulativeMonthCollections).build());
 	}
 
 	public List<Data> topPerformingUlbs(ChartCriteria chartCriteria) {
