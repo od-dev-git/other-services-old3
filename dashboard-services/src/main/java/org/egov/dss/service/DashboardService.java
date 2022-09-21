@@ -50,7 +50,9 @@ public class DashboardService {
 		responseData.setVisualizationCode(internalChartId);
 		responseData.setDrillDownChartId(drillChart);
 		responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
-		responseData.getData().forEach(data -> data.setHeaderName(chartName));
+		if(!(chartType.toString()).equalsIgnoreCase(ChartType.TABLE.toString())){
+			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+		}
 		responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol(valueType)));
 	}
 

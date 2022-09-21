@@ -275,8 +275,48 @@ public class RevenueService {
 	}
 
 	public List<Data> demandCollectionIndexDDRRevenue(ChartCriteria chartCriteria) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
+		Map<String, List<Payment>> tenantWisePayments = payments.parallelStream()
+				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
+				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
+				.collect(Collectors.groupingBy(Payment::getTenantId));
+
+		HashMap<String, BigDecimal> tenantWiseAmountCollection = new HashMap<>();
+		tenantWisePayments.forEach((key,value) -> {
+			BigDecimal sum = value.stream().collect(Collectors.mapping(Payment::getTotalAmountPaid, Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)));
+			tenantWiseAmountCollection.put(key, sum);
+		});
+
+		HashMap<String, BigDecimal> tenantWiseTransactions = new HashMap<>();
+		tenantWisePayments.forEach((key,value) -> {
+			BigDecimal noOfTransactions = BigDecimal.valueOf(value.size());
+			tenantWiseTransactions.put(key, noOfTransactions);
+		});
+
+		HashMap<String, BigDecimal> tenantWiseAssessedProperties = new HashMap<>();
+		tenantWisePayments.forEach((key,value) -> {
+			BigDecimal noOfTransactions = BigDecimal.valueOf(value.stream().map(pay -> pay.getPaymentDetails()
+					.get(0).getBill().getConsumerCode()).distinct().count());
+			tenantWiseAssessedProperties.put(key, noOfTransactions);
+		});
+
+		List<Data> response = new ArrayList<>();
+
+		tenantWiseAmountCollection.forEach((key, value) -> {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("Total Collection").value(value).build());
+
+			plots.add(Plot.builder().name("Transactions").value(tenantWiseTransactions.get(key)).build());
+
+			plots.add(Plot.builder().name("Assessed Properties").value(tenantWiseAssessedProperties.get(key)).build());
+
+			response.add(Data.builder().headerName(key).plots(plots).build());
+		});
+
+		return response;
 	}
 
 	public List<Data> taxheadsBreakupDDRRevenue(ChartCriteria chartCriteria) {
