@@ -26,5 +26,19 @@ public class DashboardUtils {
 		cal.set( Calendar.AM_PM, Calendar.PM);
 		return cal.getTimeInMillis();
 	}
+	
+	public Calendar getDayFromLong(Long fromDate) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+		cal.setTimeInMillis(fromDate);
+		return cal;
+	}
+	
+	public Calendar addOneMonth(Long fromDate) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+		cal.setTimeInMillis(fromDate);
+		cal.add(Calendar.MONTH, 1);
+		cal.add(Calendar.SECOND, -1);
+		return cal;
+	}
 
 }
