@@ -421,5 +421,66 @@ public class RevenueService {
 		
         		return taxHeadBreakupResponse;
 	}
+	
+	public List<Data> demandCollectionIndexUsageRevenue(ChartCriteria chartCriteria) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
+		Map<String, List<Payment>> consumerCodeWisePayments = payments.parallelStream()
+				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
+				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
+				.collect(Collectors.groupingBy(pay -> pay.getPaymentDetails().get(0).getBill().getConsumerCode()));
+
+		HashMap<String, BigDecimal> consumerCodeWiseAmountPaid = new HashMap<>();
+		consumerCodeWisePayments.forEach((key,value) -> {
+			BigDecimal sum = value.stream().collect(Collectors.mapping(Payment::getTotalAmountPaid, Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)));
+			consumerCodeWiseAmountPaid.put(key, sum);
+		});
+
+		List<UsageTypeResponse> usageTypeResponses = paymentRepository.getUsageTypes(paymentSearchCriteria);
+
+		usageTypeResponses.parallelStream().forEach(item -> {
+			if(consumerCodeWiseAmountPaid.containsKey(item.getConsumerCode())) {
+				item.setAmount(consumerCodeWiseAmountPaid.get(item.getConsumerCode()));
+			}
+		});
+
+		Map<String, List<UsageTypeResponse>> usageCategoryWisePayments= usageTypeResponses.parallelStream()
+				 .collect(Collectors.groupingBy(UsageTypeResponse::getUsageCategory));
+
+		HashMap<String, BigDecimal> usageCategoryWiseAmount = new HashMap<>();
+		usageCategoryWisePayments.forEach((key,value) -> {
+				BigDecimal sum = value.stream().collect(Collectors.mapping(UsageTypeResponse::getAmount, Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)));
+				usageCategoryWiseAmount.put(key, sum);
+		});
+
+		HashMap<String, BigDecimal> usageCategoryWiseTransactions = new HashMap<>();
+		usageCategoryWisePayments.forEach((key,value) -> {
+				BigDecimal noOfTransactions = BigDecimal.valueOf(value.size());
+				usageCategoryWiseTransactions.put(key, noOfTransactions);
+		});
+
+		HashMap<String, BigDecimal> usageCategoryWiseAssessedProperties = new HashMap<>();
+		usageCategoryWisePayments.forEach((key,value) -> {
+				BigDecimal noOfAssessedProperties = BigDecimal.valueOf(value.stream().map(pay -> pay.getConsumerCode()).distinct().count());
+				usageCategoryWiseAssessedProperties.put(key, noOfAssessedProperties);
+		}); 
+
+		List<Data> response = new ArrayList<>();
+
+		usageCategoryWiseAmount.forEach((key, value) -> {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("Total Collection").value(value).build());
+
+			plots.add(Plot.builder().name("Transactions").value(usageCategoryWiseTransactions.get(key)).build());
+
+			plots.add(Plot.builder().name("Assessed Properties").value(usageCategoryWiseAssessedProperties.get(key)).build());
+
+			response.add(Data.builder().headerName(key).headerName(key).plots(plots).build());
+		});	
+		return response;
+	}
+
 
 }
