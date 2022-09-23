@@ -56,6 +56,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_DDR_REVENUE.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.taxheadsBreakupDDRRevenue(requestInfoWrapper.getChartCriteria());
 		}
+		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_USAGE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.taxHeadsBreakupUsage(requestInfoWrapper.getChartCriteria());
+		}
 		if(Constants.VisualizationCodes.SERVICE_TOTAL_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
 			return ptService.totalProprties(requestInfoWrapper.getChartCriteria());
 		}

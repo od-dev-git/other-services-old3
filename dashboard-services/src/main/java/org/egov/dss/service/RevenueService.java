@@ -12,17 +12,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.text.DateFormat;  
 import java.text.SimpleDateFormat;  
 import java.util.Date;  
 import java.util.Calendar;
+import java.util.Collection;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 
 import org.apache.catalina.mapper.Mapper;
+import org.egov.dss.model.BillAccountDetail;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.UsageTypeResponse;
@@ -320,8 +323,103 @@ public class RevenueService {
 	}
 
 	public List<Data> taxheadsBreakupDDRRevenue(ChartCriteria chartCriteria) {
-		// TODO Auto-generated method stub
-		return null;
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
+		Map<String, List<Payment>> taxheadsBreakupTenantWise = payments.parallelStream()
+				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
+				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
+				.collect(Collectors.groupingBy(pay -> pay.getTenantId()));
+		List<Data> taxHeadBreakupResponse = new ArrayList<>();
+		int SerialNumber = 1;
+		for (Map.Entry<String,List<Payment>> mapElement : taxheadsBreakupTenantWise.entrySet()) {
+			
+			String key = mapElement.getKey();
+            List<Payment> value = mapElement.getValue();
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(SerialNumber)).symbol("text").build());
+            plots.add(Plot.builder().name("DDRs").label(key).symbol("text").build());
+            List<BillAccountDetail> taxheads = value.stream().map(pay -> pay.getPaymentDetails().get(0).getBill().getBillDetails().get(0).getBillAccountDetails())
+            		                      .flatMap(Collection::stream)
+            		                      .collect(Collectors.toList());
+        		
+        		Map<String, BigDecimal > taxes = taxheads.parallelStream()
+        				.collect(Collectors.groupingBy(BillAccountDetail::getTaxHeadCode,Collectors.reducing(BigDecimal.ZERO, BillAccountDetail::getAmount, BigDecimal::add)));
+
+        		for (Map.Entry<String, BigDecimal > entry : taxes.entrySet()) {
+ 
+    			plots.add(Plot.builder().name(entry.getKey()).value(entry.getValue()).symbol(key).build());
+
+        		}
+        		Data response = Data.builder().headerName(key).headerValue(SerialNumber).plots(plots).build();
+        		SerialNumber++;
+        		taxHeadBreakupResponse.add(response);
+		}
+		
+        		return taxHeadBreakupResponse;
+	}
+	
+	
+	
+	public List<Data> taxHeadsBreakupUsage(ChartCriteria chartCriteria) {
+		
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
+		Map<String, List<Payment>> consumerCodeWisePayments = payments.parallelStream()
+				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
+				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
+				.collect(Collectors.groupingBy(pay -> pay.getPaymentDetails().get(0).getBill().getConsumerCode()));
+		
+		 HashMap<String, List<BillAccountDetail>> consumerCodeWiseTaxesPaid = new HashMap<>();
+			consumerCodeWisePayments.forEach((key,value) -> {
+				List<BillAccountDetail> sum = value.stream().map(pay -> pay.getPaymentDetails().get(0).getBill().getBillDetails().get(0).getBillAccountDetails()).flatMap(Collection::stream)
+	                      .collect(Collectors.toList());
+				consumerCodeWiseTaxesPaid.put(key, sum);
+			});
+		
+		
+        List<UsageTypeResponse> usageTypeResponses = paymentRepository.getUsageTypes(paymentSearchCriteria);
+        
+        Map<String, List<BillAccountDetail>> second_Map = new HashMap<>();
+        
+        usageTypeResponses.parallelStream().forEach(item -> {
+			if(consumerCodeWiseTaxesPaid.containsKey(item.getConsumerCode())) {
+				if(second_Map.containsKey(item.getUsageCategory())){
+					List<BillAccountDetail> addedBillAccountDetails = second_Map.get(item.getUsageCategory());
+					addedBillAccountDetails.addAll(consumerCodeWiseTaxesPaid.get(item.getConsumerCode()));
+					second_Map.put(item.getUsageCategory(),addedBillAccountDetails);
+				}else {
+					second_Map.put(item.getUsageCategory(),consumerCodeWiseTaxesPaid.get(item.getConsumerCode()));
+				}
+
+			}
+		});
+
+        List<Data> taxHeadBreakupResponse = new ArrayList<>();
+        int SerialNumber = 1;
+        
+		for (Map.Entry<String,List<BillAccountDetail>> mapElement : second_Map.entrySet()) {
+			
+			String key = mapElement.getKey();
+			List<BillAccountDetail> value = mapElement.getValue();
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(SerialNumber)).symbol("text").build());
+            plots.add(Plot.builder().name("Usage Type").label(key).symbol("text").build());
+        		
+        		Map<String, BigDecimal > taxes = value.parallelStream()
+        				.collect(Collectors.groupingBy(BillAccountDetail::getTaxHeadCode,Collectors.reducing(BigDecimal.ZERO, BillAccountDetail::getAmount, BigDecimal::add)));
+
+        		for (Map.Entry<String, BigDecimal > entry : taxes.entrySet()) {
+ 
+    			plots.add(Plot.builder().name(entry.getKey()).value(entry.getValue()).symbol("number").build());
+
+        		}
+        		Data response = Data.builder().headerName(key).headerValue(SerialNumber).plots(plots).build();
+        		SerialNumber++;
+        		taxHeadBreakupResponse.add(response);
+        		
+		}
+		
+        		return taxHeadBreakupResponse;
 	}
 
 }
