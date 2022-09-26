@@ -1,0 +1,5 @@
+---------------------------------------
+Marriage Registration Applications Data
+---------------------------------------
+
+select * from eg_mr_application where tenantid != 'od.testing' and status != 'INITIATED';

@@ -1,0 +1,5 @@
+-------------------------
+TradeLicense Applications
+-------------------------
+
+select * from eg_tl_tradelicense where businessservice='TL' and tenantid != 'od.testing' and status != 'INITIATED';
