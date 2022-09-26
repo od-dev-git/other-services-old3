@@ -1,0 +1,5 @@
+--------------------------
+Public Grievance Redressal
+--------------------------
+
+select * from eg_pgr_service where tenantid != 'od.testing' and status != 'INITIATED';
