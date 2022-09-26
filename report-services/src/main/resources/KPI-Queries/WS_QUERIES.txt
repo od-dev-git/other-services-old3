@@ -1,0 +1,90 @@
+
+----------------------	
+WNS application Report
+----------------------
+For other than new Connection on all connection
+
+
+
+select
+	initcap(split_part(tenantid,'.',2)) as ulb
+	, applicationno
+	, applicationstatus
+	, connectionno
+	, to_timestamp(createdtime/1000)::date as createddate
+	, to_timestamp(lastmodifiedtime/1000)::date as lastmodifieddate
+	, case
+	   when applicationtype='NEW_WATER_CONNECTION' then 'New Connection'
+           when applicationtype='NEW_CONNECTION' then 'New Connection'
+           when applicationtype='RECONNECT_CONNECTION' then 'Re-Connection'
+	   when applicationtype='CONNECTION_OWNERSHIP_CHANGE' then 'Ownership Change'
+	   when applicationtype='DISCONNECT_WATER_CONNECTION' then 'Disconnection'
+           when applicationtype='DISCONNECT_CONNECTION' then 'Disconnection'
+	   when applicationtype='WATER_RECONNECTION' then 'Re-connection'
+	   when applicationtype='MODIFY_WATER_CONNECTION' then 'Modify Connection'
+           when applicationtype='MODIFY_CONNECTION' then 'Modify Connection'
+	   when applicationtype='CLOSE_WATER_CONNECTION' then 'Close Connection'
+           when applicationtype='CLOSE_CONNECTION' then 'Close Connection'
+           when applicationtype='METER_REPLACEMENT' then 'Meter Replacement'
+	  end as applicationtype
+	, additionaldetails ->> 'ward' as Ward
+from eg_ws_connection
+where 
+applicationtype not in ('NEW_WATER_CONNECTION','NEW_CONNECTION');
+
+
+-----------------------------------------------------------------------------------------------------------
+
+-------------------------------------------------
+For new Connection other than migrated connection
+-------------------------------------------------
+
+select
+	initcap(split_part(tenantid,'.',2)) as ulb
+	, applicationno
+	, applicationstatus
+	, connectionno
+	, to_timestamp(createdtime/1000)::date as createddate
+	, to_timestamp(lastmodifiedtime/1000)::date as lastmodifieddate
+	, case
+	   when applicationtype='NEW_WATER_CONNECTION' then 'New Connection'
+           when applicationtype='NEW_CONNECTION' then 'New Connection'
+	   when applicationtype='CONNECTION_OWNERSHIP_CHANGE' then 'Ownership Change'
+	   when applicationtype='DISCONNECT_WATER_CONNECTION' then 'Disconnection'
+	   when applicationtype='WATER_RECONNECTION' then 'Re-connection'
+	   when applicationtype='MODIFY_WATER_CONNECTION' then 'Modify Connection'
+	   when applicationtype='CLOSE_WATER_CONNECTION' then 'Close Connection'
+	  end as applicationtype
+	, additionaldetails ->> 'ward' as Ward
+from eg_ws_connection
+where oldconnectionno is null
+and applicationtype in ('NEW_WATER_CONNECTION','NEW_CONNECTION');
+
+
+ 
+----------------------------------------------------------------------------------------------------------
+
+--------------------
+WS Collection Report
+--------------------
+
+select
+	initcap(split_part(epd.tenantid,'.',2)) as ulb
+	, to_timestamp(epd.receiptdate/1000)::date as receiptdate
+	, epd.receiptnumber
+	, to_timestamp(epd.createdtime/1000)::date as createdtime
+	, eb.consumercode
+	, epd.amountpaid
+	, ep.paymentmode
+	, case
+	   when epd.businessservice='WS.ONE_TIME_FEE' then 'WS Application Fee'
+	   when epd.businessservice='WS' then 'WS Monthly Fee'
+	   when epd.businessservice='BPA.NC_SAN_FEE' then 'BPA Sanction Fee'
+	   when epd.businessservice='BPA.NC_APP_FEE' then 'BPA Application Fee'
+	   when epd.businessservice='PT.MUTATION' then 'PT Mutation Fee'
+	   when epd.businessservice='PT' then 'Property Tax'
+	 end as feeType
+from egcl_paymentdetail epd
+inner join egcl_bill eb on eb.id = epd.billid
+inner join egcl_payment ep on ep.id = epd.paymentid
+where epd.businessservice in ( 'WS', 'WS.ONE_TIME_FEE');
