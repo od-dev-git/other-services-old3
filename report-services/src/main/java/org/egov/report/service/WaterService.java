@@ -184,8 +184,19 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		//validate the search criteria
 		wsValidator.validateconsumerMasterWSReport(criteria);
 		
-		 
-		List<ConsumerMasterWSReportResponse> response = reportRepository.getComsumerMasterWSReport(requestInfo,criteria);
+		Long count = reportRepository.getConsumerMasterReportCount(criteria);
+		Integer limit = Integer.parseInt(configuration.getConsumerMasterReportLimit());
+		if(limit == null)
+			limit = 10000;
+		Integer offset =  0;
+		List<ConsumerMasterWSReportResponse> response = new ArrayList();
+		if(count > 0) {
+			while(count > 0) {	
+				response.addAll(reportRepository.getComsumerMasterWSReport(requestInfo,criteria, limit, offset));
+				count = count - response.size();
+				offset += limit;
+			}
+		}
 		
 		//Extracting user info from userService
 		if(!CollectionUtils.isEmpty(response)) {
@@ -213,6 +224,12 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		return response;
 	}
 	
+	private List<ConsumerMasterWSReportResponse> ArrayList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 	public List<ConsumerPaymentHistoryResponse> consumerPaymentHistory(RequestInfo requestInfo,WSReportSearchCriteria criteria){
 		
 		wsValidator.validateconsumerPaymentHistoryReport(criteria);

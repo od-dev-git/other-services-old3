@@ -55,11 +55,12 @@ public class WSReportRepository {
 		private ReportServiceConfiguration configuration;
 	
 	
-		public List<ConsumerMasterWSReportResponse> getComsumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
+		public List<ConsumerMasterWSReportResponse> getComsumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria,
+				Integer limit, Integer offset){
 		
 			List<Object> preparedStatement = new ArrayList<>();
 		
-			String query = queryBuilder.getQueryForConsumerMasterWSReport(preparedStatement,criteria); 
+			String query = queryBuilder.getQueryForConsumerMasterWSReport(preparedStatement,criteria, limit, offset); 
 		
 			return jdbcTemplate.query(query, preparedStatement.toArray(), new ConsumerMasterRowMapper());
 		
@@ -168,6 +169,17 @@ public class WSReportRepository {
 
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterConnectionRowMapper());
 
+		}
+
+
+		public Long getConsumerMasterReportCount(WSReportSearchCriteria criteria) {
+			
+			List<Object> preparedStatement = new ArrayList<>();
+			
+			String query = queryBuilder.getConsumerMasterReportCount(preparedStatement,criteria); 
+		
+			return jdbcTemplate.queryForObject(query, preparedStatement.toArray(), Long.class);
+			
 		}
 		
 		

@@ -230,7 +230,8 @@ public class ReportQueryBuilder {
 		return builder.toString();
 	}
 	
-	public String getQueryForConsumerMasterWSReport(List<Object> preparedStatement, WSReportSearchCriteria criteria) {
+	public String getQueryForConsumerMasterWSReport(List<Object> preparedStatement, WSReportSearchCriteria criteria,
+			Integer limit, Integer offset) {
 		
 		StringBuilder query = new StringBuilder(QUERY_FOR_CONSUMER_MASTER_WS_REPORT);
 		
@@ -251,6 +252,12 @@ public class ReportQueryBuilder {
 			query.append("ews.connectiontype = ? ");
 			preparedStatement.add(criteria.getConnectionType());
 		}
+		
+		query.append(" limit ? ");
+		preparedStatement.add(limit);
+		
+		query.append(" offset ? ");
+		preparedStatement.add(offset);
 		
 		return query.toString();
 	}
@@ -526,6 +533,33 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
      }
 		log.info(query.toString());
 		log.info("returning query from query builder");
+		return query.toString();
+	}
+
+	public String getConsumerMasterReportCount(List<Object> preparedStatement, WSReportSearchCriteria criteria) {
+		
+		StringBuilder query = new StringBuilder("select count(*) "+ 
+				"from eg_ws_connection ewc " + 
+				"inner join eg_ws_service ews on ewc.id = ews.connection_id " + 
+				"where ewc.applicationstatus = 'CONNECTION_ACTIVATED' " + 
+				"and ewc.isoldapplication = false " );
+		
+		query.append(AND_QUERY);
+		query.append("ewc.tenantid = ?");
+		preparedStatement.add(criteria.getTenantId());
+		
+		if(criteria.getWard() != null && !criteria.getWard().equalsIgnoreCase("nil")) {
+			query.append(AND_QUERY);
+			query.append("ewc.additionaldetails->> 'ward' = ? ");
+			preparedStatement.add(criteria.getWard());
+		}
+		
+		if(criteria.getConnectionType() != null) {
+			query.append(AND_QUERY);
+			query.append("ews.connectiontype = ? ");
+			preparedStatement.add(criteria.getConnectionType());
+		}
+		
 		return query.toString();
 	}
 }
