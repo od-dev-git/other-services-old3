@@ -70,5 +70,8 @@ public class ReportServiceConfiguration {
 	
 	@Value("${egov.pt.search.path}")
 	private String ptSearchEndpoint;
+	
+	@Value("${egov.report.service.limit}")
+	private Integer reportLimit;
 
 }
