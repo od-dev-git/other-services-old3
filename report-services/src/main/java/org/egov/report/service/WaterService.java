@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.BillAccountDetail;
@@ -141,42 +142,24 @@ public class WaterService {
 	
 	
 public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportSearchCriteria searchCriteria) {
+		
+	wsValidator.validateBillSummary(searchCriteria);
+	 List<BillSummaryResponses> billSummResponses = new ArrayList<>();
+	 List<BillSummaryResponses> response = wsRepository.getBillSummaryDetails(searchCriteria);
+	 Map<Object,Long> billSummResponse = response.stream().collect(Collectors.groupingBy(e->Pair.of(e.getUlb(), e.getMonthYear()),Collectors.counting()));
 	
-	 
-	    HashMap<String, Integer> hash = new LinkedHashMap<>();
-		 wsValidator.validateBillSummary(searchCriteria);
-		 List<BillSummaryResponses> response = wsRepository.getBillSummaryDetails(searchCriteria);
-		 List<BillSummaryResponses> billSummResponse = new ArrayList<>();
-		 
-		 if(!response.isEmpty()) {
-		 String myResponseMonth = response.get(0).getMonthYear();
-		 for(BillSummaryResponses res: response) {
-			 if(hash.containsKey(res.getUlb()))
-			 {
-				 Integer count = hash.get(res.getUlb());
-				 hash.put(res.getUlb(),count+1);
-			 }
-			 else
-			 {
-			 hash.put(res.getUlb(), 1);
-			 }
-			
-		 }
-		 
-		 
-		 hash.forEach((key, value)->
-		           {
-			          BillSummaryResponses res = new BillSummaryResponses();
-			          res.setCount(value);
-			          res.setUlb(key);
-			          res.setMonthYear(myResponseMonth);
-			          
-			          billSummResponse.add(res);
-		           }
-				 );
-		 
-		 }
-		 return billSummResponse;
+	 billSummResponse.forEach((key, value)->{ 		
+   	  
+		 String ulb = key.toString().split(",")[0];
+		 String monthYear = key.toString().split(",")[1];
+         BillSummaryResponses res = new BillSummaryResponses();
+         res.setCount(value.intValue());
+         res.setUlb(ulb.substring(4,ulb.length()));
+         res.setMonthYear(monthYear.substring(0, monthYear.length()-1));
+         
+         billSummResponses.add(res);
+         });
+	 return billSummResponses;
 	}
 	
 	public List<ConsumerMasterWSReportResponse> consumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria) {
