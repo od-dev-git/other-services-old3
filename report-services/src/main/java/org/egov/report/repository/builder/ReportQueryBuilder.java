@@ -88,9 +88,7 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE "
 			+ INNER_JOIN + " eg_ws_service ews2 on ewc2.id = ews2.connection_id "
 			+ WHERE + " businessservice = ? "
-			+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY 
-			+ AND + TENANT_ID +" = ? " +" )"
-			+ AND + " edv.tenantid = ? "
+			+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY +" )"
 			+ AND +" ( taxperiodfrom >= ? "
 			+ AND + "taxperiodfrom <= ? ) ";
 	
@@ -520,8 +518,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		preparedStmtList.add(searchCriteria.getTenantId());
 		preparedStmtList.add("WS");
 		preparedStmtList.add(searchCriteria.getTenantId());
-		preparedStmtList.add(searchCriteria.getTenantId());
-		preparedStmtList.add(searchCriteria.getTenantId());
 		Long firstDay = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear());
 		preparedStmtList.add(wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear()));
 		Long lastDay = wsReportUtils.addOneMonth(firstDay);
@@ -577,9 +573,7 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 				+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE "
 				+ INNER_JOIN + " eg_ws_service ews2 on ewc2.id = ews2.connection_id "
 				+ WHERE + " businessservice = ? "
-				+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY 
-				+ AND + TENANT_ID +" = ? " +" )"
-				+ AND + " edv.tenantid = ? "
+				+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY +" )"
 				+ AND +" ( taxperiodfrom >= ? "
 				+ AND + "taxperiodfrom <= ? ) ";
 		
@@ -587,8 +581,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		
 		preparedStatement.add(searchCriteria.getTenantId());
 		preparedStatement.add("WS");
-		preparedStatement.add(searchCriteria.getTenantId());
-		preparedStatement.add(searchCriteria.getTenantId());
 		preparedStatement.add(searchCriteria.getTenantId());
 		Long firstDay = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear());
 		preparedStatement.add(wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear()));
