@@ -59,7 +59,8 @@ case
 end as usagecategory,
 epp.creationreason,
 epp.status,
-to_timestamp(epp.createdtime/1000)::date as createdtime
+to_timestamp(epp.createdtime/1000)::date as createdtime,
+to_timestamp(epp.lastmodifiedtime/1000)::date as lastmodifiedtime
 from eg_pt_property epp
 join eg_pt_address epa on epa.propertyid = epp.id 
 where to_timestamp(epp.createdtime/1000)::date > '2021-11-01'
