@@ -79,7 +79,7 @@ public class ReportQueryBuilder {
 			+ FROM + " eg_ws_connection ewc "
 			+ INNER_JOIN + " eg_ws_service ews on ewc.tenantid= ? "
 			+ AND +" ewc.id = ews.connection_id "
-			+ WHERE + " ews.connectiontype = 'Non Metered' and ewc.applicationstatus = 'CONNECTION_ACTIVATED' and ewc.isoldapplication = false ";
+			+ WHERE + " ews.connectiontype = 'Metered' and ewc.applicationstatus = 'CONNECTION_ACTIVATED' and ewc.isoldapplication = false ";
 	
 	private static final String SCHEDULER_GENERATED_DEMANDS_QUERY = SELECT 
 			+ "ewc2.tenantid ,EWC2.ADDITIONALDETAILS->>'ward' as ward,"
@@ -512,7 +512,7 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 	
 	
 	public String getSchedulerGeneratedDemandQuery(WSReportSearchCriteria searchCriteria,
-			List<Object> preparedStmtList) {
+			List<Object> preparedStmtList, Integer limit, Integer offset) {
 
 		log.info("inside query");
 		StringBuilder query = new StringBuilder(SCHEDULER_GENERATED_DEMANDS_QUERY);
@@ -530,7 +530,14 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		if(searchCriteria.getWard() != null) {
 			query.append(AND).append(" EWC2.ADDITIONALDETAILS ->> 'ward' = ? ");
 			preparedStmtList.add(searchCriteria.getWard());
-     }
+		}
+		
+		query.append(" limit ? ");
+		preparedStmtList.add(limit);
+		
+		query.append(" offset ? ");
+		preparedStmtList.add(offset);
+		
 		log.info(query.toString());
 		log.info("returning query from query builder");
 		return query.toString();
@@ -558,6 +565,39 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			query.append(AND_QUERY);
 			query.append("ews.connectiontype = ? ");
 			preparedStatement.add(criteria.getConnectionType());
+		}
+		
+		return query.toString();
+	}
+
+	public String getSchedulerBasedWSDemandCount(List<Object> preparedStatement,
+			WSReportSearchCriteria searchCriteria) {
+		
+		String countForSchedularBasedDemands = "select count(*) from egbs_demand_v1 edv "
+				+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE "
+				+ INNER_JOIN + " eg_ws_service ews2 on ewc2.id = ews2.connection_id "
+				+ WHERE + " businessservice = ? "
+				+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY 
+				+ AND + TENANT_ID +" = ? " +" )"
+				+ AND + " edv.tenantid = ? "
+				+ AND +" ( taxperiodfrom >= ? "
+				+ AND + "taxperiodfrom <= ? ) ";
+		
+		StringBuilder query = new StringBuilder(countForSchedularBasedDemands);
+		
+		preparedStatement.add(searchCriteria.getTenantId());
+		preparedStatement.add("WS");
+		preparedStatement.add(searchCriteria.getTenantId());
+		preparedStatement.add(searchCriteria.getTenantId());
+		preparedStatement.add(searchCriteria.getTenantId());
+		Long firstDay = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear());
+		preparedStatement.add(wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear()));
+		Long lastDay = wsReportUtils.addOneMonth(firstDay);
+		preparedStatement.add(lastDay);
+
+		if(searchCriteria.getWard() != null) {
+			query.append(AND).append(" EWC2.ADDITIONALDETAILS ->> 'ward' = ? ");
+			preparedStatement.add(searchCriteria.getWard());
 		}
 		
 		return query.toString();

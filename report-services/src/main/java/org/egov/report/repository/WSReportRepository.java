@@ -148,13 +148,13 @@ public class WSReportRepository {
 		}
 		
 		public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedWSDemands(RequestInfo requestInfo,
-				WSReportSearchCriteria searchCriteria) {
+				WSReportSearchCriteria searchCriteria, Integer limit, Integer offset) {
             
 			log.info("in report repository");
 			List<Object> preparedStmtList = new ArrayList<>();
 
 			log.info("going in query builder");
-			String query = queryBuilder.getSchedulerGeneratedDemandQuery(searchCriteria, preparedStmtList);
+			String query = queryBuilder.getSchedulerGeneratedDemandQuery(searchCriteria, preparedStmtList, limit, offset);
 			
 			log.info("query: "+query);
 			log.info("returned from query builder");
@@ -180,6 +180,16 @@ public class WSReportRepository {
 		
 			return jdbcTemplate.queryForObject(query, preparedStatement.toArray(), Long.class);
 			
+		}
+
+
+		public Long getSchedulerBasedWSDemandCount(RequestInfo requestInfo, WSReportSearchCriteria searchCriteria) {
+			
+			List<Object> preparedStatement = new ArrayList<>();
+			
+			String query = queryBuilder.getSchedulerBasedWSDemandCount(preparedStatement,searchCriteria); 
+		
+			return jdbcTemplate.queryForObject(query, preparedStatement.toArray(), Long.class);
 		}
 		
 		

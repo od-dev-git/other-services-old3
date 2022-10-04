@@ -185,7 +185,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		wsValidator.validateconsumerMasterWSReport(criteria);
 		
 		Long count = reportRepository.getConsumerMasterReportCount(criteria);
-		Integer limit = Integer.parseInt(configuration.getConsumerMasterReportLimit());
+		Integer limit = configuration.getReportLimit();
 		if(limit == null)
 			limit = 10000;
 		Integer offset =  0;
@@ -619,8 +619,19 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		wsValidator.validateSchedulerDemandGeneration(searchCriteria);
 		log.info("validated");
 		log.info("entering into query");
-
-		List<WsSchedulerBasedDemandsGenerationReponse> response = reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria);
+		Long count = reportRepository.getSchedulerBasedWSDemandCount(requestInfo, searchCriteria);
+		Integer limit = configuration.getReportLimit();
+		if(limit == null)
+			limit = 10000;
+		Integer offset =  0;
+		List<WsSchedulerBasedDemandsGenerationReponse> response = new ArrayList();
+		if(count > 0) {
+			while(count > 0) {	
+				response.addAll(reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria, limit, offset));
+				count = count - response.size();
+				offset += limit;
+			}
+		}
 		log.info("back from query");
 		log.info("response: "+response);
 		
