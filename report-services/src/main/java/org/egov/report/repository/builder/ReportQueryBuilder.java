@@ -79,7 +79,7 @@ public class ReportQueryBuilder {
 			+ FROM + " eg_ws_connection ewc "
 			+ INNER_JOIN + " eg_ws_service ews on ewc.tenantid= ? "
 			+ AND +" ewc.id = ews.connection_id "
-			+ WHERE + " ews.connectiontype = 'Metered' and ewc.applicationstatus = 'CONNECTION_ACTIVATED' and ewc.isoldapplication = false ";
+			+ WHERE + " ews.connectiontype = 'Non Metered' and ewc.applicationstatus = 'CONNECTION_ACTIVATED' and ewc.isoldapplication = false ";
 	
 	private static final String SCHEDULER_GENERATED_DEMANDS_QUERY = SELECT 
 			+ "ewc2.tenantid ,EWC2.ADDITIONALDETAILS->>'ward' as ward,"
