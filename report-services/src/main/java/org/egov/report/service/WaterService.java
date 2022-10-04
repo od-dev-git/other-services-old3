@@ -561,34 +561,46 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 			WSReportSearchCriteria searchCriteria) {
 		
 		List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
-		
 		wsValidator.validateMonthWisePendingBillGeneration(searchCriteria);
-		
 		searchCriteria.setConnectionType(ReportConstants.NON_METERED);
 		
-		Map<String, WaterConnectionDetails> connectionResponse = reportRepository.getWaterConnections(searchCriteria);
+		Long count = reportRepository.getWaterConnectionsCount(searchCriteria);
+		Integer limit = configuration.getReportLimit();
+		Integer offset = 0;		
+		
+		Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
+		if(count>0) {
+			while(count>0) {
+				Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria , limit ,offset);
+				connectionResponse.putAll(response);
+				count = count - response.size();
+				offset += limit;
+			}
+		}
 		
 		if(!CollectionUtils.isEmpty(connectionResponse)) {
-		List<String> demandResponses = reportRepository.getDemands(searchCriteria);
+
+			count = reportRepository.getDemandsCount(searchCriteria);
+			List<String> demandResponses = new ArrayList<>();
+			
+			 limit = configuration.getReportLimit();
+			 offset = 0;	
+			if(count>0) {
+				while(count>0) {
+					List<String> responses = reportRepository.getDemands(searchCriteria, limit ,offset);
+					demandResponses.addAll(responses);
+					count = count - responses.size();
+					offset += limit;
+				}
+			}
+			
+			
 		
-		demandResponses.stream().forEach(item -> {
-			
-			if(connectionResponse.containsKey(item))
-				connectionResponse.remove(item);
-			
-		});
-		
-		connectionResponse.forEach((key, value) -> {
-			
-			MonthWisePendingBillGenerationResponse response = MonthWisePendingBillGenerationResponse.builder()
-					.consumerCode(key)
-					.tenantId(value.getTenantid())
-					.ulb(value.getTenantid().substring(3))
-					.build();
-			
-			responseList.add(response);
-			
-		});
+		responseList =connectionResponse.entrySet().parallelStream().filter(wcd -> !demandResponses.contains(wcd.getKey()))
+			.map(item -> MonthWisePendingBillGenerationResponse.builder()
+					.consumerCode(item.getKey())
+					.ulb(item.getValue().getTenantid().substring(3))
+					.build()).collect(Collectors.toList());
 		}
 		
 		return responseList;

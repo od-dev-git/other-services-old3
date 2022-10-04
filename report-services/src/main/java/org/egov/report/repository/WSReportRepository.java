@@ -137,15 +137,15 @@ public class WSReportRepository {
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WSConnectionsElegibleForDemandRowMapper());
 		}
 		
-		public List<String> getDemands(WSReportSearchCriteria searchCriteria){
-			
-			List<Object> preparedStmtList = new ArrayList<>();
-			
-			String query =  queryBuilder.getDemandsQuery(searchCriteria, preparedStmtList);
-			
-			return jdbcTemplate.queryForList(query, preparedStmtList.toArray(), String.class);
-			
-		}
+//		public List<String> getDemands(WSReportSearchCriteria searchCriteria){
+//			
+//			List<Object> preparedStmtList = new ArrayList<>();
+//			
+//			String query =  queryBuilder.getDemandsQuery(searchCriteria, preparedStmtList);
+//			
+//			return jdbcTemplate.queryForList(query, preparedStmtList.toArray(), String.class);
+//			
+//		}
 		
 		public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedWSDemands(RequestInfo requestInfo,
 				WSReportSearchCriteria searchCriteria, Integer limit, Integer offset) {
@@ -161,11 +161,12 @@ public class WSReportRepository {
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new SchedulerGeneratedDemandsRowMapper());
 		}
 		
-		public Map<String, WaterConnectionDetails> getWaterConnections(WSReportSearchCriteria criteria) {
+		public Map<String, WaterConnectionDetails> getWaterConnections(WSReportSearchCriteria criteria, Integer limit,
+				Integer offset) {
 
 			List<Object> preparedStmtList = new ArrayList<>();
 
-			String query = queryBuilder.getWaterConnectionQuery(criteria, preparedStmtList);
+			String query = queryBuilder.getWaterConnectionQuery(criteria, preparedStmtList, limit, offset);
 
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterConnectionRowMapper());
 
@@ -192,5 +193,32 @@ public class WSReportRepository {
 			return jdbcTemplate.queryForObject(query, preparedStatement.toArray(), Long.class);
 		}
 		
+		public Long getWaterConnectionsCount(WSReportSearchCriteria searchCriteria) {
+			
+			List<Object> preparedStmtList = new ArrayList<>();
+
+			String query = queryBuilder.getWaterConnectionCountQuery(searchCriteria, preparedStmtList);
+
+			return jdbcTemplate.queryForObject(query,preparedStmtList.toArray(), Long.class);
+		}
+		
+		public Long getDemandsCount(WSReportSearchCriteria searchCriteria) {
+			
+			List<Object> preparedStmtList = new ArrayList<>();
+						
+			String query =  queryBuilder.getDemandsQueryCount(searchCriteria, preparedStmtList);
+						
+			return jdbcTemplate.queryForObject(query, preparedStmtList.toArray(), Long.class);
+		}
+		
+		public List<String> getDemands(WSReportSearchCriteria searchCriteria, Integer limit, Integer offset) {
+
+			List<Object> preparedStmtList = new ArrayList<>();
+
+			String query = queryBuilder.getDemandsQuery(searchCriteria, preparedStmtList, limit, offset);
+
+			return jdbcTemplate.queryForList(query, preparedStmtList.toArray(), String.class);
+
+		}
 		
 }
