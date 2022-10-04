@@ -88,9 +88,7 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE "
 			+ INNER_JOIN + " eg_ws_service ews2 on ewc2.id = ews2.connection_id "
 			+ WHERE + " businessservice = ? "
-			+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY 
-			+ AND + TENANT_ID +" = ? " +" )"
-			+ AND + " edv.tenantid = ? "
+			+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY +" )"
 			+ AND +" ( taxperiodfrom >= ? "
 			+ AND + "taxperiodfrom <= ? ) ";
 	
@@ -191,10 +189,22 @@ public class ReportQueryBuilder {
 			+ AND + " ewc.applicationstatus ='CONNECTION_ACTIVATED' "+ AND +" ewc.isoldapplication =false "+ AND +" ewc.tenantid = ?"
 			+ GROUP_BY + " ewc.tenantid,EWC.ADDITIONALDETAILS->>'ward'; ";
 	
-	private static final String QUERY_TO_GET_DEMANDS =  SELECT + " distinct(consumercode)" + 
-			"from egbs_demand_v1 demand " ;
+	private static final String QUERY_TO_GET_DEMANDS =  SELECT + " distinct(consumercode)" 
+			+ "from egbs_demand_v1 demand "
+			+ "inner join eg_ws_connection ewc on demand.consumercode = ewc.connectionno "
+			+ "inner join eg_ws_service ews on ews.connection_id =ewc.id ";
 	
+	private static final String QUERY_FOR_WS_CONNECTION_COUNT= SELECT 
+			+ "count(ewc2.userid) "
+			+ FROM + " eg_ws_connection ewc "
+			+ INNER_JOIN + " eg_ws_service ews on ewc.id = ews.connection_id "
+			+ INNER_JOIN + " eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid "
+			+ WHERE + " ewc.isoldapplication = false " + AND_QUERY + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' ";
 	
+	private static final String QUERY_TO_GET_DEMANDS_COUNT =  SELECT + " count(distinct(consumercode))" 
+			+ "from egbs_demand_v1 demand "
+			+ "inner join eg_ws_connection ewc on demand.consumercode = ewc.connectionno "
+			+ "inner join eg_ws_service ews on ews.connection_id =ewc.id ";
 	
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -230,7 +240,8 @@ public class ReportQueryBuilder {
 		return builder.toString();
 	}
 	
-	public String getQueryForConsumerMasterWSReport(List<Object> preparedStatement, WSReportSearchCriteria criteria) {
+	public String getQueryForConsumerMasterWSReport(List<Object> preparedStatement, WSReportSearchCriteria criteria,
+			Integer limit, Integer offset) {
 		
 		StringBuilder query = new StringBuilder(QUERY_FOR_CONSUMER_MASTER_WS_REPORT);
 		
@@ -251,6 +262,12 @@ public class ReportQueryBuilder {
 			query.append("ews.connectiontype = ? ");
 			preparedStatement.add(criteria.getConnectionType());
 		}
+		
+		query.append(" limit ? ");
+		preparedStatement.add(limit);
+		
+		query.append(" offset ? ");
+		preparedStatement.add(offset);
 		
 		return query.toString();
 	}
@@ -463,24 +480,34 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		return query.toString();
 	}
 	
-	public String getDemandsQuery(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList) {
-		
+	public String getDemandsQuery(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList, Integer limit,
+			Integer offset) {
+
 		StringBuilder query = new StringBuilder(QUERY_TO_GET_DEMANDS);
 		
+		query.append(AND_QUERY).append("ews.connectiontype = ? ");
+		preparedStmtList.add("Non Metered");
+
 		Long firstDate = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getFromDate());
-		
+
 		query.append(WHERE).append(" taxperiodfrom >= ? and taxperiodfrom <= ? ");
 		preparedStmtList.add(firstDate);
 		preparedStmtList.add(wsReportUtils.addOneMonth(firstDate));
-		
+
 		query.append(AND_QUERY).append(" businessservice = ?");
 		preparedStmtList.add("WS");
-		
+
+		query.append(" limit ? ");
+		preparedStmtList.add(limit);
+
+		query.append(" offset ? ");
+		preparedStmtList.add(offset);
+
 		return query.toString();
-		
+
 	}
 	
-	public String getWaterConnectionQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
+	public String getWaterConnectionQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList, Integer limit, Integer offset) {
 
 		StringBuilder query = new StringBuilder(QUERY_FOR_WS_CONNECTION);
 		
@@ -492,12 +519,17 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			}
 			
 			Long firstDate = wsReportUtils.getFirstDayOfMonthYear(criteria.getFromDate());
-			query.append(AND_QUERY).append(" ews.connectionexecutiondate >= ? ");
 			query.append(AND_QUERY).append(" ews.connectionexecutiondate <= ? ");
-			preparedStmtList.add(firstDate);
 			preparedStmtList.add(wsReportUtils.addOneMonth(firstDate));
 		}
-
+		
+		query.append(" limit ? ");
+		preparedStmtList.add(limit);
+		
+		query.append(" offset ? ");
+		preparedStmtList.add(offset);
+		
+		
 		return query.toString();
 
 	}
@@ -505,15 +537,13 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 	
 	
 	public String getSchedulerGeneratedDemandQuery(WSReportSearchCriteria searchCriteria,
-			List<Object> preparedStmtList) {
+			List<Object> preparedStmtList, Integer limit, Integer offset) {
 
 		log.info("inside query");
 		StringBuilder query = new StringBuilder(SCHEDULER_GENERATED_DEMANDS_QUERY);
 		log.info("building query");
 		preparedStmtList.add(searchCriteria.getTenantId());
 		preparedStmtList.add("WS");
-		preparedStmtList.add(searchCriteria.getTenantId());
-		preparedStmtList.add(searchCriteria.getTenantId());
 		preparedStmtList.add(searchCriteria.getTenantId());
 		Long firstDay = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear());
 		preparedStmtList.add(wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear()));
@@ -523,9 +553,110 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		if(searchCriteria.getWard() != null) {
 			query.append(AND).append(" EWC2.ADDITIONALDETAILS ->> 'ward' = ? ");
 			preparedStmtList.add(searchCriteria.getWard());
-     }
+		}
+		
+		query.append(" limit ? ");
+		preparedStmtList.add(limit);
+		
+		query.append(" offset ? ");
+		preparedStmtList.add(offset);
+		
 		log.info(query.toString());
 		log.info("returning query from query builder");
 		return query.toString();
 	}
+
+	public String getConsumerMasterReportCount(List<Object> preparedStatement, WSReportSearchCriteria criteria) {
+		
+		StringBuilder query = new StringBuilder("select count(*) "+ 
+				"from eg_ws_connection ewc " + 
+				"inner join eg_ws_service ews on ewc.id = ews.connection_id " + 
+				"where ewc.applicationstatus = 'CONNECTION_ACTIVATED' " + 
+				"and ewc.isoldapplication = false " );
+		
+		query.append(AND_QUERY);
+		query.append("ewc.tenantid = ?");
+		preparedStatement.add(criteria.getTenantId());
+		
+		if(criteria.getWard() != null && !criteria.getWard().equalsIgnoreCase("nil")) {
+			query.append(AND_QUERY);
+			query.append("ewc.additionaldetails->> 'ward' = ? ");
+			preparedStatement.add(criteria.getWard());
+		}
+		
+		if(criteria.getConnectionType() != null) {
+			query.append(AND_QUERY);
+			query.append("ews.connectiontype = ? ");
+			preparedStatement.add(criteria.getConnectionType());
+		}
+		
+		return query.toString();
+	}
+
+	public String getSchedulerBasedWSDemandCount(List<Object> preparedStatement,
+			WSReportSearchCriteria searchCriteria) {
+		
+		String countForSchedularBasedDemands = "select count(*) from egbs_demand_v1 edv "
+				+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE "
+				+ INNER_JOIN + " eg_ws_service ews2 on ewc2.id = ews2.connection_id "
+				+ WHERE + " businessservice = ? "
+				+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY +" )"
+				+ AND +" ( taxperiodfrom >= ? "
+				+ AND + "taxperiodfrom <= ? ) ";
+		
+		StringBuilder query = new StringBuilder(countForSchedularBasedDemands);
+		
+		preparedStatement.add(searchCriteria.getTenantId());
+		preparedStatement.add("WS");
+		preparedStatement.add(searchCriteria.getTenantId());
+		Long firstDay = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear());
+		preparedStatement.add(wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getMonthYear()));
+		Long lastDay = wsReportUtils.addOneMonth(firstDay);
+		preparedStatement.add(lastDay);
+
+		if(searchCriteria.getWard() != null) {
+			query.append(AND).append(" EWC2.ADDITIONALDETAILS ->> 'ward' = ? ");
+			preparedStatement.add(searchCriteria.getWard());
+		}
+		
+		return query.toString();
+	}
+	
+	public String getWaterConnectionCountQuery(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList) {
+
+		StringBuilder query = new StringBuilder(QUERY_FOR_WS_CONNECTION_COUNT);
+
+		if (searchCriteria.getFromDate() != null) {
+
+			if (searchCriteria.getConnectionType() != null) {
+				query.append(AND_QUERY).append(" ews.connectiontype = ? ");
+				preparedStmtList.add(searchCriteria.getConnectionType());
+			}
+
+			Long firstDate = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getFromDate());
+			query.append(AND_QUERY).append(" ews.connectionexecutiondate <= ? ");
+			preparedStmtList.add(wsReportUtils.addOneMonth(firstDate));
+		}
+
+		return query.toString();
+	}
+	
+	public String getDemandsQueryCount(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList) {
+		StringBuilder query = new StringBuilder(QUERY_TO_GET_DEMANDS_COUNT);
+
+		query.append(AND_QUERY).append("ews.connectiontype = ? ");
+		preparedStmtList.add("Non Metered");
+
+		Long firstDate = wsReportUtils.getFirstDayOfMonthYear(searchCriteria.getFromDate());
+
+		query.append(WHERE).append(" taxperiodfrom >= ? and taxperiodfrom <= ? ");
+		preparedStmtList.add(firstDate);
+		preparedStmtList.add(wsReportUtils.addOneMonth(firstDate));
+
+		query.append(AND_QUERY).append(" businessservice = ?");
+		preparedStmtList.add("WS");
+
+		return query.toString();
+	}
+	
 }

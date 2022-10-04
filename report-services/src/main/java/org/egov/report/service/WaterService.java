@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.BillAccountDetail;
@@ -141,42 +142,24 @@ public class WaterService {
 	
 	
 public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportSearchCriteria searchCriteria) {
+		
+	wsValidator.validateBillSummary(searchCriteria);
+	 List<BillSummaryResponses> billSummResponses = new ArrayList<>();
+	 List<BillSummaryResponses> response = wsRepository.getBillSummaryDetails(searchCriteria);
+	 Map<Object,Long> billSummResponse = response.stream().collect(Collectors.groupingBy(e->Pair.of(e.getUlb(), e.getMonthYear()),Collectors.counting()));
 	
-	 
-	    HashMap<String, Integer> hash = new LinkedHashMap<>();
-		 wsValidator.validateBillSummary(searchCriteria);
-		 List<BillSummaryResponses> response = wsRepository.getBillSummaryDetails(searchCriteria);
-		 List<BillSummaryResponses> billSummResponse = new ArrayList<>();
-		 
-		 if(!response.isEmpty()) {
-		 String myResponseMonth = response.get(0).getMonthYear();
-		 for(BillSummaryResponses res: response) {
-			 if(hash.containsKey(res.getUlb()))
-			 {
-				 Integer count = hash.get(res.getUlb());
-				 hash.put(res.getUlb(),count+1);
-			 }
-			 else
-			 {
-			 hash.put(res.getUlb(), 1);
-			 }
-			
-		 }
-		 
-		 
-		 hash.forEach((key, value)->
-		           {
-			          BillSummaryResponses res = new BillSummaryResponses();
-			          res.setCount(value);
-			          res.setUlb(key);
-			          res.setMonthYear(myResponseMonth);
-			          
-			          billSummResponse.add(res);
-		           }
-				 );
-		 
-		 }
-		 return billSummResponse;
+	 billSummResponse.forEach((key, value)->{ 		
+   	  
+		 String ulb = key.toString().split(",")[0];
+		 String monthYear = key.toString().split(",")[1];
+         BillSummaryResponses res = new BillSummaryResponses();
+         res.setCount(value.intValue());
+         res.setUlb(ulb.substring(4,ulb.length()));
+         res.setMonthYear(monthYear.substring(0, monthYear.length()-1));
+         
+         billSummResponses.add(res);
+         });
+	 return billSummResponses;
 	}
 	
 	public List<ConsumerMasterWSReportResponse> consumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria) {
@@ -184,8 +167,19 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		//validate the search criteria
 		wsValidator.validateconsumerMasterWSReport(criteria);
 		
-		 
-		List<ConsumerMasterWSReportResponse> response = reportRepository.getComsumerMasterWSReport(requestInfo,criteria);
+		Long count = reportRepository.getConsumerMasterReportCount(criteria);
+		Integer limit = configuration.getReportLimit();
+		if(limit == null)
+			limit = 10000;
+		Integer offset =  0;
+		List<ConsumerMasterWSReportResponse> response = new ArrayList();
+		if(count > 0) {
+			while(count > 0) {	
+				response.addAll(reportRepository.getComsumerMasterWSReport(requestInfo,criteria, limit, offset));
+				count = count - response.size();
+				offset += limit;
+			}
+		}
 		
 		//Extracting user info from userService
 		if(!CollectionUtils.isEmpty(response)) {
@@ -213,6 +207,12 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		return response;
 	}
 	
+	private List<ConsumerMasterWSReportResponse> ArrayList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 	public List<ConsumerPaymentHistoryResponse> consumerPaymentHistory(RequestInfo requestInfo,WSReportSearchCriteria criteria){
 		
 		wsValidator.validateconsumerPaymentHistoryReport(criteria);
@@ -561,34 +561,46 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 			WSReportSearchCriteria searchCriteria) {
 		
 		List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
-		
 		wsValidator.validateMonthWisePendingBillGeneration(searchCriteria);
-		
 		searchCriteria.setConnectionType(ReportConstants.NON_METERED);
 		
-		Map<String, WaterConnectionDetails> connectionResponse = reportRepository.getWaterConnections(searchCriteria);
+		Long count = reportRepository.getWaterConnectionsCount(searchCriteria);
+		Integer limit = configuration.getReportLimit();
+		Integer offset = 0;		
+		
+		Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
+		if(count>0) {
+			while(count>0) {
+				Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria , limit ,offset);
+				connectionResponse.putAll(response);
+				count = count - response.size();
+				offset += limit;
+			}
+		}
 		
 		if(!CollectionUtils.isEmpty(connectionResponse)) {
-		List<String> demandResponses = reportRepository.getDemands(searchCriteria);
+
+			count = reportRepository.getDemandsCount(searchCriteria);
+			List<String> demandResponses = new ArrayList<>();
+			
+			 limit = configuration.getReportLimit();
+			 offset = 0;	
+			if(count>0) {
+				while(count>0) {
+					List<String> responses = reportRepository.getDemands(searchCriteria, limit ,offset);
+					demandResponses.addAll(responses);
+					count = count - responses.size();
+					offset += limit;
+				}
+			}
+			
+			
 		
-		demandResponses.stream().forEach(item -> {
-			
-			if(connectionResponse.containsKey(item))
-				connectionResponse.remove(item);
-			
-		});
-		
-		connectionResponse.forEach((key, value) -> {
-			
-			MonthWisePendingBillGenerationResponse response = MonthWisePendingBillGenerationResponse.builder()
-					.consumerCode(key)
-					.tenantId(value.getTenantid())
-					.ulb(value.getTenantid().substring(3))
-					.build();
-			
-			responseList.add(response);
-			
-		});
+		responseList =connectionResponse.entrySet().parallelStream().filter(wcd -> !demandResponses.contains(wcd.getKey()))
+			.map(item -> MonthWisePendingBillGenerationResponse.builder()
+					.consumerCode(item.getKey())
+					.ulb(item.getValue().getTenantid().substring(3))
+					.build()).collect(Collectors.toList());
 		}
 		
 		return responseList;
@@ -602,8 +614,19 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		wsValidator.validateSchedulerDemandGeneration(searchCriteria);
 		log.info("validated");
 		log.info("entering into query");
-
-		List<WsSchedulerBasedDemandsGenerationReponse> response = reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria);
+		Long count = reportRepository.getSchedulerBasedWSDemandCount(requestInfo, searchCriteria);
+		Integer limit = configuration.getReportLimit();
+		if(limit == null)
+			limit = 10000;
+		Integer offset =  0;
+		List<WsSchedulerBasedDemandsGenerationReponse> response = new ArrayList();
+		if(count > 0) {
+			while(count > 0) {	
+				response.addAll(reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria, limit, offset));
+				count = count - response.size();
+				offset += limit;
+			}
+		}
 		log.info("back from query");
 		log.info("response: "+response);
 		
