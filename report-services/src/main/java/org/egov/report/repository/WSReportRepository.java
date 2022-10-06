@@ -1,6 +1,7 @@
 package org.egov.report.repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -221,4 +222,29 @@ public class WSReportRepository {
 
 		}
 		
+		public Long getWaterConnectionCount(WSReportSearchCriteria searchCriteria) {
+            List<Object> preparedStmtList = new ArrayList<>();
+
+            String query = queryBuilder.getWaterConnectionsCountQuery(searchCriteria, preparedStmtList);
+
+            return jdbcTemplate.queryForObject(query,preparedStmtList.toArray(),  Long.class);
+        
+        }
+		
+		public List<HashMap<String, String>> getWaterConnection(WSReportSearchCriteria searchCriteria ,Integer limit , Integer offset) {
+            List<Object> preparedStmtList = new ArrayList<>();
+
+            String query = queryBuilder.getWaterConnectionsQuery(searchCriteria, preparedStmtList ,limit,offset);
+
+            return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterConnectionsRowMapper());
+        }
+		
+		public Map<String, List<WaterDemandResponse>> getWaterMonthlyDemandReports(
+                WSReportSearchCriteria searchCriteria , List<String> keySet) {
+            List<Object> preparedStmtList = new ArrayList<>();
+
+            String query = queryBuilder.getWaterMonthlyDemandQuery2(searchCriteria, preparedStmtList ,keySet);
+
+            return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterMonthlyDemandsRowMapper());
+        }
 }
