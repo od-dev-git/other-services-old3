@@ -334,7 +334,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         wsValidator.validateWaterMonthlyDemandReport(searchCriteria);
 
         Long count = reportRepository.getWaterConnectionCount(searchCriteria);
-        Integer limit=10000;
+        Integer limit=configuration.getReportLimit();
         Integer offset = 0;     
         
         List<HashMap<String, String>> waterConnection = new ArrayList<>();
@@ -348,7 +348,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         }
         
         //get demand details response here //change here
-        final int chunkSize = 10000;
+        Integer chunkSize=configuration.getReportLimit();
         final AtomicInteger counter = new AtomicInteger();
 
         final Collection<List<HashMap<String, String>>> result = waterConnection.parallelStream()
@@ -359,8 +359,6 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         Map<String, List<WaterDemandResponse>> demandResponse = new HashMap<String, List<WaterDemandResponse>>();
         for(List<HashMap<String, String>> parameter : result) {
             
-    //        List<String> keySet = parameter.parallelStream().forEach(item -> item.keySet().parallelStream().collect(Collectors.toList()));
-       //     List<String> userIds = parameter.parallelStream().map(entry-> entry.keySet()).collect(Collectors.());
             List<String> keySet = new ArrayList<>();
                     parameter.parallelStream().forEach(item -> {
                     List<String> keySetValue =  item.keySet().parallelStream().collect(Collectors.toList()); 
@@ -466,7 +464,6 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                         res.setPayableAfterRebateAmt(item.getAmountBeforeDueDate());
                         res.setPayableWithPenaltyAmt(item.getAmountAfterDueDate());
                         res.setTotalDueAmt(item.getTotalDue());
-                    //  res.setUlb(details.getTenantid().substring(3));
                         response.add(res);
                     }
                 });
