@@ -176,7 +176,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		if(count > 0) {
 			while(count > 0) {	
 				response.addAll(reportRepository.getComsumerMasterWSReport(requestInfo,criteria, limit, offset));
-				count = count - response.size();
+				count = count - limit;
 				offset += limit;
 			}
 		}
@@ -573,7 +573,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 			while(count>0) {
 				Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria , limit ,offset);
 				connectionResponse.putAll(response);
-				count = count - response.size();
+				count = count - limit;
 				offset += limit;
 			}
 		}
@@ -589,7 +589,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 				while(count>0) {
 					List<String> responses = reportRepository.getDemands(searchCriteria, limit ,offset);
 					demandResponses.addAll(responses);
-					count = count - responses.size();
+					count = count - limit;
 					offset += limit;
 				}
 			}
@@ -623,7 +623,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		if(count > 0) {
 			while(count > 0) {	
 				response.addAll(reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria, limit, offset));
-				count = count - response.size();
+				count = count - limit;
 				offset += limit;
 			}
 		}
