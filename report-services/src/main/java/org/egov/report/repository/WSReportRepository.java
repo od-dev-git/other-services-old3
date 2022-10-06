@@ -18,7 +18,9 @@ import org.egov.report.repository.rowmapper.EmployeeWiseWSCollectionRowMapper;
 import org.egov.report.repository.rowmapper.SchedulerGeneratedDemandsRowMapper;
 import org.egov.report.repository.rowmapper.WSConnectionsElegibleForDemandRowMapper;
 import org.egov.report.repository.rowmapper.WaterConnectionRowMapper;
+import org.egov.report.repository.rowmapper.WaterConnectionsRowMapper;
 import org.egov.report.repository.rowmapper.WaterMonthlyDemandRowMapper;
+import org.egov.report.repository.rowmapper.WaterMonthlyDemandsRowMapper;
 import org.egov.report.repository.rowmapper.WaterNewConsumerMonthlyRowMapper;
 import org.egov.report.service.UserService;
 import org.egov.report.service.WaterService;
@@ -35,6 +37,7 @@ import org.egov.report.web.model.WsSchedulerBasedDemandsGenerationReponse;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +58,8 @@ public class WSReportRepository {
 		@Autowired
 		private ReportServiceConfiguration configuration;
 	
+		@Autowired
+		private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
 		public List<ConsumerMasterWSReportResponse> getComsumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria,
 				Integer limit, Integer offset){
@@ -241,10 +246,12 @@ public class WSReportRepository {
 		
 		public Map<String, List<WaterDemandResponse>> getWaterMonthlyDemandReports(
                 WSReportSearchCriteria searchCriteria , List<String> keySet) {
-            List<Object> preparedStmtList = new ArrayList<>();
+           // List<Object> preparedStmtList = new ArrayList<>();
+		    Map<String, Object> preparedStmtList = new HashMap<>();
 
             String query = queryBuilder.getWaterMonthlyDemandQuery2(searchCriteria, preparedStmtList ,keySet);
 
-            return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterMonthlyDemandsRowMapper());
+      //      return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterMonthlyDemandsRowMapper());
+            return namedParameterJdbcTemplate.query(query,preparedStmtList, new WaterMonthlyDemandsRowMapper());
         }
 }

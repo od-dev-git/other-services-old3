@@ -342,12 +342,12 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
             while(count>0) {
                 List<HashMap<String, String>> connections = reportRepository.getWaterConnection(searchCriteria,limit,offset);
                 waterConnection.addAll(connections);
-                count = count - connections.size();
+                count = count - limit;
                 offset += limit;
             }
         }
         
-        //get demand details response here
+        //get demand details response here //change here
         final int chunkSize = 10000;
         final AtomicInteger counter = new AtomicInteger();
 
@@ -359,7 +359,14 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         Map<String, List<WaterDemandResponse>> demandResponse = new HashMap<String, List<WaterDemandResponse>>();
         for(List<HashMap<String, String>> parameter : result) {
             
-             List<String> keySet = parameter.get(0).keySet().parallelStream().collect(Collectors.toList());
+    //        List<String> keySet = parameter.parallelStream().forEach(item -> item.keySet().parallelStream().collect(Collectors.toList()));
+       //     List<String> userIds = parameter.parallelStream().map(entry-> entry.keySet()).collect(Collectors.());
+            List<String> keySet = new ArrayList<>();
+                    parameter.parallelStream().forEach(item -> {
+                    List<String> keySetValue =  item.keySet().parallelStream().collect(Collectors.toList()); 
+                    keySet.addAll(keySetValue);
+            });
+                    
             Map<String, List<WaterDemandResponse>> addedDemandResponse = reportRepository.getWaterMonthlyDemandReports(searchCriteria , keySet);
             demandResponse.putAll(addedDemandResponse);
 
@@ -430,7 +437,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
             if(user!=null) {
                 item.getValue().get(0).setMobile(user.getMobileNumber());
                 item.getValue().get(0).setConnectionHolderName(user.getName());
-                item.getValue().get(0).setAddrss(user.getCorrespondenceAddress());
+                item.getValue().get(0).setAddress(user.getCorrespondenceAddress());
             }
         });
         
@@ -455,7 +462,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                         res.setWard(details.get(0).getWard());
                         res.setConnectionHolderName(details.get(0).getConnectionHolderName());
                         res.setMobile(details.get(0).getMobile());
-                        res.setAddrss(details.get(0).getAddrss());
+                        res.setAddrss(details.get(0).getAddress());
                         res.setPayableAfterRebateAmt(item.getAmountBeforeDueDate());
                         res.setPayableWithPenaltyAmt(item.getAmountAfterDueDate());
                         res.setTotalDueAmt(item.getTotalDue());

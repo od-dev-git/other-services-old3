@@ -19,25 +19,50 @@ import lombok.Setter;
 @Builder
 public class WaterDemandResponse {
 
-	@JsonProperty("tenantid")
-	private String tenantid;
 
-	@JsonProperty("id")
-	private String demandId;
+    @JsonProperty("tenantid")
+    private String tenantid;
 
-	@JsonProperty("taxperiodfrom")
-	private Long taxperiodfrom;
+    @JsonProperty("id")
+    private String demandId; // I think its not required
 
-	@JsonProperty("taxperiodto")
-	private Long taxperiodto;
+    @JsonProperty("taxperiodfrom")
+    private Long taxperiodfrom;
 
-	@JsonProperty("taxheadcode")
-	private String taxheadcode;
+    @JsonProperty("taxperiodto")
+    private Long taxperiodto;
 
-	@JsonProperty("taxamount")
-	private BigDecimal taxamount;
+    @JsonProperty("taxheadcode")
+    private String taxheadcode;
 
-	@JsonProperty("collectionamount")
-	private BigDecimal collectionamount;
+    @JsonProperty("taxamount")
+    private BigDecimal taxamount;
+
+    @JsonProperty("collectionamount")
+    private BigDecimal collectionamount;
+    
+    @JsonProperty("ward")
+    private String ward;
+    
+    @JsonProperty("oldconnectionno")
+    private String oldconnectionno;
+    
+    @JsonProperty("consumercode")
+    private String consumercode;
+    
+    @JsonProperty("connectiontype")
+    private String connectiontype;
+    
+    @JsonProperty("userid")
+    private String userid;
+    
+    @JsonProperty("address")
+    private String address;
+    
+    @JsonProperty("connectionHolderName")
+    private String connectionHolderName;
+    
+    @JsonProperty("contactNo")
+    private String mobile;
 	
 }

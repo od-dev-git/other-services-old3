@@ -2,7 +2,9 @@ package org.egov.report.repository.builder;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.WSReportUtils;
@@ -723,15 +725,27 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
         return query.toString();
     }
 	
-	public String getWaterMonthlyDemandQuery2(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList ,List<String> keySet) {
-        StringBuilder query = new StringBuilder(QUERY_FOR_WATER_MONTHLY_DEMANDS2);
-        query.append(AND_QUERY).append(" d.taxperiodto >= ? ");
-        preparedStmtList.add(searchCriteria.getFromDate());
-        query.append(AND_QUERY).append(" d.taxperiodto  <= ? ");
-        preparedStmtList.add(searchCriteria.getToDate());
-        query.append(AND_QUERY).append(" d.consumercode IN ( ? ) ");
-        preparedStmtList.add(String.join(" , ", keySet));
-    
+	public String getWaterMonthlyDemandQuery2(WSReportSearchCriteria searchCriteria, Map<String ,Object> preparedStmtList ,List<String> keySet) {
+      StringBuilder query = new StringBuilder(QUERY_FOR_WATER_MONTHLY_DEMANDS2);
+      query.append(" and d.taxperiodto >= :from ");
+      preparedStmtList.put("from", searchCriteria.getFromDate());
+      query.append(" and d.taxperiodto <= :to ");
+      preparedStmtList.put("to", searchCriteria.getToDate());
+      query.append("and d.consumercode IN  (:id)  ");
+      preparedStmtList.put("id", keySet);
+//        query.append(AND_QUERY).append(" d.taxperiodto >= ? ");
+//        preparedStmtList.add(searchCriteria.getFromDate());
+//        query.append(AND_QUERY).append(" d.taxperiodto  <= ? ");
+//        preparedStmtList.add(searchCriteria.getToDate());
+//        query.append(AND_QUERY).append(" d.consumercode IN ( ? ) ");
+////        preparedStmtList.add(String.join(" , ", keySet));
+//        String join = String.join(",",keySet);
+//        preparedStmtList.add(join);
+//     //   join.replace(',', "','");
+//     //   preparedStmtList.add(keySet.stream().map(id -> "\'"+id+"\'" ).collect(Collectors.joining(",")));
+//    
+	    
+	    
         return query.toString();
     }
 }
