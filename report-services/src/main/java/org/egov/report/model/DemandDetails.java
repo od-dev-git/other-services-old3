@@ -16,6 +16,8 @@ import lombok.Setter;
 public class DemandDetails {
 	
 	private String consumerCode;
+	
+	private String demandId;
 
 	private BigDecimal rebateAmount = BigDecimal.ZERO;
 
