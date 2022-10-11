@@ -29,9 +29,12 @@ public class PropertyDetailsReportRepository {
 	@Autowired
 	private ReportQueryBuilder queryBuilder;
 	
-	public List<PropertyDetailsResponse> getPropertyDetails(PropertyDetailsSearchCriteria criteria)
+	public List<PropertyDetailsResponse> getPropertyDetails(PropertyDetailsSearchCriteria criteria , Integer limit ,Integer offset)
 	{
 		List<Object> preparedPropStmtList = new ArrayList<>();
+		
+		criteria.setLimit(limit);
+		criteria.setOffset(offset);
 
 		String query = queryBuilder.getPropertyDetailsQuery(criteria, preparedPropStmtList);
 
@@ -67,5 +70,13 @@ public class PropertyDetailsReportRepository {
 
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());
 	}
+
+    public Long getPropertyDetailsCount(PropertyDetailsSearchCriteria searchCriteria) {
+        List<Object> preparedPropStmtList = new ArrayList<>();
+
+        String query = queryBuilder.getPropertyDetailsQueryCount(searchCriteria, preparedPropStmtList);
+
+        return jdbcTemplate.queryForObject(query, preparedPropStmtList.toArray(), Long.class);
+    }
 
 }

@@ -20,6 +20,7 @@ import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.repository.PropertyDetailsReportRepository;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.validator.PropertyReportValidator;
+import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.PropertyDemandResponse;
 import org.egov.report.web.model.PropertyDetailsResponse;
@@ -64,36 +65,52 @@ public class PropertyService {
 	@Autowired
 	private ObjectMapper mapper;
 
-	public List<PropertyDetailsResponse> getPropertyDetails(RequestInfo requestInfo,
-			PropertyDetailsSearchCriteria searchCriteria) {
-		// TODO Auto-generated method stub
+    public List<PropertyDetailsResponse> getPropertyDetails(RequestInfo requestInfo,
+            PropertyDetailsSearchCriteria searchCriteria) {
 
-		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
+        prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
-		List<PropertyDetailsResponse> propertyDetailResponse = pdRepository.getPropertyDetails(searchCriteria);
+        Long count = pdRepository.getPropertyDetailsCount(searchCriteria);
+        Integer limit = configuration.getReportLimit();
+        Integer offset = 0;
+        
+        List<PropertyDetailsResponse> response = new ArrayList();
+        
+        if (count > 0) {
+            List<PropertyDetailsResponse> propertyDetailResponse = new ArrayList();
+            while (count > 0) {
+                propertyDetailResponse = pdRepository.getPropertyDetails(searchCriteria, limit, offset);
+                count = count - limit;
+                offset += limit;
 
-		if (!CollectionUtils.isEmpty(propertyDetailResponse)) {
-			
-		// Extracting user info from userService
+                if (!CollectionUtils.isEmpty(propertyDetailResponse)) {
 
-		Set<String> userIds = propertyDetailResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
-				.active(true)
-				.userType(UserSearchCriteria.CITIZEN)
-				.tenantId(searchCriteria.getUlbName())
-				.build();
-		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
-		propertyDetailResponse.stream().forEach(item -> {
-			User user = userMap.get(item.getUuid());
-			if(user!=null) {
-				item.setMobileNumber(user.getMobileNumber());
-				item.setName(user.getName());
-			}
-		});
-		}			
-		return propertyDetailResponse;
-	}
+                    // Extracting user info from userService
+
+                    Set<String> userIds = propertyDetailResponse.stream().map(item -> item.getUuid()).distinct()
+                            .collect(Collectors.toSet());
+                    UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+                            .active(true)
+                            .userType(UserSearchCriteria.CITIZEN)
+                            .tenantId(searchCriteria.getUlbName())
+                            .build();
+                    List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+                    Map<String, User> userMap = usersInfo.stream()
+                            .collect(Collectors.toMap(User::getUuid, Function.identity()));
+                    propertyDetailResponse.stream().forEach(item -> {
+                        User user = userMap.get(item.getUuid());
+                        if (user != null) {
+                            item.setMobileNumber(user.getMobileNumber());
+                            item.setName(user.getName());
+                        }
+                    });
+                }
+                response.addAll(propertyDetailResponse);
+            }
+            
+        }
+        return response;
+    }
 
 	public List<TaxCollectorWiseCollectionResponse> getTaxCollectorWiseCollections(RequestInfo requestInfo,
 			PropertyDetailsSearchCriteria searchCriteria) {

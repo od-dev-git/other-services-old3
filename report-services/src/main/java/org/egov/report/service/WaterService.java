@@ -207,9 +207,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                         }
                     });
                 }
+                consumerMasterResponse.addAll(response);
             }
-            consumerMasterResponse.addAll(response);
-
+            
         }
         return response;
     }
@@ -328,7 +328,6 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
     public List<WaterMonthlyDemandResponse> waterMonthlyDemandReport(RequestInfo requestInfo,
             WSReportSearchCriteria searchCriteria) {
 
-        List<WaterMonthlyDemandResponse> response = new ArrayList<>();
         wsValidator.validateWaterMonthlyDemandReport(searchCriteria);
 
         Long count = reportRepository.getWaterConnectionCount(searchCriteria);
@@ -336,6 +335,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         Integer offset = 0;
 
         List<HashMap<String, String>> waterConnection = new ArrayList<>();
+        
+        List<WaterMonthlyDemandResponse> response = new ArrayList<>();
+        List<WaterMonthlyDemandResponse> finalResponse = new ArrayList<>();
         
         if (count > 0) {
    //         List<DemandDetails> wsDemandDetails = new ArrayList<>();
@@ -461,9 +463,10 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                         }
                     });
                 }
+                finalResponse.addAll(response);
             }
         }
-        return response;
+        return finalResponse;
     }	
 	
 	public List<WSConsumerHistoryResponse> wsConsumerHistoryReport(RequestInfo requestInfo, WSReportSearchCriteria criteria) {
@@ -631,8 +634,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                                     .build())
                             .collect(Collectors.toList());
                 }
+                monthWisePendingBillGenerationResponse.addAll(responseList);
             }
-            monthWisePendingBillGenerationResponse.addAll(responseList);
+            
         }
         return monthWisePendingBillGenerationResponse;
     }

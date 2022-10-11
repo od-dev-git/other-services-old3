@@ -229,6 +229,15 @@ public class ReportQueryBuilder {
             + WHERE + " d.businessservice = 'WS' " + AND_QUERY + " d.status = 'ACTIVE' "
             + AND_QUERY + " ewc.isoldapplication = 'false' " + AND_QUERY + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' ";
 	
+	private static final String PROPERTY_DETAILS_SUMMARY_QUERY_COUNT = SELECT
+            + "count(epp.propertyid)"
+            + FROM
+            + "eg_pt_property epp "
+            + INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id "
+            + LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
+            + INNER_JOIN + "eg_pt_address epa on epa.propertyid = epp.id "
+            + WHERE + "epp.status <> 'INACTIVE' "
+            + AND + "epp.tenantid = ? ";
 	
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -330,6 +339,12 @@ public class ReportQueryBuilder {
 				query.append(AND);
 				query.append(" epa.ward = '").append(criteria.getWardNo()).append("'");
 	     }
+	     
+         query.append(" limit ? ");
+         preparedPropStmtList.add(criteria.getLimit());
+
+         query.append(" offset ? ");
+         preparedPropStmtList.add(criteria.getOffset());
 
 	     return query.toString();
 	}
@@ -746,6 +761,20 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 //    
 	    
 	    
+        return query.toString();
+    }
+
+    public String getPropertyDetailsQueryCount(PropertyDetailsSearchCriteria searchCriteria,
+            List<Object> preparedPropStmtList) {
+        StringBuilder query = new StringBuilder(PROPERTY_DETAILS_SUMMARY_QUERY_COUNT);
+
+        preparedPropStmtList.add(searchCriteria.getUlbName());
+
+        if(searchCriteria.getWardNo() != null) {
+               query.append(AND);
+               query.append(" epa.ward = '").append(searchCriteria.getWardNo()).append("'");
+        }
+
         return query.toString();
     }
 }
