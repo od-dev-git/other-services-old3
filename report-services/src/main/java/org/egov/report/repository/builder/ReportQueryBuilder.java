@@ -230,7 +230,7 @@ public class ReportQueryBuilder {
             + AND_QUERY + " ewc.isoldapplication = 'false' " + AND_QUERY + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' ";
 	
 	private static final String PROPERTY_DETAILS_SUMMARY_QUERY_COUNT = SELECT
-            + "count(epp.propertyid)"
+            + "count(epp.propertyid) "
             + FROM
             + "eg_pt_property epp "
             + INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id "
@@ -239,6 +239,16 @@ public class ReportQueryBuilder {
             + WHERE + "epp.status <> 'INACTIVE' "
             + AND + "epp.tenantid = ? ";
 	
+	private static final String PROPERTY_DEMANDS_COUNT_QUERY = SELECT 
+            + "COUNT(consumercode) "
+            + FROM + " egbs_demand_v1 edv "
+            + INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid "
+            + INNER_JOIN +" eg_pt_address epa on epp.id =epa.propertyid "
+            + INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id "
+            + LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
+            + INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.id=edv2.demandid  "
+            + WHERE + "edv2.tenantid= ? " + AND + " edv2.tenantid= ? " + AND + " edv.status <> 'CANCELLED' "
+            + AND ;
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
 			queryString.append(" WHERE ");
@@ -419,9 +429,15 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			preparedPropStmtList.add(searchCriteria.getWardNo());
 		}
 		
+		query.append(" limit ? ");
+		preparedPropStmtList.add(searchCriteria.getLimit());
+        
+        query.append(" offset ? ");
+        preparedPropStmtList.add(searchCriteria.getOffset());
 	
 		return query.toString();
 	}
+	
 	public String getWaterMonthlyDemandQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
 
 		StringBuilder query = new StringBuilder(QUERY_FOR_WATER_MONTHLY_DEMAND);
@@ -776,5 +792,31 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
         }
 
         return query.toString();
+    }
+
+    public String getPropertyWiseDemandCountQuery(PropertyDetailsSearchCriteria searchCriteria,
+            List<Object> preparedPropStmtList) {
+        
+        StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_COUNT_QUERY);
+                
+                query.append(" edv.businessservice ='PT' ");
+                preparedPropStmtList.add(searchCriteria.getUlbName());
+                preparedPropStmtList.add(searchCriteria.getUlbName());
+                if(searchCriteria.getPropertyId() != null) {
+                    query.append(AND_QUERY).append(" edv.consumercode = ? ");
+                    preparedPropStmtList.add(searchCriteria.getPropertyId());
+                }
+
+                if(searchCriteria.getOldPropertyId() != null) {
+                    query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
+                    preparedPropStmtList.add(searchCriteria.getOldPropertyId());
+                }
+                
+                if(searchCriteria.getWardNo() != null) {
+                    query.append(AND_QUERY).append(" epa.ward  = ? ");
+                    preparedPropStmtList.add(searchCriteria.getWardNo());
+                }
+                
+                return query.toString();
     }
 }

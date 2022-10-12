@@ -42,9 +42,12 @@ public class PropertyDetailsReportRepository {
 
 	}
 
-	public HashMap<String,List<PropertyDemandResponse>> getPropertyDemandDetails(PropertyDetailsSearchCriteria searchCriteria) {
+	public HashMap<String,List<PropertyDemandResponse>> getPropertyDemandDetails(PropertyDetailsSearchCriteria searchCriteria , Integer limit ,Integer offset) {
 
 		List<Object> preparedPropStmtList = new ArrayList<>();
+		
+		searchCriteria.setLimit(limit);
+		searchCriteria.setOffset(offset);
 
 		String query = queryBuilder.getPropertyWiseDemandQuery(searchCriteria, preparedPropStmtList);
 
@@ -75,6 +78,14 @@ public class PropertyDetailsReportRepository {
         List<Object> preparedPropStmtList = new ArrayList<>();
 
         String query = queryBuilder.getPropertyDetailsQueryCount(searchCriteria, preparedPropStmtList);
+
+        return jdbcTemplate.queryForObject(query, preparedPropStmtList.toArray(), Long.class);
+    }
+
+    public Long getPropertyDemandDetailsCount(PropertyDetailsSearchCriteria searchCriteria) {
+        List<Object> preparedPropStmtList = new ArrayList<>();
+
+        String query = queryBuilder.getPropertyWiseDemandCountQuery(searchCriteria, preparedPropStmtList);
 
         return jdbcTemplate.queryForObject(query, preparedPropStmtList.toArray(), Long.class);
     }
