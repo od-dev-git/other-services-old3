@@ -41,6 +41,12 @@ public class PaymentQueryBuilder {
             " INNER JOIN egcl_paymentdetail pyd ON pyd.paymentid = py.id " +
             " INNER JOIN egcl_bill bill ON bill.id = pyd.billid " +
             " INNER JOIN egcl_billdetial bd ON bd.billid = bill.id " ;
+	
+	public static final String PAYMENTS_COUNT_QUERY = "SELECT count(*) " +
+            " FROM egcl_payment py  " +
+            " INNER JOIN egcl_paymentdetail pyd ON pyd.paymentid = py.id " +
+            " INNER JOIN egcl_bill bill ON bill.id = pyd.billid " +
+            " INNER JOIN egcl_billdetial bd ON bd.billid = bill.id " ;
 
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
@@ -71,7 +77,8 @@ public class PaymentQueryBuilder {
 		StringBuilder selectQuery = new StringBuilder(ID_QUERY);
 		addWhereClause(selectQuery, preparedStatementValues, searchCriteria);
 		StringBuilder finalQuery = addWrapperQuery(selectQuery);
-//		addPagination(finalQuery, preparedStatementValues, searchCriteria);
+		if(searchCriteria.getLimit() != null && searchCriteria.getOffset() != null)
+			addPagination(finalQuery, preparedStatementValues, searchCriteria);
 		return finalQuery.toString();
 	}
 
@@ -192,6 +199,25 @@ public class PaymentQueryBuilder {
         wrapper = wrapper.replace("{{PLACEHOLDER}}", builder.toString());
 
         return new StringBuilder(wrapper);
+
+    }
+
+	public String getIdCountQuery(PaymentSearchCriteria paymentSearchCriteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PAYMENTS_COUNT_QUERY);
+		addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+		//StringBuilder finalQuery = addWrapperQuery(selectQuery);
+		return selectQuery.toString();
+	}
+	
+	private void addPagination(StringBuilder query,Map<String, Object> preparedStatementValues,PaymentSearchCriteria criteria){
+        
+		int limit = criteria.getLimit();
+        int offset = criteria.getOffset();
+        query.append(" OFFSET :offset ");
+        query.append(" LIMIT :limit ");
+
+        preparedStatementValues.put("offset", offset);
+        preparedStatementValues.put("limit", limit);
 
     }
 }

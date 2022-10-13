@@ -91,4 +91,11 @@ public class PaymentRepository {
 
     }
 
+	public Long getPaymentsCount(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = paymentQueryBuilder.getIdCountQuery(paymentSearchCriteria, preparedStatementValues);
+        log.info("query: "+query);
+		return namedParameterJdbcTemplate.queryForObject(query, preparedStatementValues, Long.class);
+	}
+
 }
