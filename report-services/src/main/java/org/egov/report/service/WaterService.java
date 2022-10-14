@@ -596,13 +596,17 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         Integer offset = 0;
 
         List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
-        List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGenerationResponse = new ArrayList<>();
+        Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
+
+        
         if (count > 0) {
-            Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
             while (count > 0) {
-                connectionResponse = reportRepository.getWaterConnections(searchCriteria, limit, offset);
+                Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria, limit, offset);
+                connectionResponse.putAll(response);
                 count = count - limit;
                 offset += limit;
+            }
+        }
 
                 if (!CollectionUtils.isEmpty(connectionResponse)) {
 
@@ -628,11 +632,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                                     .build())
                             .collect(Collectors.toList());
                 }
-                monthWisePendingBillGenerationResponse.addAll(responseList);
-            }
-            
-        }
-        return monthWisePendingBillGenerationResponse;
+        return responseList;
     }
 	
 	public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedDemands(RequestInfo requestInfo,
