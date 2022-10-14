@@ -1,6 +1,7 @@
 package org.egov.report.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.stream.Stream;
 import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.BillDetail;
 import org.egov.report.model.IncentiveAnalysis;
 import org.egov.report.model.Payment;
@@ -40,6 +42,9 @@ public class IncentiveService {
 	@Autowired
 	private UserService userService;
 	
+	@Autowired
+	private ReportServiceConfiguration configuration;
+	
 	public IncentiveResponse getIncentiveReport(@Valid RequestInfo requestInfo,
 			IncentiveReportCriteria incentiveReportCriteria) {
 		
@@ -51,13 +56,23 @@ public class IncentiveService {
 				.tenantId(incentiveReportCriteria.getTenantId())
 				.fromDate(incentiveReportCriteria.getFromDate())
 				.toDate(incentiveReportCriteria.getToDate()).build();
-				
-		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
-		if(payments.isEmpty()) {
-			return IncentiveResponse.builder().incentiveAnalysis(Collections.emptyList()).build();
-		}
 		
-		Map<String, IncentiveAnalysis> incentiveAnalysis = prepareCollectionReport(payments);
+		Long count = paymentService.getPaymentsCount(requestInfo, paymentSearchCriteria);
+		
+		
+		Integer limit = configuration.getReportLimit();
+		Integer offset = 0;
+		Map<String, IncentiveAnalysis> incentiveAnalysis  = new HashMap<>();
+		if(count > 0) {
+			while(count > 0) {
+				paymentSearchCriteria.setOffset(offset);
+				paymentSearchCriteria.setLimit(limit);
+				List<Payment> tempPayments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+				prepareCollectionReport(tempPayments, incentiveAnalysis);
+				count = count - limit;
+				offset += limit;
+			}
+		}
 		
 		calculatorService.calculateIncentives(incentiveReportCriteria.getModule(), incentiveAnalysis);
 		
@@ -82,14 +97,14 @@ public class IncentiveService {
 		}
 	}
 
-	private Map<String, IncentiveAnalysis> prepareCollectionReport(List<Payment> payments) {
-		Map<String, IncentiveAnalysis> incentiveReport = new HashMap<>();
+	private void prepareCollectionReport(List<Payment> payments, Map<String, IncentiveAnalysis> incentiveAnalysis) {
+		
 		
 		for (Payment payment : payments) {
-			IncentiveAnalysis incentive = incentiveReport.get(payment.getAuditDetails().getCreatedBy());
+			IncentiveAnalysis incentive = incentiveAnalysis.get(payment.getAuditDetails().getCreatedBy());
 			if(incentive == null) {
 				incentive = IncentiveAnalysis.builder().empId(payment.getAuditDetails().getCreatedBy()).build();
-				incentiveReport.put(payment.getAuditDetails().getCreatedBy(), incentive);
+				incentiveAnalysis.put(payment.getAuditDetails().getCreatedBy(), incentive);
 			}
 			incentive.setTotalNoOfTransaction(incentive.getTotalNoOfTransaction()+1);
 			incentive.setTotalCollection(incentive.getTotalCollection().add(payment.getTotalAmountPaid()));
@@ -98,8 +113,6 @@ public class IncentiveService {
 			incentive.setCollectionTowardsArrear(incentive.getCollectionTowardsArrear().add(arrearCollected));
 			incentive.setCollectionTowardsCurrent(incentive.getCollectionTowardsCurrent().add(payment.getTotalAmountPaid().subtract(arrearCollected)));
 		}
-		
-		return incentiveReport;
 	}
 
 
