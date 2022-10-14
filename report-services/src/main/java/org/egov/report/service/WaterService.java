@@ -211,7 +211,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
             }
             
         }
-        return response;
+        return consumerMasterResponse;
     }
 	
 	public List<ConsumerPaymentHistoryResponse> consumerPaymentHistory(RequestInfo requestInfo,WSReportSearchCriteria criteria){
@@ -336,14 +336,13 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
         List<HashMap<String, String>> waterConnection = new ArrayList<>();
         
-        List<WaterMonthlyDemandResponse> response = new ArrayList<>();
+//        List<WaterMonthlyDemandResponse> response = new ArrayList<>();
         List<WaterMonthlyDemandResponse> finalResponse = new ArrayList<>();
         
         if (count > 0) {
-   //         List<DemandDetails> wsDemandDetails = new ArrayList<>();
-  //          Map<String, List<WaterDemandResponse>> wsDemandResponse = new HashMap<String, List<WaterDemandResponse>>();
             Map<String, List<WaterDemandResponse>> demandResponse = new HashMap<String, List<WaterDemandResponse>>();
             while (count > 0) {
+                List<WaterMonthlyDemandResponse> response = new ArrayList<>();
                 waterConnection = reportRepository.getWaterConnection(searchCriteria, limit, offset);
                 count = count - limit;
                 offset += limit;
@@ -428,11 +427,6 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                         }
                     });
                     
-                //    wsDemandDetails.addAll(demandDetails);
-                //    wsDemandResponse.putAll(demandResponse);
-//                }
-//
-//            }
 
                     final  Map<String, List<WaterDemandResponse>> wsDemandResponse = demandResponse;
                     demandDetails.parallelStream().forEach(item -> {
@@ -601,10 +595,10 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         Integer limit = configuration.getReportLimit();
         Integer offset = 0;
 
-        Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
         List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
         List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGenerationResponse = new ArrayList<>();
         if (count > 0) {
+            Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
             while (count > 0) {
                 connectionResponse = reportRepository.getWaterConnections(searchCriteria, limit, offset);
                 count = count - limit;

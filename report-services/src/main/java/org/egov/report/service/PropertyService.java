@@ -278,10 +278,25 @@ public class PropertyService {
 
 		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
-		List<PropertyWiseDemandResponse> propertyResponse = new ArrayList<PropertyWiseDemandResponse>();
+	//	List<PropertyWiseDemandResponse> propertyResponse = new ArrayList<PropertyWiseDemandResponse>();
+		List<PropertyWiseDemandResponse> propertyWiseDemandResponse = new ArrayList<PropertyWiseDemandResponse>();
+		
+		//
+        Long count = pdRepository.getPropertyDemandDetailsCount(searchCriteria);//
+        Integer limit = configuration.getReportLimit();
+        Integer offset = 0;
+        
+        if (count > 0) {
+            Map<String, List<PropertyDemandResponse>> propertyDemandResponse = new HashMap<>();
+            while (count > 0) {
+                List<PropertyWiseDemandResponse> propertyResponse = new ArrayList<PropertyWiseDemandResponse>();
+                propertyDemandResponse = pdRepository.getPropertyWiseDemandDetails(searchCriteria , limit , offset);
+                count = count - limit;
+                offset += limit;
+		//
 
-		Map<String, List<PropertyDemandResponse>> propertyDemandResponse = pdRepository
-				.getPropertyWiseDemandDetails(searchCriteria);
+//		Map<String, List<PropertyDemandResponse>> propertyDemandResponse = pdRepository
+//				.getPropertyWiseDemandDetails(searchCriteria);
 
 		if (!CollectionUtils.isEmpty(propertyDemandResponse)) {
 
@@ -313,8 +328,8 @@ public class PropertyService {
 					propertyInfo.setTaxperiodto(item.getTaxperiodto().toString());
 					propertyInfo.setUlb(item.getTenantid());
 					propertyInfo.setUuid(item.getUuid());
-					propertyInfo.setName(null);
-					propertyInfo.setMobilenumber(null);
+//					propertyInfo.setName(null);
+//					propertyInfo.setMobilenumber(null);
 					propertyInfo.setOldpropertyid(item.getOldpropertyid());
 					propertyInfo.setWard(item.getWard());
 
@@ -342,9 +357,13 @@ public class PropertyService {
 					item.setName(user.getName());
 				}
 			});
-		}
+        }
+propertyWiseDemandResponse.addAll(propertyResponse);
+
+    }
+}
 		
-		return propertyResponse;
+		return propertyWiseDemandResponse;
 	}
 
 	public List<PropertyWiseCollectionResponse> getpropertyCollectionReport(RequestInfo requestInfo,
@@ -355,7 +374,16 @@ public class PropertyService {
 		List<PropertyWiseCollectionResponse> propertyWiseCollectionResponses = new ArrayList<PropertyWiseCollectionResponse>();
 
 		// Search property by criteria
-		List<PropertyDetailsResponse> properties = pdRepository.getPropertiesDetail(searchCriteria);
+		Long count = pdRepository.getPropertiesDetailCount(searchCriteria);
+        Integer limit = configuration.getReportLimit();
+        Integer offset = 0;
+        
+        if (count > 0) {
+            List<PropertyDetailsResponse> properties = new ArrayList<>();
+            while (count > 0) {
+                properties = pdRepository.getPropertiesDetail(searchCriteria , limit , offset);
+                count = count - limit;
+                offset += limit;
 		
 		if(!CollectionUtils.isEmpty(properties)) {
 			
@@ -428,11 +456,12 @@ public class PropertyService {
 			});
 			
 
-
-
 		}
-		
-		return propertyWiseCollectionResponses;
-	}
+    }
+
+}
+
+        return propertyWiseCollectionResponses;
+    }
 
 }
