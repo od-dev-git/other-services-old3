@@ -69,4 +69,10 @@ public class PaymentService {
 		return payments;
 	}
 
+	public Long getPaymentsCount(@Valid RequestInfo requestInfo, PaymentSearchCriteria paymentSearchCriteria) {
+		
+		return paymentRepository.getPaymentsCount(paymentSearchCriteria);
+	
+	}
+
 }
