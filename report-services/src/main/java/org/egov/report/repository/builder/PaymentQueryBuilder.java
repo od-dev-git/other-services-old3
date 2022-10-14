@@ -42,7 +42,7 @@ public class PaymentQueryBuilder {
             " INNER JOIN egcl_bill bill ON bill.id = pyd.billid " +
             " INNER JOIN egcl_billdetial bd ON bd.billid = bill.id " ;
 	
-	public static final String PAYMENTS_COUNT_QUERY = "SELECT count(*) " +
+	public static final String PAYMENTS_COUNT_QUERY = "SELECT count(DISTINCT py.id) " +
             " FROM egcl_payment py  " +
             " INNER JOIN egcl_paymentdetail pyd ON pyd.paymentid = py.id " +
             " INNER JOIN egcl_bill bill ON bill.id = pyd.billid " +
