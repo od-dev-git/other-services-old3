@@ -29,12 +29,12 @@ public class PropertyDetailsReportRepository {
 	@Autowired
 	private ReportQueryBuilder queryBuilder;
 	
-	public List<PropertyDetailsResponse> getPropertyDetails(PropertyDetailsSearchCriteria criteria , Integer limit ,Integer offset)
+	public List<PropertyDetailsResponse> getPropertyDetails(PropertyDetailsSearchCriteria criteria)
 	{
 		List<Object> preparedPropStmtList = new ArrayList<>();
 		
-		criteria.setLimit(limit);
-		criteria.setOffset(offset);
+//		criteria.setLimit(limit);
+//		criteria.setOffset(offset);
 
 		String query = queryBuilder.getPropertyDetailsQuery(criteria, preparedPropStmtList);
 
@@ -42,12 +42,12 @@ public class PropertyDetailsReportRepository {
 
 	}
 
-	public HashMap<String,List<PropertyDemandResponse>> getPropertyDemandDetails(PropertyDetailsSearchCriteria searchCriteria , Integer limit ,Integer offset) {
+	public HashMap<String,List<PropertyDemandResponse>> getPropertyDemandDetails(PropertyDetailsSearchCriteria searchCriteria) {
 
 		List<Object> preparedPropStmtList = new ArrayList<>();
 		
-		searchCriteria.setLimit(limit);
-		searchCriteria.setOffset(offset);
+//		searchCriteria.setLimit(limit);
+//		searchCriteria.setOffset(offset);
 
 		String query = queryBuilder.getPropertyWiseDemandQuery(searchCriteria, preparedPropStmtList);
 
@@ -55,12 +55,12 @@ public class PropertyDetailsReportRepository {
 	}
 
 	public HashMap<String, List<PropertyDemandResponse>> getPropertyWiseDemandDetails(
-			PropertyDetailsSearchCriteria searchCriteria , Integer limit ,Integer offset) {
+			PropertyDetailsSearchCriteria searchCriteria ) {
 		
 		List<Object> preparedPropStmtList = new ArrayList<>();
 		
-		searchCriteria.setLimit(limit);
-        searchCriteria.setOffset(offset);
+//		searchCriteria.setLimit(limit);
+//      searchCriteria.setOffset(offset);
 
 		String query = queryBuilder.getPropertyWiseDemandQuery(searchCriteria, preparedPropStmtList);
 
@@ -68,12 +68,12 @@ public class PropertyDetailsReportRepository {
 		
 	}
 
-	public List<PropertyDetailsResponse> getPropertiesDetail(PropertyDetailsSearchCriteria searchCriteria , Integer Limit , Integer Offset) {
+	public List<PropertyDetailsResponse> getPropertiesDetail(PropertyDetailsSearchCriteria searchCriteria) {
 
 		List<Object> preparedPropStmtList = new ArrayList<>();
 
-		searchCriteria.setLimit(Limit);
-		searchCriteria.setOffset(Offset);
+//		searchCriteria.setLimit(Limit);
+//		searchCriteria.setOffset(Offset);
 		String query = queryBuilder.getPropertiesDetail(searchCriteria, preparedPropStmtList);
 
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());

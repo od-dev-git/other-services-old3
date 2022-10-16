@@ -178,7 +178,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         List<ConsumerMasterWSReportResponse> response = new ArrayList();
         if (count > 0) {
             while (count > 0) {
-                response = reportRepository.getComsumerMasterWSReport(requestInfo, criteria, limit, offset);
+                criteria.setLimit(limit);
+                criteria.setOffset(offset);
+                response = reportRepository.getComsumerMasterWSReport(requestInfo, criteria);
                 count = count - limit;
                 offset += limit;
 
@@ -343,7 +345,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
             Map<String, List<WaterDemandResponse>> demandResponse = new HashMap<String, List<WaterDemandResponse>>();
             while (count > 0) {
                 List<WaterMonthlyDemandResponse> response = new ArrayList<>();
-                waterConnection = reportRepository.getWaterConnection(searchCriteria, limit, offset);
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                waterConnection = reportRepository.getWaterConnection(searchCriteria);
                 count = count - limit;
                 offset += limit;
 
@@ -601,7 +605,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         
         if (count > 0) {
             while (count > 0) {
-                Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria, limit, offset);
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria);
                 connectionResponse.putAll(response);
                 count = count - limit;
                 offset += limit;
@@ -617,7 +623,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                     offset = 0;
                     if (count > 0) {
                         while (count > 0) {
-                            List<String> responses = reportRepository.getDemands(searchCriteria, limit, offset);
+                            searchCriteria.setLimit(limit);
+                            searchCriteria.setOffset(offset);
+                            List<String> responses = reportRepository.getDemands(searchCriteria);
                             demandResponses.addAll(responses);
                             count = count - limit;
                             offset += limit;
@@ -650,7 +658,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		List<WsSchedulerBasedDemandsGenerationReponse> response = new ArrayList();
 		if(count > 0) {
 			while(count > 0) {	
-				response.addAll(reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria, limit, offset));
+			    searchCriteria.setLimit(limit);
+			    searchCriteria.setOffset(offset);
+				response.addAll(reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria));
 				count = count - limit;
 				offset += limit;
 			}

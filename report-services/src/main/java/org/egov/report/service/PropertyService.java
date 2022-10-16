@@ -80,7 +80,9 @@ public class PropertyService {
         if (count > 0) {
             List<PropertyDetailsResponse> propertyDetailResponse = new ArrayList();
             while (count > 0) {
-                propertyDetailResponse = pdRepository.getPropertyDetails(searchCriteria, limit, offset);
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                propertyDetailResponse = pdRepository.getPropertyDetails(searchCriteria);
                 count = count - limit;
                 offset += limit;
 
@@ -227,7 +229,9 @@ public class PropertyService {
         if (count > 0) {
             Map<String, List<PropertyDemandResponse>> propertyDemandResponse = new HashMap<>();
             while (count > 0) {
-                propertyDemandResponse = pdRepository.getPropertyDemandDetails(searchCriteria , limit , offset);
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                propertyDemandResponse = pdRepository.getPropertyDemandDetails(searchCriteria);
                 count = count - limit;
                 offset += limit;
 
@@ -290,7 +294,9 @@ public class PropertyService {
             Map<String, List<PropertyDemandResponse>> propertyDemandResponse = new HashMap<>();
             while (count > 0) {
                 List<PropertyWiseDemandResponse> propertyResponse = new ArrayList<PropertyWiseDemandResponse>();
-                propertyDemandResponse = pdRepository.getPropertyWiseDemandDetails(searchCriteria , limit , offset);
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                propertyDemandResponse = pdRepository.getPropertyWiseDemandDetails(searchCriteria);
                 count = count - limit;
                 offset += limit;
 		//
@@ -381,7 +387,9 @@ propertyWiseDemandResponse.addAll(propertyResponse);
         if (count > 0) {
             List<PropertyDetailsResponse> properties = new ArrayList<>();
             while (count > 0) {
-                properties = pdRepository.getPropertiesDetail(searchCriteria , limit , offset);
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                properties = pdRepository.getPropertiesDetail(searchCriteria);
                 count = count - limit;
                 offset += limit;
 		

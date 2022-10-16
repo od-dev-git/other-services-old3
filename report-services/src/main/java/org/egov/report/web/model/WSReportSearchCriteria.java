@@ -45,5 +45,11 @@ public class WSReportSearchCriteria {
 	
 	@JsonProperty("oldConnectionNo")
 	private String oldConnectionNo;
+	
+	@JsonProperty("limit")
+    private Integer limit ;
+    
+    @JsonProperty("offset")
+    private Integer offset ;
 
 }
