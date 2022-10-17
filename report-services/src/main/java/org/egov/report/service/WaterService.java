@@ -164,58 +164,58 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 	 return billSummResponses;
 	}
 	
-	public List<ConsumerMasterWSReportResponse> consumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria) {
-		
-		//validate the search criteria
-		wsValidator.validateconsumerMasterWSReport(criteria);
-		
-		Long count = reportRepository.getConsumerMasterReportCount(criteria);
-		Integer limit = configuration.getReportLimit();
-		if(limit == null)
-			limit = 10000;
-		Integer offset =  0;
-		List<ConsumerMasterWSReportResponse> response = new ArrayList();
-		if(count > 0) {
-			while(count > 0) {	
-				response.addAll(reportRepository.getComsumerMasterWSReport(requestInfo,criteria, limit, offset));
-				count = count - limit;
-				offset += limit;
-			}
-		}
-		
-		//Extracting user info from userService
-		if(!CollectionUtils.isEmpty(response)) {
-			
-			Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct().collect(Collectors.toSet());
-			
-			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().uuid(userIds)
-					.active(true)
-					.userType(UserSearchCriteria.CITIZEN)
-					.tenantId(criteria.getTenantId())
-					.build();
-			
-			List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, userSearchCriteria);
-			Map<String, OwnerInfo> userMap = usersInfo.stream().collect(Collectors.toMap(OwnerInfo::getUuid, Function.identity()));
-			
-			response.stream().forEach(item -> {
-				OwnerInfo user = userMap.get(item.getUserId());
-				if(user!=null) {
-					item.setUserName(user.getName());
-					item.setUserMobile(user.getMobileNumber());
-					item.setUserAddress(user.getCorrespondenceAddress());
-				}
-			});
-		}
-		return response;
-	}
+    public List<ConsumerMasterWSReportResponse> consumerMasterWSReport(RequestInfo requestInfo,
+            WSReportSearchCriteria criteria) {
+
+        // validate the search criteria
+        wsValidator.validateconsumerMasterWSReport(criteria);
+
+        Long count = reportRepository.getConsumerMasterReportCount(criteria);
+        Integer limit = configuration.getReportLimit();
+
+        Integer offset = 0;
+        List<ConsumerMasterWSReportResponse> consumerMasterResponse = new ArrayList();
+        List<ConsumerMasterWSReportResponse> response = new ArrayList();
+        if (count > 0) {
+            while (count > 0) {
+                criteria.setLimit(limit);
+                criteria.setOffset(offset);
+                response = reportRepository.getComsumerMasterWSReport(requestInfo, criteria);
+                count = count - limit;
+                offset += limit;
+
+                // Extracting user info from userService
+                if (!CollectionUtils.isEmpty(response)) {
+
+                    Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct()
+                            .collect(Collectors.toSet());
+
+                    UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().uuid(userIds)
+                            .active(true)
+                            .userType(UserSearchCriteria.CITIZEN)
+                            .tenantId(criteria.getTenantId())
+                            .build();
+
+                    List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, userSearchCriteria);
+                    Map<String, OwnerInfo> userMap = usersInfo.stream()
+                            .collect(Collectors.toMap(OwnerInfo::getUuid, Function.identity()));
+
+                    response.stream().forEach(item -> {
+                        OwnerInfo user = userMap.get(item.getUserId());
+                        if (user != null) {
+                            item.setUserName(user.getName());
+                            item.setUserMobile(user.getMobileNumber());
+                            item.setUserAddress(user.getCorrespondenceAddress());
+                        }
+                    });
+                }
+                consumerMasterResponse.addAll(response);
+            }
+            
+        }
+        return consumerMasterResponse;
+    }
 	
-	//what is this
-	private List<ConsumerMasterWSReportResponse> ArrayList() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
 	public List<ConsumerPaymentHistoryResponse> consumerPaymentHistory(RequestInfo requestInfo,WSReportSearchCriteria criteria){
 		
 		wsValidator.validateconsumerPaymentHistoryReport(criteria);
@@ -327,82 +327,69 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 	}
 	
-	public List<WaterMonthlyDemandResponse> waterMonthlyDemandReport(RequestInfo requestInfo,
+    public List<WaterMonthlyDemandResponse> waterMonthlyDemandReport(RequestInfo requestInfo,
             WSReportSearchCriteria searchCriteria) {
 
-        List<WaterMonthlyDemandResponse> response = new ArrayList<>();
         wsValidator.validateWaterMonthlyDemandReport(searchCriteria);
 
         Long count = reportRepository.getWaterConnectionCount(searchCriteria);
-        Integer limit=configuration.getReportLimit();
-        Integer offset = 0;     
-        
+        Integer limit = configuration.getReportLimit();
+        Integer offset = 0;
+
         List<HashMap<String, String>> waterConnection = new ArrayList<>();
-        if(count>0) {
-            while(count>0) {
-                List<HashMap<String, String>> connections = reportRepository.getWaterConnection(searchCriteria,limit,offset);
-                waterConnection.addAll(connections);
+        
+//        List<WaterMonthlyDemandResponse> response = new ArrayList<>();
+        List<WaterMonthlyDemandResponse> finalResponse = new ArrayList<>();
+        
+        if (count > 0) {
+            Map<String, List<WaterDemandResponse>> demandResponse = new HashMap<String, List<WaterDemandResponse>>();
+            while (count > 0) {
+                List<WaterMonthlyDemandResponse> response = new ArrayList<>();
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                waterConnection = reportRepository.getWaterConnection(searchCriteria);
                 count = count - limit;
                 offset += limit;
-            }
-        }
-        
-        //get demand details response here //change here
-        Integer chunkSize=configuration.getReportLimit();
-        final AtomicInteger counter = new AtomicInteger();
 
-        final Collection<List<HashMap<String, String>>> result = waterConnection.parallelStream()
-            .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize))
-            .values();
-
-
-        Map<String, List<WaterDemandResponse>> demandResponse = new HashMap<String, List<WaterDemandResponse>>();
-        for(List<HashMap<String, String>> parameter : result) {
-            
-            List<String> keySet = new ArrayList<>();
-                    parameter.parallelStream().forEach(item -> {
-                    List<String> keySetValue =  item.keySet().parallelStream().collect(Collectors.toList()); 
+                List<String> keySet = new ArrayList<>();
+                waterConnection.parallelStream().forEach(item -> {
+                    List<String> keySetValue = item.keySet().parallelStream().collect(Collectors.toList());
                     keySet.addAll(keySetValue);
-            });
-                    
-            Map<String, List<WaterDemandResponse>> addedDemandResponse = reportRepository.getWaterMonthlyDemandReports(searchCriteria , keySet);
-            demandResponse.putAll(addedDemandResponse);
+                });
 
-        }
+                demandResponse = reportRepository.getWaterMonthlyDemandReports(searchCriteria, keySet);
 
+                if (!CollectionUtils.isEmpty(demandResponse)) {
+                    List<DemandDetails> demandDetails = new ArrayList<>();
 
-        if(!CollectionUtils.isEmpty(demandResponse)) {
-        List<DemandDetails> demandDetails = new ArrayList<>();
-
-        //calculate current demand details and arrears here
-        demandResponse.entrySet().parallelStream().forEach(items->
-                    {
+                    // calculate current demand details and arrears here
+                    demandResponse.entrySet().parallelStream().forEach(items -> {
                         DemandDetails details = new DemandDetails();
                         details.setDemandId(items.getKey());
 
                         Long fromDateCurrentDemand = items.getValue().get(0).getTaxperiodfrom();
                         Long toDateCurrentDemand = items.getValue().get(0).getTaxperiodto();
 
-                        items.getValue().parallelStream().forEach(item -> 
-                        {   
-                            if(item.getTaxperiodto() >= fromDateCurrentDemand && item.getTaxperiodto() <= toDateCurrentDemand) {
+                        items.getValue().parallelStream().forEach(item -> {
+                            if (item.getTaxperiodto() >= fromDateCurrentDemand
+                                    && item.getTaxperiodto() <= toDateCurrentDemand) {
 
                                 details.setDemandPeriodFrom(wsReportUtils.getConvertedDate(item.getTaxperiodfrom()));
                                 details.setDemandPeriodTo(wsReportUtils.getConvertedDate(item.getTaxperiodto()));
-                                if(item.getTaxheadcode().equalsIgnoreCase("WS_CHARGE")) {
+                                if (item.getTaxheadcode().equalsIgnoreCase("WS_CHARGE")) {
                                     details.setTaxAmount(details.getTaxAmount().add(item.getTaxamount()));
                                     details.setCollectedAmt(details.getCollectedAmt().add(item.getCollectionamount()));
                                 }
-                                if(item.getTaxheadcode().equalsIgnoreCase("WS_TIME_REBATE"))
+                                if (item.getTaxheadcode().equalsIgnoreCase("WS_TIME_REBATE"))
                                     details.setRebateAmount(details.getRebateAmount().add(item.getTaxamount()));
-                                if(item.getTaxheadcode().equalsIgnoreCase("WS_ADVANCE_CARRYFORWARD"))
-                                    details.setAdvance(details.getAdvance().add(item.getTaxamount()));  
-                                if(item.getTaxheadcode().equalsIgnoreCase("WS_TIME_PENALTY"))
-                                    details.setPenaltyAmount(details.getPenaltyAmount().add(item.getTaxamount()));  
-                            }
-                            else {
+                                if (item.getTaxheadcode().equalsIgnoreCase("WS_ADVANCE_CARRYFORWARD"))
+                                    details.setAdvance(details.getAdvance().add(item.getTaxamount()));
+                                if (item.getTaxheadcode().equalsIgnoreCase("WS_TIME_PENALTY"))
+                                    details.setPenaltyAmount(details.getPenaltyAmount().add(item.getTaxamount()));
+                            } else {
                                 details.setArrears(details.getArrears().add(item.getTaxamount()));
-                                details.setArrearsCollectedAmount(details.getArrearsCollectedAmount().add(item.getCollectionamount()));
+                                details.setArrearsCollectedAmount(
+                                        details.getArrearsCollectedAmount().add(item.getCollectionamount()));
                             }
                         });
                         BigDecimal taxAmt = details.getTaxAmount();
@@ -412,65 +399,74 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                         BigDecimal arrears = details.getArrears();
                         BigDecimal rebateAmt = details.getRebateAmount();
                         BigDecimal arrearsCollectedAmt = details.getArrearsCollectedAmount();
-                        details.setAmountAfterDueDate(wsReportUtils.CalculateAmtAfterDueDate(taxAmt, collectedAmt, penaltyAmt, advanceAmt, arrears, arrearsCollectedAmt));
-                        details.setAmountBeforeDueDate(wsReportUtils.CalculateAmtBeforeDueDate(taxAmt, collectedAmt, penaltyAmt, advanceAmt, arrears, rebateAmt, arrearsCollectedAmt));
-                        details.setTotalDue(wsReportUtils.calculateTotalDue(taxAmt, collectedAmt, penaltyAmt, advanceAmt, arrears, arrearsCollectedAmt));
+                        details.setAmountAfterDueDate(wsReportUtils.CalculateAmtAfterDueDate(taxAmt, collectedAmt,
+                                penaltyAmt, advanceAmt, arrears, arrearsCollectedAmt));
+                        details.setAmountBeforeDueDate(wsReportUtils.CalculateAmtBeforeDueDate(taxAmt, collectedAmt,
+                                penaltyAmt, advanceAmt, arrears, rebateAmt, arrearsCollectedAmt));
+                        details.setTotalDue(wsReportUtils.calculateTotalDue(taxAmt, collectedAmt, penaltyAmt,
+                                advanceAmt, arrears, arrearsCollectedAmt));
                         demandDetails.add(details);
                     });
 
-        //get Water Connection details here
-        Set<String> userIds = demandResponse.entrySet().parallelStream().map(entry-> entry.getValue().get(0).getUserid())
-                .distinct().collect(Collectors.toSet());
-        UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
-                .active(true)
-                .userType(UserSearchCriteria.CITIZEN)
-                .tenantId(searchCriteria.getTenantId())
-                .build();
-        
-        List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-        Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
+                    // get Water Connection details here
+                    Set<String> userIds = demandResponse.entrySet().parallelStream()
+                            .map(entry -> entry.getValue().get(0).getUserid())
+                            .distinct().collect(Collectors.toSet());
+                    UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+                            .active(true)
+                            .userType(UserSearchCriteria.CITIZEN)
+                            .tenantId(searchCriteria.getTenantId())
+                            .build();
 
-        demandResponse.entrySet().parallelStream().forEach(item -> {
-            User user = userMap.get(item.getValue().get(0).getUserid());
-            if(user!=null) {
-                item.getValue().get(0).setMobile(user.getMobileNumber());
-                item.getValue().get(0).setConnectionHolderName(user.getName());
-                item.getValue().get(0).setAddress(user.getCorrespondenceAddress());
-            }
-        });
-        
-        //map water connection and demand details here
-                demandDetails.parallelStream().forEach(item -> {
+                    List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+                    Map<String, User> userMap = usersInfo.stream()
+                            .collect(Collectors.toMap(User::getUuid, Function.identity()));
 
-                    List<WaterDemandResponse> details = demandResponse.get(item.getDemandId());
-                    if(details != null) {
+                    demandResponse.entrySet().parallelStream().forEach(item -> {
+                        User user = userMap.get(item.getValue().get(0).getUserid());
+                        if (user != null) {
+                            item.getValue().get(0).setMobile(user.getMobileNumber());
+                            item.getValue().get(0).setConnectionHolderName(user.getName());
+                            item.getValue().get(0).setAddress(user.getCorrespondenceAddress());
+                        }
+                    });
+                    
+
+                    final  Map<String, List<WaterDemandResponse>> wsDemandResponse = demandResponse;
+                    demandDetails.parallelStream().forEach(item -> {
                         
-                        WaterMonthlyDemandResponse res = new WaterMonthlyDemandResponse();
-                        res.setAdvanceAmt(item.getAdvance());
-                        res.setArrearAmt(item.getArrears());
-                        res.setCollectedAmt(item.getCollectedAmt());
-                        res.setConnectionNo(details.get(0).getConsumercode());
-                        res.setConnectionType(details.get(0).getConnectiontype());
-                        res.setCurrentDemandAmt(item.getTaxAmount());
-                        res.setPenaltyAmt(item.getPenaltyAmount());
-                        res.setRebateAmt(item.getRebateAmount());
-                        res.setTaxPeriodTo(item.getDemandPeriodTo());
-                        res.setTaxPriodFrom(item.getDemandPeriodFrom());
-                        res.setTenantId(details.get(0).getTenantid());
-                        res.setWard(details.get(0).getWard());
-                        res.setConnectionHolderName(details.get(0).getConnectionHolderName());
-                        res.setMobile(details.get(0).getMobile());
-                        res.setAddrss(details.get(0).getAddress());
-                        res.setPayableAfterRebateAmt(item.getAmountBeforeDueDate());
-                        res.setPayableWithPenaltyAmt(item.getAmountAfterDueDate());
-                        res.setTotalDueAmt(item.getTotalDue());
-                        response.add(res);
-                    }
-                });
-        
-    }
-        return response;
+                        List<WaterDemandResponse> details = wsDemandResponse.get(item.getDemandId());
+                        if (details != null) {
+
+                            WaterMonthlyDemandResponse res = new WaterMonthlyDemandResponse();
+                            res.setAdvanceAmt(item.getAdvance());
+                            res.setArrearAmt(item.getArrears());
+                            res.setCollectedAmt(item.getCollectedAmt());
+                            res.setConnectionNo(details.get(0).getConsumercode());
+                            res.setConnectionType(details.get(0).getConnectiontype());
+                            res.setCurrentDemandAmt(item.getTaxAmount());
+                            res.setPenaltyAmt(item.getPenaltyAmount());
+                            res.setRebateAmt(item.getRebateAmount());
+                            res.setTaxPeriodTo(item.getDemandPeriodTo());
+                            res.setTaxPriodFrom(item.getDemandPeriodFrom());
+                            res.setTenantId(details.get(0).getTenantid());
+                            res.setWard(details.get(0).getWard());
+                            res.setConnectionHolderName(details.get(0).getConnectionHolderName());
+                            res.setMobile(details.get(0).getMobile());
+                            res.setAddrss(details.get(0).getAddress());
+                            res.setPayableAfterRebateAmt(item.getAmountBeforeDueDate());
+                            res.setPayableWithPenaltyAmt(item.getAmountAfterDueDate());
+                            res.setTotalDueAmt(item.getTotalDue());
+                            response.add(res);
+                        }
+                    });
+                }
+                finalResponse.addAll(response);
+            }
+        }
+        return finalResponse;
     }	
+	
 	public List<WSConsumerHistoryResponse> wsConsumerHistoryReport(RequestInfo requestInfo, WSReportSearchCriteria criteria) {
 		
 		List<WSConsumerHistoryResponse> response = new ArrayList<>();
@@ -592,54 +588,60 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 	}
 
 
-	public List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGeneration(RequestInfo requestInfo,
-			WSReportSearchCriteria searchCriteria) {
-		
-		List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
-		wsValidator.validateMonthWisePendingBillGeneration(searchCriteria);
-		searchCriteria.setConnectionType(ReportConstants.NON_METERED);
-		
-		Long count = reportRepository.getWaterConnectionsCount(searchCriteria);
-		Integer limit = configuration.getReportLimit();
-		Integer offset = 0;		
-		
-		Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
-		if(count>0) {
-			while(count>0) {
-				Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria , limit ,offset);
-				connectionResponse.putAll(response);
-				count = count - limit;
-				offset += limit;
-			}
-		}
-		
-		if(!CollectionUtils.isEmpty(connectionResponse)) {
+    public List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGeneration(RequestInfo requestInfo,
+            WSReportSearchCriteria searchCriteria) {
 
-			count = reportRepository.getDemandsCount(searchCriteria);
-			List<String> demandResponses = new ArrayList<>();
-			
-			 limit = configuration.getReportLimit();
-			 offset = 0;	
-			if(count>0) {
-				while(count>0) {
-					List<String> responses = reportRepository.getDemands(searchCriteria, limit ,offset);
-					demandResponses.addAll(responses);
-					count = count - limit;
-					offset += limit;
-				}
-			}
-			
-			
-		
-		responseList =connectionResponse.entrySet().parallelStream().filter(wcd -> !demandResponses.contains(wcd.getKey()))
-			.map(item -> MonthWisePendingBillGenerationResponse.builder()
-					.consumerCode(item.getKey())
-					.ulb(item.getValue().getTenantid().substring(3))
-					.build()).collect(Collectors.toList());
-		}
-		
-		return responseList;
-	}
+        
+        wsValidator.validateMonthWisePendingBillGeneration(searchCriteria);
+        searchCriteria.setConnectionType(ReportConstants.NON_METERED);
+
+        Long count = reportRepository.getWaterConnectionsCount(searchCriteria);
+        Integer limit = configuration.getReportLimit();
+        Integer offset = 0;
+
+        List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
+        Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
+
+        
+        if (count > 0) {
+            while (count > 0) {
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria);
+                connectionResponse.putAll(response);
+                count = count - limit;
+                offset += limit;
+            }
+        }
+
+                if (!CollectionUtils.isEmpty(connectionResponse)) {
+
+                    count = reportRepository.getDemandsCount(searchCriteria);
+                    List<String> demandResponses = new ArrayList<>();
+
+                    limit = configuration.getReportLimit();
+                    offset = 0;
+                    if (count > 0) {
+                        while (count > 0) {
+                            searchCriteria.setLimit(limit);
+                            searchCriteria.setOffset(offset);
+                            List<String> responses = reportRepository.getDemands(searchCriteria);
+                            demandResponses.addAll(responses);
+                            count = count - limit;
+                            offset += limit;
+                        }
+                    }
+
+                    responseList = connectionResponse.entrySet().parallelStream()
+                            .filter(wcd -> !demandResponses.contains(wcd.getKey()))
+                            .map(item -> MonthWisePendingBillGenerationResponse.builder()
+                                    .consumerCode(item.getKey())
+                                    .ulb(item.getValue().getTenantid().substring(3))
+                                    .build())
+                            .collect(Collectors.toList());
+                }
+        return responseList;
+    }
 	
 	public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedDemands(RequestInfo requestInfo,
 			WSReportSearchCriteria searchCriteria) {
@@ -651,13 +653,14 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		log.info("entering into query");
 		Long count = reportRepository.getSchedulerBasedWSDemandCount(requestInfo, searchCriteria);
 		Integer limit = configuration.getReportLimit();
-		if(limit == null)
-			limit = 10000;
+
 		Integer offset =  0;
 		List<WsSchedulerBasedDemandsGenerationReponse> response = new ArrayList();
 		if(count > 0) {
 			while(count > 0) {	
-				response.addAll(reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria, limit, offset));
+			    searchCriteria.setLimit(limit);
+			    searchCriteria.setOffset(offset);
+				response.addAll(reportRepository.getSchedulerBasedWSDemands(requestInfo,searchCriteria));
 				count = count - limit;
 				offset += limit;
 			}

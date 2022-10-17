@@ -2,6 +2,7 @@ package org.egov.report.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.repository.PropertyDetailsReportRepository;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.validator.PropertyReportValidator;
+import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.PropertyDemandResponse;
 import org.egov.report.web.model.PropertyDetailsResponse;
@@ -64,112 +66,131 @@ public class PropertyService {
 	@Autowired
 	private ObjectMapper mapper;
 
-	public List<PropertyDetailsResponse> getPropertyDetails(RequestInfo requestInfo,
-			PropertyDetailsSearchCriteria searchCriteria) {
-		// TODO Auto-generated method stub
+    public List<PropertyDetailsResponse> getPropertyDetails(RequestInfo requestInfo,
+            PropertyDetailsSearchCriteria searchCriteria) {
 
-		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
+        prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
-		List<PropertyDetailsResponse> propertyDetailResponse = pdRepository.getPropertyDetails(searchCriteria);
+        Long count = pdRepository.getPropertyDetailsCount(searchCriteria);
+        Integer limit = configuration.getReportLimit();
+        Integer offset = 0;
+        
+        List<PropertyDetailsResponse> response = new ArrayList();
+        
+        if (count > 0) {
+            List<PropertyDetailsResponse> propertyDetailResponse = new ArrayList();
+            while (count > 0) {
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                propertyDetailResponse = pdRepository.getPropertyDetails(searchCriteria);
+                count = count - limit;
+                offset += limit;
 
-		if (!CollectionUtils.isEmpty(propertyDetailResponse)) {
-			
-		// Extracting user info from userService
+                if (!CollectionUtils.isEmpty(propertyDetailResponse)) {
 
-		Set<String> userIds = propertyDetailResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
-				.active(true)
-				.userType(UserSearchCriteria.CITIZEN)
-				.tenantId(searchCriteria.getUlbName())
-				.build();
-		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
-		propertyDetailResponse.stream().forEach(item -> {
-			User user = userMap.get(item.getUuid());
-			if(user!=null) {
-				item.setMobileNumber(user.getMobileNumber());
-				item.setName(user.getName());
-			}
-		});
-		}			
-		return propertyDetailResponse;
-	}
+                    // Extracting user info from userService
 
-	public List<TaxCollectorWiseCollectionResponse> getTaxCollectorWiseCollections(RequestInfo requestInfo,
-			PropertyDetailsSearchCriteria searchCriteria) {
+                    Set<String> userIds = propertyDetailResponse.stream().map(item -> item.getUuid()).distinct()
+                            .collect(Collectors.toSet());
+                    UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+                            .active(true)
+                            .userType(UserSearchCriteria.CITIZEN)
+                            .tenantId(searchCriteria.getUlbName())
+                            .build();
+                    List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+                    Map<String, User> userMap = usersInfo.stream()
+                            .collect(Collectors.toMap(User::getUuid, Function.identity()));
+                    propertyDetailResponse.stream().forEach(item -> {
+                        User user = userMap.get(item.getUuid());
+                        if (user != null) {
+                            item.setMobileNumber(user.getMobileNumber());
+                            item.setName(user.getName());
+                        }
+                    });
+                }
+                response.addAll(propertyDetailResponse);
+            }
+            
+        }
+        return response;
+    }
 
-prValidator.validateTaxCollectorWiseCollectionSearchCriteria(searchCriteria);
+    public List<TaxCollectorWiseCollectionResponse> getTaxCollectorWiseCollections(RequestInfo requestInfo,
+            PropertyDetailsSearchCriteria searchCriteria) {
 
-		Set<String> businessService = new HashSet<String>();
-		businessService.add("PT");
-		PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder().businessServices(businessService)
-				.tenantId(searchCriteria.getUlbName()).fromDate(searchCriteria.getStartDate())
-				.toDate(searchCriteria.getEndDate()).build();
+        prValidator.validateTaxCollectorWiseCollectionSearchCriteria(searchCriteria);
 
-		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
-		List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse = new ArrayList<TaxCollectorWiseCollectionResponse>();
+        Set<String> businessService = new HashSet<String>();
+        businessService.add("PT");
+        PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder().businessServices(businessService)
+                .tenantId(searchCriteria.getUlbName()).fromDate(searchCriteria.getStartDate())
+                .toDate(searchCriteria.getEndDate()).build();
 
-		for (Payment res : payments) {
+        List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+        List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse = new ArrayList<TaxCollectorWiseCollectionResponse>();
+        List<TaxCollectorWiseCollectionResponse> response = new ArrayList<TaxCollectorWiseCollectionResponse>();
 
-			TaxCollectorWiseCollectionResponse taxCollectorWiseCollection = new TaxCollectorWiseCollectionResponse();
-			taxCollectorWiseCollection.setAmountpaid(res.getTotalAmountPaid().toString());
-			taxCollectorWiseCollection.setPaymentMode(res.getPaymentMode().toString());
-			taxCollectorWiseCollection.setReceiptnumber(res.getPaymentDetails().get(0).getReceiptNumber());
-			taxCollectorWiseCollection.setConsumercode(res.getPaymentDetails().get(0).getBill().getConsumerCode());
-			taxCollectorWiseCollection.setPaymentdate(res.getTransactionDate().toString());
-			taxCollectorWiseCollection.setUserid(res.getAuditDetails().getCreatedBy());
-			taxCollectorWiseCollection.setTenantid(res.getTenantId());
+        for (Payment res : payments) {
 
-			taxCollectorWiseCollectionResponse.add(taxCollectorWiseCollection);
+            TaxCollectorWiseCollectionResponse taxCollectorWiseCollection = new TaxCollectorWiseCollectionResponse();
+            taxCollectorWiseCollection.setAmountpaid(res.getTotalAmountPaid().toString());
+            taxCollectorWiseCollection.setPaymentMode(res.getPaymentMode().toString());
+            taxCollectorWiseCollection.setReceiptnumber(res.getPaymentDetails().get(0).getReceiptNumber());
+            taxCollectorWiseCollection.setConsumercode(res.getPaymentDetails().get(0).getBill().getConsumerCode());
+            taxCollectorWiseCollection.setPaymentdate(res.getTransactionDate().toString());
+            taxCollectorWiseCollection.setUserid(res.getAuditDetails().getCreatedBy());
+            taxCollectorWiseCollection.setTenantid(res.getTenantId());
 
-		}
+            taxCollectorWiseCollectionResponse.add(taxCollectorWiseCollection);
 
-		List<Long> uids = new ArrayList<>();
-		UserSearchCriteria usCriteria = new UserSearchCriteria();
-		Set<String> Propertys = new HashSet<>();
-		PropertySearchingCriteria pdsCriteria = new PropertySearchingCriteria();
+        }
 
-		if (!CollectionUtils.isEmpty(taxCollectorWiseCollectionResponse)) {
-			taxCollectorWiseCollectionResponse.forEach(res -> uids.add(Long.valueOf(res.getUserid())));
-			usCriteria.setId(uids);
-			taxCollectorWiseCollectionResponse.forEach(res -> Propertys.add((res.getConsumercode())));
-			pdsCriteria.setProperty(Propertys);
+        List<Long> uids = new ArrayList<>();
+        UserSearchCriteria usCriteria = new UserSearchCriteria();
+        Set<String> Propertys = new HashSet<>();
+        PropertySearchingCriteria pdsCriteria = new PropertySearchingCriteria();
 
-			List<Long> ids = uids.stream().distinct().collect(Collectors.toList());
-			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName())
-					.userType(UserSearchCriteria.EMPLOYEE).active(true)
-					.id(ids).build();
-			List<OwnerInfo> info = userService.getUserDetails(requestInfo, userSearchCriteria);
-			for (TaxCollectorWiseCollectionResponse res : taxCollectorWiseCollectionResponse) {
-				info.forEach(item -> {
-					if (res.getUserid().equalsIgnoreCase(item.getId().toString())) {
-						res.setMobilenumber(item.getMobileNumber());
-						res.setName(item.getName());
-						res.setEmployeeid(item.getUserName());
-						res.setType(item.getType());
-					}
-				});
-			}
+        if (!CollectionUtils.isEmpty(taxCollectorWiseCollectionResponse)) {
+            taxCollectorWiseCollectionResponse.forEach(res -> uids.add(Long.valueOf(res.getUserid())));
+            usCriteria.setId(uids);
+            taxCollectorWiseCollectionResponse.forEach(res -> Propertys.add((res.getConsumercode())));
+            pdsCriteria.setProperty(Propertys);
 
-			taxCollectorWiseCollectionResponse.forEach(res -> uids.add(Long.valueOf(res.getUserid())));
-			usCriteria.setId(uids);
+            List<Long> ids = uids.stream().distinct().collect(Collectors.toList());
+            UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().tenantId(searchCriteria.getUlbName())
+                    .userType(UserSearchCriteria.EMPLOYEE).active(true)
+                    .id(ids).build();
+            List<OwnerInfo> info = userService.getUserDetails(requestInfo, userSearchCriteria);
+            for (TaxCollectorWiseCollectionResponse res : taxCollectorWiseCollectionResponse) {
+                info.forEach(item -> {
+                    if (res.getUserid().equalsIgnoreCase(item.getId().toString())) {
+                        res.setMobilenumber(item.getMobileNumber());
+                        res.setName(item.getName());
+                        res.setEmployeeid(item.getUserName());
+                        res.setType(item.getType());
+                    }
+                });
+            }
 
-			PropertySearchingCriteria propsCriteria = PropertySearchingCriteria.builder()
-					.tenantid(searchCriteria.getUlbName()).property(Propertys).build();
+            taxCollectorWiseCollectionResponse.forEach(res -> uids.add(Long.valueOf(res.getUserid())));
+            usCriteria.setId(uids);
 
-			List<Property> propinfo = getProperty(requestInfo, propsCriteria);
-			for (TaxCollectorWiseCollectionResponse res : taxCollectorWiseCollectionResponse) {
-				propinfo.forEach(item -> {
-					if (res.getConsumercode().equalsIgnoreCase(item.getPropertyId())) {
-						res.setOldpropertyid(item.getOldPropertyId());
-					}
-				});
-			}
+            PropertySearchingCriteria propsCriteria = PropertySearchingCriteria.builder()
+                    .tenantid(searchCriteria.getUlbName()).property(Propertys).build();
 
-		}
+            List<Property> propinfo = getProperty(requestInfo, propsCriteria);
+            for (TaxCollectorWiseCollectionResponse res : taxCollectorWiseCollectionResponse) {
+                propinfo.forEach(item -> {
+                    if (res.getConsumercode().equalsIgnoreCase(item.getPropertyId())) {
+                        res.setOldpropertyid(item.getOldPropertyId());
+                    }
+                });
+            }
 
-		return taxCollectorWiseCollectionResponse;
-	}
+        }
+
+        return taxCollectorWiseCollectionResponse;
+    }
 
 	public List<Property> getProperty(RequestInfo requestInfo, PropertySearchingCriteria searchCriteria) {
 
@@ -201,16 +222,28 @@ prValidator.validateTaxCollectorWiseCollectionSearchCriteria(searchCriteria);
 
 		List<ULBWiseTaxCollectionResponse> propertyResponse = new ArrayList<ULBWiseTaxCollectionResponse>();
 
-		
-		Map<String, List<PropertyDemandResponse>> propertyDemandResponse = pdRepository
-				.getPropertyDemandDetails(searchCriteria);
+		Long count = pdRepository.getPropertyDemandDetailsCount(searchCriteria);
+        Integer limit = configuration.getReportLimit();
+        Integer offset = 0;
+        
+        if (count > 0) {
+            Map<String, List<PropertyDemandResponse>> propertyDemandResponse = new HashMap<>();
+            while (count > 0) {
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                propertyDemandResponse = pdRepository.getPropertyDemandDetails(searchCriteria);
+                count = count - limit;
+                offset += limit;
 
 		if (!CollectionUtils.isEmpty(propertyDemandResponse)) {
 
-			propertyDemandResponse.forEach((key, value) -> {
+		//	propertyDemandResponse.forEach((key, value) -> {
+		    propertyDemandResponse.entrySet().parallelStream().forEach(obj -> {
+		        
 				ULBWiseTaxCollectionResponse propertyInfo = new ULBWiseTaxCollectionResponse();
 
-				value.forEach(item -> {
+			//	value.forEach(item -> {
+				obj.getValue().forEach(item -> {
 					if (item.getTaxperiodto() < System.currentTimeMillis()) { 
 						
 						propertyInfo.setTotalarreartaxamount((propertyInfo.getTotalarreartaxamount()).add(item.getTaxamount()));
@@ -228,17 +261,19 @@ prValidator.validateTaxCollectorWiseCollectionSearchCriteria(searchCriteria);
 				BigDecimal dueAmountWithCurrentYearDemand = dueAmountWithTotalArrear.add(propertyInfo.getTotaltaxamount());
 				BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemand.subtract(propertyInfo.getTotalcollectionamount());
 
-				propertyInfo.setPropertyId(key);
+				propertyInfo.setPropertyId(obj.getKey());
 				propertyInfo.setDueamount(dueAmountFinal);
-				propertyInfo.setUlb(value.get(0).getTenantid());
-				propertyInfo.setOldpropertyid(value.get(0).getOldpropertyid());
-				propertyInfo.setWard(value.get(0).getWard());
+				propertyInfo.setUlb(obj.getValue().get(0).getTenantid());
+				propertyInfo.setOldpropertyid(obj.getValue().get(0).getOldpropertyid());
+				propertyInfo.setWard(obj.getValue().get(0).getWard());
 
 				propertyResponse.add(propertyInfo);
 			});
 
 
-		}
+        }
+    }
+}
 		return propertyResponse;
 	}
 
@@ -247,10 +282,27 @@ prValidator.validateTaxCollectorWiseCollectionSearchCriteria(searchCriteria);
 
 		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
-		List<PropertyWiseDemandResponse> propertyResponse = new ArrayList<PropertyWiseDemandResponse>();
+	//	List<PropertyWiseDemandResponse> propertyResponse = new ArrayList<PropertyWiseDemandResponse>();
+		List<PropertyWiseDemandResponse> propertyWiseDemandResponse = new ArrayList<PropertyWiseDemandResponse>();
+		
+		//
+        Long count = pdRepository.getPropertyDemandDetailsCount(searchCriteria);//
+        Integer limit = configuration.getReportLimit();
+        Integer offset = 0;
+        
+        if (count > 0) {
+            Map<String, List<PropertyDemandResponse>> propertyDemandResponse = new HashMap<>();
+            while (count > 0) {
+                List<PropertyWiseDemandResponse> propertyResponse = new ArrayList<PropertyWiseDemandResponse>();
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                propertyDemandResponse = pdRepository.getPropertyWiseDemandDetails(searchCriteria);
+                count = count - limit;
+                offset += limit;
+		//
 
-		Map<String, List<PropertyDemandResponse>> propertyDemandResponse = pdRepository
-				.getPropertyWiseDemandDetails(searchCriteria);
+//		Map<String, List<PropertyDemandResponse>> propertyDemandResponse = pdRepository
+//				.getPropertyWiseDemandDetails(searchCriteria);
 
 		if (!CollectionUtils.isEmpty(propertyDemandResponse)) {
 
@@ -282,8 +334,8 @@ prValidator.validateTaxCollectorWiseCollectionSearchCriteria(searchCriteria);
 					propertyInfo.setTaxperiodto(item.getTaxperiodto().toString());
 					propertyInfo.setUlb(item.getTenantid());
 					propertyInfo.setUuid(item.getUuid());
-					propertyInfo.setName(null);
-					propertyInfo.setMobilenumber(null);
+//					propertyInfo.setName(null);
+//					propertyInfo.setMobilenumber(null);
 					propertyInfo.setOldpropertyid(item.getOldpropertyid());
 					propertyInfo.setWard(item.getWard());
 
@@ -311,9 +363,13 @@ prValidator.validateTaxCollectorWiseCollectionSearchCriteria(searchCriteria);
 					item.setName(user.getName());
 				}
 			});
-		}
+        }
+propertyWiseDemandResponse.addAll(propertyResponse);
+
+    }
+}
 		
-		return propertyResponse;
+		return propertyWiseDemandResponse;
 	}
 
 	public List<PropertyWiseCollectionResponse> getpropertyCollectionReport(RequestInfo requestInfo,
@@ -324,7 +380,18 @@ prValidator.validateTaxCollectorWiseCollectionSearchCriteria(searchCriteria);
 		List<PropertyWiseCollectionResponse> propertyWiseCollectionResponses = new ArrayList<PropertyWiseCollectionResponse>();
 
 		// Search property by criteria
-		List<PropertyDetailsResponse> properties = pdRepository.getPropertiesDetail(searchCriteria);
+		Long count = pdRepository.getPropertiesDetailCount(searchCriteria);
+        Integer limit = configuration.getReportLimit();
+        Integer offset = 0;
+        
+        if (count > 0) {
+            List<PropertyDetailsResponse> properties = new ArrayList<>();
+            while (count > 0) {
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                properties = pdRepository.getPropertiesDetail(searchCriteria);
+                count = count - limit;
+                offset += limit;
 		
 		if(!CollectionUtils.isEmpty(properties)) {
 			
@@ -397,11 +464,12 @@ prValidator.validateTaxCollectorWiseCollectionSearchCriteria(searchCriteria);
 			});
 			
 
-
-
 		}
-		
-		return propertyWiseCollectionResponses;
-	}
+    }
+
+}
+
+        return propertyWiseCollectionResponses;
+    }
 
 }

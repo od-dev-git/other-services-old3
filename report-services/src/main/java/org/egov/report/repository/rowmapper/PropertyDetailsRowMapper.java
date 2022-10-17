@@ -69,7 +69,10 @@ List<PropertyDetailsResponse> pdrList = new ArrayList<>();
 				address.append(pinCode+", ");
 		     }
 
-			address = address.delete(address.length()-2, address.length());
+			if(address.length() != 0) {
+			    address = address.delete(address.length()-2, address.length());   
+			}
+			
 			pdr.setAddress(address.toString());
 
 			pdrList.add(pdr);
