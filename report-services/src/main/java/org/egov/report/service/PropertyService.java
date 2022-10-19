@@ -11,7 +11,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
-import org.egov.report.model.Demand;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
