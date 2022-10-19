@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.report.model.Demand;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
@@ -22,6 +23,7 @@ import org.egov.report.repository.PropertyDetailsReportRepository;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.validator.PropertyReportValidator;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
+import org.egov.report.web.model.DemandCriteria;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.PropertyDemandResponse;
 import org.egov.report.web.model.PropertyDetailsResponse;
@@ -65,7 +67,7 @@ public class PropertyService {
 
 	@Autowired
 	private ObjectMapper mapper;
-
+	
     public List<PropertyDetailsResponse> getPropertyDetails(RequestInfo requestInfo,
             PropertyDetailsSearchCriteria searchCriteria) {
 
@@ -282,72 +284,43 @@ public class PropertyService {
 
 		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
-	//	List<PropertyWiseDemandResponse> propertyResponse = new ArrayList<PropertyWiseDemandResponse>();
 		List<PropertyWiseDemandResponse> propertyWiseDemandResponse = new ArrayList<PropertyWiseDemandResponse>();
 		
-		//
-        Long count = pdRepository.getPropertyDemandDetailsCount(searchCriteria);//
-        Integer limit = configuration.getReportLimit();
+		Long count = pdRepository.getPropertyCount(searchCriteria);
+	    Integer limit = configuration.getReportConnectionsLimit();
         Integer offset = 0;
         
         if (count > 0) {
-            Map<String, List<PropertyDemandResponse>> propertyDemandResponse = new HashMap<>();
+            List<PropertyDetailsResponse> properties = new ArrayList<>();
+            List<PropertyDemandResponse> propertyDemandResponse = new ArrayList<>();
             while (count > 0) {
-                List<PropertyWiseDemandResponse> propertyResponse = new ArrayList<PropertyWiseDemandResponse>();
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
-                propertyDemandResponse = pdRepository.getPropertyWiseDemandDetails(searchCriteria);
+                properties = pdRepository.getPropertyDetail(searchCriteria);
                 count = count - limit;
                 offset += limit;
-		//
-
-//		Map<String, List<PropertyDemandResponse>> propertyDemandResponse = pdRepository
-//				.getPropertyWiseDemandDetails(searchCriteria);
-
-		if (!CollectionUtils.isEmpty(propertyDemandResponse)) {
-
-			propertyDemandResponse.forEach((key, value) -> {
-				value.forEach(item -> {
-					PropertyWiseDemandResponse propertyInfo = new PropertyWiseDemandResponse();
-					BigDecimal currentYearDemandAmount = BigDecimal.ZERO;
-					BigDecimal totalCollectionAmount = BigDecimal.ZERO;
-					BigDecimal dueAmount = BigDecimal.ZERO;
-
-					if (item.getTaxamount() == null) {
-						propertyInfo.setTaxamount(currentYearDemandAmount.toString());
-					} else {
-						currentYearDemandAmount = item.getTaxamount();
-						propertyInfo.setTaxamount(currentYearDemandAmount.toString());
-					}
-
-					if (item.getCollectionamount() == null) {
-						propertyInfo.setCollectionamount(totalCollectionAmount.toString());
-					} else {
-						totalCollectionAmount = item.getCollectionamount();
-						propertyInfo.setCollectionamount(totalCollectionAmount.toString());
-					}
-					BigDecimal dueAmountWithCurrentYearDemandAmount = dueAmount.add(currentYearDemandAmount);
-					BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemandAmount.subtract(totalCollectionAmount);
-					propertyInfo.setDueamount(dueAmountFinal.toString());
-					propertyInfo.setPropertyId(key);
-					propertyInfo.setTaxperiodfrom(item.getTaxperiodfrom().toString());
-					propertyInfo.setTaxperiodto(item.getTaxperiodto().toString());
-					propertyInfo.setUlb(item.getTenantid());
-					propertyInfo.setUuid(item.getUuid());
-//					propertyInfo.setName(null);
-//					propertyInfo.setMobilenumber(null);
-					propertyInfo.setOldpropertyid(item.getOldpropertyid());
-					propertyInfo.setWard(item.getWard());
-
-					propertyResponse.add(propertyInfo);
-
-				});
-			});
-
+	
+                Set<String> propertiesSet = properties.parallelStream().map(obj -> obj.getPropertyId()).distinct().collect(Collectors.toSet());
+	            DemandCriteria demandCriteria = DemandCriteria.builder().tenantId(searchCriteria.getUlbName())
+                        .consumerCode(propertiesSet).build();
+	            
+	           propertyDemandResponse = pdRepository.getPropertyDemands(demandCriteria);
+	           
+               propertyDemandResponse.parallelStream().forEach(row -> {
+                   PropertyWiseDemandResponse tempResponse = PropertyWiseDemandResponse.builder()
+                           .mobilenumber(null).name(null).oldpropertyid(row.getOldpropertyid())
+                           .propertyId(row.getConsumercode()).collectionamount(String.valueOf(row.getCollectionamount()))
+                           .taxamount(String.valueOf(row.getTaxamount())).dueamount(String.valueOf(((row.getTaxamount().subtract(row.getCollectionamount())))))
+                           .taxperiodfrom(String.valueOf(row.getTaxperiodfrom())).taxperiodto(String.valueOf(row.getTaxperiodto())).ulb(row.getTenantid())
+                           .uuid(row.getUuid()).ward(row.getWard())
+                           .build();
+                   
+                   propertyWiseDemandResponse.add(tempResponse);
+                   });
 
 			// Extracting user info from userService
 
-			Set<String> userIds = propertyResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
+			Set<String> userIds = propertyDemandResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
 			UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
 					.active(true)
 					.userType(UserSearchCriteria.CITIZEN)
@@ -356,7 +329,7 @@ public class PropertyService {
 			List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
 			Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 
-			propertyResponse.stream().forEach(item -> {
+			propertyWiseDemandResponse.stream().forEach(item -> {
 				User user = userMap.get(item.getUuid());
 				if(user!=null) {
 					item.setMobilenumber(user.getMobileNumber());
@@ -364,11 +337,8 @@ public class PropertyService {
 				}
 			});
         }
-propertyWiseDemandResponse.addAll(propertyResponse);
 
-    }
-}
-		
+    }	
 		return propertyWiseDemandResponse;
 	}
 
