@@ -104,6 +104,7 @@ public class PropertyDetailsReportRepository {
 
         return jdbcTemplate.queryForObject(query,preparedPropStmtList.toArray(), Long.class);
     }
+    
 
     public Long getPropertyCount(PropertyDetailsSearchCriteria searchCriteria) {
         List<Object> preparedPropStmtList = new ArrayList<>();
@@ -131,5 +132,6 @@ public class PropertyDetailsReportRepository {
         return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandIdWiseRowMapper());
 
     }
+
 
 }
