@@ -8,7 +8,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.egov.report.web.model.User;
+import org.egov.report.web.contract.User;
+
+//import org.egov.report.web.model.User;
 
 //import org.egov.demand.model.AuditDetails;
 //import org.egov.demand.model.Demand;

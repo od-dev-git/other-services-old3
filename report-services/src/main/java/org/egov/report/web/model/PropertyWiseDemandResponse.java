@@ -1,5 +1,7 @@
 package org.egov.report.web.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -22,7 +24,7 @@ public class PropertyWiseDemandResponse {
     private String propertyId ;
  
 	@JsonProperty("uuid")
-	private String uuid;
+	private List<String> uuid;
 	
     @JsonProperty("oldPropertyId")
     private String oldpropertyid ;

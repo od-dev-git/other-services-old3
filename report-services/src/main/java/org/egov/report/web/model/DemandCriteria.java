@@ -1,5 +1,7 @@
 package org.egov.report.web.model;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+
 import java.math.BigDecimal;
 import java.util.Set;
 
@@ -36,7 +38,7 @@ public class DemandCriteria {
     
     private Long periodTo;
     
-//  private Type type;
+    private Type type;
     
     private String mobileNumber;
     

@@ -11,7 +11,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.report.service.DemandService;
 import org.egov.report.model.Demand;
+import org.egov.report.model.DemandDetail;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.Payment;
 import org.egov.report.model.PaymentSearchCriteria;
@@ -41,6 +43,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -67,6 +70,9 @@ public class PropertyService {
 
 	@Autowired
 	private ObjectMapper mapper;
+	
+	@Autowired
+    private DemandService demandService;
 	
     public List<PropertyDetailsResponse> getPropertyDetails(RequestInfo requestInfo,
             PropertyDetailsSearchCriteria searchCriteria) {
@@ -292,7 +298,7 @@ public class PropertyService {
         
         if (count > 0) {
             List<PropertyDetailsResponse> properties = new ArrayList<>();
-            List<PropertyDemandResponse> propertyDemandResponse = new ArrayList<>();
+
             while (count > 0) {
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
@@ -304,43 +310,86 @@ public class PropertyService {
 	            DemandCriteria demandCriteria = DemandCriteria.builder().tenantId(searchCriteria.getUlbName())
                         .consumerCode(propertiesSet).build();
 	            
-	           propertyDemandResponse = pdRepository.getPropertyDemands(demandCriteria);
-	           
-               propertyDemandResponse.parallelStream().forEach(row -> {
+	            List<Demand> demands = demandService.getDemands(demandCriteria, requestInfo);
+
+	            demands.parallelStream().forEach(row -> {
                    PropertyWiseDemandResponse tempResponse = PropertyWiseDemandResponse.builder()
-                           .mobilenumber(null).name(null).oldpropertyid(row.getOldpropertyid())
-                           .propertyId(row.getConsumercode()).collectionamount(String.valueOf(row.getCollectionamount()))
-                           .taxamount(String.valueOf(row.getTaxamount())).dueamount(String.valueOf(((row.getTaxamount().subtract(row.getCollectionamount())))))
-                           .taxperiodfrom(String.valueOf(row.getTaxperiodfrom())).taxperiodto(String.valueOf(row.getTaxperiodto())).ulb(row.getTenantid())
-                           .uuid(row.getUuid()).ward(row.getWard())
+                           .propertyId(row.getConsumerCode())
+                           .taxperiodfrom(String.valueOf(row.getTaxPeriodFrom())).taxperiodto(String.valueOf(row.getTaxPeriodTo())).ulb(row.getTenantId())
                            .build();
+
+                   List<DemandDetail> tempDemandDetail = row.getDemandDetails();
+                   BigDecimal taxAmount = BigDecimal.ZERO;
+                   BigDecimal collectionAmount = BigDecimal.ZERO;
+                   tempResponse.setTaxamount(taxAmount.toString());
+                   tempResponse.setCollectionamount(collectionAmount.toString());
+                   tempDemandDetail.parallelStream().forEach(demandUnit -> {
+                       if(demandUnit.getTaxAmount() != null) {
+                           tempResponse.setTaxamount(new BigDecimal(tempResponse.getTaxamount()).add(demandUnit.getTaxAmount()).toString());
+                       }
+                       if(demandUnit.getCollectionAmount() != null) {
+                           tempResponse.setCollectionamount(new BigDecimal(tempResponse.getCollectionamount()).add(demandUnit.getCollectionAmount()).toString());
+                       }
+                       
+                   });
+                   taxAmount = new BigDecimal(tempResponse.getTaxamount());
+                   collectionAmount = new BigDecimal(tempResponse.getCollectionamount());
+                   tempResponse.setDueamount(taxAmount.subtract(collectionAmount).toString());
                    
                    propertyWiseDemandResponse.add(tempResponse);
+                   
                    });
+	            
+	            // setting properties data
+	            
+	            final List<PropertyDetailsResponse> tempProperties = properties;
+	            propertyWiseDemandResponse.parallelStream().forEach(item -> {
+	                List<String> uuids = new ArrayList<>();
+	               tempProperties.stream().forEach(prop -> {
+	                  if(prop.getPropertyId().equals(item.getPropertyId())){
+	                      item.setOldpropertyid(prop.getOldPropertyId());
+	                      item.setWard(prop.getWardNumber());
+	                      uuids.add(prop.getUuid());
+	                  }
+	              });
+	               item.setUuid(uuids);
+	          });
+	            
+	         // Extracting user info from userService
 
-			// Extracting user info from userService
+	            Set<String> userIds = properties.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
+	            UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+	                    .active(true)
+	                    .userType(UserSearchCriteria.CITIZEN)
+	                    .tenantId(searchCriteria.getUlbName())
+	                    .build();
+	            List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+	            Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 
-			Set<String> userIds = propertyDemandResponse.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
-			UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
-					.active(true)
-					.userType(UserSearchCriteria.CITIZEN)
-					.tenantId(searchCriteria.getUlbName())
-					.build();
-			List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-			Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
+	            propertyWiseDemandResponse.stream().forEach(item -> {
+	                item.getUuid().stream().forEach(uid ->{
+	                    User user = userMap.get(uid);
+	                    if(user!=null) {
+	                        if( item.getMobilenumber() != null) {
+	                            item.setMobilenumber(item.getMobilenumber() + " , " + user.getMobileNumber());
+	                        }else {
+	                            item.setMobilenumber(user.getMobileNumber());
+	                        }
+	                        if( item.getName() != null) {
+	                            item.setName(item.getName() + " , " + user.getName());
+	                        }else {
+	                            item.setName(user.getName());
+	                        }
 
-			propertyWiseDemandResponse.stream().forEach(item -> {
-				User user = userMap.get(item.getUuid());
-				if(user!=null) {
-					item.setMobilenumber(user.getMobileNumber());
-					item.setName(user.getName());
-				}
-			});
+	                    } 
+	                });
+	            });
+	            
+	            
+            }
         }
-
-    }	
-		return propertyWiseDemandResponse;
-	}
+        return propertyWiseDemandResponse;
+    }
 
 	public List<PropertyWiseCollectionResponse> getpropertyCollectionReport(RequestInfo requestInfo,
 			PropertyDetailsSearchCriteria searchCriteria) {
