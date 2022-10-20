@@ -32,9 +32,9 @@ public class PropertyDetailsSearchCriteria {
 	private Long endDate;
 	
 	@JsonProperty("limit")
-	Integer limit ;
+	private Integer limit ;
 	
 	@JsonProperty("offset")
-	Integer offset ;
+	private Integer offset ;
 
 }

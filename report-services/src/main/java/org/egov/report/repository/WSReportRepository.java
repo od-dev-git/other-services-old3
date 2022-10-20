@@ -61,12 +61,11 @@ public class WSReportRepository {
 		@Autowired
 		private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
-		public List<ConsumerMasterWSReportResponse> getComsumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria,
-				Integer limit, Integer offset){
+		public List<ConsumerMasterWSReportResponse> getComsumerMasterWSReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
 		
 			List<Object> preparedStatement = new ArrayList<>();
 		
-			String query = queryBuilder.getQueryForConsumerMasterWSReport(preparedStatement,criteria, limit, offset); 
+			String query = queryBuilder.getQueryForConsumerMasterWSReport(preparedStatement,criteria); 
 		
 			return jdbcTemplate.query(query, preparedStatement.toArray(), new ConsumerMasterRowMapper());
 		
@@ -154,25 +153,24 @@ public class WSReportRepository {
 //		}
 		
 		public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedWSDemands(RequestInfo requestInfo,
-				WSReportSearchCriteria searchCriteria, Integer limit, Integer offset) {
+				WSReportSearchCriteria searchCriteria) {
             
 			log.info("in report repository");
 			List<Object> preparedStmtList = new ArrayList<>();
 
 			log.info("going in query builder");
-			String query = queryBuilder.getSchedulerGeneratedDemandQuery(searchCriteria, preparedStmtList, limit, offset);
+			String query = queryBuilder.getSchedulerGeneratedDemandQuery(searchCriteria, preparedStmtList);
 			
 			log.info("query: "+query);
 			log.info("returned from query builder");
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new SchedulerGeneratedDemandsRowMapper());
 		}
 		
-		public Map<String, WaterConnectionDetails> getWaterConnections(WSReportSearchCriteria criteria, Integer limit,
-				Integer offset) {
+		public Map<String, WaterConnectionDetails> getWaterConnections(WSReportSearchCriteria criteria) {
 
 			List<Object> preparedStmtList = new ArrayList<>();
 
-			String query = queryBuilder.getWaterConnectionQuery(criteria, preparedStmtList, limit, offset);
+			String query = queryBuilder.getWaterConnectionQuery(criteria, preparedStmtList);
 
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterConnectionRowMapper());
 
@@ -217,11 +215,11 @@ public class WSReportRepository {
 			return jdbcTemplate.queryForObject(query, preparedStmtList.toArray(), Long.class);
 		}
 		
-		public List<String> getDemands(WSReportSearchCriteria searchCriteria, Integer limit, Integer offset) {
+		public List<String> getDemands(WSReportSearchCriteria searchCriteria) {
 
 			List<Object> preparedStmtList = new ArrayList<>();
 
-			String query = queryBuilder.getDemandsQuery(searchCriteria, preparedStmtList, limit, offset);
+			String query = queryBuilder.getDemandsQuery(searchCriteria, preparedStmtList);
 
 			return jdbcTemplate.queryForList(query, preparedStmtList.toArray(), String.class);
 
@@ -236,10 +234,10 @@ public class WSReportRepository {
         
         }
 		
-		public List<HashMap<String, String>> getWaterConnection(WSReportSearchCriteria searchCriteria ,Integer limit , Integer offset) {
+		public List<HashMap<String, String>> getWaterConnection(WSReportSearchCriteria searchCriteria) {
             List<Object> preparedStmtList = new ArrayList<>();
 
-            String query = queryBuilder.getWaterConnectionsQuery(searchCriteria, preparedStmtList ,limit,offset);
+            String query = queryBuilder.getWaterConnectionsQuery(searchCriteria, preparedStmtList);
 
             return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterConnectionsRowMapper());
         }
