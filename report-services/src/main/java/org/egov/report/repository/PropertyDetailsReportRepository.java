@@ -11,7 +11,6 @@ import org.egov.report.web.model.PropertyDetailsResponse;
 
 import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
-import org.egov.report.repository.rowmapper.DemandIdWiseRowMapper;
 import org.egov.report.repository.rowmapper.DemandsRowMapper;
 import org.egov.report.repository.rowmapper.PropertyDetailsRowMapper;
 import org.egov.report.repository.rowmapper.UserRowMapper;
@@ -122,16 +121,5 @@ public class PropertyDetailsReportRepository {
         return jdbcTemplate.query(query, preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());
 
     }
-
-    public List<PropertyDemandResponse> getPropertyDemands(DemandCriteria demandCriteria) {
-
-        List<Object> preparedPropStmtList = new ArrayList<>();
-        
-        String query = queryBuilder.getPropertyDemandsQuery(demandCriteria, preparedPropStmtList);
-
-        return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandIdWiseRowMapper());
-
-    }
-
 
 }

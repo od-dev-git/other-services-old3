@@ -277,17 +277,6 @@ public class ReportQueryBuilder {
 	            + WHERE + "epp.status <> 'INACTIVE' "
 	            + AND + "epp.tenantid = ? " ;
 	    
-	    private static final String BASE_DEMAND_QUERY = SELECT 
-	            + "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,eu.uuid,"
-	            + "edv.tenantid ,edv.status,sum(edv2.taxamount) as taxamount,sum(edv2.collectionamount) as collectionamount,epp.oldpropertyid,epa.ward "
-	            + FROM + " egbs_demand_v1 edv "
-	            + INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid "
-	            + INNER_JOIN +" eg_pt_address epa on epp.id =epa.propertyid "
-	            + INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id "
-	            + LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
-	            + INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.id=edv2.demandid  "
-	            + WHERE + " edv.status <> 'CANCELLED' " ;
-	    
 	    public static final String DEMAND_QUERY_GROUP_BY_CLAUSE = "consumercode ,edv.id,payer,edv.createdby  ,taxperiodfrom ,taxperiodto ,eu.uuid,edv.tenantid ,edv.status ,epp.oldpropertyid,epa.ward";
 
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
@@ -952,23 +941,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
         addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedPropStmtList);
 
         return query.toString();
-    }
-
-    public String getPropertyDemandsQuery(DemandCriteria demandCriteria, List<Object> preparedPropStmtList) {
-
-        StringBuilder demandQuery = new StringBuilder(BASE_DEMAND_QUERY);
-
-        if (demandCriteria.getConsumerCode() != null && !demandCriteria.getConsumerCode().isEmpty()) {
-            addAndClause(demandQuery);
-            demandQuery.append("edv.consumercode IN ("
-            + getIdQueryForStrings(demandCriteria.getConsumerCode()));
-        }
-
-        addGroupByClause(demandQuery, DEMAND_QUERY_GROUP_BY_CLAUSE);
-        
-        log.info("the query String for demand : " + demandQuery.toString());
-        return demandQuery.toString();
-
     }
     
     private static void addGroupByClause(StringBuilder demandQueryBuilder,String columnName) {

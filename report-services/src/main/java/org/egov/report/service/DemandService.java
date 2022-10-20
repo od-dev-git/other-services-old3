@@ -16,7 +16,6 @@ import org.egov.report.validator.DemandValidatorV1;
 //import org.egov.demand.web.contract.UserResponse;
 //import org.egov.demand.web.contract.UserSearchRequest;
 import org.egov.report.repository.DemandRepository;
-import org.egov.report.config.DemandServiceConfiguration;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.Demand;
 import org.egov.report.model.UserSearchRequest;
