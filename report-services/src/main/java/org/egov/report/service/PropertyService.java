@@ -297,20 +297,26 @@ public class PropertyService {
         Integer offset = 0;
         
         if (count > 0) {
+            
+            Set<String> allProperties = (pdRepository.getPropertyIds(searchCriteria)).stream().distinct().collect(Collectors.toSet());//set distinct here
             List<PropertyDetailsResponse> properties = new ArrayList<>();
 
             while (count > 0) {
-                searchCriteria.setLimit(limit);
-                searchCriteria.setOffset(offset);
-                properties = pdRepository.getPropertyDetail(searchCriteria);
-                count = count - limit;
-                offset += limit;
-    
-                Set<String> propertiesSet = properties.parallelStream().map(obj -> obj.getPropertyId()).distinct().collect(Collectors.toSet());
-                DemandCriteria demandCriteria = DemandCriteria.builder().tenantId(searchCriteria.getUlbName())
-                        .consumerCode(propertiesSet).build();
                 
-                List<Demand> demands = demandService.getDemands(demandCriteria, requestInfo);
+              List<PropertyWiseDemandResponse> tempResponseList = new ArrayList<PropertyWiseDemandResponse>();  
+              searchCriteria.setLimit(limit);
+              searchCriteria.setOffset(offset);
+              Set<String> tempPropertiesListSet = allProperties.stream().skip(offset).limit(limit).collect(Collectors.toSet());
+              count = count - limit;
+              offset += limit;
+
+              searchCriteria.setPropertyIds(tempPropertiesListSet);
+              properties = pdRepository.getPropertyDetail(searchCriteria);//expand result
+    
+              DemandCriteria demandCriteria = DemandCriteria.builder().tenantId(searchCriteria.getUlbName())
+                        .consumerCode(tempPropertiesListSet).build();
+                
+               List<Demand> demands = demandService.getDemands(demandCriteria, requestInfo);
 
                 demands.parallelStream().forEach(row -> {
                    PropertyWiseDemandResponse tempResponse = PropertyWiseDemandResponse.builder()
@@ -323,7 +329,7 @@ public class PropertyService {
                    BigDecimal collectionAmount = BigDecimal.ZERO;
                    tempResponse.setTaxamount(taxAmount.toString());
                    tempResponse.setCollectionamount(collectionAmount.toString());
-                   tempDemandDetail.parallelStream().forEach(demandUnit -> {
+                   tempDemandDetail.stream().forEach(demandUnit -> {
                        if(demandUnit.getTaxAmount() != null) {
                            tempResponse.setTaxamount(new BigDecimal(tempResponse.getTaxamount()).add(demandUnit.getTaxAmount()).toString());
                        }
@@ -336,14 +342,14 @@ public class PropertyService {
                    collectionAmount = new BigDecimal(tempResponse.getCollectionamount());
                    tempResponse.setDueamount(taxAmount.subtract(collectionAmount).toString());
                    
-                   propertyWiseDemandResponse.add(tempResponse);
+                   tempResponseList.add(tempResponse);
                    
                    });
                 
                 // setting properties data
                 
                 final List<PropertyDetailsResponse> tempProperties = properties;
-                propertyWiseDemandResponse.parallelStream().forEach(item -> {
+                tempResponseList.stream().forEach(item -> {    
                     List<String> uuids = new ArrayList<>();
                    tempProperties.stream().forEach(prop -> {
                       if(prop.getPropertyId().equals(item.getPropertyId())){
@@ -366,7 +372,7 @@ public class PropertyService {
                 List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
                 Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 
-                propertyWiseDemandResponse.stream().forEach(item -> {
+                tempResponseList.stream().forEach(item -> {    
                     item.getUuid().stream().forEach(uid ->{
                         User user = userMap.get(uid);
                         if(user!=null) {
@@ -385,10 +391,12 @@ public class PropertyService {
                     });
                 });
                 
-                
+                propertyWiseDemandResponse.addAll(tempResponseList);  
             }
+            
         }
-        return propertyWiseDemandResponse;    }
+        return propertyWiseDemandResponse;
+    }
 
 	public List<PropertyWiseCollectionResponse> getpropertyCollectionReport(RequestInfo requestInfo,
 			PropertyDetailsSearchCriteria searchCriteria) {

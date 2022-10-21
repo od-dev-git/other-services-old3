@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.egov.report.web.model.DemandCriteria;
 import org.egov.report.web.model.PropertyDemandResponse;
@@ -120,6 +121,14 @@ public class PropertyDetailsReportRepository {
 
         return jdbcTemplate.query(query, preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());
 
+    }
+
+    public List<String> getPropertyIds(PropertyDetailsSearchCriteria searchCriteria) {
+        List<Object> preparedPropStmtList = new ArrayList<>();
+
+        String query = queryBuilder.getPropertyIds(searchCriteria, preparedPropStmtList);
+
+        return jdbcTemplate.queryForList(query, preparedPropStmtList.toArray(), String.class);
     }
 
 }
