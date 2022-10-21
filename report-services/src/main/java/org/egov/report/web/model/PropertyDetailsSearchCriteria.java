@@ -1,5 +1,7 @@
 package org.egov.report.web.model;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -21,6 +23,9 @@ public class PropertyDetailsSearchCriteria {
 
 	@JsonProperty("propertyId")
 	private String propertyId;
+	
+	@JsonProperty("propertyIds")
+    private Set<String> propertyIds;
 	
 	@JsonProperty("oldPropertyId")
 	private String oldPropertyId;

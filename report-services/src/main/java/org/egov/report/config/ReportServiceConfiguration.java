@@ -74,4 +74,7 @@ public class ReportServiceConfiguration {
 	@Value("${egov.report.service.limit}")
 	private Integer reportLimit;
 
+	@Value("${egov.report.service.connections.limit}")
+    private Integer reportConnectionsLimit;
+
 }
