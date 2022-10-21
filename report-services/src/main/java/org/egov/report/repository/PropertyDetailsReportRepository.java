@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.egov.report.web.model.DemandCriteria;
 import org.egov.report.web.model.PropertyDemandResponse;
 import org.egov.report.web.model.PropertyDetailsResponse;
 
@@ -101,6 +103,32 @@ public class PropertyDetailsReportRepository {
         String query = queryBuilder.getPropertiesDetailCount(searchCriteria, preparedPropStmtList);
 
         return jdbcTemplate.queryForObject(query,preparedPropStmtList.toArray(), Long.class);
+    }
+    
+
+    public Long getPropertyCount(PropertyDetailsSearchCriteria searchCriteria) {
+        List<Object> preparedPropStmtList = new ArrayList<>();
+
+        String query = queryBuilder.getPropertiesCount(searchCriteria, preparedPropStmtList);
+
+        return jdbcTemplate.queryForObject(query,preparedPropStmtList.toArray(), Long.class);
+    }
+
+    public List<PropertyDetailsResponse> getPropertyDetail(PropertyDetailsSearchCriteria searchCriteria) {
+        List<Object> preparedPropStmtList = new ArrayList<>();
+
+        String query = queryBuilder.getPropertyDetailQuery(searchCriteria, preparedPropStmtList);
+
+        return jdbcTemplate.query(query, preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());
+
+    }
+
+    public List<String> getPropertyIds(PropertyDetailsSearchCriteria searchCriteria) {
+        List<Object> preparedPropStmtList = new ArrayList<>();
+
+        String query = queryBuilder.getPropertyIds(searchCriteria, preparedPropStmtList);
+
+        return jdbcTemplate.queryForList(query, preparedPropStmtList.toArray(), String.class);
     }
 
 }
