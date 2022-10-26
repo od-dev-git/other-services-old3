@@ -90,7 +90,7 @@ public class ReportQueryBuilder {
 			+ "ewc2.tenantid ,EWC2.ADDITIONALDETAILS->>'ward' as ward,"
 			+ "ewc2.oldconnectionno,ews2.connectiontype, "
 			+ DEMAND_QUERY 
-			+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE "
+			+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE and  ewc2.applicationstatus ='CONNECTION_ACTIVATED' and ewc2.isoldapplication = false "
 			+ INNER_JOIN + " eg_ws_service ews2 on ewc2.id = ews2.connection_id "
 			+ WHERE + " businessservice = ? "
 			+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY +" )"
@@ -184,7 +184,8 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " egcl_bill bill on ewc.connectionno = bill.consumercode "
 			+ INNER_JOIN + " egcl_paymentdetail paymentd on paymentd.billid = bill.id "
 			+ INNER_JOIN + " egcl_payment payment on payment.id = paymentd.paymentid "
-			+ WHERE + " ewc.isoldapplication = false ";
+			+ WHERE + " ewc.isoldapplication = false "
+			+ AND + " ewc.applicationstatus ='CONNECTION_ACTIVATED' ";
 	
 	private static final String WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY = SELECT
 			+ "EWC.TENANTID ,EWC.ADDITIONALDETAILS->>'ward' as ward,count(distinct ewc.connectionno) as connectionscount "
