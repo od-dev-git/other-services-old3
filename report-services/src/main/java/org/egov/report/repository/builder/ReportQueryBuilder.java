@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.WSReportUtils;
+import org.egov.report.web.model.DemandCriteria;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,7 @@ public class ReportQueryBuilder {
 			+ "ewc2.tenantid ,EWC2.ADDITIONALDETAILS->>'ward' as ward,"
 			+ "ewc2.oldconnectionno,ews2.connectiontype, "
 			+ DEMAND_QUERY 
-			+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE "
+			+ INNER_JOIN + " eg_ws_connection ewc2 on ewc2.tenantid= ? and EWC2.connectionno=edv.CONSUMERCODE and  ewc2.applicationstatus ='CONNECTION_ACTIVATED' and ewc2.isoldapplication = false "
 			+ INNER_JOIN + " eg_ws_service ews2 on ewc2.id = ews2.connection_id "
 			+ WHERE + " businessservice = ? "
 			+ AND + "consumercode " + IN +" ( " + WS_CONNECTION_DETAILS_QUERY +" )"
@@ -183,7 +184,8 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " egcl_bill bill on ewc.connectionno = bill.consumercode "
 			+ INNER_JOIN + " egcl_paymentdetail paymentd on paymentd.billid = bill.id "
 			+ INNER_JOIN + " egcl_payment payment on payment.id = paymentd.paymentid "
-			+ WHERE + " ewc.isoldapplication = false ";
+			+ WHERE + " ewc.isoldapplication = false "
+			+ AND + " ewc.applicationstatus ='CONNECTION_ACTIVATED' ";
 	
 	private static final String WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY = SELECT
 			+ "EWC.TENANTID ,EWC.ADDITIONALDETAILS->>'ward' as ward,count(distinct ewc.connectionno) as connectionscount "
@@ -265,6 +267,29 @@ public class ReportQueryBuilder {
 	        +" inner join eg_ws_service ews on ewc.id = ews.connection_id " 
 	        +" where ewc.applicationstatus = 'CONNECTION_ACTIVATED' " 
 	        +" and ewc.isoldapplication = false " ;
+	    
+    public static final String DEMAND_QUERY_GROUP_BY_CLAUSE = "consumercode ,edv.id,payer,edv.createdby  ,taxperiodfrom ,taxperiodto ,eu.uuid,edv.tenantid ,edv.status ,epp.oldpropertyid,epa.ward";
+
+    private static final String PROPERTY = FROM
+            + " eg_pt_property epp "
+            + INNER_JOIN + "eg_pt_address epa on epa.propertyid = epp.id "
+            + WHERE + "epp.status <> 'INACTIVE' "
+            + AND + " epp.tenantid = ? ";
+
+    private static final String PROPERTY_COUNT_QUERY = SELECT + "count ( distinct epp.propertyid ) " + PROPERTY;
+
+    private static final String PROPERTY_IDS = SELECT + " epp.propertyid " + PROPERTY;
+
+    private static final String PROPERTY_DETAILS = SELECT
+            + "epp.propertyid,epp.tenantid,epa.ward,epp.oldpropertyid,eu.uuid,"
+            + "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
+            + FROM
+            + "eg_pt_property epp "
+            + INNER_JOIN + "eg_pt_owner epo " + ON + "epo.propertyid = epp.id "
+            + LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
+            + INNER_JOIN + "eg_pt_address epa on epa.propertyid = epp.id "
+            + WHERE + "epp.status <> 'INACTIVE' ";
+
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
 			queryString.append(" WHERE ");
@@ -878,5 +903,88 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
             preparedStmtList.add(offset);
         }
 
+    }
+    
+    public String getPropertiesCount(PropertyDetailsSearchCriteria searchCriteria, List<Object> preparedPropStmtList) {
+        StringBuilder query = new StringBuilder(PROPERTY_COUNT_QUERY);
+
+        preparedPropStmtList.add(searchCriteria.getUlbName());
+
+        if(StringUtils.hasText(searchCriteria.getWardNo())) {
+               query.append(AND).append(" epa.ward = ? ");
+               preparedPropStmtList.add(searchCriteria.getWardNo());
+        }
+
+       if(StringUtils.hasText(searchCriteria.getPropertyId())) {
+           query.append(AND_QUERY).append(" epp.propertyid = ? ");
+           preparedPropStmtList.add(searchCriteria.getPropertyId());
+       }
+       
+       if(StringUtils.hasText(searchCriteria.getOldPropertyId())) {
+           query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
+           preparedPropStmtList.add(searchCriteria.getOldPropertyId());
+       }
+
+       return query.toString();
+    }
+
+    public String getPropertyDetailQuery(PropertyDetailsSearchCriteria searchCriteria,
+            List<Object> preparedPropStmtList) {
+        StringBuilder query = new StringBuilder(PROPERTY_DETAILS);
+        
+        if (!CollectionUtils.isEmpty(searchCriteria.getPropertyIds()) ) {
+            addAndClause(query);
+            query.append("epp.propertyid IN ("
+            + getIdQueryForStrings(searchCriteria.getPropertyIds()));
+        }
+
+        return query.toString();
+    }
+    
+    private static void addGroupByClause(StringBuilder demandQueryBuilder,String columnName) {
+        demandQueryBuilder.append(" GROUP BY " + columnName);
+    }
+    
+    private static boolean addAndClause(StringBuilder queryString) {
+        queryString.append(" AND ");
+        return true;
+    }
+    
+    private static String getIdQueryForStrings(Set<String> idList) {
+
+        StringBuilder query = new StringBuilder();
+        if (!idList.isEmpty()) {
+
+            String[] list = idList.toArray(new String[idList.size()]);
+            query.append("'"+list[0]+"'");
+            for (int i = 1; i < idList.size(); i++) {
+                query.append("," + "'"+list[i]+"'");
+            }
+        }
+        return query.append(")").toString();
+    }
+
+    public String getPropertyIds(PropertyDetailsSearchCriteria searchCriteria, List<Object> preparedPropStmtList) {
+                
+        StringBuilder query = new StringBuilder(PROPERTY_IDS);
+
+        preparedPropStmtList.add(searchCriteria.getUlbName());
+
+        if(StringUtils.hasText(searchCriteria.getWardNo())) {
+               query.append(AND);
+               query.append(" epa.ward = '").append(searchCriteria.getWardNo()).append("'");
+        }
+        
+        if(StringUtils.hasText(searchCriteria.getPropertyId())) {
+            query.append(AND_QUERY).append(" epp.propertyid = ? ");
+            preparedPropStmtList.add(searchCriteria.getPropertyId());
+        }
+        
+        if(StringUtils.hasText(searchCriteria.getOldPropertyId())) {
+            query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
+            preparedPropStmtList.add(searchCriteria.getOldPropertyId());
+        }
+        
+        return query.toString();
     }
 }
