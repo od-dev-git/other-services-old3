@@ -51,7 +51,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 
 		while (rs.next()) {
 			String id = rs.getString("mr_originalId");
-			log.info("mapper receive id"+id);
+			log.info("mapper receive id: "+id);
 			MarriageRegistration currentMarriageRegistration = marriageRegistrationMap.get(id);
 			String tenantId = rs.getString("mr_tenantId");
 

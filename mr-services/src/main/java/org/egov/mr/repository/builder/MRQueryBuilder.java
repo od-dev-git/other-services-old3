@@ -237,8 +237,10 @@ public class MRQueryBuilder {
 
         preparedStmtList.add(offset);
         preparedStmtList.add(limit+offset);
-
-       log.info("finalQuery  :-  "+finalQuery);
+        
+        log.info("preparestatements: ");
+        preparedStmtList.forEach(item -> log.info(String.valueOf(item)));
+        log.info("finalQuery  :-  "+finalQuery);
         
        return finalQuery;
     }
