@@ -33,10 +33,14 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import lombok.extern.slf4j.Slf4j;
 
 
 
 @Service
+@Slf4j
 public class MarriageRegistrationService {
 
 
@@ -301,6 +305,26 @@ public class MarriageRegistrationService {
 		
 
 		return marriageRegistrations;
+	}
+
+	
+	public List<MarriageRegistration> plainSearch(@Valid MarriageRegistrationSearchCriteria criteria,
+			RequestInfo requestInfo) {
+
+		List<MarriageRegistration> marriageRegistrations;
+        List<String> ids = repository.fetchMarriageRegistrationIds(criteria);
+        if(ids.isEmpty())
+            return Collections.emptyList();
+
+        criteria.setIds(ids);     
+        
+        MarriageRegistrationSearchCriteria idsCriteria = MarriageRegistrationSearchCriteria.builder().ids(ids).limit(criteria.getLimit()).offset(criteria.getOffset()).build();
+
+        marriageRegistrations = repository.getMarriageRegistrationPlainSearch(idsCriteria);
+        
+        log.info("Total Records Returned: "+marriageRegistrations.size());
+
+        return marriageRegistrations;
 	}
 
 

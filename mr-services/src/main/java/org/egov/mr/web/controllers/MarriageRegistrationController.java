@@ -125,6 +125,18 @@ import javax.servlet.http.HttpServletRequest;
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    
+    @RequestMapping(value="/_plainsearch", method = RequestMethod.POST)
+    public ResponseEntity<MarriageRegistrationResponse> plainsearch(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                            @Valid @ModelAttribute MarriageRegistrationSearchCriteria criteria){
+
+        List<MarriageRegistration> marriageRegistrations = marriageRegistrationService.plainSearch(criteria, requestInfoWrapper.getRequestInfo());
+
+        MarriageRegistrationResponse response = MarriageRegistrationResponse.builder().marriageRegistrations(marriageRegistrations).responseInfo(
+                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
 
 
