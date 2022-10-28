@@ -32,8 +32,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 
 @Component
+@Slf4j
 public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistration>> {
 
 
@@ -48,6 +51,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 
 		while (rs.next()) {
 			String id = rs.getString("mr_originalId");
+			log.info("mapper receive id"+id);
 			MarriageRegistration currentMarriageRegistration = marriageRegistrationMap.get(id);
 			String tenantId = rs.getString("mr_tenantId");
 
@@ -87,7 +91,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 
 
 			if(rs.getString("mrc_id")!=null && rs.getBoolean("isgroom")) {
-
+				log.info("Groom details present");
 				Address coupleAddress = null ;
 
 				if(rs.getString("mrca_id")!=null )
@@ -185,7 +189,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 			}
 
 			if(rs.getString("mrc_id")!=null && !rs.getBoolean("isgroom")) {
-
+				log.info("Bride details present");
 				Address coupleAddress = null ;
 
 				if(rs.getString("mrca_id")!=null )
@@ -297,7 +301,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 			}
 			
 			if(rs.getString("mr_apt_dtl_id")!=null && rs.getBoolean("mr_apt_dtl_active")) {
-				
+				log.info("Appointment details present");
 				try {
 					Long startTime = (Long) rs.getObject("mr_apt_dtl_startTime");
 					Long endTime = (Long) rs.getObject("mr_apt_dtl_endTime");
@@ -327,6 +331,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 			}
 
 			if(rs.getString("mr_ver_doc_id")!=null && rs.getBoolean("mr_ver_doc_active")) {
+				log.info("Document present");
 				Document verificationDocument = Document.builder()
 						.documentType(rs.getString("mr_ver_doc_documenttype"))
 						.fileStoreId(rs.getString("mr_ver_doc_filestoreid"))
@@ -338,7 +343,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 			}
 
 			if(rs.getString("mr_dsc_details_id")!=null) {
-
+				log.info("DSC details present");
 	        	DscDetails dscDetail = DscDetails.builder()
 	                    .documentType(rs.getString("mr_dsc_details_documenttype"))
 	                    .documentId(rs.getString("mr_dsc_details_documentid"))
@@ -369,7 +374,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 			addChildrenToProperty(rs, currentMarriageRegistration);
 
 		}
-
+		log.info("Mapper returned: "+marriageRegistrationMap.values().size());
 		return new ArrayList<>(marriageRegistrationMap.values());
 
 	}
