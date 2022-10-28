@@ -1,5 +1,7 @@
 package org.egov.report.service;
 
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,8 +11,11 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.model.UserSearchRequest;
+import org.egov.report.repository.FileStoreRepository;
 import org.egov.report.repository.ReportDao;
 import org.egov.report.repository.ServiceRepository;
+import org.egov.report.repository.UserRepository;
+import org.egov.report.util.EncryptionDecryptionUtil;
 import org.egov.report.util.ReportConstants;
 import org.egov.report.web.model.OwnerInfo;
 import org.egov.report.web.model.User;
@@ -40,6 +45,15 @@ public class UserService {
 	
 	@Autowired
 	private ReportDao reportDao;
+	
+	@Autowired
+	private EncryptionDecryptionUtil encryptionDecryptionUtil;
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	@Autowired
+	private FileStoreRepository fileRepository;
 	
 	private UserSearchRequest getBaseUserSearchRequest(String tenantId, RequestInfo requestInfo) {
 		return UserSearchRequest.builder().requestInfo(requestInfo).userType("EMPLOYEE").tenantId(tenantId).active(true)
@@ -113,5 +127,42 @@ public class UserService {
 		return request;
 	}
 	
+	public List<org.egov.report.user.User> searchUsers(org.egov.report.user.UserSearchCriteria searchCriteria, RequestInfo requestInfo) {
+
+		/*
+		 * searchCriteria
+		 * .setTenantId(getStateLevelTenantForCitizen(searchCriteria.getTenantId(),
+		 * searchCriteria.getType()));
+		 */
+
+		searchCriteria = encryptionDecryptionUtil.encryptObject(searchCriteria, "UserSearchCriteria",
+				org.egov.report.user.UserSearchCriteria.class);
+		List<org.egov.report.user.User> list = userRepository.findAll(searchCriteria);
+
+		list = encryptionDecryptionUtil.decryptObject(list, "UserList", org.egov.report.user.User.class, requestInfo);
+
+		//setFileStoreUrlsByFileStoreIds(list);
+		return list;
+	}
+	
+	private void setFileStoreUrlsByFileStoreIds(List<org.egov.report.user.User> userList) {
+		List<String> fileStoreIds = userList.parallelStream().filter(p -> p.getPhoto() != null).map(org.egov.report.user.User::getPhoto)
+				.collect(Collectors.toList());
+		if (!isEmpty(fileStoreIds)) {
+			Map<String, String> fileStoreUrlList = null;
+			try {
+				fileStoreUrlList = fileRepository.getUrlByFileStoreId(userList.get(0).getTenantId(), fileStoreIds);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			if (fileStoreUrlList != null && !fileStoreUrlList.isEmpty()) {
+				for (org.egov.report.user.User user : userList) {
+					user.setPhoto(fileStoreUrlList.get(user.getPhoto()));
+				}
+			}
+		}
+	}
 
 }

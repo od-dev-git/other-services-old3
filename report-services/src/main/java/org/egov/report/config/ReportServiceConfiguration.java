@@ -1,5 +1,8 @@
 package org.egov.report.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
@@ -7,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import org.egov.encryption.config.EncryptionConfiguration;
 import org.egov.tracer.config.TracerConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,9 +29,12 @@ import java.util.TimeZone;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Import({TracerConfiguration.class})
+@Import({TracerConfiguration.class, EncryptionConfiguration.class})
 public class ReportServiceConfiguration {
 
+	@Autowired
+	ObjectMapper objectMapper;
+	
     @Value("${app.timezone}")
     private String timeZone;
 
@@ -43,6 +50,14 @@ public class ReportServiceConfiguration {
     MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
     converter.setObjectMapper(objectMapper);
     return converter;
+    }
+    
+    @PostConstruct
+    public void postConstruct() {
+		objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+		objectMapper.setDefaultPropertyInclusion(Include.NON_NULL);
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).setTimeZone(TimeZone.getTimeZone(timeZone));
+    	
     }
     
     /** Properties data */

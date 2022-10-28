@@ -84,8 +84,23 @@
 			<version>0.0.3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+            <groupId>org.egov</groupId>
+            <artifactId>enc-client</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.kafka</groupId>
+                    <artifactId>spring-kafka</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.kafka</groupId>
+                    <artifactId>kafka-clients</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 	</dependencies>
-
+	
 	<build>
 		<plugins>
 			<plugin>

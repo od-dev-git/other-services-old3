@@ -27,6 +27,7 @@ import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.model.WSConnection;
 import org.egov.report.model.WSConnectionRequest;
 import org.egov.report.model.WSSearchCriteria;
+import org.egov.report.model.enums.UserType;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.PaymentUtil;
@@ -184,34 +185,30 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                 count = count - limit;
                 offset += limit;
 
-                // Extracting user info from userService
-                if (!CollectionUtils.isEmpty(response)) {
+                // Extracting user info
+				if (!CollectionUtils.isEmpty(response)) {
+					List<String> userIds = response.stream().map(item -> item.getUserId()).distinct()
+							.collect(Collectors.toList());
 
-                    Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct()
-                            .collect(Collectors.toSet());
+					org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
+							.builder().uuid(userIds).build();
 
-                    UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().uuid(userIds)
-                            .active(true)
-                            .userType(UserSearchCriteria.CITIZEN)
-                            .tenantId(criteria.getTenantId())
-                            .build();
+					List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+							requestInfo);
+					Map<String, org.egov.report.user.User> userMap = usersInfo.stream()
+							.collect(Collectors.toMap(org.egov.report.user.User::getUuid, Function.identity()));
 
-                    List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, userSearchCriteria);
-                    Map<String, OwnerInfo> userMap = usersInfo.stream()
-                            .collect(Collectors.toMap(OwnerInfo::getUuid, Function.identity()));
-
-                    response.stream().forEach(item -> {
-                        OwnerInfo user = userMap.get(item.getUserId());
-                        if (user != null) {
-                            item.setUserName(user.getName());
-                            item.setUserMobile(user.getMobileNumber());
-                            item.setUserAddress(user.getCorrespondenceAddress());
-                        }
-                    });
-                }
-                consumerMasterResponse.addAll(response);
-            }
-            
+					response.stream().forEach(item -> {
+						org.egov.report.user.User user = userMap.get(item.getUserId());
+						if (user != null) {
+							item.setUserName(user.getName());
+							item.setUserMobile(user.getMobileNumber());
+							item.setUserAddress(user.getCorrespondenceAddress().getAddress());
+						}
+					});
+				}
+				consumerMasterResponse.addAll(response);
+			}  
         }
         return consumerMasterResponse;
     }
