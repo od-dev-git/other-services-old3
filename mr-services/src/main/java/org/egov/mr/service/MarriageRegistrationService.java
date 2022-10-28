@@ -34,9 +34,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 
 
 @Service
+@Slf4j
 public class MarriageRegistrationService {
 
 
@@ -113,6 +116,7 @@ public class MarriageRegistrationService {
 
 
 	public List<MarriageRegistration> search(MarriageRegistrationSearchCriteria criteria, RequestInfo requestInfo, String serviceFromPath, HttpHeaders headers){
+		log.info("search: "+criteria.toString());
 		List<MarriageRegistration> marriageRegistrations;
 		// allow mobileNumber based search by citizen if interserviceCall
 		boolean isInterServiceCall = isInterServiceCall(headers);
@@ -157,6 +161,7 @@ public class MarriageRegistrationService {
 
 	public List<MarriageRegistration> getMarriageRegistrationsWithOwnerInfo(MarriageRegistrationSearchCriteria criteria,RequestInfo requestInfo){
 		List<MarriageRegistration> marriageRegistrations = repository.getMarriageRegistartions(criteria);
+		log.info("No of records: " + marriageRegistrations.size());
 		if(marriageRegistrations.isEmpty())
 			return Collections.emptyList();
 		return marriageRegistrations;
