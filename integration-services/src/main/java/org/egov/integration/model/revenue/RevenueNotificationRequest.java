@@ -2,6 +2,8 @@ package org.egov.integration.model.revenue;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.egov.common.contract.request.RequestInfo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,5 +25,6 @@ public class RevenueNotificationRequest {
 	private RequestInfo requestInfo = null;
 
 	@JsonProperty("Notifications")
+	@NotNull
 	private List<RevenueNotification> revenueNotifications;
 }

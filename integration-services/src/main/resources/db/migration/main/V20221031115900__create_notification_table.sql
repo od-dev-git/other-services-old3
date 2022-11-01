@@ -1,4 +1,4 @@
-create table eg_uis_revenuenotification(
+create table if not exists eg_uis_revenuenotification(
 	id character varying(256) NOT NULL,
 	districtname character varying(256) ,
 	tenantid character varying(256),
@@ -20,4 +20,4 @@ create table eg_uis_revenuenotification(
 	CONSTRAINT pk_eg_is_revenuenotification PRIMARY KEY (id)
 );
 
-CREATE INDEX eg_uis_revenuenotification_index ON eg_uis_revenuenotification(tenantid);
+create index if not exists eg_uis_revenuenotification_index ON eg_uis_revenuenotification(tenantid);
