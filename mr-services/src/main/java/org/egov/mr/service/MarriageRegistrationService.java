@@ -317,15 +317,19 @@ public class MarriageRegistrationService {
 
 		List<MarriageRegistration> marriageRegistrations;
         List<String> ids = repository.fetchMarriageRegistrationIds(criteria);
+        
         if(ids.isEmpty())
             return Collections.emptyList();
 
         criteria.setIds(ids);     
         
-        MarriageRegistrationSearchCriteria idsCriteria = MarriageRegistrationSearchCriteria.builder().ids(ids).limit(criteria.getLimit()).offset(criteria.getOffset()).build();
+        MarriageRegistrationSearchCriteria idsCriteria = MarriageRegistrationSearchCriteria.builder().ids(ids).limit(criteria.getLimit())
+                //.offset(criteria.getOffset())
+                .build();
 
         marriageRegistrations = repository.getMarriageRegistrationPlainSearch(idsCriteria);
         
+        log.info("Total Records to be returned: "+ ids.size());
         log.info("Total Records Returned: "+marriageRegistrations.size());
 
         return marriageRegistrations;
