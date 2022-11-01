@@ -1,9 +1,12 @@
 package org.egov.mr.repository;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mr.config.MRConfiguration;
@@ -18,6 +21,7 @@ import org.egov.mr.web.models.MarriageRegistrationSearchCriteria;
 import org.egov.mr.workflow.WorkflowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
@@ -119,13 +123,39 @@ public class MRRepository {
        producer.push(config.getUpdateDscDetailsTopic(), new MarriageRegistrationRequest(requestInfo, marriageRegistrations));
 		
 	}
+	
 
 
 
+	private void sortChildObjectsById(List<MarriageRegistration> marriageRegistrations) {
+        if(CollectionUtils.isEmpty(marriageRegistrations))
+            return;
+    }
+	
+	public List<String> fetchMarriageRegistrationIds(@Valid MarriageRegistrationSearchCriteria criteria) {
+		List<Object> preparedStmtList = new ArrayList<>();
+        preparedStmtList.add(criteria.getOffset());
+        preparedStmtList.add(criteria.getLimit());
+
+        return jdbcTemplate.query("select id from eg_mr_application ORDER BY createdtime offset " +
+                        " ? " +
+                        "limit ? ",
+                preparedStmtList.toArray(),
+                new SingleColumnRowMapper<>(String.class));
+	}
 
 
 
+	public List<MarriageRegistration> getMarriageRegistrationPlainSearch(
+			MarriageRegistrationSearchCriteria idsCriteria) {
 
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = queryBuilder.getMRPlainSearchQuery(idsCriteria, preparedStmtList);
+        log.info("Query: " + query);
+        List<MarriageRegistration> marriageRegistrations =  jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
+  //      sortChildObjectsById(marriageRegistrations);
+        return marriageRegistrations;
+	}
 
 
 }
