@@ -87,4 +87,5 @@ select
 from egcl_paymentdetail epd
 inner join egcl_bill eb on eb.id = epd.billid
 inner join egcl_payment ep on ep.id = epd.paymentid
-where epd.businessservice in ( 'WS', 'WS.ONE_TIME_FEE');
+where epd.businessservice in ( 'WS', 'WS.ONE_TIME_FEE')
+and ep.paymentstatus != 'CANCELLED';

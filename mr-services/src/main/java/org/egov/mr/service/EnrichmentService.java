@@ -33,6 +33,9 @@ import com.jayway.jsonpath.JsonPath;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
 import static org.egov.mr.util.MRConstants.*;
 
 
@@ -589,7 +592,7 @@ public class EnrichmentService {
 		}
 	}
 
-	
+
 
 
 
