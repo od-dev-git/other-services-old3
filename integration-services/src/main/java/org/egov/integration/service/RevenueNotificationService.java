@@ -1,5 +1,6 @@
 package org.egov.integration.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -12,7 +13,10 @@ import org.egov.integration.validator.RevenueNotificationValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class RevenueNotificationService {
 	
 	@Autowired
@@ -41,8 +45,21 @@ public class RevenueNotificationService {
 	}
 
 	public List<RevenueNotification> search(RevenueNotificationSearchCriteria searchCriteria) {
-		// TODO Auto-generated method stub
-		return null;
+
+		revenueNotificationValidator.validateSearch(searchCriteria);
+
+		log.info("validated");
+		log.info("entering into query");
+
+		List<RevenueNotification> revenueNotifications;
+		revenueNotifications = revenueNotificationRepository.getNotifications(searchCriteria);
+
+		if (revenueNotifications.isEmpty())
+			return Collections.emptyList();
+
+		log.info("No of Notifications : " + revenueNotifications.size());
+
+		return revenueNotifications;
 	}
 
 }

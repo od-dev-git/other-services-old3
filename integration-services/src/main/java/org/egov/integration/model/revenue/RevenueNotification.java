@@ -69,7 +69,7 @@ public class RevenueNotification {
 	private String action;
 	
 	@JsonProperty("additionaldetails")
-	private String additionaldetails;
+	private Object additionaldetails;
 	
 	@JsonProperty("createdby")
 	private String createdby;

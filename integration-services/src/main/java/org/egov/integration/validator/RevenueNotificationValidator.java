@@ -9,7 +9,9 @@ import java.util.Map;
 
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.integration.config.IntegrationConfiguration;
 import org.egov.integration.model.revenue.RevenueNotificationRequest;
+import org.egov.integration.model.revenue.RevenueNotificationSearchCriteria;
 import org.egov.integration.repository.ServiceRepository;
 import org.egov.integration.util.RevenueNotificationConstants;
 import org.egov.mdms.model.MasterDetail;
@@ -20,6 +22,7 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.jayway.jsonpath.JsonPath;
 
@@ -29,20 +32,26 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RevenueNotificationValidator {
 	
-	@Value("${egov.mdms.host}")
-    private String mdmsHost;
-	
-	@Value("${egov.mdms.search.endpoint}")
-    private String mdmsEndpoint;
-	
 	@Autowired
 	ServiceRepository serviceRepository;
+	
+	@Autowired
+	IntegrationConfiguration configuration;
 	
 	private void createCustomException(Map<String, String> errorMap) {
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
 	}
 
+	public void validateSearch(RevenueNotificationSearchCriteria searchCriteria) {
+		Map<String, String> errorMap = new HashMap<>();
+
+		if (!StringUtils.hasText(searchCriteria.getTenantId())) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "Ulb can not be empty/blank");
+		}
+		createCustomException(errorMap);
+	}
+	
 	public void validateMDMSForCreateRequest(RevenueNotificationRequest request) {
 		
 		Map<String, String> errorMap = new HashMap<>();
@@ -59,6 +68,8 @@ public class RevenueNotificationValidator {
 
 	private List<String> getDataFromMdms(RevenueNotificationRequest request) {
 		
+		String mdmsHost = configuration.getMdmsHost();
+		String mdmsEndpoint = configuration.getMdmsEndpoint();
 		StringBuilder uri = new StringBuilder(mdmsHost).append(mdmsEndpoint);
 		List<String> names = Arrays.asList(RevenueNotificationConstants.MDMS_NAME_TENANTS);
 		MdmsCriteriaReq criteriaReq = prepareMdMsRequest(RevenueNotificationConstants.MDMS_MODULE_NAME, names,
