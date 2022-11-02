@@ -32,7 +32,7 @@ public class RevenueNotificationService {
 		
 		revenueNotificationValidator.validateMDMSForCreateRequest(request);
 		
-		enrichmentService.enrichRevenueNotificationRequest(request.getRevenueNotifications());
+		enrichmentService.enrichRevenueNotificationRequest(request);
 		
 		revenueNotificationRepository.saveRevenueNotification(request);
 		
