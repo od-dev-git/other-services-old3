@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.egov.integration.IntegrationServicesApplication;
 import org.egov.integration.model.revenue.RevenueNotification;
+import org.egov.integration.model.revenue.RevenueNotificationRequest;
 import org.egov.integration.producer.RevenueNotificationProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,9 +19,9 @@ public class RevenueNotificationRepository {
 	@Value("${egov.integration.revenue.notification.save.topic}")
     private String saveRevenueNotification;
 	
-	public void saveRevenueNotification(List<RevenueNotification> revenueNotifications) {
+	public void saveRevenueNotification(RevenueNotificationRequest revenueNotificationsRequest) {
 		
-		revenueNotificationProducer.push(saveRevenueNotification, revenueNotifications);
+		revenueNotificationProducer.push(saveRevenueNotification, revenueNotificationsRequest);
 	}
 
 }

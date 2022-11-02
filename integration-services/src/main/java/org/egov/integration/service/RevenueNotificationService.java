@@ -26,16 +26,13 @@ public class RevenueNotificationService {
 	
 	public List<RevenueNotification> create(@Valid RevenueNotificationRequest request) {
 		
-		revenueNotificationValidator.validateRevenueNotificationRequest(request.getRevenueNotifications());
-		
-		//yet to implement
-		//revenueNotificationValidator.validateMDMSForCreateRequest(request.getRequestInfo());
+		revenueNotificationValidator.validateMDMSForCreateRequest(request);
 		
 		enrichmentService.enrichRevenueNotificationRequest(request.getRevenueNotifications());
 		
-		revenueNotificationRepository.saveRevenueNotification(request.getRevenueNotifications());
+		revenueNotificationRepository.saveRevenueNotification(request);
 		
-		return null;
+		return request.getRevenueNotifications();
 	}
 
 	public List<RevenueNotification> update(@Valid RevenueNotificationRequest request) {

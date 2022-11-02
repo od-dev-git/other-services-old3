@@ -1,7 +1,6 @@
 package org.egov.integration.model.revenue;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,65 +9,77 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class RevenueNotification {
 	
 	@JsonProperty("id")
 	private String id;
 	
-	@JsonProperty("districtName")
-	private String districtName;
+	@JsonProperty("districtname")
+	@NotBlank(message = "District Name cannot be Blank")
+	private String districtname;
 	
-	@JsonProperty("tenantId")
-	private String tenantId;
+	@JsonProperty("tenantid")
+	@NotBlank(message = "Tenant Id cannot be Blank")
+	private String tenantid;
 	
-	@JsonProperty("revenueVillage")
-	private String revenueVillage;
+	@JsonProperty("revenuevillage")
+	@NotBlank(message = "Revenue Village cannot be Blank")
+	private String revenuevillage;
 	
-	@JsonProperty("plotNo")
-	private String plotNo;
+	@JsonProperty("plotno")
+	@NotBlank(message = "Plot Number cannot be Blank")
+	private String plotno;
 	
-	@JsonProperty("flatNo")
-	private String flatNo; 
+	@JsonProperty("flatno")
+	@NotBlank(message = "Flat Number cannot be Blank")
+	private String flatno; 
 	
 	@JsonProperty("address")
+	@NotBlank(message = "Address cannot be Blank")
 	private String address;
 	
-	@JsonProperty("currentOwnerName")
-	private String currentOwnerName;
+	@JsonProperty("currentownername")
+	@NotBlank(message = "Current Owner Name cannot be Blank")
+	private String currentownername;
 	
-	@JsonProperty("currentOwnerMobileNumber")
-	private String currentOwnerMobileNumber; 
+	@JsonProperty("currentownermobilenumber")
+	@NotBlank(message = "Current Owner Mobile number cannot be Blank")
+	private String currentownermobilenumber; 
 	
-	@JsonProperty("newOwnerName")
-	private String newOwnerName;
+	@JsonProperty("newownername")
+	@NotBlank(message = "New Owner Name cannot be null")
+	private String newownername;
 	
-	@JsonProperty("newOwnerMobileNumber")
-	private String newOwnerMobileNumber; 
+	@JsonProperty("newownermobilenumber")
+	@NotBlank(message = "New Owner Mobile Number cannot be Blank")
+	private String newownermobilenumber; 
 	
-	@JsonProperty("actionTaken")
-	private String actionTaken;
+	@JsonProperty("actiontaken")
+	private Boolean actiontaken;
 	
 	@JsonProperty("action")
-	private Boolean action;
+	private String action;
 	
-	@JsonProperty("additionalDetails")
-	private String additionalDetails;
+	@JsonProperty("additionaldetails")
+	private String additionaldetails;
 	
-	@JsonProperty("createdBy")
-	private String createdBy;
+	@JsonProperty("createdby")
+	private String createdby;
 	
-	@JsonProperty("createdTime")
-	private Long createdTime;
+	@JsonProperty("createdtime")
+	private Long createdtime;
 	
-	@JsonProperty("lastModifiedBy")
-	private String lastModifiedBy;
+	@JsonProperty("lastmodifiedby")
+	private String lastmodifiedby;
 	
-	@JsonProperty("lastModifiedTime")
-	private Long lastModifiedTime;
+	@JsonProperty("lastmodifiedtime")
+	private Long lastmodifiedtime;
 }

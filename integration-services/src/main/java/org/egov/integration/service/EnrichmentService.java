@@ -1,6 +1,7 @@
 package org.egov.integration.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.egov.integration.model.revenue.RevenueNotification;
 import org.springframework.stereotype.Service;
@@ -12,10 +13,11 @@ public class EnrichmentService {
 		
 		revenueNotifications.stream().forEach(item -> {
 			
-			item.setAction(false);
-			item.setActionTaken("No Action Taken");
-			item.setCreatedTime(System.currentTimeMillis());
-			item.setLastModifiedTime(System.currentTimeMillis());		
+			item.setId(UUID.randomUUID().toString());
+			item.setAction("No Action Taken");
+			item.setActiontaken(false);
+			item.setCreatedtime(System.currentTimeMillis());
+			item.setLastmodifiedtime(System.currentTimeMillis());		
 		});
 		
 	}

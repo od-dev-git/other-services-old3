@@ -1,68 +1,88 @@
 package org.egov.integration.validator;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import org.egov.common.contract.request.RequestInfo;
-import org.egov.integration.model.revenue.RevenueNotification;
+import org.egov.integration.model.revenue.RevenueNotificationRequest;
+import org.egov.integration.repository.ServiceRepository;
+import org.egov.integration.util.RevenueNotificationConstants;
+import org.egov.mdms.model.MasterDetail;
+import org.egov.mdms.model.MdmsCriteria;
+import org.egov.mdms.model.MdmsCriteriaReq;
+import org.egov.mdms.model.ModuleDetail;
 import org.egov.tracer.model.CustomException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+
+import com.jayway.jsonpath.JsonPath;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class RevenueNotificationValidator {
+	
+	@Value("${egov.mdms.host}")
+    private String mdmsHost;
+	
+	@Value("${egov.mdms.search.endpoint}")
+    private String mdmsEndpoint;
+	
+	@Autowired
+	ServiceRepository serviceRepository;
 	
 	private void createCustomException(Map<String, String> errorMap) {
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
 	}
-	
 
-	public void validateRevenueNotificationRequest(List<RevenueNotification> request) {
+	public void validateMDMSForCreateRequest(RevenueNotificationRequest request) {
 		
 		Map<String, String> errorMap = new HashMap<>();
-		request.stream().forEach(item -> {
-			
-			if(!StringUtils.hasText(item.getAddress()))
-				errorMap.put("NO_DATA_GIVEN", "Address Cannot be Empty");
-			
-			if(!StringUtils.hasText(item.getDistrictName()))
-				errorMap.put("NO_DATA_GIVEN", "District Name Cannot be Empty");
-			
-			if(!StringUtils.hasText(item.getTenantId()))
-				errorMap.put("NO_DATA_GIVEN", "TenantId/ULB Cannot be Empty");
-			
-			if(!StringUtils.hasText(item.getRevenueVillage()))
-				errorMap.put("NO_DATA_GIVEN", "Revenue Village Cannot be Empty");
-			
-			if(!StringUtils.hasText(item.getPlotNo()))
-				errorMap.put("NO_DATA_GIVEN", "Plot Number Cannot be Empty");
-			
-			if(!StringUtils.hasText(item.getFlatNo()))
-				errorMap.put("NO_DATA_GIVEN", "Flat Number Cannot be Empty");
-			
-			if(!StringUtils.hasText(item.getCurrentOwnerName()))
-				errorMap.put("NO_DATA_GIVEN", "Current Owner Name Cannot be Empty");
-			
-			if(!StringUtils.hasText(item.getCurrentOwnerMobileNumber()))
-				errorMap.put("NO_DATA_GIVEN", "Current Owner Mobile Number Cannot be Empty");
-			
-			if(!StringUtils.hasText(item.getNewOwnerName()))
-				errorMap.put("NO_DATA_GIVEN", "New Owner Name Cannot be Empty");
-			
-			if(!StringUtils.hasText(item.getNewOwnerMobileNumber()))
-				errorMap.put("NO_DATA_GIVEN", "New Owner Mobile Number Cannot be Empty");
-			
-		});
 		
-		createCustomException(errorMap);
+		List<String> tenantids = getDataFromMdms(request);	
+		request.getRevenueNotifications().stream().forEach(item -> {
+			if(!tenantids.contains(item.getTenantid())) {
+				errorMap.put("INVAILD_TENANTID", "Tenant Id not valid");
+			}
+		});	
+		if(!errorMap.isEmpty())
+			createCustomException(errorMap);
 	}
 
-
-	public void validateMDMSForCreateRequest(RequestInfo requestInfo) {
-		// TODO Auto-generated method stub
+	private List<String> getDataFromMdms(RevenueNotificationRequest request) {
 		
+		StringBuilder uri = new StringBuilder(mdmsHost).append(mdmsEndpoint);
+		List<String> names = Arrays.asList(RevenueNotificationConstants.MDMS_NAME_TENANTS);
+		MdmsCriteriaReq criteriaReq = prepareMdMsRequest(RevenueNotificationConstants.MDMS_MODULE_NAME, names,
+				RevenueNotificationConstants.MDMS_TENANT_ID, RevenueNotificationConstants.MDMS_FILTER,
+				request.getRequestInfo());
+		try {
+			Object result = serviceRepository.fetchResult(uri, criteriaReq);
+			return JsonPath.read(result, RevenueNotificationConstants.JSON_FILTER);
+		} catch (Exception e) {
+			throw new CustomException("MDMS_FETCH_EXCEPTION", "Data fetch exception from MDMS");
+		}
+	}
+
+	private MdmsCriteriaReq prepareMdMsRequest(String moduleName, List<String> names, String tenantId,
+			String filter, RequestInfo requestInfo) {
+		
+		List<MasterDetail> masterDetails = new ArrayList<>();
+		names.forEach(name -> {
+			masterDetails.add(MasterDetail.builder().name(name).filter(filter).build());
+		});
+		ModuleDetail moduleDetail = ModuleDetail.builder().moduleName(moduleName).masterDetails(masterDetails).build();
+		List<ModuleDetail> moduleDetails = new ArrayList<>();
+		moduleDetails.add(moduleDetail);
+		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().tenantId(tenantId).moduleDetails(moduleDetails).build();
+		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
 	}
 }
