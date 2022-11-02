@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.egov.integration.config.IntegrationConfiguration;
 import org.egov.integration.model.revenue.RevenueNotificationSearchCriteria;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RevenueNotificationQueryBuilder {
 
+	@Autowired
 	private IntegrationConfiguration config;
 
 	private static final String SELECT = " SELECT ";
@@ -27,7 +29,7 @@ public class RevenueNotificationQueryBuilder {
 	private static final String ORDER_BY = " order by ";
 
 	private final String paginationWrapper = "SELECT * FROM "
-			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY tl_lastModifiedTime DESC , tl_id) offset_ FROM " + "({})"
+			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY lastmodifiedtime DESC ) offset_ FROM " + "({})"
 			+ " result) result_offset " + "WHERE offset_ > ? AND offset_ <= ?";
 
 	private static final String revenueNotificationValues = " rn.id, rn.districtname, rn.tenantid, rn.revenuevillage, rn.plotno, rn.flatno,"
@@ -60,6 +62,8 @@ public class RevenueNotificationQueryBuilder {
 		preparedStmtList.add(offset);
 		preparedStmtList.add(limit + offset);
 
+		log.info("Final Query : " + finalQuery);
+		
 		return finalQuery;
 	}
 
@@ -70,8 +74,6 @@ public class RevenueNotificationQueryBuilder {
 
 		query.append(WHERE).append(" rn.tenantid = ? ");
 		preparedStmtList.add(searchCriteria.getTenantId());
-
-		// addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedPropStmtList);
 
 		return addPaginationWrapper(query.toString(), preparedStmtList, searchCriteria);
 
