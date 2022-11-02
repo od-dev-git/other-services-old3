@@ -29,10 +29,10 @@ public class ReportServicesApplication {
 	@Value("${app.timezone}")
     private String timeZone;
 	
-	@Bean
-	public ObjectMapper objectMapper() {
-		return new ObjectMapper().configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-				.setDefaultPropertyInclusion(Include.NON_NULL)
-				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).setTimeZone(TimeZone.getTimeZone(timeZone));
-	}
+//	@Bean
+//	public ObjectMapper objectMapper() {
+//		return new ObjectMapper().configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+//				.setDefaultPropertyInclusion(Include.NON_NULL)
+//				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).setTimeZone(TimeZone.getTimeZone(timeZone));
+//	}
 }
