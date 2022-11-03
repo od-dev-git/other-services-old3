@@ -1,5 +1,8 @@
 package org.egov.integration.model.revenue;
 
+import java.util.List;
+
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -46,22 +49,6 @@ public class RevenueNotification {
 	@NotBlank(message = "Address cannot be Blank")
 	private String address;
 	
-	@JsonProperty("currentownername")
-	@NotBlank(message = "Current Owner Name cannot be Blank")
-	private String currentownername;
-	
-	@JsonProperty("currentownermobilenumber")
-	@NotBlank(message = "Current Owner Mobile number cannot be Blank")
-	private String currentownermobilenumber; 
-	
-	@JsonProperty("newownername")
-	@NotBlank(message = "New Owner Name cannot be null")
-	private String newownername;
-	
-	@JsonProperty("newownermobilenumber")
-	@NotBlank(message = "New Owner Mobile Number cannot be Blank")
-	private String newownermobilenumber; 
-	
 	@JsonProperty("actiontaken")
 	private Boolean actiontaken;
 	
@@ -82,4 +69,19 @@ public class RevenueNotification {
 	
 	@JsonProperty("lastmodifiedtime")
 	private Long lastmodifiedtime;
+	
+	@JsonProperty("waterconsumerno")
+	private String waterConsumerNo;
+	
+	@JsonProperty("propertyid")
+	private String propertyId;
+	
+	@JsonProperty("currentowner")
+	@NotBlank(message="Current Owner Details cannot be empty")
+	List<@Valid RevenueOwner> currentOwner;
+	
+	@JsonProperty("newowner")
+	@NotBlank(message="New Owner Details cannot be empty")
+	List<@Valid RevenueOwner> newOwner;
+	
 }

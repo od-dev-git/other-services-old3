@@ -5,11 +5,7 @@ create table if not exists eg_uis_revenuenotification(
 	revenuevillage character varying(256),
 	plotno character varying(256),
 	flatno character varying(256),
-	address character varying(256),
-	currentownername character varying(256),
-	currentownermobilenumber character varying(256),
-	newownername character varying(256),
-	newownermobilenumber character varying(256),
+	address character varying(1000),
 	actiontaken boolean,
 	action character varying(256),
 	additionaldetails jsonb,
@@ -21,3 +17,21 @@ create table if not exists eg_uis_revenuenotification(
 );
 
 create index if not exists eg_uis_revenuenotification_index ON eg_uis_revenuenotification(tenantid);
+
+
+
+create table if not exists eg_uis_revenuenotification_owners(
+	revenuenotificationid character varying(256) NOT NULL,
+	ownername character varying(256),
+	mobilenumber character varying(256),
+	ownertype character varying(50),
+	createdby character varying(256),
+	createdtime bigint,
+	lastmodifiedby character varying(256),
+	lastmodifiedtime bigint,	
+	CONSTRAINT eeg_uis_revenuenotification_owners_id_fkey FOREIGN KEY (revenuenotificationid) REFERENCES eg_uis_revenuenotification (id) 
+  	ON UPDATE CASCADE
+  	ON DELETE CASCADE
+);
+
+create index if not exists eg_uis_revenuenotification_owners_index ON eg_uis_revenuenotification_owners(revenuenotificationid);
