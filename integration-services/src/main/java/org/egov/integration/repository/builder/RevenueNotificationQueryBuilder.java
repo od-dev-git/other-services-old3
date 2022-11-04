@@ -32,7 +32,7 @@ public class RevenueNotificationQueryBuilder {
 	private static final String ORDER_BY = " order by ";
 
 	private final String paginationWrapper = "SELECT * FROM "
-			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY lastmodifiedtime DESC ) offset_ FROM " + "({})"
+			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY lastmodifiedtime DESC , id ) offset_ FROM " + "({})"
 			+ " result) result_offset " + "WHERE offset_ > ? AND offset_ <= ?";
 
 	private static final String revenueNotificationValues =  " rn.id, rn.districtname, rn.tenantid, rn.revenuevillage, rn.plotno, rn.flatno,"
