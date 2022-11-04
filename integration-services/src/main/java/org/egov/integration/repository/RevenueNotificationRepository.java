@@ -16,8 +16,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Repository
 public class RevenueNotificationRepository {
+	
+	@Autowired
+	private ObjectMapper mapper;
 
 	@Autowired
 	private RevenueNotificationProducer revenueNotificationProducer;
@@ -47,7 +52,7 @@ public class RevenueNotificationRepository {
 
 		String query = queryBuilder.getNotificationsSearchQuery(searchCriteria, preparedStmtList);
 
-		return jdbcTemplate.query(query, preparedStmtList.toArray(), new RevenueNotificationsRowMapper());
+		return jdbcTemplate.query(query, preparedStmtList.toArray(), new RevenueNotificationsRowMapper(mapper));
 	}
 
 }

@@ -1,5 +1,6 @@
 package org.egov.integration.model.revenue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -83,4 +84,21 @@ public class RevenueNotification {
 	@JsonProperty("newowner")
 	private List<@Valid RevenueOwner> newOwner;
 	
+	public RevenueNotification addCurrentOwners(RevenueOwner owners) {
+        if (this.currentOwner == null) {
+        this.currentOwner = new ArrayList<>();
+        }
+        if(!this.currentOwner.contains(owners))
+            this.currentOwner.add(owners);
+        return this;
+    }
+	  
+	  public RevenueNotification addNewOwners(RevenueOwner owners) {
+        if (this.newOwner == null) {
+        this.newOwner = new ArrayList<>();
+        }
+        if(!this.newOwner.contains(owners))
+            this.newOwner.add(owners);
+        return this;
+    }
 }

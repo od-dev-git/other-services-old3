@@ -21,5 +21,15 @@ public class RevenueNotificationSearchCriteria {
 
 	@JsonProperty("offset")
 	private Integer offset;
+	
+	@JsonProperty("actiontaken")
+	private Boolean actiontaken;
+	
+	@JsonProperty("wsconsumerno")
+	private String wsconsumerno;
+	
+	@JsonProperty("propertyid")
+	private String propertyid;
+
 
 }

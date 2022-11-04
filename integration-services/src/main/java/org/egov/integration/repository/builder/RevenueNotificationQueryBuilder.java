@@ -14,8 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RevenueNotificationQueryBuilder {
 
-	@Autowired
 	private IntegrationConfiguration config;
+
+	public RevenueNotificationQueryBuilder(IntegrationConfiguration config) {
+		this.config = config;
+	}
 
 	private static final String SELECT = " SELECT ";
 	private static final String INNER_JOIN = " INNER JOIN ";
@@ -32,17 +35,21 @@ public class RevenueNotificationQueryBuilder {
 			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY lastmodifiedtime DESC ) offset_ FROM " + "({})"
 			+ " result) result_offset " + "WHERE offset_ > ? AND offset_ <= ?";
 
-	private static final String revenueNotificationValues = " rn.id, rn.districtname, rn.tenantid, rn.revenuevillage, rn.plotno, rn.flatno,"
-			+ " rn.address, rn.currentownername, rn.currentownermobilenumber, rn.newownername, rn.newownermobilenumber, rn.actiontaken, "
-			+ " rn.action , rn.additionaldetails, rn.createdby, rn.createdtime, rn.lastmodifiedby, rn.lastmodifiedtime";
+	private static final String revenueNotificationValues =  " rn.id, rn.districtname, rn.tenantid, rn.revenuevillage, rn.plotno, rn.flatno,"
+			+ " rn.address, rn.actiontaken, rn.action , rn.waterconsumerno, rn.propertyid,"
+			+ " rn.additionaldetails, rn.createdby, rn.createdtime, rn.lastmodifiedby, rn.lastmodifiedtime ";
 
+	private static final String revenueNotificationOwnerValues = " rno.revenuenotificationid, rno.ownername, rno.mobilenumber, rno.ownertype ";
+	
 	private static final String revenueNotificationTable = " eg_uis_revenuenotification rn ";
+	
+	private static final String revenueNotificationOwnersTable = " eg_uis_revenuenotification_owners rno ";
 
-	private static final String QUERY_FOR_REVENUE_NOTIFICATIONS_SEARCH = SELECT + revenueNotificationValues + FROM
-			+ revenueNotificationTable;
+	private static final String QUERY_FOR_REVENUE_NOTIFICATIONS_SEARCH = SELECT 
+			+ revenueNotificationValues + " , " + revenueNotificationOwnerValues
+			+ FROM + revenueNotificationTable
+			+ INNER_JOIN + revenueNotificationOwnersTable + ON+ " rn.id = rno.revenuenotificationid ";
 
-	private static final String QUERY_FOR_REVENUE_NOTIFICATIONS_COUNT = SELECT + " rn.id " + FROM
-			+ revenueNotificationTable;
 
 	private String addPaginationWrapper(String query, List<Object> preparedStmtList,
 			RevenueNotificationSearchCriteria criteria) {
@@ -74,6 +81,21 @@ public class RevenueNotificationQueryBuilder {
 
 		query.append(WHERE).append(" rn.tenantid = ? ");
 		preparedStmtList.add(searchCriteria.getTenantId());
+		
+		if((searchCriteria.getActiontaken() != null)) {
+        	query.append(AND).append(" rn.actiontaken = ? ");
+        	preparedStmtList.add(searchCriteria.getActiontaken());
+        }
+		
+		if(StringUtils.hasText(searchCriteria.getPropertyid())) {
+        	query.append(AND).append(" rn.propertyid = ? ");
+        	preparedStmtList.add(searchCriteria.getPropertyid());
+        }
+		
+		if(StringUtils.hasText(searchCriteria.getWsconsumerno())) {
+        	query.append(AND).append(" rn.waterconsumerno = ? ");
+        	preparedStmtList.add(searchCriteria.getWsconsumerno());
+        }
 
 		return addPaginationWrapper(query.toString(), preparedStmtList, searchCriteria);
 
