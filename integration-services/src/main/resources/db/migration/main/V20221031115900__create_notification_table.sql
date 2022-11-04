@@ -6,6 +6,8 @@ create table if not exists eg_uis_revenuenotification(
 	plotno character varying(256),
 	flatno character varying(256),
 	address character varying(1000),
+	waterconsumerno character varying(256),
+	propertyid character varying(256),
 	actiontaken boolean,
 	action character varying(256),
 	additionaldetails jsonb,

@@ -40,8 +40,14 @@ public class RevenueNotificationService {
 	}
 
 	public List<RevenueNotification> update(@Valid RevenueNotificationRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		revenueNotificationValidator.validateUpdateRequest(request);
+		
+		enrichmentService.enrichRevenueNotificationUpdateRequest(request);
+		
+		revenueNotificationRepository.updateRevenueNotification(request);
+		
+		return request.getRevenueNotifications();
 	}
 
 	public List<RevenueNotification> search(RevenueNotificationSearchCriteria searchCriteria) {

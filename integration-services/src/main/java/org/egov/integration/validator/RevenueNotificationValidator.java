@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.integration.config.IntegrationConfiguration;
@@ -58,7 +59,7 @@ public class RevenueNotificationValidator {
 		
 		List<String> tenantids = getDataFromMdms(request);	
 		request.getRevenueNotifications().stream().forEach(item -> {
-			if(!tenantids.contains(item.getTenantid())) {
+			if(!tenantids.contains(item.getTenantId())) {
 				errorMap.put("INVAILD_TENANTID", "Tenant Id not valid");
 			}
 		});	
@@ -95,5 +96,24 @@ public class RevenueNotificationValidator {
 		moduleDetails.add(moduleDetail);
 		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().tenantId(tenantId).moduleDetails(moduleDetails).build();
 		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
+	}
+
+	public void validateUpdateRequest(@Valid RevenueNotificationRequest request) {
+		
+		Map<String, String> errorMap = new HashMap<>();
+		
+		request.getRevenueNotifications().stream().forEach(item -> {
+			
+			if(!item.getActionTaken()) {
+				errorMap.put("INVALID_ACTION", "Action Taken should be marked as true to proceed ");
+			}
+			
+			if(item.getActionTaken() && !StringUtils.hasText(item.getAction())) {
+				errorMap.put("INVALID_ACTION", "Please specify Action to Proceed further");
+			}
+			
+			if(!errorMap.isEmpty())
+				createCustomException(errorMap);
+		});	
 	}
 }

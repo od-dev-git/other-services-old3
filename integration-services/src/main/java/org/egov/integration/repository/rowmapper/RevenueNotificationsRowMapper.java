@@ -28,13 +28,13 @@ public class RevenueNotificationsRowMapper implements ResultSetExtractor<List<Re
 		while (rs.next()) {
 
 			RevenueNotification revenueNotification = RevenueNotification.builder().id(rs.getString("id"))
-					.districtname(rs.getString("districtname")).tenantid(rs.getString("tenantid"))
-					.revenuevillage(rs.getString("revenuevillage")).plotno(rs.getString("plotno"))
-					.flatno(rs.getString("flatno")).address(rs.getString("address"))
-					.actiontaken(rs.getBoolean("actiontaken")).action(rs.getString("action"))
-					.additionaldetails(rs.getObject("additionaldetails")).createdby(rs.getString("createdby"))
-					.createdtime(rs.getLong("createdtime")).lastmodifiedby(rs.getString("lastmodifiedby"))
-					.lastmodifiedtime(rs.getLong("lastmodifiedtime")).build();
+					.districtName(rs.getString("districtname")).tenantId(rs.getString("tenantid"))
+					.revenueVillage(rs.getString("revenuevillage")).plotNo(rs.getString("plotno"))
+					.flatNo(rs.getString("flatno")).address(rs.getString("address"))
+					.actionTaken(rs.getBoolean("actiontaken")).action(rs.getString("action"))
+					.additionalDetails(rs.getObject("additionaldetails")).createdBy(rs.getString("createdby"))
+					.createdTime(rs.getLong("createdtime")).lastModifiedBy(rs.getString("lastmodifiedby"))
+					.lastModifiedTime(rs.getLong("lastmodifiedtime")).build();
 
 			revenueNotifications.add(revenueNotification);
 

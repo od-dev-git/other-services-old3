@@ -35,6 +35,11 @@ public class RevenueNotificationRepository {
 
 		revenueNotificationProducer.push(configuration.getSaveRevenueNotification(), revenueNotificationsRequest);
 	}
+	
+	public void updateRevenueNotification(RevenueNotificationRequest revenueNotificationsRequest) {
+
+		revenueNotificationProducer.push(configuration.getUpdateRevenueNotification(), revenueNotificationsRequest);
+	}
 
 	public List<RevenueNotification> getNotifications(RevenueNotificationSearchCriteria searchCriteria) {
 

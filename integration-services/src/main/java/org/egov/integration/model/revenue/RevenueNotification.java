@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -27,48 +28,48 @@ public class RevenueNotification {
 	
 	@JsonProperty("districtname")
 	@NotBlank(message = "District Name cannot be Blank")
-	private String districtname;
+	private String districtName;
 	
 	@JsonProperty("tenantid")
 	@NotBlank(message = "Tenant Id cannot be Blank")
-	private String tenantid;
+	private String tenantId;
 	
 	@JsonProperty("revenuevillage")
 	@NotBlank(message = "Revenue Village cannot be Blank")
-	private String revenuevillage;
+	private String revenueVillage;
 	
 	@JsonProperty("plotno")
 	@NotBlank(message = "Plot Number cannot be Blank")
-	private String plotno;
+	private String plotNo;
 	
 	@JsonProperty("flatno")
 	@NotBlank(message = "Flat Number cannot be Blank")
-	private String flatno; 
+	private String flatNo; 
 	
 	@JsonProperty("address")
 	@NotBlank(message = "Address cannot be Blank")
 	private String address;
 	
 	@JsonProperty("actiontaken")
-	private Boolean actiontaken;
+	private Boolean actionTaken;
 	
 	@JsonProperty("action")
 	private String action;
 	
 	@JsonProperty("additionaldetails")
-	private Object additionaldetails;
+	private Object additionalDetails;
 	
 	@JsonProperty("createdby")
-	private String createdby;
+	private String createdBy;
 	
 	@JsonProperty("createdtime")
-	private Long createdtime;
+	private Long createdTime;
 	
 	@JsonProperty("lastmodifiedby")
-	private String lastmodifiedby;
+	private String lastModifiedBy;
 	
 	@JsonProperty("lastmodifiedtime")
-	private Long lastmodifiedtime;
+	private Long lastModifiedTime;
 	
 	@JsonProperty("waterconsumerno")
 	private String waterConsumerNo;
@@ -77,11 +78,9 @@ public class RevenueNotification {
 	private String propertyId;
 	
 	@JsonProperty("currentowner")
-	@NotBlank(message="Current Owner Details cannot be empty")
-	List<@Valid RevenueOwner> currentOwner;
+	private List<@Valid RevenueOwner> currentOwner;
 	
 	@JsonProperty("newowner")
-	@NotBlank(message="New Owner Details cannot be empty")
-	List<@Valid RevenueOwner> newOwner;
+	private List<@Valid RevenueOwner> newOwner;
 	
 }

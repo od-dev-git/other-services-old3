@@ -37,5 +37,8 @@ public class IntegrationConfiguration {
 	
 	@Value("${egov.mdms.search.endpoint}")
     private String mdmsEndpoint;
+	
+	@Value("${egov.integration.revenue.notification.update.topic}")
+	private String updateRevenueNotification;
 
 }
