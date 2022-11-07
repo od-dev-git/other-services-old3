@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,7 +44,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.micrometer.core.instrument.util.StringUtils;
+import org.springframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -275,7 +276,9 @@ public class PropertyService {
 				propertyInfo.setOldpropertyid(obj.getValue().get(0).getOldpropertyid());
 				propertyInfo.setWard(obj.getValue().get(0).getWard());
 
-				propertyResponse.add(propertyInfo);
+				if(!Objects.isNull(propertyInfo)) {
+                    propertyResponse.add(propertyInfo);
+                }
 			});
 
 
@@ -310,6 +313,7 @@ public class PropertyService {
               count = count - limit;
               offset += limit;
 
+              log.info("tempPropertiesListSet" +  tempPropertiesListSet.toString() );
               searchCriteria.setPropertyIds(tempPropertiesListSet);
               properties = pdRepository.getPropertyDetail(searchCriteria);//expand result
     
@@ -318,6 +322,7 @@ public class PropertyService {
                 
                List<Demand> demands = demandService.getDemands(demandCriteria, requestInfo);
 
+               log.info("demands" +  demands.toString() );
                 demands.parallelStream().forEach(row -> {
                    PropertyWiseDemandResponse tempResponse = PropertyWiseDemandResponse.builder()
                            .propertyId(row.getConsumerCode())
@@ -346,7 +351,10 @@ public class PropertyService {
                    
                    });
                 
+                log.info("tempResponseList enriched" +  tempResponseList.toString() );
+                
                 // setting properties data
+                log.info("setting properties data " );
                 
                 final List<PropertyDetailsResponse> tempProperties = properties;
                 tempResponseList.stream().forEach(item -> {    
@@ -361,6 +369,7 @@ public class PropertyService {
                    item.setUuid(uuids);
               });
                 
+                log.info("setting user data" );
              // Extracting user info from userService
 
                 Set<String> userIds = properties.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
@@ -376,12 +385,12 @@ public class PropertyService {
                     item.getUuid().stream().forEach(uid ->{
                         User user = userMap.get(uid);
                         if(user!=null) {
-                            if( item.getMobilenumber() != null) {
+                            if( !StringUtils.hasText( item.getMobilenumber())) {
                                 item.setMobilenumber(item.getMobilenumber() + " , " + user.getMobileNumber());
                             }else {
                                 item.setMobilenumber(user.getMobileNumber());
                             }
-                            if( item.getName() != null) {
+                            if(!StringUtils.hasText( item.getName())) {
                                 item.setName(item.getName() + " , " + user.getName());
                             }else {
                                 item.setName(user.getName());
@@ -392,6 +401,7 @@ public class PropertyService {
                 });
                 
                 propertyWiseDemandResponse.addAll(tempResponseList);  
+                log.info("propertyWiseDemandResponse enriched" );
             }
             
         }
