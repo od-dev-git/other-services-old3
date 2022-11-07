@@ -385,12 +385,12 @@ public class PropertyService {
                     item.getUuid().stream().forEach(uid ->{
                         User user = userMap.get(uid);
                         if(user!=null) {
-                            if( !StringUtils.hasText( item.getMobilenumber())) {
+                            if( StringUtils.hasText( item.getMobilenumber())) {
                                 item.setMobilenumber(item.getMobilenumber() + " , " + user.getMobileNumber());
                             }else {
                                 item.setMobilenumber(user.getMobileNumber());
                             }
-                            if(!StringUtils.hasText( item.getName())) {
+                            if(StringUtils.hasText( item.getName())) {
                                 item.setName(item.getName() + " , " + user.getName());
                             }else {
                                 item.setName(user.getName());
