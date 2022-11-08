@@ -39,7 +39,6 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<scope>42.2.2.jre7</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.swagger</groupId>
