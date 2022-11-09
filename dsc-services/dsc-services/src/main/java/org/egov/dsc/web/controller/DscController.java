@@ -132,6 +132,7 @@ public class DscController {
 	private String logPath = System.getProperty("user.dir") + "/DS/Log";
 	private String tempPath = System.getProperty("user.dir") + "/" + "DS/Temp";
 	private String licPath = System.getProperty("user.dir") + "/" + "DS/Lic";
+	private String tempFilePath = "/DS/TempFiles/";
 	private boolean dsc = false;
 
 	@GetMapping(value = "/_getCheck")
@@ -665,6 +666,9 @@ public class DscController {
 		}
 		try {
 			unsignedFileStrm.close();
+			if(unsignedFile != null) {
+				unsignedFile.delete();
+			}
 		} catch (IOException e) {
 			throw new DSCException(applicationProperties.getDSC_ERR_17());
 		}
@@ -721,7 +725,7 @@ public class DscController {
 		if (apiResponse != null && apiResponse.getErrorCode() != null) {
 			if(tempSigFile != null)
 			{
-				//tempSigFile.delete();
+				tempSigFile.delete();
 			}
 			return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(), null,
 					apiResponse.getErrorCode() + " - " + apiResponse.getErrorMsg());
@@ -750,12 +754,16 @@ public class DscController {
 			result = "Success";
 			System.out.println("fileID - " + fileId);
 			System.out.println("result - " + result);
+			if(tempSigFile != null)
+			{
+				tempSigFile.delete();
+			}
 		} else {
 			fileId = null;
 			result = "Failure";
 			if(tempSigFile != null)
 			{
-				//tempSigFile.delete();
+				tempSigFile.delete();
 			}
 			return getSuccessDataSignResponse(result, fileId, dataSignRequest.getRequestInfo(),
 					applicationProperties.getDSC_ERR_26(), null);
@@ -952,7 +960,8 @@ public class DscController {
 		Path path = null;
 		try {
 			responseEntity = fetchFilesFromDigitService(fileStoreId, tenantId);
-			fileDirPath = Paths.get(fileStoreId);
+//			fileDirPath = Paths.get(fileStoreId);
+			fileDirPath = Paths.get(tempFilePath+fileStoreId);
 			path = Files.write(fileDirPath, responseEntity.getBody());
 		} catch (Exception e) {
 			throw new DSCException(applicationProperties.getDSC_ERR_12());
