@@ -19,24 +19,34 @@ public class DemandDetails {
 	
 	private String demandId;
 
+	@Builder.Default
 	private BigDecimal rebateAmount = BigDecimal.ZERO;
 
+	@Builder.Default
 	private BigDecimal taxAmount = BigDecimal.ZERO;
 
+	@Builder.Default
 	private BigDecimal penaltyAmount = BigDecimal.ZERO;
 
+	@Builder.Default
 	private BigDecimal advance = BigDecimal.ZERO;
 
+	@Builder.Default
 	private BigDecimal collectedAmt = BigDecimal.ZERO;
 
+	@Builder.Default
 	private BigDecimal arrears = BigDecimal.ZERO;
 
+	@Builder.Default
 	private BigDecimal arrearsCollectedAmount = BigDecimal.ZERO;
 
+	@Builder.Default
 	private BigDecimal amountBeforeDueDate = BigDecimal.ZERO;
 
+	@Builder.Default
 	private BigDecimal amountAfterDueDate = BigDecimal.ZERO;
 
+	@Builder.Default
 	private BigDecimal totalDue = BigDecimal.ZERO;
 
 	private String demandPeriodFrom;
