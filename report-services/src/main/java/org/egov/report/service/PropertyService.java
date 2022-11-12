@@ -362,8 +362,12 @@ public class PropertyService {
                     List<String> uuids = new ArrayList<>();
                    tempProperties.stream().forEach(prop -> {
                       if(prop.getPropertyId().equals(item.getPropertyId())){
-                          item.setOldpropertyid(prop.getOldPropertyId());
-                          item.setWard(prop.getWardNumber());
+                          if (StringUtils.hasText(prop.getOldPropertyId())) {
+                              item.setOldpropertyid(prop.getOldPropertyId());
+                          }
+                          if (StringUtils.hasText(prop.getWardNumber())) {
+                              item.setWard(prop.getWardNumber());
+                          }
                           uuids.add(prop.getUuid());
                       }
                   });
