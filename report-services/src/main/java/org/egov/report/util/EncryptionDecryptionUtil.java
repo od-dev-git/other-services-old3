@@ -152,10 +152,10 @@ public class EncryptionDecryptionUtil {
         List<String> decryptedUserUuid = (List<String>) ((List) objectToDecrypt).stream()
                 .map(user -> ((org.egov.report.user.User) user).getUuid()).collect(Collectors.toList());
 
-        ObjectNode auditData = objectMapper.createObjectNode();
+        /*ObjectNode auditData = objectMapper.createObjectNode();
         auditData.set("entityType", TextNode.valueOf(User.class.getName()));
         auditData.set("decryptedEntityIds", objectMapper.valueToTree(decryptedUserUuid));
-        auditService.audit(userInfo.getUuid(), System.currentTimeMillis(), purpose, abacParams, auditData);
+        auditService.audit(userInfo.getUuid(), System.currentTimeMillis(), purpose, abacParams, auditData);*/
     }
 
     private User getEncrichedandCopiedUserInfo(User userInfo) {
