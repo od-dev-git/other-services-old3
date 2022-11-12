@@ -436,7 +436,11 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                     final  Map<String, List<WaterDemandResponse>> wsDemandResponse = demandResponse;
                     demandDetails.parallelStream().forEach(item -> {
  
-                        List<WaterDemandResponse> details = wsDemandResponse.get(item.getDemandId());
+                        List<WaterDemandResponse> details = null;
+                        if (item != null && wsDemandResponse != null) {
+                            details = wsDemandResponse.get(item.getDemandId());
+                        }
+                        
                         if (details != null) {
 
                             WaterMonthlyDemandResponse res = new WaterMonthlyDemandResponse();
