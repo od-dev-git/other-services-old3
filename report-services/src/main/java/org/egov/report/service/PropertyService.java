@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.ObjectUtils;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.service.DemandService;
@@ -275,8 +276,8 @@ public class PropertyService {
 				propertyInfo.setUlb(obj.getValue().get(0).getTenantid());
 				propertyInfo.setOldpropertyid(obj.getValue().get(0).getOldpropertyid());
 				propertyInfo.setWard(obj.getValue().get(0).getWard());
-
-				if(!Objects.isNull(propertyInfo)) {
+				
+				if(!Objects.isNull(propertyInfo) && StringUtils.hasText(propertyInfo.getUlb())) {
                     propertyResponse.add(propertyInfo);
                 }
 			});
@@ -385,15 +386,19 @@ public class PropertyService {
                     item.getUuid().stream().forEach(uid ->{
                         User user = userMap.get(uid);
                         if(user!=null) {
-                            if( StringUtils.hasText( item.getMobilenumber())) {
+                            if( StringUtils.hasText( item.getMobilenumber()) && StringUtils.hasText(user.getMobileNumber())) {
                                 item.setMobilenumber(item.getMobilenumber() + " , " + user.getMobileNumber());
                             }else {
-                                item.setMobilenumber(user.getMobileNumber());
+                                if (StringUtils.hasText(user.getMobileNumber())) {
+                                    item.setMobilenumber(user.getMobileNumber());
+                                }
                             }
-                            if(StringUtils.hasText( item.getName())) {
+                            if(StringUtils.hasText( item.getName())  && StringUtils.hasText( user.getName())) {
                                 item.setName(item.getName() + " , " + user.getName());
                             }else {
-                                item.setName(user.getName());
+                                if (StringUtils.hasText(user.getName())) {
+                                    item.setName(user.getName());
+                                }
                             }
 
                         } 
