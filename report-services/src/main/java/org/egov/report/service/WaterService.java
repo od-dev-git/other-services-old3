@@ -337,13 +337,11 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
         List<HashMap<String, String>> waterConnection = new ArrayList<>();
         
-//        List<WaterMonthlyDemandResponse> response = new ArrayList<>();
         List<WaterMonthlyDemandResponse> finalResponse = new ArrayList<>();
         
         if (count > 0) {
             Map<String, List<WaterDemandResponse>> demandResponse = new HashMap<String, List<WaterDemandResponse>>();
             while (count > 0) {
-//                List<WaterMonthlyDemandResponse> response = new ArrayList<>();
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
                 waterConnection = reportRepository.getWaterConnection(searchCriteria);
@@ -469,7 +467,6 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                         }
                     });
                 }
-//                finalResponse.addAll(response);
             }
         }
         return finalResponse;
