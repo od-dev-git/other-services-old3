@@ -337,13 +337,11 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
         List<HashMap<String, String>> waterConnection = new ArrayList<>();
         
-//        List<WaterMonthlyDemandResponse> response = new ArrayList<>();
         List<WaterMonthlyDemandResponse> finalResponse = new ArrayList<>();
         
         if (count > 0) {
             Map<String, List<WaterDemandResponse>> demandResponse = new HashMap<String, List<WaterDemandResponse>>();
             while (count > 0) {
-                List<WaterMonthlyDemandResponse> response = new ArrayList<>();
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
                 waterConnection = reportRepository.getWaterConnection(searchCriteria);
@@ -455,6 +453,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             if(details.get(0)!= null) {        
                                 res.setConnectionNo(details.get(0).getConsumercode());
                                 res.setConnectionType(details.get(0).getConnectiontype());
+                                res.setUlb(details.get(0).getTenantid());
                                 res.setTenantId(details.get(0).getTenantid());
                                 res.setWard(details.get(0).getWard());
                                 res.setConnectionHolderName(details.get(0).getConnectionHolderName());
@@ -464,11 +463,10 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             res.setPayableAfterRebateAmt(item.getAmountBeforeDueDate());
                             res.setPayableWithPenaltyAmt(item.getAmountAfterDueDate());
                             res.setTotalDueAmt(item.getTotalDue());
-                            response.add(res);
+                            finalResponse.add(res); 
                         }
                     });
                 }
-                finalResponse.addAll(response);
             }
         }
         return finalResponse;
