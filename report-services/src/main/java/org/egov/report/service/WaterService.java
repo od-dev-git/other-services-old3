@@ -2,6 +2,7 @@ package org.egov.report.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -354,6 +356,8 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                     keySet.addAll(keySetValue);
                 });
 
+                Long taxperiodToDate = enrichToDate(searchCriteria.getToDate());
+                searchCriteria.setToDate(taxperiodToDate);
                 demandResponse = reportRepository.getWaterMonthlyDemandReports(searchCriteria, keySet);
 
                 if (!CollectionUtils.isEmpty(demandResponse)) {
@@ -431,7 +435,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
                     final  Map<String, List<WaterDemandResponse>> wsDemandResponse = demandResponse;
                     demandDetails.parallelStream().forEach(item -> {
-                        
+ 
                         List<WaterDemandResponse> details = wsDemandResponse.get(item.getDemandId());
                         if (details != null) {
 
@@ -439,18 +443,20 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             res.setAdvanceAmt(item.getAdvance());
                             res.setArrearAmt(item.getArrears());
                             res.setCollectedAmt(item.getCollectedAmt());
-                            res.setConnectionNo(details.get(0).getConsumercode());
-                            res.setConnectionType(details.get(0).getConnectiontype());
                             res.setCurrentDemandAmt(item.getTaxAmount());
                             res.setPenaltyAmt(item.getPenaltyAmount());
                             res.setRebateAmt(item.getRebateAmount());
                             res.setTaxPeriodTo(item.getDemandPeriodTo());
                             res.setTaxPriodFrom(item.getDemandPeriodFrom());
-                            res.setTenantId(details.get(0).getTenantid());
-                            res.setWard(details.get(0).getWard());
-                            res.setConnectionHolderName(details.get(0).getConnectionHolderName());
-                            res.setMobile(details.get(0).getMobile());
-                            res.setAddrss(details.get(0).getAddress());
+                            if(details.get(0)!= null) {        
+                                res.setConnectionNo(details.get(0).getConsumercode());
+                                res.setConnectionType(details.get(0).getConnectiontype());
+                                res.setTenantId(details.get(0).getTenantid());
+                                res.setWard(details.get(0).getWard());
+                                res.setConnectionHolderName(details.get(0).getConnectionHolderName());
+                                res.setMobile(details.get(0).getMobile());
+                                res.setAddrss(details.get(0).getAddress());
+                            }
                             res.setPayableAfterRebateAmt(item.getAmountBeforeDueDate());
                             res.setPayableWithPenaltyAmt(item.getAmountAfterDueDate());
                             res.setTotalDueAmt(item.getTotalDue());
@@ -667,6 +673,16 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 		
 		return response;
 	}
+	
+	   public Long enrichToDate(Long toDate) {
+	        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+	        cal.setTimeInMillis(toDate);
+	        cal.set(Calendar.HOUR, 11);
+	        cal.set(Calendar.MINUTE, 59);
+	        cal.set(Calendar.SECOND, 59);
+	        cal.set( Calendar.AM_PM, Calendar.PM);
+	        return cal.getTimeInMillis();
+	    }
 		
 	
 }

@@ -1,6 +1,7 @@
 package org.egov.report.util;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -63,7 +64,7 @@ public class WSReportUtils {
 				.add(penaltyAmt).add(arrears).subtract(arrearsCollectedAmt);
 
 		if (amtAfterDueDate.compareTo(BigDecimal.ZERO) == 1)
-			return amtAfterDueDate.setScale(2, BigDecimal.ROUND_CEILING);
+			return amtAfterDueDate.setScale(0, RoundingMode.HALF_UP);
 		else
 			return BigDecimal.ZERO;
 	}
@@ -76,7 +77,7 @@ public class WSReportUtils {
 				.add(rebateAmt).add(arrears).subtract(arrearsCollectedAmt);
 
 		if (amtBeforeDueDate.compareTo(BigDecimal.ZERO) == 1)
-			return amtBeforeDueDate.setScale(2, BigDecimal.ROUND_CEILING);
+			return amtBeforeDueDate.setScale(0, RoundingMode.HALF_UP);
 		else
 			return BigDecimal.ZERO;
 	}
