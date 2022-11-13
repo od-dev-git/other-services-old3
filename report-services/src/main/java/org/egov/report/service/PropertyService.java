@@ -246,12 +246,12 @@ public class PropertyService {
 
 		if (!CollectionUtils.isEmpty(propertyDemandResponse)) {
 
-		//	propertyDemandResponse.forEach((key, value) -> {
+
 		    propertyDemandResponse.entrySet().parallelStream().forEach(obj -> {
 		        
 				ULBWiseTaxCollectionResponse propertyInfo = new ULBWiseTaxCollectionResponse();
 
-			//	value.forEach(item -> {
+
 				obj.getValue().forEach(item -> {
 					if (item.getTaxperiodto() < System.currentTimeMillis()) { 
 						
@@ -357,9 +357,15 @@ public class PropertyService {
                 log.info("setting properties data " );
                 
                 final List<PropertyDetailsResponse> tempProperties = properties;
-                tempResponseList.stream().forEach(item -> {    
+                tempResponseList.stream().forEach(item -> {
+                    if(item == null) {
+                        log.info(" null item found ");
+                    }
+                    if(item != null) {
+   
                     List<String> uuids = new ArrayList<>();
                    tempProperties.stream().forEach(prop -> {
+                       if(prop != null) {
                       if(prop.getPropertyId().equals(item.getPropertyId())){
                           if (StringUtils.hasText(prop.getOldPropertyId())) {
                               item.setOldpropertyid(prop.getOldPropertyId());
@@ -369,8 +375,10 @@ public class PropertyService {
                           }
                           uuids.add(prop.getUuid());
                       }
+                       }
                   });
                    item.setUuid(uuids);
+                    }
               });
                 
                 log.info("setting user data" );
