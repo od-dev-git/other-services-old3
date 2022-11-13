@@ -324,6 +324,7 @@ public class PropertyService {
 
                log.info("demands" +  demands.toString() );
                 demands.parallelStream().forEach(row -> {
+                    if(row != null) {
                    PropertyWiseDemandResponse tempResponse = PropertyWiseDemandResponse.builder()
                            .propertyId(row.getConsumerCode())
                            .taxperiodfrom(String.valueOf(row.getTaxPeriodFrom())).taxperiodto(String.valueOf(row.getTaxPeriodTo())).ulb(row.getTenantId())
@@ -348,7 +349,7 @@ public class PropertyService {
                    tempResponse.setDueamount(taxAmount.subtract(collectionAmount).toString());
                    
                    tempResponseList.add(tempResponse);
-                   
+                    }
                    });
                 
                 log.info("tempResponseList enriched" +  tempResponseList.toString() );
