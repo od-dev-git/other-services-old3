@@ -45,8 +45,10 @@ public class DemandsRowMapper implements ResultSetExtractor<HashMap<String,List<
 
 			
 			if(!pdrResponse.containsKey(cc) ){
-				pdrResponse.put(cc,new ArrayList<PropertyDemandResponse>());
-			}
+                List<PropertyDemandResponse> propertyDemandResponseList = new ArrayList<PropertyDemandResponse>();
+                propertyDemandResponseList.add(pdr);
+                pdrResponse.put(cc,propertyDemandResponseList);
+            }
 			
 			pdrResponse.get(cc).add(pdr);
 			
