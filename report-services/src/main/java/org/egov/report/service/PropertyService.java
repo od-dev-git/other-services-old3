@@ -324,6 +324,7 @@ public class PropertyService {
 
                log.info("demands" +  demands.toString() );
                 demands.parallelStream().forEach(row -> {
+                    if(row != null) {
                    PropertyWiseDemandResponse tempResponse = PropertyWiseDemandResponse.builder()
                            .propertyId(row.getConsumerCode())
                            .taxperiodfrom(String.valueOf(row.getTaxPeriodFrom())).taxperiodto(String.valueOf(row.getTaxPeriodTo())).ulb(row.getTenantId())
@@ -348,7 +349,7 @@ public class PropertyService {
                    tempResponse.setDueamount(taxAmount.subtract(collectionAmount).toString());
                    
                    tempResponseList.add(tempResponse);
-                   
+                    }
                    });
                 
                 log.info("tempResponseList enriched" +  tempResponseList.toString() );
@@ -393,8 +394,10 @@ public class PropertyService {
                 List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
                 Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
 
-                tempResponseList.stream().forEach(item -> {    
+                tempResponseList.stream().forEach(item -> { 
+                    if(item != null) {
                     item.getUuid().stream().forEach(uid ->{
+                        if(uid != null) {
                         User user = userMap.get(uid);
                         if(user!=null) {
                             if( StringUtils.hasText( item.getMobilenumber()) && StringUtils.hasText(user.getMobileNumber())) {
@@ -413,7 +416,9 @@ public class PropertyService {
                             }
 
                         } 
+                    }
                     });
+                }
                 });
                 
                 propertyWiseDemandResponse.addAll(tempResponseList);  
