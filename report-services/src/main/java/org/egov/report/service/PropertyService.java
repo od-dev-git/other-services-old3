@@ -288,143 +288,146 @@ public class PropertyService {
 		return propertyResponse;
 	}
 
-	public List<PropertyWiseDemandResponse> getpropertyWiseDemandReport(RequestInfo requestInfo,
-			PropertyDetailsSearchCriteria searchCriteria) {
+    public List<PropertyWiseDemandResponse> getpropertyWiseDemandReport(RequestInfo requestInfo,
+            PropertyDetailsSearchCriteria searchCriteria) {
 
-	    prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
+        prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
         List<PropertyWiseDemandResponse> propertyWiseDemandResponse = new ArrayList<PropertyWiseDemandResponse>();
-        
+
         Long count = pdRepository.getPropertyCount(searchCriteria);
         Integer limit = configuration.getReportConnectionsLimit();
         Integer offset = 0;
-        
+
         if (count > 0) {
-            
-            Set<String> allProperties = (pdRepository.getPropertyIds(searchCriteria)).stream().distinct().collect(Collectors.toSet());//set distinct here
-            List<PropertyDetailsResponse> properties = new ArrayList<>();
+
+            Set<String> allProperties = (pdRepository.getPropertyIds(searchCriteria)).stream().distinct()
+                    .collect(Collectors.toSet());
 
             while (count > 0) {
-                
-              List<PropertyWiseDemandResponse> tempResponseList = new ArrayList<PropertyWiseDemandResponse>();  
-              searchCriteria.setLimit(limit);
-              searchCriteria.setOffset(offset);
-              Set<String> tempPropertiesListSet = allProperties.stream().skip(offset).limit(limit).collect(Collectors.toSet());
-              count = count - limit;
-              offset += limit;
 
-              log.info("tempPropertiesListSet" +  tempPropertiesListSet.toString() );
-              searchCriteria.setPropertyIds(tempPropertiesListSet);
-              properties = pdRepository.getPropertyDetail(searchCriteria);//expand result
-    
-              DemandCriteria demandCriteria = DemandCriteria.builder().tenantId(searchCriteria.getUlbName())
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                Set<String> tempPropertiesListSet = allProperties.stream().skip(offset).limit(limit)
+                        .collect(Collectors.toSet());
+                count = count - limit;
+                offset += limit;
+
+                log.info("tempPropertiesListSet" + tempPropertiesListSet.toString());
+                searchCriteria.setPropertyIds(tempPropertiesListSet);
+                List<PropertyDetailsResponse> properties = pdRepository.getPropertyDetail(searchCriteria);// expand
+                                                                                                          // result
+
+                DemandCriteria demandCriteria = DemandCriteria.builder().tenantId(searchCriteria.getUlbName())
                         .consumerCode(tempPropertiesListSet).build();
-                
-               List<Demand> demands = demandService.getDemands(demandCriteria, requestInfo);
+                List<Demand> demands = demandService.getDemands(demandCriteria, requestInfo);
+                log.info("demands" + demands.toString());
 
-               log.info("demands" +  demands.toString() );
-                demands.parallelStream().forEach(row -> {
-                    if(row != null) {
-                   PropertyWiseDemandResponse tempResponse = PropertyWiseDemandResponse.builder()
-                           .propertyId(row.getConsumerCode())
-                           .taxperiodfrom(String.valueOf(row.getTaxPeriodFrom())).taxperiodto(String.valueOf(row.getTaxPeriodTo())).ulb(row.getTenantId())
-                           .build();
+                List<PropertyWiseDemandResponse> tempResponseList = demands.parallelStream().map(row -> {
 
-                   List<DemandDetail> tempDemandDetail = row.getDemandDetails();
-                   BigDecimal taxAmount = BigDecimal.ZERO;
-                   BigDecimal collectionAmount = BigDecimal.ZERO;
-                   tempResponse.setTaxamount(taxAmount.toString());
-                   tempResponse.setCollectionamount(collectionAmount.toString());
-                   tempDemandDetail.stream().forEach(demandUnit -> {
-                       if(demandUnit.getTaxAmount() != null) {
-                           tempResponse.setTaxamount(new BigDecimal(tempResponse.getTaxamount()).add(demandUnit.getTaxAmount()).toString());
-                       }
-                       if(demandUnit.getCollectionAmount() != null) {
-                           tempResponse.setCollectionamount(new BigDecimal(tempResponse.getCollectionamount()).add(demandUnit.getCollectionAmount()).toString());
-                       }
-                       
-                   });
-                   taxAmount = new BigDecimal(tempResponse.getTaxamount());
-                   collectionAmount = new BigDecimal(tempResponse.getCollectionamount());
-                   tempResponse.setDueamount(taxAmount.subtract(collectionAmount).toString());
-                   
-                   tempResponseList.add(tempResponse);
-                    }
-                   });
-                
-                log.info("tempResponseList enriched" +  tempResponseList.toString() );
-                
+                    PropertyWiseDemandResponse tempResponse = PropertyWiseDemandResponse.builder()
+                            .propertyId(row.getConsumerCode())
+                            .taxperiodfrom(String.valueOf(row.getTaxPeriodFrom()))
+                            .taxperiodto(String.valueOf(row.getTaxPeriodTo())).ulb(row.getTenantId())
+                            .build();
+
+                    List<DemandDetail> tempDemandDetail = row.getDemandDetails();
+                    BigDecimal taxAmount = BigDecimal.ZERO;
+                    BigDecimal collectionAmount = BigDecimal.ZERO;
+                    tempResponse.setTaxamount(taxAmount.toString());
+                    tempResponse.setCollectionamount(collectionAmount.toString());
+                    tempDemandDetail.stream().forEach(demandUnit -> {
+                        if (demandUnit.getTaxAmount() != null) {
+                            tempResponse.setTaxamount(new BigDecimal(tempResponse.getTaxamount())
+                                    .add(demandUnit.getTaxAmount()).toString());
+                        }
+                        if (demandUnit.getCollectionAmount() != null) {
+                            tempResponse.setCollectionamount(new BigDecimal(tempResponse.getCollectionamount())
+                                    .add(demandUnit.getCollectionAmount()).toString());
+                        }
+                    });
+                    taxAmount = new BigDecimal(tempResponse.getTaxamount());
+                    collectionAmount = new BigDecimal(tempResponse.getCollectionamount());
+                    tempResponse.setDueamount(taxAmount.subtract(collectionAmount).toString());
+
+                    return tempResponse;
+
+                }).collect(Collectors.toList());
+
+                log.info("tempResponseList enriched" + tempResponseList.toString());
+
                 // setting properties data
-                log.info("setting properties data " );
-                
+                log.info("setting properties data ");
                 final List<PropertyDetailsResponse> tempProperties = properties;
                 tempResponseList.stream().forEach(item -> {
-                    if(item == null) {
+                    if (item == null) {
                         log.info(" null item found ");
                     }
-                    if(item != null) {
-   
-                    List<String> uuids = new ArrayList<>();
-                   tempProperties.stream().forEach(prop -> {
-                       if(prop != null) {
-                      if(prop.getPropertyId().equals(item.getPropertyId())){
-                          if (StringUtils.hasText(prop.getOldPropertyId())) {
-                              item.setOldpropertyid(prop.getOldPropertyId());
-                          }
-                          if (StringUtils.hasText(prop.getWardNumber())) {
-                              item.setWard(prop.getWardNumber());
-                          }
-                          uuids.add(prop.getUuid());
-                      }
-                       }
-                  });
-                   item.setUuid(uuids);
+                    if (item != null) {
+                        List<String> uuids = new ArrayList<>();
+                        tempProperties.stream().forEach(prop -> {
+                            if (prop != null) {
+                                if (prop.getPropertyId().equals(item.getPropertyId())) {
+                                    if (StringUtils.hasText(prop.getOldPropertyId())) {
+                                        item.setOldpropertyid(prop.getOldPropertyId());
+                                    }
+                                    if (StringUtils.hasText(prop.getWardNumber())) {
+                                        item.setWard(prop.getWardNumber());
+                                    }
+                                    uuids.add(prop.getUuid());
+                                }
+                            }
+                        });
+                        item.setUuid(uuids);
                     }
-              });
-                
-                log.info("setting user data" );
-             // Extracting user info from userService
+                });
 
-                Set<String> userIds = properties.stream().map(item -> item.getUuid()).distinct().collect(Collectors.toSet());
+                log.info("setting user data");
+                // Extracting user info from userService
+
+                Set<String> userIds = properties.stream().map(item -> item.getUuid()).distinct()
+                        .collect(Collectors.toSet());
                 UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
                         .active(true)
                         .userType(UserSearchCriteria.CITIZEN)
                         .tenantId(searchCriteria.getUlbName())
                         .build();
                 List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-                Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
+                Map<String, User> userMap = usersInfo.stream()
+                        .collect(Collectors.toMap(User::getUuid, Function.identity()));
 
-                tempResponseList.stream().forEach(item -> { 
-                    if(item != null) {
-                    item.getUuid().stream().forEach(uid ->{
-                        if(uid != null) {
-                        User user = userMap.get(uid);
-                        if(user!=null) {
-                            if( StringUtils.hasText( item.getMobilenumber()) && StringUtils.hasText(user.getMobileNumber())) {
-                                item.setMobilenumber(item.getMobilenumber() + " , " + user.getMobileNumber());
-                            }else {
-                                if (StringUtils.hasText(user.getMobileNumber())) {
-                                    item.setMobilenumber(user.getMobileNumber());
+                tempResponseList.stream().forEach(item -> {
+                    if (item != null) {
+                        item.getUuid().stream().forEach(uid -> {
+                            if (uid != null) {
+                                User user = userMap.get(uid);
+                                if (user != null) {
+                                    if (StringUtils.hasText(item.getMobilenumber())
+                                            && StringUtils.hasText(user.getMobileNumber())) {
+                                        item.setMobilenumber(item.getMobilenumber() + " , " + user.getMobileNumber());
+                                    } else {
+                                        if (StringUtils.hasText(user.getMobileNumber())) {
+                                            item.setMobilenumber(user.getMobileNumber());
+                                        }
+                                    }
+                                    if (StringUtils.hasText(item.getName()) && StringUtils.hasText(user.getName())) {
+                                        item.setName(item.getName() + " , " + user.getName());
+                                    } else {
+                                        if (StringUtils.hasText(user.getName())) {
+                                            item.setName(user.getName());
+                                        }
+                                    }
+
                                 }
                             }
-                            if(StringUtils.hasText( item.getName())  && StringUtils.hasText( user.getName())) {
-                                item.setName(item.getName() + " , " + user.getName());
-                            }else {
-                                if (StringUtils.hasText(user.getName())) {
-                                    item.setName(user.getName());
-                                }
-                            }
-
-                        } 
+                        });
                     }
-                    });
-                }
                 });
-                
-                propertyWiseDemandResponse.addAll(tempResponseList);  
-                log.info("propertyWiseDemandResponse enriched" );
+
+                propertyWiseDemandResponse.addAll(tempResponseList);
+                log.info("propertyWiseDemandResponse enriched");
             }
-            
+
         }
         return propertyWiseDemandResponse;
     }
