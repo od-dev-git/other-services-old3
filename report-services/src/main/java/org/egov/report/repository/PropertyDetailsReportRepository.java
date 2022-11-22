@@ -47,12 +47,7 @@ public class PropertyDetailsReportRepository {
 	public HashMap<String,List<PropertyDemandResponse>> getPropertyDemandDetails(PropertyDetailsSearchCriteria searchCriteria) {
 
 		List<Object> preparedPropStmtList = new ArrayList<>();
-		
-//		searchCriteria.setLimit(limit);
-//		searchCriteria.setOffset(offset);
-
 		String query = queryBuilder.getPropertyWiseDemandQuery(searchCriteria, preparedPropStmtList);
-
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandsRowMapper());
 	}
 

@@ -224,69 +224,67 @@ public class PropertyService {
 		return prop;
 	}
 
-	public List<ULBWiseTaxCollectionResponse> getulbWiseTaxCollections(RequestInfo requestInfo,
-			PropertyDetailsSearchCriteria searchCriteria) {
+    public List<ULBWiseTaxCollectionResponse> getulbWiseTaxCollections(RequestInfo requestInfo,
+            PropertyDetailsSearchCriteria searchCriteria) {
 
-		prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
+        prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
-		List<ULBWiseTaxCollectionResponse> propertyResponse = new ArrayList<ULBWiseTaxCollectionResponse>();
+        List<ULBWiseTaxCollectionResponse> propertyResponse = new ArrayList<ULBWiseTaxCollectionResponse>();
 
-		Long count = pdRepository.getPropertyDemandDetailsCount(searchCriteria);
+        Long count = pdRepository.getPropertyDemandDetailsCount(searchCriteria);
         Integer limit = configuration.getReportLimit();
         Integer offset = 0;
-        
+
         if (count > 0) {
-            Map<String, List<PropertyDemandResponse>> propertyDemandResponse = new HashMap<>();
             while (count > 0) {
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
-                propertyDemandResponse = pdRepository.getPropertyDemandDetails(searchCriteria);
+                Map<String, List<PropertyDemandResponse>> propertyDemandResponse = pdRepository.getPropertyDemandDetails(searchCriteria);
                 count = count - limit;
                 offset += limit;
 
-		if (!CollectionUtils.isEmpty(propertyDemandResponse)) {
+                if (!CollectionUtils.isEmpty(propertyDemandResponse)) {
+                    propertyDemandResponse.entrySet().parallelStream().forEach(object -> {
+                        ULBWiseTaxCollectionResponse propertyInfo = new ULBWiseTaxCollectionResponse();
+                        object.getValue().forEach(demands -> {
+                            if (demands.getTaxperiodto() < System.currentTimeMillis()) {
+                                propertyInfo.setTotalarreartaxamount(
+                                        (propertyInfo.getTotalarreartaxamount()).add(demands.getTaxamount()));
+                            } else {
+                                propertyInfo
+                                        .setTotaltaxamount((propertyInfo.getTotaltaxamount()).add(demands.getTaxamount()));
+                            }
+                            propertyInfo.setTotalcollectionamount(
+                                    (propertyInfo.getTotalcollectionamount()).add(demands.getCollectionamount()));
+                        });
 
+                        BigDecimal dueAmountWithTotalArrear = propertyInfo.getDueamount()
+                                .add(propertyInfo.getTotalarreartaxamount());
+                        BigDecimal dueAmountWithCurrentYearDemand = dueAmountWithTotalArrear
+                                .add(propertyInfo.getTotaltaxamount());
+                        BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemand
+                                .subtract(propertyInfo.getTotalcollectionamount());
 
-		    propertyDemandResponse.entrySet().parallelStream().forEach(obj -> {
-		        
-				ULBWiseTaxCollectionResponse propertyInfo = new ULBWiseTaxCollectionResponse();
+                        propertyInfo.setPropertyId(object.getKey());
+                        propertyInfo.setDueamount(dueAmountFinal);
+                        propertyInfo.setUlb(object.getValue().get(0).getTenantid());
+                        propertyInfo.setOldpropertyid(object.getValue().get(0).getOldpropertyid());
+                        propertyInfo.setWard(object.getValue().get(0).getWard());
 
-
-				obj.getValue().forEach(item -> {
-					if (item.getTaxperiodto() < System.currentTimeMillis()) { 
-						
-						propertyInfo.setTotalarreartaxamount((propertyInfo.getTotalarreartaxamount()).add(item.getTaxamount()));
-					}
-
-					else {
-						propertyInfo.setTotaltaxamount((propertyInfo.getTotaltaxamount()).add(item.getTaxamount()));
-					}
-
-					propertyInfo.setTotalcollectionamount((propertyInfo.getTotalcollectionamount()).add(item.getCollectionamount()));
-
-				});
-
-				BigDecimal dueAmountWithTotalArrear = propertyInfo.getDueamount().add(propertyInfo.getTotalarreartaxamount());
-				BigDecimal dueAmountWithCurrentYearDemand = dueAmountWithTotalArrear.add(propertyInfo.getTotaltaxamount());
-				BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemand.subtract(propertyInfo.getTotalcollectionamount());
-
-				propertyInfo.setPropertyId(obj.getKey());
-				propertyInfo.setDueamount(dueAmountFinal);
-				propertyInfo.setUlb(obj.getValue().get(0).getTenantid());
-				propertyInfo.setOldpropertyid(obj.getValue().get(0).getOldpropertyid());
-				propertyInfo.setWard(obj.getValue().get(0).getWard());
-				
-				if(!Objects.isNull(propertyInfo) && StringUtils.hasText(propertyInfo.getUlb())) {
-                    propertyResponse.add(propertyInfo);
+                        if(propertyInfo == null) {
+                            log.info("null object found " + propertyInfo.toString());
+                        }
+                        if (!Objects.isNull(propertyInfo) && StringUtils.hasText(propertyInfo.getUlb())) {
+                            propertyResponse.add(propertyInfo);
+                        }
+                    });
                 }
-			});
-
-
+                
+                
+            }
         }
+        return propertyResponse;
     }
-}
-		return propertyResponse;
-	}
 
     public List<PropertyWiseDemandResponse> getpropertyWiseDemandReport(RequestInfo requestInfo,
             PropertyDetailsSearchCriteria searchCriteria) {
