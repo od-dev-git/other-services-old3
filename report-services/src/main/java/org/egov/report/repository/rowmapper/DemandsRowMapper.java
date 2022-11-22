@@ -11,52 +11,49 @@ import org.egov.report.web.model.PropertyDetailsResponse;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-public class DemandsRowMapper implements ResultSetExtractor<HashMap<String,List<PropertyDemandResponse>>> {
-	
-	HashMap<String,List<PropertyDemandResponse>>  pdrResponse = new HashMap();
-	
-	@Override
-	public HashMap<String,List<PropertyDemandResponse>> extractData(ResultSet rs) throws SQLException, DataAccessException {
+public class DemandsRowMapper implements ResultSetExtractor<HashMap<String, List<PropertyDemandResponse>>> {
 
-		while(rs.next()) {
+    HashMap<String, List<PropertyDemandResponse>> propertyDemandReportResponse = new HashMap();
 
-			PropertyDemandResponse pdr = new PropertyDemandResponse();
-			
-			String cc = rs.getString("consumercode");
-			pdr.setConsumercode(cc);
-			pdr.setId(rs.getString("id"));
-			pdr.setPayer(rs.getString("payer"));
-			pdr.setOldpropertyid(rs.getString("oldpropertyid"));
-			pdr.setWard(rs.getString("ward"));
-			pdr.setUuid(rs.getString("uuid"));
-			pdr.setCreatedby(rs.getString("createdby"));
-			pdr.setTaxperiodfrom(rs.getLong("taxperiodfrom"));
-			pdr.setTaxperiodto(rs.getLong("taxperiodto"));
-			
-			
+    @Override
+    public HashMap<String, List<PropertyDemandResponse>> extractData(ResultSet rs)
+            throws SQLException, DataAccessException {
 
-			String ti = rs.getString("tenantid");
-			String tiNew = ti.replace("od.", "");
-			tiNew = tiNew.substring(0,1).toUpperCase() + tiNew.substring(1).toLowerCase();
-			pdr.setTenantid(tiNew);
+        while (rs.next()) {
 
-			pdr.setTaxamount(rs.getBigDecimal("taxamount"));
-			pdr.setCollectionamount(rs.getBigDecimal("collectionamount"));
+            PropertyDemandResponse propertyDemandResponse = new PropertyDemandResponse();
 
-			
-			if(!pdrResponse.containsKey(cc) ){
+            String consumerCode = rs.getString("consumercode");
+            propertyDemandResponse.setConsumercode(consumerCode);
+            propertyDemandResponse.setId(rs.getString("id"));
+            propertyDemandResponse.setPayer(rs.getString("payer"));
+            propertyDemandResponse.setOldpropertyid(rs.getString("oldpropertyid"));
+            propertyDemandResponse.setWard(rs.getString("ward"));
+            propertyDemandResponse.setUuid(rs.getString("uuid"));
+            propertyDemandResponse.setCreatedby(rs.getString("createdby"));
+            propertyDemandResponse.setTaxperiodfrom(rs.getLong("taxperiodfrom"));
+            propertyDemandResponse.setTaxperiodto(rs.getLong("taxperiodto"));
+
+            String tenantId = rs.getString("tenantid");
+            String tenantIdStyled = tenantId.replace("od.", "");
+            tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+            propertyDemandResponse.setTenantid(tenantIdStyled);
+
+            propertyDemandResponse.setTaxamount(rs.getBigDecimal("taxamount"));
+            propertyDemandResponse.setCollectionamount(rs.getBigDecimal("collectionamount"));
+
+            if (!propertyDemandReportResponse.containsKey(consumerCode)) {
                 List<PropertyDemandResponse> propertyDemandResponseList = new ArrayList<PropertyDemandResponse>();
-                propertyDemandResponseList.add(pdr);
-                pdrResponse.put(cc,propertyDemandResponseList);
+                propertyDemandResponseList.add(propertyDemandResponse);
+                propertyDemandReportResponse.put(consumerCode, propertyDemandResponseList);
+            } else {
+                propertyDemandReportResponse.get(consumerCode).add(propertyDemandResponse);
             }
-			
-			pdrResponse.get(cc).add(pdr);
-			
 
-		}
+        }
 
-		return pdrResponse;
+        return propertyDemandReportResponse;
 
-}
+    }
 
 }

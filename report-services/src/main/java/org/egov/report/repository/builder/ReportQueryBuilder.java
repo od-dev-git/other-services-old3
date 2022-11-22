@@ -127,12 +127,12 @@ public class ReportQueryBuilder {
 			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,eu.uuid,"
 			+ "edv.tenantid ,edv.status,edv2.taxamount ,edv2.collectionamount,epp.oldpropertyid,epa.ward "
 			+ FROM + " egbs_demand_v1 edv "
-			+ INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid "
+			+ INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid " +  AND + "epp.status = 'ACTIVE' "
 			+ INNER_JOIN +" eg_pt_address epa on epp.id =epa.propertyid "
-			+ INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id "
+			+ INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id " 
 			+ LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
 			+ INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.id=edv2.demandid  "
-			+ WHERE + "edv2.tenantid= ? " + AND + " edv2.tenantid= ? " + AND + " edv.status <> 'CANCELLED' "
+			+ WHERE + "edv.tenantid= ? " + AND + " edv2.tenantid= ? " + AND + " edv.status <> 'CANCELLED' "
 			+ AND ;
 	
 	private static final String QUERY_FOR_WATER_NEW_CONSUMER = SELECT 
@@ -471,11 +471,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			preparedPropStmtList.add(searchCriteria.getWardNo());
 		}
 		
-//		query.append(" limit ? ");
-//		preparedPropStmtList.add(searchCriteria.getLimit());
-//        
-//        query.append(" offset ? ");
-//        preparedPropStmtList.add(searchCriteria.getOffset());
 		addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedPropStmtList);
 	
 		return query.toString();
