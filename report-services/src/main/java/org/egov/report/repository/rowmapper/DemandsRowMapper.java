@@ -21,26 +21,20 @@ public class DemandsRowMapper implements ResultSetExtractor<HashMap<String, List
 
         while (rs.next()) {
 
-            PropertyDemandResponse propertyDemandResponse = new PropertyDemandResponse();
-
             String consumerCode = rs.getString("consumercode");
-            propertyDemandResponse.setConsumercode(consumerCode);
-            propertyDemandResponse.setId(rs.getString("id"));
-            propertyDemandResponse.setPayer(rs.getString("payer"));
-            propertyDemandResponse.setOldpropertyid(rs.getString("oldpropertyid"));
-            propertyDemandResponse.setWard(rs.getString("ward"));
-            propertyDemandResponse.setUuid(rs.getString("uuid"));
-            propertyDemandResponse.setCreatedby(rs.getString("createdby"));
-            propertyDemandResponse.setTaxperiodfrom(rs.getLong("taxperiodfrom"));
-            propertyDemandResponse.setTaxperiodto(rs.getLong("taxperiodto"));
-
+            
             String tenantId = rs.getString("tenantid");
             String tenantIdStyled = tenantId.replace("od.", "");
             tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
-            propertyDemandResponse.setTenantid(tenantIdStyled);
-
-            propertyDemandResponse.setTaxamount(rs.getBigDecimal("taxamount"));
-            propertyDemandResponse.setCollectionamount(rs.getBigDecimal("collectionamount"));
+            
+            PropertyDemandResponse propertyDemandResponse = PropertyDemandResponse.builder()
+                    .consumercode(consumerCode).id(rs.getString("id"))
+                    .oldpropertyid(rs.getString("oldpropertyid")).ward(rs.getString("ward")).tenantid(tenantIdStyled)
+                    .uuid(rs.getString("uuid")).payer(rs.getString("payer"))
+                    .createdby(rs.getString("createdby"))
+                    .taxperiodfrom(rs.getLong("taxperiodfrom")).taxperiodto(rs.getLong("taxperiodto"))
+                    .taxamount(rs.getBigDecimal("taxamount")).collectionamount(rs.getBigDecimal("collectionamount"))
+                    .build();
 
             if (!propertyDemandReportResponse.containsKey(consumerCode)) {
                 List<PropertyDemandResponse> propertyDemandResponseList = new ArrayList<PropertyDemandResponse>();
