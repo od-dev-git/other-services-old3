@@ -23,22 +23,22 @@ List<PropertyDetailsResponse> propertyDetailsResponseList = new ArrayList<>();
 
 		while(rs.next()) {
 
-			PropertyDetailsResponse propertyDetailsResponse = new PropertyDetailsResponse();
-
-			String ti = rs.getString("tenantid");
-			String tiNew = ti.replace("od.", "");
-			tiNew = tiNew.substring(0,1).toUpperCase() + tiNew.substring(1).toLowerCase();
-			propertyDetailsResponse.setUlbName(tiNew);
-
-			propertyDetailsResponse.setWardNumber(rs.getString("ward"));
-			propertyDetailsResponse.setOldPropertyId(rs.getString("oldPropertyId"));
-			propertyDetailsResponse.setPropertyId(rs.getString("propertyId"));
-			propertyDetailsResponse.setUuid(rs.getString("uuid"));
-			propertyDetailsResponse.setDoorNo(rs.getString("doorNo"));
-			propertyDetailsResponse.setBuildingName(rs.getString("buildingName"));
-			propertyDetailsResponse.setStreet(rs.getString("street"));
-			propertyDetailsResponse.setCity(rs.getString("city"));
-			propertyDetailsResponse.setPincode(rs.getString("pincode"));
+			String tenantId = rs.getString("tenantid");
+			String tenantIdStyled = tenantId.replace("od.", "");
+			tenantIdStyled = tenantIdStyled.substring(0,1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+			
+	         PropertyDetailsResponse propertyDetailsResponse = PropertyDetailsResponse.builder()
+	                 .ulbName(tenantIdStyled)
+	                 .wardNumber(rs.getString("ward"))
+	                 .oldPropertyId(rs.getString("oldPropertyId"))
+	                 .propertyId(rs.getString("propertyId"))
+	                 .uuid(rs.getString("uuid"))
+	                 .doorNo(rs.getString("doorNo"))
+	                 .buildingName(rs.getString("buildingName"))
+	                 .street(rs.getString("street"))
+	                 .city(rs.getString("city"))
+	                 .pincode(rs.getString("pincode"))
+	                 .build();
 
 			StringBuilder address = getAddress(propertyDetailsResponse);
 			propertyDetailsResponse.setAddress(address.toString());

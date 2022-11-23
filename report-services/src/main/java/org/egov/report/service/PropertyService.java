@@ -22,6 +22,7 @@ import org.egov.report.model.Property;
 import org.egov.report.model.PropertyConnectionRequest;
 import org.egov.report.model.PropertySearchingCriteria;
 import org.egov.report.model.UserSearchCriteria;
+import org.egov.report.model.enums.UserType;
 import org.egov.report.repository.PropertyDetailsReportRepository;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.validator.PropertyReportValidator;
@@ -87,33 +88,36 @@ public class PropertyService {
         List<PropertyDetailsResponse> response = new ArrayList();
         
         if (count > 0) {
-            List<PropertyDetailsResponse> propertyDetailResponse = new ArrayList();
             while (count > 0) {
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
-                propertyDetailResponse = pdRepository.getPropertyDetails(searchCriteria);
+                log.info("Feching Property Details ");
+                List<PropertyDetailsResponse> propertyDetailResponse = pdRepository.getPropertyDetails(searchCriteria);
+                log.info("Property Details Fetched");
                 count = count - limit;
                 offset += limit;
 
                 if (!CollectionUtils.isEmpty(propertyDetailResponse)) {
 
                     // Extracting user info from userService
-
-                    Set<String> userIds = propertyDetailResponse.stream().map(item -> item.getUuid()).distinct()
-                            .collect(Collectors.toSet());
-                    UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+                    log.info("Fetching User Details ");
+                    List<String> userIds = propertyDetailResponse.stream().map(propertyDetail -> propertyDetail.getUuid()).distinct()
+                            .collect(Collectors.toList());
+                    org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria.builder().uuid(userIds)
                             .active(true)
-                            .userType(UserSearchCriteria.CITIZEN)
-                            .tenantId(searchCriteria.getUlbName())
+                            .type(UserType.CITIZEN)
                             .build();
-                    List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-                    Map<String, User> userMap = usersInfo.stream()
-                            .collect(Collectors.toMap(User::getUuid, Function.identity()));
-                    propertyDetailResponse.stream().forEach(item -> {
-                        User user = userMap.get(item.getUuid());
+                    List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+                            requestInfo);
+                    log.info("User Details Fetched ");
+                    Map<String, org.egov.report.user.User> userMap = usersInfo.stream()
+                            .collect(Collectors.toMap(org.egov.report.user.User::getUuid, Function.identity()));
+                    log.info("Setting User Details ");
+                    propertyDetailResponse.stream().forEach(propertyDetail -> {
+                        org.egov.report.user.User user = userMap.get(propertyDetail.getUuid());
                         if (user != null) {
-                            item.setMobileNumber(user.getMobileNumber());
-                            item.setName(user.getName());
+                            propertyDetail.setMobileNumber(user.getMobileNumber());
+                            propertyDetail.setName(user.getName());
                         }
                     });
                 }
@@ -224,7 +228,7 @@ public class PropertyService {
 		return prop;
 	}
 
-    public List<ULBWiseTaxCollectionResponse> getulbWiseTaxCollections(RequestInfo requestInfo,
+	public List<ULBWiseTaxCollectionResponse> getulbWiseTaxCollections(RequestInfo requestInfo,
             PropertyDetailsSearchCriteria searchCriteria) {
 
         prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
