@@ -385,17 +385,11 @@ public class ReportQueryBuilder {
 		 StringBuilder query = new StringBuilder(PROPERTY_DETAILS_SUMMARY_QUERY);
 
 	     preparedPropStmtList.add(criteria.getUlbName());
-
 	     if(StringUtils.hasText(criteria.getWardNo())) {
 				query.append(AND);
 				query.append(" epa.ward = '").append(criteria.getWardNo()).append("'");
 	     }
-	     
-//         query.append(" limit ? ");
-//         preparedPropStmtList.add(criteria.getLimit());
-//
-//         query.append(" offset ? ");
-//         preparedPropStmtList.add(criteria.getOffset());
+
 	     addPaginationIfRequired(query,criteria.getLimit(),criteria.getOffset(),preparedPropStmtList);
 
 	     return query.toString();
@@ -826,10 +820,10 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 
     public String getPropertyDetailsQueryCount(PropertyDetailsSearchCriteria searchCriteria,
             List<Object> preparedPropStmtList) {
+        
         StringBuilder query = new StringBuilder(PROPERTY_DETAILS_SUMMARY_QUERY_COUNT);
-
+        
         preparedPropStmtList.add(searchCriteria.getUlbName());
-
         if(StringUtils.hasText(searchCriteria.getWardNo())) {
                query.append(AND);
                query.append(" epa.ward = '").append(searchCriteria.getWardNo()).append("'");
