@@ -127,12 +127,12 @@ public class ReportQueryBuilder {
 			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,eu.uuid,"
 			+ "edv.tenantid ,edv.status,edv2.taxamount ,edv2.collectionamount,epp.oldpropertyid,epa.ward "
 			+ FROM + " egbs_demand_v1 edv "
-			+ INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid "
+			+ INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid " +  AND + "epp.status = 'ACTIVE' "
 			+ INNER_JOIN +" eg_pt_address epa on epp.id =epa.propertyid "
-			+ INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id "
+			+ INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id " 
 			+ LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
 			+ INNER_JOIN + " egbs_demanddetail_v1 edv2 on edv.id=edv2.demandid  "
-			+ WHERE + "edv2.tenantid= ? " + AND + " edv2.tenantid= ? " + AND + " edv.status <> 'CANCELLED' "
+			+ WHERE + "edv.tenantid= ? " + AND + " edv2.tenantid= ? " + AND + " edv.status <> 'CANCELLED' "
 			+ AND ;
 	
 	private static final String QUERY_FOR_WATER_NEW_CONSUMER = SELECT 
@@ -289,6 +289,12 @@ public class ReportQueryBuilder {
             + LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
             + INNER_JOIN + "eg_pt_address epa on epa.propertyid = epp.id "
             + WHERE + "epp.status <> 'INACTIVE' ";
+    
+    private static final String OLDPROPERTY_IDS_DETAILS = SELECT
+            + " epp.propertyid,epp.oldpropertyid "
+            + FROM
+            + "eg_pt_property epp "
+            + WHERE + "epp.status <> 'INACTIVE' ";
 
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -385,17 +391,11 @@ public class ReportQueryBuilder {
 		 StringBuilder query = new StringBuilder(PROPERTY_DETAILS_SUMMARY_QUERY);
 
 	     preparedPropStmtList.add(criteria.getUlbName());
-
 	     if(StringUtils.hasText(criteria.getWardNo())) {
 				query.append(AND);
 				query.append(" epa.ward = '").append(criteria.getWardNo()).append("'");
 	     }
-	     
-//         query.append(" limit ? ");
-//         preparedPropStmtList.add(criteria.getLimit());
-//
-//         query.append(" offset ? ");
-//         preparedPropStmtList.add(criteria.getOffset());
+
 	     addPaginationIfRequired(query,criteria.getLimit(),criteria.getOffset(),preparedPropStmtList);
 
 	     return query.toString();
@@ -471,11 +471,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			preparedPropStmtList.add(searchCriteria.getWardNo());
 		}
 		
-//		query.append(" limit ? ");
-//		preparedPropStmtList.add(searchCriteria.getLimit());
-//        
-//        query.append(" offset ? ");
-//        preparedPropStmtList.add(searchCriteria.getOffset());
 		addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedPropStmtList);
 	
 		return query.toString();
@@ -831,10 +826,10 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 
     public String getPropertyDetailsQueryCount(PropertyDetailsSearchCriteria searchCriteria,
             List<Object> preparedPropStmtList) {
+        
         StringBuilder query = new StringBuilder(PROPERTY_DETAILS_SUMMARY_QUERY_COUNT);
-
+        
         preparedPropStmtList.add(searchCriteria.getUlbName());
-
         if(StringUtils.hasText(searchCriteria.getWardNo())) {
                query.append(AND);
                query.append(" epa.ward = '").append(searchCriteria.getWardNo()).append("'");
@@ -985,6 +980,19 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
             preparedPropStmtList.add(searchCriteria.getOldPropertyId());
         }
         
+        return query.toString();
+    }
+
+    public String getOldPropertyIdsQuery(PropertyDetailsSearchCriteria searchCriteria,
+            List<Object> preparedPropStmtList) {
+        StringBuilder query = new StringBuilder(OLDPROPERTY_IDS_DETAILS);
+
+        if (!CollectionUtils.isEmpty(searchCriteria.getPropertyIds())) {
+            addAndClause(query);
+            query.append("epp.propertyid IN ("
+                    + getIdQueryForStrings(searchCriteria.getPropertyIds()));
+        }
+
         return query.toString();
     }
 }

@@ -13,12 +13,14 @@ import org.egov.report.web.model.PropertyDetailsResponse;
 import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
 import org.egov.report.repository.rowmapper.DemandsRowMapper;
+import org.egov.report.repository.rowmapper.OldPropertyIdRowMapper;
 import org.egov.report.repository.rowmapper.PropertyDetailsRowMapper;
 import org.egov.report.repository.rowmapper.UserRowMapper;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.User;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.expression.MapAccessor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -34,12 +36,7 @@ public class PropertyDetailsReportRepository {
 	public List<PropertyDetailsResponse> getPropertyDetails(PropertyDetailsSearchCriteria criteria)
 	{
 		List<Object> preparedPropStmtList = new ArrayList<>();
-		
-//		criteria.setLimit(limit);
-//		criteria.setOffset(offset);
-
 		String query = queryBuilder.getPropertyDetailsQuery(criteria, preparedPropStmtList);
-
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());
 
 	}
@@ -47,12 +44,7 @@ public class PropertyDetailsReportRepository {
 	public HashMap<String,List<PropertyDemandResponse>> getPropertyDemandDetails(PropertyDetailsSearchCriteria searchCriteria) {
 
 		List<Object> preparedPropStmtList = new ArrayList<>();
-		
-//		searchCriteria.setLimit(limit);
-//		searchCriteria.setOffset(offset);
-
 		String query = queryBuilder.getPropertyWiseDemandQuery(searchCriteria, preparedPropStmtList);
-
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandsRowMapper());
 	}
 
@@ -60,12 +52,7 @@ public class PropertyDetailsReportRepository {
 			PropertyDetailsSearchCriteria searchCriteria ) {
 		
 		List<Object> preparedPropStmtList = new ArrayList<>();
-		
-//		searchCriteria.setLimit(limit);
-//      searchCriteria.setOffset(offset);
-
 		String query = queryBuilder.getPropertyWiseDemandQuery(searchCriteria, preparedPropStmtList);
-
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new DemandsRowMapper());
 		
 	}
@@ -83,9 +70,7 @@ public class PropertyDetailsReportRepository {
 
     public Long getPropertyDetailsCount(PropertyDetailsSearchCriteria searchCriteria) {
         List<Object> preparedPropStmtList = new ArrayList<>();
-
         String query = queryBuilder.getPropertyDetailsQueryCount(searchCriteria, preparedPropStmtList);
-
         return jdbcTemplate.queryForObject(query, preparedPropStmtList.toArray(), Long.class);
     }
 
@@ -129,6 +114,12 @@ public class PropertyDetailsReportRepository {
         String query = queryBuilder.getPropertyIds(searchCriteria, preparedPropStmtList);
 
         return jdbcTemplate.queryForList(query, preparedPropStmtList.toArray(), String.class);
+    }
+
+    public HashMap<String, String> getOldPropertyIds(PropertyDetailsSearchCriteria searchCriteria) {
+        List<Object> preparedPropStmtList = new ArrayList<>();
+        String query = queryBuilder.getOldPropertyIdsQuery(searchCriteria, preparedPropStmtList);
+        return jdbcTemplate.query(query,preparedPropStmtList.toArray(),new OldPropertyIdRowMapper());
     }
 
 }
