@@ -48,7 +48,7 @@ public class UserResultSetExtractor implements ResultSetExtractor<List<User>> {
 
                 user = User.builder().id(rs.getLong("id")).tenantId(rs.getString("tenantid")).title(rs.getString("title"))
                         .salutation(rs.getString("salutation"))
-                        .dob(rs.getDate("dob")).name(rs.getString("username"))
+                        .dob(rs.getDate("dob")).username(rs.getString("username"))
                         .password(rs.getString("password"))
                         .passwordExpiryDate(rs.getTimestamp("pwdexpirydate"))
                         .mobileNumber(rs.getString("mobilenumber")).altContactNumber(rs.getString("altcontactnumber"))
