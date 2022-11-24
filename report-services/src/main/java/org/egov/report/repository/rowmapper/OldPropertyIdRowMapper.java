@@ -9,6 +9,7 @@ import java.util.List;
 import org.egov.report.web.model.PropertyDemandResponse;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.util.StringUtils;
 
 public class OldPropertyIdRowMapper implements ResultSetExtractor<HashMap<String, String>> {
 
@@ -23,8 +24,9 @@ public class OldPropertyIdRowMapper implements ResultSetExtractor<HashMap<String
             String key = rs.getString("propertyid");
             String value = rs.getString("oldpropertyid");
 
-            oldPropertyIdMap.put(key, value);
-
+            if(!oldPropertyIdMap.containsKey(key)) {
+                oldPropertyIdMap.put(key, value);                
+            }
         }
 
         return oldPropertyIdMap;

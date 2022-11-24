@@ -158,20 +158,17 @@ public class PropertyService {
         });
 
         if (!CollectionUtils.isEmpty(taxCollectorWiseCollectionResponse)) {
-            List<Long> userIds = new ArrayList<>();
-            taxCollectorWiseCollectionResponse.stream().forEach(res -> userIds.add(Long.valueOf(res.getUserid())));
-            Set<String> Properties = new HashSet<>();
-            taxCollectorWiseCollectionResponse.stream().forEach(res -> Properties.add((res.getConsumercode())));
+            List<Long> userIds = taxCollectorWiseCollectionResponse.stream().map(res ->Long.valueOf(res.getUserid())).distinct().collect(Collectors.toList());
+            Set<String> Properties = taxCollectorWiseCollectionResponse.stream().map(res -> (res.getConsumercode())).collect(Collectors.toSet());
             
          // Extracting user info from userService
             log.info("Fetching User Details ");
-            List<Long> ids = userIds.stream().distinct().collect(Collectors.toList());
             org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
                     .builder()
                     .tenantId(searchCriteria.getUlbName())
                     .active(true)
                     .type(UserType.EMPLOYEE)
-                    .id(ids)
+                    .id(userIds)
                     .build();
             List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
                     requestInfo);
@@ -195,13 +192,12 @@ public class PropertyService {
                     .ulbName(searchCriteria.getUlbName()).propertyIds(Properties).build();
             HashMap<String , String> propertyMap = pdRepository.getOldPropertyIds(propertySearchingCriteria);
             log.info("Setting Property Details ");
-            for (TaxCollectorWiseCollectionResponse taxCollectorWiseCollection : taxCollectorWiseCollectionResponse) {
+            taxCollectorWiseCollectionResponse.parallelStream().forEach(taxCollectorWiseCollection ->{
                 if(StringUtils.hasText(propertyMap.get(taxCollectorWiseCollection.getConsumercode()))){
-                    String oldPropertyId = (propertyMap.get(taxCollectorWiseCollection.getConsumercode()));
+                    String oldPropertyId = propertyMap.get(taxCollectorWiseCollection.getConsumercode());
                     taxCollectorWiseCollection.setOldpropertyid(oldPropertyId);
-                    
                 }
-            }
+            });
 
         }
 
