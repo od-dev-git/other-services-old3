@@ -289,6 +289,12 @@ public class ReportQueryBuilder {
             + LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
             + INNER_JOIN + "eg_pt_address epa on epa.propertyid = epp.id "
             + WHERE + "epp.status <> 'INACTIVE' ";
+    
+    private static final String OLDPROPERTY_IDS_DETAILS = SELECT
+            + " epp.propertyid,epp.oldpropertyid "
+            + FROM
+            + "eg_pt_property epp "
+            + WHERE + "epp.status <> 'INACTIVE' ";
 
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -974,6 +980,19 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
             preparedPropStmtList.add(searchCriteria.getOldPropertyId());
         }
         
+        return query.toString();
+    }
+
+    public String getOldPropertyIdsQuery(PropertyDetailsSearchCriteria searchCriteria,
+            List<Object> preparedPropStmtList) {
+        StringBuilder query = new StringBuilder(OLDPROPERTY_IDS_DETAILS);
+
+        if (!CollectionUtils.isEmpty(searchCriteria.getPropertyIds())) {
+            addAndClause(query);
+            query.append("epp.propertyid IN ("
+                    + getIdQueryForStrings(searchCriteria.getPropertyIds()));
+        }
+
         return query.toString();
     }
 }
