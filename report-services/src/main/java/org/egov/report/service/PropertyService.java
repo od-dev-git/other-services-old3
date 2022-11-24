@@ -140,22 +140,20 @@ public class PropertyService {
                 .toDate(searchCriteria.getEndDate()).build();
 
         List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
-        List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse = new ArrayList<TaxCollectorWiseCollectionResponse>();
-
-        payments.parallelStream().forEach(payment  -> {
-            TaxCollectorWiseCollectionResponse taxCollectorWiseCollection = TaxCollectorWiseCollectionResponse
-                    .builder()
-                    .amountpaid(payment.getTotalAmountPaid().toString())
-                    .paymentMode(payment.getPaymentMode().toString())
-                    .receiptnumber(payment.getPaymentDetails().get(0).getReceiptNumber())
-                    .consumercode(payment.getPaymentDetails().get(0).getBill().getConsumerCode())
-                    .paymentdate(payment.getTransactionDate().toString())
-                    .userid(payment.getAuditDetails().getCreatedBy())
-                    .tenantid(payment.getTenantId())
-                    .build();
+        List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse =  payments.parallelStream().map(payment  ->{
             
-            taxCollectorWiseCollectionResponse.add(taxCollectorWiseCollection);
-        });
+            TaxCollectorWiseCollectionResponse taxCollectorWiseCollection = TaxCollectorWiseCollectionResponse
+                  .builder()
+                  .amountpaid(payment.getTotalAmountPaid().toString())
+                  .paymentMode(payment.getPaymentMode().toString())
+                  .receiptnumber(payment.getPaymentDetails().get(0).getReceiptNumber())
+                  .consumercode(payment.getPaymentDetails().get(0).getBill().getConsumerCode())
+                  .paymentdate(payment.getTransactionDate().toString())
+                  .userid(payment.getAuditDetails().getCreatedBy())
+                  .tenantid(payment.getTenantId())
+                  .build();
+            return taxCollectorWiseCollection;
+        }).collect(Collectors.toList());
 
         if (!CollectionUtils.isEmpty(taxCollectorWiseCollectionResponse)) {
             List<Long> userIds = taxCollectorWiseCollectionResponse.stream().map(res ->Long.valueOf(res.getUserid())).distinct().collect(Collectors.toList());
