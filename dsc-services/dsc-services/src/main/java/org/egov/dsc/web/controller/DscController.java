@@ -516,6 +516,7 @@ public class DscController {
 		File logFile = new File(logPath);
 		File licFile = new File(licPath);
 		File tempFile = new File(tempPath);
+		File tempFilePathfile = new File(tempFilePath);
 		String pdfStr = "";
 		List<emBridgeSignerInput> inputs = new ArrayList<>();
 		PKCSBulkPdfHashSignRequest pKCSBulkPdfHashSignRequest = new PKCSBulkPdfHashSignRequest();
@@ -534,6 +535,9 @@ public class DscController {
 			}
 			if (!licFile.exists()) {
 				licFile.mkdirs();
+			}
+			if (!tempFilePathfile.exists()) {
+				tempFilePathfile.mkdirs();
 			}
 			bridge = new emBridge(licPath + "/OdishaUrban.lic", logFile.getCanonicalPath());
 		} catch (IOException e) {
