@@ -987,7 +987,7 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
         if (criteria.getConsumerNumbers() != null && !criteria.getConsumerNumbers().isEmpty()) {
             addAndClause(query);
             query.append("ewc.connectionno IN ("
-            + getIdQueryForStrings(Set.copyOf(criteria.getConsumerNumbers())));
+            + getIdQueryForStrings(criteria.getConsumerNumbers()));
         }
 
         addPaginationIfRequired(query,criteria.getLimit(),criteria.getOffset(),preparedStmtList);
