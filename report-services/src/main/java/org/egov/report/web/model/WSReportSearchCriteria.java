@@ -1,5 +1,8 @@
 package org.egov.report.web.model;
 
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -33,7 +36,10 @@ public class WSReportSearchCriteria {
 
 	@JsonProperty("consumerNumber")
 	private String consumerCode;
-	
+
+    @JsonProperty("consumerNumbers")
+    private Set<String> consumerNumbers;
+
 	@JsonProperty("connectionType")
 	private String connectionType;
 	

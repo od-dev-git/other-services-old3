@@ -201,10 +201,10 @@ public class ReportQueryBuilder {
 			+ "inner join eg_ws_service ews on ews.connection_id =ewc.id ";
 	
 	private static final String QUERY_FOR_WS_CONNECTION_COUNT= SELECT 
-			+ "count(ewc2.userid) "
+			+ "count(distinct ewc.connectionno) "
 			+ FROM + " eg_ws_connection ewc "
-			+ INNER_JOIN + " eg_ws_service ews on ewc.id = ews.connection_id "
-			+ INNER_JOIN + " eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid "
+//			+ INNER_JOIN + " eg_ws_service ews on ewc.id = ews.connection_id "
+//			+ INNER_JOIN + " eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid "
 			+ WHERE + " ewc.isoldapplication = false " + AND_QUERY + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' ";
 	
 	private static final String QUERY_TO_GET_DEMANDS_COUNT =  SELECT + " count(distinct(consumercode))" 
@@ -212,7 +212,13 @@ public class ReportQueryBuilder {
 			+ "inner join eg_ws_connection ewc on demand.consumercode = ewc.connectionno "
 			+ "inner join eg_ws_service ews on ews.connection_id =ewc.id ";
 	
-	private static final String QUERY_FOR_WATER_CONNECTIONS = "select distinct ewc.connectionno ,ewc2.userid "
+//	private static final String QUERY_FOR_WATER_CONNECTIONS = "select distinct ewc.connectionno ,ewc2.userid "
+//            + "from eg_ws_connection ewc "
+//            + "inner join eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid  "
+//            + "inner join eg_ws_service ews on ewc.id = ews.connection_id "
+//            + "where ewc.isoldapplication = 'false' " + AND_QUERY+" EWC.APPLICATIONSTATUS = 'CONNECTION_ACTIVATED' "    ;
+	
+    private static final String QUERY_FOR_WATER_CONNECTIONS = "select distinct ewc.connectionno  "
             + "from eg_ws_connection ewc "
             + "inner join eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid  "
             + "inner join eg_ws_service ews on ewc.id = ews.connection_id "
@@ -623,13 +629,7 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			preparedStmtList.add(wsReportUtils.addOneMonth(firstDate));
 		}
 		
-//		query.append(" limit ? ");
-//		preparedStmtList.add(limit);
-//		
-//		query.append(" offset ? ");
-//		preparedStmtList.add(offset);
 		addPaginationIfRequired(query,criteria.getLimit(),criteria.getOffset(),preparedStmtList);
-		
 		
 		return query.toString();
 
@@ -790,36 +790,20 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
             query.append(AND_QUERY).append(" ews.connectiontype = ? ");
             preparedStmtList.add(searchCriteria.getConnectionType());
         }
-//        query.append(" limit ? ");
-//        preparedStmtList.add(limit);
-//        
-//        query.append(" offset ? ");
-//        preparedStmtList.add(offset);
+
         addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedStmtList);
         
         return query.toString();
     }
 	
-	public String getWaterMonthlyDemandQuery2(WSReportSearchCriteria searchCriteria, Map<String ,Object> preparedStmtList ,List<String> keySet) {
+	public String getWaterMonthlyDemandQuery2(WSReportSearchCriteria searchCriteria, Map<String ,Object> preparedStmtList ) {
       StringBuilder query = new StringBuilder(QUERY_FOR_WATER_MONTHLY_DEMANDS2);
-      query.append(" and d.taxperiodto >= :from ");
-      preparedStmtList.put("from", searchCriteria.getFromDate());
       query.append(" and d.taxperiodto <= :to ");
       preparedStmtList.put("to", searchCriteria.getToDate());
       query.append("and d.consumercode IN  (:id)  ");
-      preparedStmtList.put("id", keySet);
-//        query.append(AND_QUERY).append(" d.taxperiodto >= ? ");
-//        preparedStmtList.add(searchCriteria.getFromDate());
-//        query.append(AND_QUERY).append(" d.taxperiodto  <= ? ");
-//        preparedStmtList.add(searchCriteria.getToDate());
-//        query.append(AND_QUERY).append(" d.consumercode IN ( ? ) ");
-////        preparedStmtList.add(String.join(" , ", keySet));
-//        String join = String.join(",",keySet);
-//        preparedStmtList.add(join);
-//     //   join.replace(',', "','");
-//     //   preparedStmtList.add(keySet.stream().map(id -> "\'"+id+"\'" ).collect(Collectors.joining(",")));
-//    
-	    
+      preparedStmtList.put("id", searchCriteria.getConsumerNumbers());
+      query.append(ORDER_BY).append(" d.taxperiodto ");
+      query.append(" desc ");
 	    
         return query.toString();
     }
@@ -994,5 +978,21 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
         }
 
         return query.toString();
+    }
+    
+    public String getWaterConnectionDetailsQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
+
+        StringBuilder query = new StringBuilder(QUERY_FOR_WS_CONNECTION);
+
+        if (criteria.getConsumerNumbers() != null && !criteria.getConsumerNumbers().isEmpty()) {
+            addAndClause(query);
+            query.append("ewc.connectionno IN ("
+            + getIdQueryForStrings(Set.copyOf(criteria.getConsumerNumbers())));
+        }
+
+        addPaginationIfRequired(query,criteria.getLimit(),criteria.getOffset(),preparedStmtList);
+
+        return query.toString();
+
     }
 }

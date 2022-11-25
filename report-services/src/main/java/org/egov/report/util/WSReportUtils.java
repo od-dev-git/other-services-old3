@@ -92,4 +92,38 @@ public class WSReportUtils {
 		else
 			return BigDecimal.ZERO;
 	}
+
+    public BigDecimal CalculateAmtAfterDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,
+            BigDecimal penaltyAmt, BigDecimal advanceAmt, BigDecimal totalArrearAmt) {
+        BigDecimal multiplyingFactor = new BigDecimal(1.05);
+        BigDecimal amtAfterDueDate = ((taxAmt.subtract(collectedAmt)).multiply(multiplyingFactor)).add(advanceAmt)
+                .add(penaltyAmt).add(totalArrearAmt);
+
+        if (amtAfterDueDate.compareTo(BigDecimal.ZERO) == 1)
+            return amtAfterDueDate.setScale(0, RoundingMode.HALF_UP);
+        else
+            return BigDecimal.ZERO;
+    }
+
+    public BigDecimal CalculateAmtBeforeDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,
+            BigDecimal penaltyAmt, BigDecimal advanceAmt, BigDecimal totalArrearAmt, BigDecimal rebateAmt) {
+        BigDecimal multiplyingFactor = new BigDecimal(0.98);
+        BigDecimal amtBeforeDueDate = ((taxAmt.subtract(collectedAmt)).multiply(multiplyingFactor)).add(advanceAmt)
+                .add(rebateAmt).add(totalArrearAmt);
+
+        if (amtBeforeDueDate.compareTo(BigDecimal.ZERO) == 1)
+            return amtBeforeDueDate.setScale(0, RoundingMode.HALF_UP);
+        else
+            return BigDecimal.ZERO;
+    }
+
+    public BigDecimal calculateTotalDueModified(BigDecimal taxAmt, BigDecimal collectedAmt, BigDecimal penaltyAmt,
+            BigDecimal advanceAmt, BigDecimal totalArrearAmt) {
+        BigDecimal totalDue = taxAmt.add(penaltyAmt).add(advanceAmt).add(totalArrearAmt).subtract(collectedAmt);
+
+        if (totalDue.compareTo(BigDecimal.ZERO) == 1)
+            return totalDue.setScale(2, BigDecimal.ROUND_CEILING);
+        else
+            return BigDecimal.ZERO;
+    }
 }

@@ -18,18 +18,20 @@ public class WaterConnectionRowMapper implements ResultSetExtractor<Map<String, 
 
 		while(rs.next()) {
 
-			WaterConnectionDetails response = new WaterConnectionDetails();
-
 			String consumerCode = rs.getString("connectionno");
-			response.setTenantid(rs.getString("tenantid"));
-			response.setUserid(rs.getString("userid"));
-			response.setWard(rs.getString("ward"));
-			response.setConnectiontype(rs.getString("connectiontype"));
-			response.setOldconnectionno(rs.getString("oldconnectionno"));
+			
+			WaterConnectionDetails response = WaterConnectionDetails
+			        .builder()
+			        .tenantid(consumerCode)
+			        .userid(rs.getString("userid"))
+			        .ward(rs.getString("ward"))
+			        .connectiontype(rs.getString("connectiontype"))
+			        .oldconnectionno(rs.getString("oldconnectionno"))
+			        .build();			
 
-
-			responseMap.put(consumerCode, response);
-
+			if(!responseMap.containsKey(consumerCode)) {
+	            responseMap.put(consumerCode, response);
+			}
 		}
 
 		return responseMap;

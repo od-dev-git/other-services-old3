@@ -20,38 +20,31 @@ public class WaterMonthlyDemandsRowMapper implements ResultSetExtractor<Map<Stri
         Map<String, List<WaterDemandResponse>>  responseMap = new HashMap<>();
         while(rs.next()) {
 
-            WaterDemandResponse response = new WaterDemandResponse();
-            String demandId = rs.getString("id");
+            //use builder
             String consumerCode = rs.getString("consumercode");
-            String oldConnectionNo = rs.getString("oldconnectionno");
-            String tenantId = rs.getString("tenantid");
-            Long taxPeriodFrom = rs.getLong("taxperiodfrom");
-            Long taxPeriodTo = rs.getLong("taxperiodto");
-            String taxHeadCode = rs.getString("taxheadcode");
-            BigDecimal collectedAmt = rs.getBigDecimal("collectionamount");
-            BigDecimal taxAmt =  rs.getBigDecimal("taxamount");
-            String ward = rs.getString("ward");
-            String connectionType = rs.getString("connectiontype");
-            String userId = rs.getString("userid");
 
-            //response.setConsumercode(consumerCode);
-            response.setTaxamount(taxAmt);
-            response.setCollectionamount(collectedAmt);
-            response.setTaxheadcode(taxHeadCode);
-            response.setTaxperiodfrom(taxPeriodFrom);
-            response.setTaxperiodto(taxPeriodTo);
-            response.setTenantid(tenantId);
-            response.setDemandId(demandId);
-            response.setWard(ward);
-            response.setConsumercode(consumerCode);
-            response.setOldconnectionno(oldConnectionNo);
-            response.setConnectiontype(connectionType);
-            response.setUserid(userId);
+            WaterDemandResponse response = WaterDemandResponse
+                    .builder()
+                    .taxamount(rs.getBigDecimal("taxamount"))
+                    .collectionamount(rs.getBigDecimal("collectionamount"))
+                    .taxheadcode(rs.getString("taxheadcode"))
+                    .taxperiodfrom(rs.getLong("taxperiodfrom"))
+                    .taxperiodto(rs.getLong("taxperiodto"))
+                    .tenantid(rs.getString("tenantid"))
+                    .demandId(rs.getString("id"))
+                    .ward(rs.getString("ward"))
+                    .consumercode(rs.getString("consumercode"))
+                    .oldconnectionno(rs.getString("oldconnectionno"))
+                    .connectiontype(rs.getString("connectiontype"))
+                    .userid(rs.getString("userid"))
+                    .build();
 
-            if(!responseMap.containsKey(demandId))
-                responseMap.put(demandId, new ArrayList<>());
+            if(response != null) {
+                if(!responseMap.containsKey(consumerCode))
+                    responseMap.put(consumerCode, new ArrayList<>());
 
-            responseMap.get(demandId).add(response);
+                responseMap.get(consumerCode).add(response);                
+            }
 
         }
 
