@@ -404,11 +404,11 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             if(currentDemandDetails != null) {
 
                                 currentDemandDetails.parallelStream().forEach(demandDetail -> {
-                                    if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_CHARGE")) {
+                                    if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_CHARGE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("SW_CHARGE")) {
                                         responsePerConnection.setCurrentDemandAmt(responsePerConnection.getCurrentDemandAmt().add(demandDetail.getTaxAmount()));
                                         responsePerConnection.setCollectedAmt(responsePerConnection.getCollectedAmt().add(demandDetail.getCollectionAmount()));
                                     }
-                                    if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_TIME_REBATE"))
+                                    if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_TIME_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_ANNUAL_PAYMENT_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_SPECIAL_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("SW_SPECIAL_REBATE"))
                                         responsePerConnection.setRebateAmt((responsePerConnection.getRebateAmt().add(demandDetail.getTaxAmount())).subtract(demandDetail.getCollectionAmount()));
                                     if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_ADVANCE_CARRYFORWARD") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("SW_ADVANCE_CARRYFORWARD"))
                                         responsePerConnection.setAdvanceAmt((responsePerConnection.getAdvanceAmt().add(demandDetail.getTaxAmount())).subtract(demandDetail.getCollectionAmount()));
@@ -418,8 +418,8 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             }
                             responsePerConnection.setTaxPriodFrom(connectionDemands.get(0).getTaxPeriodFrom().toString());
                             responsePerConnection.setTaxPeriodTo(connectionDemands.get(0).getTaxPeriodTo().toString());
-
-
+                            responsePerConnection.setUlb(connectionDemands.get(0).getTenantId());
+                            responsePerConnection.setTenantId(connectionDemands.get(0).getTenantId());
 
                             BigDecimal totalArrearAmt = connectionDemands.stream().skip(1)
                                     .flatMap(item -> item.getDemandDetails().stream())
@@ -450,7 +450,8 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             if(connectionDetails != null) {
                                 responsePerConnection.setConnectionType(connectionDetails.getConnectiontype());
                                 responsePerConnection.setWard(connectionDetails.getWard());
-                                responsePerConnection.setConnectionNo(connectionNo);                            
+                                responsePerConnection.setConnectionNo(connectionNo); 
+                                responsePerConnection.setOldconnectionno(connectionDetails.getOldconnectionno());
                             }
 
                             // set User details here

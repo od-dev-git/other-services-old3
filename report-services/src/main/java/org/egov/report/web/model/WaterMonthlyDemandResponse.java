@@ -29,6 +29,9 @@ public class WaterMonthlyDemandResponse {
 	@JsonProperty("connectionNo")
 	private String connectionNo;
 	
+	@JsonProperty("oldconnectionno")
+    private String oldconnectionno;
+	
 	@JsonProperty("connectionType")
 	private String connectionType;
 	
