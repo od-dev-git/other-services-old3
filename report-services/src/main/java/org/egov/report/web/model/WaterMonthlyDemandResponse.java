@@ -58,6 +58,14 @@ public class WaterMonthlyDemandResponse {
 	@Default
 	private BigDecimal collectedAmt = BigDecimal.ZERO;
 	
+	@JsonProperty("sewageCurrentDemandAmount")
+    @Default
+    private BigDecimal sewageCurrentDemandAmount = BigDecimal.ZERO;
+    
+    @JsonProperty("sewageCollectionAmount")
+    @Default
+    private BigDecimal sewageCollectionAmount = BigDecimal.ZERO;
+	
 	@JsonProperty("rebateAmount")
 	@Default
 	private BigDecimal rebateAmt = BigDecimal.ZERO;

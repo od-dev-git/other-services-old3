@@ -404,9 +404,13 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             if(currentDemandDetails != null) {
 
                                 currentDemandDetails.parallelStream().forEach(demandDetail -> {
-                                    if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_CHARGE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("SW_CHARGE")) {
+                                    if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_CHARGE")) {
                                         responsePerConnection.setCurrentDemandAmt(responsePerConnection.getCurrentDemandAmt().add(demandDetail.getTaxAmount()));
                                         responsePerConnection.setCollectedAmt(responsePerConnection.getCollectedAmt().add(demandDetail.getCollectionAmount()));
+                                    }
+                                    if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("SW_CHARGE")) {
+                                        responsePerConnection.setSewageCurrentDemandAmount(responsePerConnection.getSewageCurrentDemandAmount().add(demandDetail.getTaxAmount()));
+                                        responsePerConnection.setSewageCollectionAmount(responsePerConnection.getSewageCollectionAmount().add(demandDetail.getCollectionAmount()));
                                     }
                                     if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_TIME_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_ANNUAL_PAYMENT_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_SPECIAL_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("SW_SPECIAL_REBATE"))
                                         responsePerConnection.setRebateAmt((responsePerConnection.getRebateAmt().add(demandDetail.getTaxAmount())).subtract(demandDetail.getCollectionAmount()));
