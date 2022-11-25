@@ -18,7 +18,6 @@ import org.egov.report.repository.rowmapper.EmployeeWiseWSCollectionRowMapper;
 import org.egov.report.repository.rowmapper.SchedulerGeneratedDemandsRowMapper;
 import org.egov.report.repository.rowmapper.WSConnectionsElegibleForDemandRowMapper;
 import org.egov.report.repository.rowmapper.WaterConnectionRowMapper;
-import org.egov.report.repository.rowmapper.WaterConnectionsRowMapper;
 import org.egov.report.repository.rowmapper.WaterMonthlyDemandRowMapper;
 import org.egov.report.repository.rowmapper.WaterMonthlyDemandsRowMapper;
 import org.egov.report.repository.rowmapper.WaterNewConsumerMonthlyRowMapper;
@@ -234,22 +233,25 @@ public class WSReportRepository {
         
         }
 		
-		public List<HashMap<String, String>> getWaterConnection(WSReportSearchCriteria searchCriteria) {
+        public List<String> getWaterConnection(WSReportSearchCriteria searchCriteria) {
             List<Object> preparedStmtList = new ArrayList<>();
 
             String query = queryBuilder.getWaterConnectionsQuery(searchCriteria, preparedStmtList);
 
-            return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterConnectionsRowMapper());
+            return jdbcTemplate.queryForList(query,preparedStmtList.toArray(), String.class);
         }
 		
 		public Map<String, List<WaterDemandResponse>> getWaterMonthlyDemandReports(
-                WSReportSearchCriteria searchCriteria , List<String> keySet) {
-           // List<Object> preparedStmtList = new ArrayList<>();
+                WSReportSearchCriteria searchCriteria ) {
 		    Map<String, Object> preparedStmtList = new HashMap<>();
-
-            String query = queryBuilder.getWaterMonthlyDemandQuery2(searchCriteria, preparedStmtList ,keySet);
-
-      //      return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterMonthlyDemandsRowMapper());
-            return namedParameterJdbcTemplate.query(query,preparedStmtList, new WaterMonthlyDemandsRowMapper());
+		    String query = queryBuilder.getWaterMonthlyDemandQuery2(searchCriteria, preparedStmtList );
+		    return namedParameterJdbcTemplate.query(query,preparedStmtList, new WaterMonthlyDemandsRowMapper());
         }
+		
+        public Map<String, WaterConnectionDetails> getWaterConnectionDetails(WSReportSearchCriteria criteria) {
+            List<Object> preparedStmtList = new ArrayList<>();
+            String query = queryBuilder.getWaterConnectionDetailsQuery(criteria, preparedStmtList);
+            return jdbcTemplate.query(query, preparedStmtList.toArray(), new WaterConnectionRowMapper());
+        }
+        
 }
