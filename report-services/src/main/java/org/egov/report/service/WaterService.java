@@ -420,8 +420,8 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                                         responsePerConnection.setPenaltyAmt((responsePerConnection.getPenaltyAmt().add(demandDetail.getTaxAmount())).subtract(demandDetail.getCollectionAmount()));
                                 });
                             }
-                            responsePerConnection.setTaxPriodFrom(connectionDemands.get(0).getTaxPeriodFrom().toString());
-                            responsePerConnection.setTaxPeriodTo(connectionDemands.get(0).getTaxPeriodTo().toString());
+                            responsePerConnection.setTaxPriodFrom(wsReportUtils.getConvertedDate(connectionDemands.get(0).getTaxPeriodFrom()));
+                            responsePerConnection.setTaxPeriodTo(wsReportUtils.getConvertedDate(connectionDemands.get(0).getTaxPeriodTo()));
                             String tenantId = connectionDemands.get(0).getTenantId();
                             String tenantIdStyled = tenantId.replace("od.", "");
                             tenantIdStyled = tenantIdStyled.substring(0,1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
