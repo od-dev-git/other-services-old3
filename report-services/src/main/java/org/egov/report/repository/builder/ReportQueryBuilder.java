@@ -203,8 +203,8 @@ public class ReportQueryBuilder {
 	private static final String QUERY_FOR_WS_CONNECTION_COUNT= SELECT 
 			+ "count(distinct ewc.connectionno) "
 			+ FROM + " eg_ws_connection ewc "
-//			+ INNER_JOIN + " eg_ws_service ews on ewc.id = ews.connection_id "
-//			+ INNER_JOIN + " eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid "
+			+ INNER_JOIN + " eg_ws_service ews on ewc.id = ews.connection_id "
+			+ INNER_JOIN + " eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid "
 			+ WHERE + " ewc.isoldapplication = false " + AND_QUERY + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' ";
 	
 	private static final String QUERY_TO_GET_DEMANDS_COUNT =  SELECT + " count(distinct(consumercode))" 
