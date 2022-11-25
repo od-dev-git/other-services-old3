@@ -418,8 +418,11 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             }
                             responsePerConnection.setTaxPriodFrom(connectionDemands.get(0).getTaxPeriodFrom().toString());
                             responsePerConnection.setTaxPeriodTo(connectionDemands.get(0).getTaxPeriodTo().toString());
-                            responsePerConnection.setUlb(connectionDemands.get(0).getTenantId());
-                            responsePerConnection.setTenantId(connectionDemands.get(0).getTenantId());
+                            String tenantId = connectionDemands.get(0).getTenantId();
+                            String tenantIdStyled = tenantId.replace("od.", "");
+                            tenantIdStyled = tenantIdStyled.substring(0,1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+                            responsePerConnection.setUlb(tenantIdStyled);
+                            responsePerConnection.setTenantId(tenantIdStyled);
 
                             BigDecimal totalArrearAmt = connectionDemands.stream().skip(1)
                                     .flatMap(item -> item.getDemandDetails().stream())
