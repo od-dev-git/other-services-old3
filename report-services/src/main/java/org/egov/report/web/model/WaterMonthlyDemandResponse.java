@@ -29,6 +29,9 @@ public class WaterMonthlyDemandResponse {
 	@JsonProperty("connectionNo")
 	private String connectionNo;
 	
+	@JsonProperty("oldconnectionno")
+    private String oldconnectionno;
+	
 	@JsonProperty("connectionType")
 	private String connectionType;
 	
@@ -54,6 +57,14 @@ public class WaterMonthlyDemandResponse {
 	@JsonProperty("collectionAmount")
 	@Default
 	private BigDecimal collectedAmt = BigDecimal.ZERO;
+	
+	@JsonProperty("sewageCurrentDemandAmount")
+    @Default
+    private BigDecimal sewageCurrentDemandAmount = BigDecimal.ZERO;
+    
+    @JsonProperty("sewageCollectionAmount")
+    @Default
+    private BigDecimal sewageCollectionAmount = BigDecimal.ZERO;
 	
 	@JsonProperty("rebateAmount")
 	@Default
