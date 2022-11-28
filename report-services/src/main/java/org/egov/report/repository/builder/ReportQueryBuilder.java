@@ -545,11 +545,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			preparedPropStmtList.add(searchCriteria.getOldPropertyId());
 		}
 		
-//		query.append(" limit ? ");
-//		preparedPropStmtList.add(searchCriteria.getLimit());
-//
-//        query.append(" offset ? ");
-//        preparedPropStmtList.add(searchCriteria.getOffset());
 		addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedPropStmtList);
 
 		return query.toString();
