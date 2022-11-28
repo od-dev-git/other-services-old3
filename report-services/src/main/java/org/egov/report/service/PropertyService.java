@@ -475,44 +475,12 @@ public class PropertyService {
                     if (payments != null) {
                         List<PropertyWiseCollectionResponse> tempCollectionResponses = payments.parallelStream()
                                 .map(payment -> {
-                                    PropertyWiseCollectionResponse propertyWiseCollectionResponse = new PropertyWiseCollectionResponse();
-
-                                    if (payment != null) {
-
-                                        BigDecimal due = payment.getTotalDue();
-                                        BigDecimal amountPaid = payment.getTotalAmountPaid();
-                                        BigDecimal currentDueInitial = BigDecimal.ZERO;
-                                        BigDecimal currentDueWithTotalDue = currentDueInitial.add(due);
-                                        BigDecimal finalCurrentDue = currentDueWithTotalDue.subtract(amountPaid);
-
-                                        propertyWiseCollectionResponse.setConsumercode(
-                                                payment.getPaymentDetails().get(0).getBill().getConsumerCode());
-                                        propertyWiseCollectionResponse.setDue(payment.getTotalDue().toString());
-                                        propertyWiseCollectionResponse
-                                                .setAmountpaid(payment.getTotalAmountPaid().toString());
-                                        propertyWiseCollectionResponse.setCurrentdue(finalCurrentDue.toString());
-                                        propertyWiseCollectionResponse.setReceiptdate(
-                                                payment.getPaymentDetails().get(0).getReceiptDate().toString());
-                                        propertyWiseCollectionResponse.setReceiptnumber(
-                                                payment.getPaymentDetails().get(0).getReceiptNumber());
-                                        propertyWiseCollectionResponse.setPaymentMode(payment.getPaymentMode().name());
-                                    }
-                                    return propertyWiseCollectionResponse;
+                                    return enrichPayments(payment);
                                 }).collect(Collectors.toList());
 
                         // setting property data
                         log.info("Setting Property Details ");
-                        tempCollectionResponses.parallelStream().forEach(response -> {
-//                            PropertyDetailsResponse propertyDetail = propertyMap.get(response.getConsumercode());
-                            List<PropertyDetailsResponse> propertyDetail = propertyMap.get(response.getConsumercode());
-                            if (propertyDetail != null) {
-                                response.setOldpropertyid(propertyDetail.get(0).getOldPropertyId());
-                                response.setWard(propertyDetail.get(0).getWardNumber());
-                                List<String> uuids = propertyDetail.parallelStream()
-                                        .map(propertyUser -> propertyUser.getUuid()).collect(Collectors.toList());
-                                response.setUuid(uuids);// stream and set in list
-                            }
-                        });
+                        enrichPropertyDetail(propertyMap, tempCollectionResponses);
 
                         // Getting user data
                         log.info("Fetching User Details ");
@@ -530,50 +498,8 @@ public class PropertyService {
                         Map<String, org.egov.report.user.User> userMap = usersInfo.stream()
                                 .collect(Collectors.toMap(org.egov.report.user.User::getUuid, Function.identity()));
                         log.info("Setting User Details ");
-                        tempCollectionResponses.stream().forEach(collectionResponse -> {
-                            if (collectionResponse != null) {
-                                collectionResponse.getUuid().parallelStream().forEach(uuid -> {
-                                    org.egov.report.user.User user = userMap.get(uuid);
-                                    if (user != null) {
-                                        if (StringUtils.hasText(collectionResponse.getMobilenumber())
-                                                && StringUtils.hasText(user.getMobileNumber())) {
-                                            collectionResponse.setMobilenumber(collectionResponse.getMobilenumber()
-                                                    + " , " + user.getMobileNumber());
-                                        } else {
-                                            if (StringUtils.hasText(user.getMobileNumber())) {
-                                                collectionResponse.setMobilenumber(user.getMobileNumber());
-                                            }
-                                        }
-
-                                        if (StringUtils.hasText(collectionResponse.getName())
-                                                && StringUtils.hasText(user.getName())) {
-                                            collectionResponse
-                                                    .setName(collectionResponse.getName() + " , " + user.getName());
-                                        } else {
-                                            if (StringUtils.hasText(user.getName())) {
-                                                collectionResponse.setName(user.getName());
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        });
-
-//                        if (StringUtils.hasText(item.getMobilenumber())
-//                                && StringUtils.hasText(user.getMobileNumber())) {
-//                            item.setMobilenumber(item.getMobilenumber() + " , " + user.getMobileNumber());
-//                        } else {
-//                            if (StringUtils.hasText(user.getMobileNumber())) {
-//                                item.setMobilenumber(user.getMobileNumber());
-//                            }
-//                        }
-//                        if (StringUtils.hasText(item.getName()) && StringUtils.hasText(user.getName())) {
-//                            item.setName(item.getName() + " , " + user.getName());
-//                        } else {
-//                            if (StringUtils.hasText(user.getName())) {
-//                                item.setName(user.getName());
-//                            }
-//                        }
+                        
+                        enrichUserData(tempCollectionResponses, userMap);
 
                         propertyWiseCollectionResponses.addAll(tempCollectionResponses);
 
@@ -587,6 +513,79 @@ public class PropertyService {
         }
 
         return propertyWiseCollectionResponses;
+    }
+
+    private PropertyWiseCollectionResponse enrichPayments(Payment payment) {
+        PropertyWiseCollectionResponse propertyWiseCollectionResponse = new PropertyWiseCollectionResponse();
+
+        if (payment != null) {
+
+            BigDecimal due = payment.getTotalDue();
+            BigDecimal amountPaid = payment.getTotalAmountPaid();
+            BigDecimal currentDueInitial = BigDecimal.ZERO;
+            BigDecimal currentDueWithTotalDue = currentDueInitial.add(due);
+            BigDecimal finalCurrentDue = currentDueWithTotalDue.subtract(amountPaid);
+
+            propertyWiseCollectionResponse.setConsumercode(
+                    payment.getPaymentDetails().get(0).getBill().getConsumerCode());
+            propertyWiseCollectionResponse.setDue(payment.getTotalDue().toString());
+            propertyWiseCollectionResponse
+                    .setAmountpaid(payment.getTotalAmountPaid().toString());
+            propertyWiseCollectionResponse.setCurrentdue(finalCurrentDue.toString());
+            propertyWiseCollectionResponse.setReceiptdate(
+                    payment.getPaymentDetails().get(0).getReceiptDate().toString());
+            propertyWiseCollectionResponse.setReceiptnumber(
+                    payment.getPaymentDetails().get(0).getReceiptNumber());
+            propertyWiseCollectionResponse.setPaymentMode(payment.getPaymentMode().name());
+        }
+        return propertyWiseCollectionResponse;
+    }
+
+    private void enrichPropertyDetail(Map<String, List<PropertyDetailsResponse>> propertyMap,
+            List<PropertyWiseCollectionResponse> tempCollectionResponses) {
+        tempCollectionResponses.parallelStream().forEach(response -> {
+//                            PropertyDetailsResponse propertyDetail = propertyMap.get(response.getConsumercode());
+            List<PropertyDetailsResponse> propertyDetail = propertyMap.get(response.getConsumercode());
+            if (propertyDetail != null) {
+                response.setOldpropertyid(propertyDetail.get(0).getOldPropertyId());
+                response.setWard(propertyDetail.get(0).getWardNumber());
+                List<String> uuids = propertyDetail.parallelStream()
+                        .map(propertyUser -> propertyUser.getUuid()).collect(Collectors.toList());
+                response.setUuid(uuids);// stream and set in list
+            }
+        });
+    }
+
+    private void enrichUserData(List<PropertyWiseCollectionResponse> tempCollectionResponses,
+            Map<String, org.egov.report.user.User> userMap) {
+        tempCollectionResponses.stream().forEach(collectionResponse -> {
+            if (collectionResponse != null) {
+                collectionResponse.getUuid().parallelStream().forEach(uuid -> {
+                    org.egov.report.user.User user = userMap.get(uuid);
+                    if (user != null) {
+                        if (StringUtils.hasText(collectionResponse.getMobilenumber())
+                                && StringUtils.hasText(user.getMobileNumber())) {
+                            collectionResponse.setMobilenumber(collectionResponse.getMobilenumber()
+                                    + " , " + user.getMobileNumber());
+                        } else {
+                            if (StringUtils.hasText(user.getMobileNumber())) {
+                                collectionResponse.setMobilenumber(user.getMobileNumber());
+                            }
+                        }
+
+                        if (StringUtils.hasText(collectionResponse.getName())
+                                && StringUtils.hasText(user.getName())) {
+                            collectionResponse
+                                    .setName(collectionResponse.getName() + " , " + user.getName());
+                        } else {
+                            if (StringUtils.hasText(user.getName())) {
+                                collectionResponse.setName(user.getName());
+                            }
+                        }
+                    }
+                });
+            }
+        });
     }
 
 }
