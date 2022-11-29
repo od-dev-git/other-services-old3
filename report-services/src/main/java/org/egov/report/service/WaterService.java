@@ -452,15 +452,17 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             BigDecimal penaltyAmt = responsePerConnection.getPenaltyAmt();
                             BigDecimal advanceAmt = responsePerConnection.getAdvanceAmt();
                             BigDecimal rebateAmt = responsePerConnection.getRebateAmt();
+                            BigDecimal sewageCurrentDemandAmount = responsePerConnection.getSewageCurrentDemandAmount();
+                            BigDecimal sewageCollectionAmount = responsePerConnection.getSewageCollectionAmount();
 
 
                             
                             responsePerConnection.setArrearAmt(totalArrearAmt);
-                            responsePerConnection.setPayableWithPenaltyAmt((wsReportUtils.CalculateAmtAfterDueDateModified(taxAmt, collectedAmt,
+                            responsePerConnection.setPayableWithPenaltyAmt((wsReportUtils.CalculateAmtAfterDueDateModified(taxAmt, collectedAmt,sewageCurrentDemandAmount,sewageCollectionAmount,
                                     penaltyAmt, advanceAmt, totalArrearAmt)));
-                            responsePerConnection.setPayableAfterRebateAmt(wsReportUtils.CalculateAmtBeforeDueDateModified(taxAmt, collectedAmt,
+                            responsePerConnection.setPayableAfterRebateAmt(wsReportUtils.CalculateAmtBeforeDueDateModified(taxAmt, collectedAmt,sewageCurrentDemandAmount,sewageCollectionAmount,
                                     penaltyAmt, advanceAmt, totalArrearAmt, rebateAmt));
-                            responsePerConnection.setTotalDueAmt(wsReportUtils.calculateTotalDueModified(taxAmt, collectedAmt, penaltyAmt,
+                            responsePerConnection.setTotalDueAmt(wsReportUtils.calculateTotalDueModified(taxAmt, collectedAmt,sewageCurrentDemandAmount,sewageCollectionAmount, penaltyAmt,
                                     advanceAmt, totalArrearAmt));
                             
                             
