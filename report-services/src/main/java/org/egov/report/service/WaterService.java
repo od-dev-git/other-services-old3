@@ -155,7 +155,7 @@ public class WaterService {
 		response.stream().forEach(item -> {
 		    org.egov.report.user.User user = userMap.get(Long.valueOf(item.getEmployeeId()));
 			if(user!=null) {
-				item.setEmployeeId(user.getId().toString());//changed
+				item.setEmployeeId(user.getUsername());
 				item.setEmployeeName(user.getName());
 			}
 		});
