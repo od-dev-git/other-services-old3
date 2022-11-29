@@ -108,16 +108,20 @@ public class WaterService {
 		
 		wsValidator.validateEmployeeDateWiseWSCollectionReport(searchCriteria);
 		
+		log.info("setting Payments Search Criteria");
 		PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
 				.businessServices(Stream.of("WS","WS.ONE_TIME_FEE").collect(Collectors.toSet()))
 				.tenantId(searchCriteria.getTenantId())
 				.fromDate(searchCriteria.getCollectionDate())
-				.toDate(searchCriteria.getCollectionDate()).build();
+				.toDate(searchCriteria.getCollectionDate())
+				.build();
+		log.info(" Payments Search Criteria : " + paymentSearchCriteria.toString());
 		
 		if(StringUtils.hasText(searchCriteria.getPaymentMode())) {
 			paymentSearchCriteria.setPaymentModes(Stream.of(searchCriteria.getPaymentMode().split(",")).collect(Collectors.toSet()));
 		}
 		
+		log.info("getting Payment Details");
 		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
 		if(payments.isEmpty()) {
 			return Collections.emptyList();
@@ -134,15 +138,24 @@ public class WaterService {
 						.head("Water")
 						.collectedAmount(payment.getTotalAmountPaid()).build())
 				.collect(Collectors.toList());
-		
+
+		log.info("setting UserIds");
 		List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct().collect(Collectors.toList());
-		List<OwnerInfo> usersInfo = userService.getUser(requestInfo, userIds);
-		Map<Long, OwnerInfo> userMap = usersInfo.stream().collect(Collectors.toMap(OwnerInfo::getId, Function.identity()));
-		
+		log.info("setting User Search Criteria");
+		org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
+              .builder()
+              .id(userIds)
+              .build();
+		log.info("getting User Details Here");
+		List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+              requestInfo);
+		 Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
+               .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
+		 log.info("setting User Details Here");
 		response.stream().forEach(item -> {
-			OwnerInfo user = userMap.get(Long.valueOf(item.getEmployeeId()));
+		    org.egov.report.user.User user = userMap.get(Long.valueOf(item.getEmployeeId()));
 			if(user!=null) {
-				item.setEmployeeId(user.getUserName());
+				item.setEmployeeId(user.getId().toString());//changed
 				item.setEmployeeName(user.getName());
 			}
 		});
