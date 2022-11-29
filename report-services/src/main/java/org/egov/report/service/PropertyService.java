@@ -486,21 +486,9 @@ public class PropertyService {
                         log.info("Fetching User Details ");
                         List<String> userIds = properties.stream().map(property -> property.getUuid()).distinct()
                                 .collect(Collectors.toList());
-                        org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
-                                .builder()
-                                .uuid(userIds)
-                                .active(true)
-                                .type(UserType.CITIZEN)
-                                .build();
-                        List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
-                                requestInfo);
-                        log.info("User Details Fetched ");
-                        Map<String, org.egov.report.user.User> userMap = usersInfo.stream()
-                                .collect(Collectors.toMap(org.egov.report.user.User::getUuid, Function.identity()));
-                        log.info("Setting User Details ");
-                        
-                        enrichUserData(tempCollectionResponses, userMap);
+                        enrichUserDetails(requestInfo, tempCollectionResponses, userIds);
 
+                        //setting Temporary Response to Final Response
                         propertyWiseCollectionResponses.addAll(tempCollectionResponses);
 
                     }
@@ -513,6 +501,51 @@ public class PropertyService {
         }
 
         return propertyWiseCollectionResponses;
+    }
+
+    private void enrichUserDetails(RequestInfo requestInfo,
+            List<PropertyWiseCollectionResponse> tempCollectionResponses, List<String> userIds) {
+        org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
+                .builder()
+                .uuid(userIds)
+                .active(true)
+                .type(UserType.CITIZEN)
+                .build();
+        List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+                requestInfo);
+        log.info("User Details Fetched ");
+        Map<String, org.egov.report.user.User> userMap = usersInfo.stream()
+                .collect(Collectors.toMap(org.egov.report.user.User::getUuid, Function.identity()));
+        log.info("Setting User Details ");
+        
+        tempCollectionResponses.stream().forEach(collectionResponse -> {
+            if (collectionResponse != null) {
+                collectionResponse.getUuid().parallelStream().forEach(uuid -> {
+                    org.egov.report.user.User user = userMap.get(uuid);
+                    if (user != null) {
+                        if (StringUtils.hasText(collectionResponse.getMobilenumber())
+                                && StringUtils.hasText(user.getMobileNumber())) {
+                            collectionResponse.setMobilenumber(collectionResponse.getMobilenumber()
+                                    + " , " + user.getMobileNumber());
+                        } else {
+                            if (StringUtils.hasText(user.getMobileNumber())) {
+                                collectionResponse.setMobilenumber(user.getMobileNumber());
+                            }
+                        }
+
+                        if (StringUtils.hasText(collectionResponse.getName())
+                                && StringUtils.hasText(user.getName())) {
+                            collectionResponse
+                                    .setName(collectionResponse.getName() + " , " + user.getName());
+                        } else {
+                            if (StringUtils.hasText(user.getName())) {
+                                collectionResponse.setName(user.getName());
+                            }
+                        }
+                    }
+                });
+            }
+        });
     }
 
     private PropertyWiseCollectionResponse enrichPayments(Payment payment) {
@@ -552,38 +585,6 @@ public class PropertyService {
                 List<String> uuids = propertyDetail.parallelStream()
                         .map(propertyUser -> propertyUser.getUuid()).collect(Collectors.toList());
                 response.setUuid(uuids);// stream and set in list
-            }
-        });
-    }
-
-    private void enrichUserData(List<PropertyWiseCollectionResponse> tempCollectionResponses,
-            Map<String, org.egov.report.user.User> userMap) {
-        tempCollectionResponses.stream().forEach(collectionResponse -> {
-            if (collectionResponse != null) {
-                collectionResponse.getUuid().parallelStream().forEach(uuid -> {
-                    org.egov.report.user.User user = userMap.get(uuid);
-                    if (user != null) {
-                        if (StringUtils.hasText(collectionResponse.getMobilenumber())
-                                && StringUtils.hasText(user.getMobileNumber())) {
-                            collectionResponse.setMobilenumber(collectionResponse.getMobilenumber()
-                                    + " , " + user.getMobileNumber());
-                        } else {
-                            if (StringUtils.hasText(user.getMobileNumber())) {
-                                collectionResponse.setMobilenumber(user.getMobileNumber());
-                            }
-                        }
-
-                        if (StringUtils.hasText(collectionResponse.getName())
-                                && StringUtils.hasText(user.getName())) {
-                            collectionResponse
-                                    .setName(collectionResponse.getName() + " , " + user.getName());
-                        } else {
-                            if (StringUtils.hasText(user.getName())) {
-                                collectionResponse.setName(user.getName());
-                            }
-                        }
-                    }
-                });
             }
         });
     }
