@@ -60,11 +60,7 @@ public class PropertyDetailsReportRepository {
 	public List<PropertyDetailsResponse> getPropertiesDetail(PropertyDetailsSearchCriteria searchCriteria) {
 
 		List<Object> preparedPropStmtList = new ArrayList<>();
-
-//		searchCriteria.setLimit(Limit);
-//		searchCriteria.setOffset(Offset);
 		String query = queryBuilder.getPropertiesDetail(searchCriteria, preparedPropStmtList);
-
 		return jdbcTemplate.query(query,preparedPropStmtList.toArray(), new PropertyDetailsRowMapper());
 	}
 
