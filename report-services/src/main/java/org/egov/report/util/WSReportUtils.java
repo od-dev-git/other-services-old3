@@ -93,10 +93,11 @@ public class WSReportUtils {
 			return BigDecimal.ZERO;
 	}
 
-    public BigDecimal CalculateAmtAfterDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,
+    public BigDecimal CalculateAmtAfterDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt,
             BigDecimal penaltyAmt, BigDecimal advanceAmt, BigDecimal totalArrearAmt) {
         BigDecimal multiplyingFactor = new BigDecimal(1.05);
-        BigDecimal amtAfterDueDate = ((taxAmt.subtract(collectedAmt)).multiply(multiplyingFactor)).add(advanceAmt)
+        BigDecimal amtAfterDueDate = (((sewageTaxAmt.subtract(sewageCollectedAmt)).add(taxAmt.subtract(collectedAmt)))
+                .multiply(multiplyingFactor)).add(advanceAmt)
                 .add(penaltyAmt).add(totalArrearAmt);
 
         if (amtAfterDueDate.compareTo(BigDecimal.ZERO) == 1)
@@ -105,10 +106,11 @@ public class WSReportUtils {
             return BigDecimal.ZERO;
     }
 
-    public BigDecimal CalculateAmtBeforeDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,
+    public BigDecimal CalculateAmtBeforeDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt,
             BigDecimal penaltyAmt, BigDecimal advanceAmt, BigDecimal totalArrearAmt, BigDecimal rebateAmt) {
         BigDecimal multiplyingFactor = new BigDecimal(0.98);
-        BigDecimal amtBeforeDueDate = ((taxAmt.subtract(collectedAmt)).multiply(multiplyingFactor)).add(advanceAmt)
+        BigDecimal amtBeforeDueDate = (((sewageTaxAmt.subtract(sewageCollectedAmt)).add(taxAmt.subtract(collectedAmt)))
+                .multiply(multiplyingFactor)).add(advanceAmt)
                 .add(rebateAmt).add(totalArrearAmt);
 
         if (amtBeforeDueDate.compareTo(BigDecimal.ZERO) == 1)
@@ -117,9 +119,9 @@ public class WSReportUtils {
             return BigDecimal.ZERO;
     }
 
-    public BigDecimal calculateTotalDueModified(BigDecimal taxAmt, BigDecimal collectedAmt, BigDecimal penaltyAmt,
+    public BigDecimal calculateTotalDueModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt, BigDecimal penaltyAmt,
             BigDecimal advanceAmt, BigDecimal totalArrearAmt) {
-        BigDecimal totalDue = taxAmt.add(penaltyAmt).add(advanceAmt).add(totalArrearAmt).subtract(collectedAmt);
+        BigDecimal totalDue = taxAmt.add(sewageTaxAmt).add(penaltyAmt).add(advanceAmt).add(totalArrearAmt).subtract(collectedAmt).subtract(sewageCollectedAmt);
 
         if (totalDue.compareTo(BigDecimal.ZERO) == 1)
             return totalDue.setScale(2, BigDecimal.ROUND_CEILING);
