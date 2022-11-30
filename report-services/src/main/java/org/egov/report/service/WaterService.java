@@ -455,9 +455,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             BigDecimal advanceAmt = responsePerConnection.getAdvanceAmt();
                             BigDecimal rebateAmt = responsePerConnection.getRebateAmt();
                             BigDecimal sewageCurrentDemandAmount = responsePerConnection.getSewageCurrentDemandAmount();
-                            log.info(" Sewage Current Demand Amount :  " + sewageCurrentDemandAmount.toString());
                             BigDecimal sewageCollectionAmount = responsePerConnection.getSewageCollectionAmount();
-                            log.info(" Sewage Collection Amount :  " + sewageCollectionAmount.toString());
                             BigDecimal specialRebateAmt = responsePerConnection.getSpecialRebateAmt();
 
 
