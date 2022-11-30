@@ -402,9 +402,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                 if (!CollectionUtils.isEmpty(demandsGroupedByConnectionNo)) {//use Collect To List
                     List<WaterMonthlyDemandResponse> tempResponse = demandsGroupedByConnectionNo.entrySet().parallelStream().map(connection ->{
                         
-
                         WaterMonthlyDemandResponse responsePerConnection = new WaterMonthlyDemandResponse();
                         String connectionNo = String.valueOf(connection.getKey());
+                        log.info(" Connection No :  " + connectionNo.toString());
                         List<Demand> connectionDemands = connection.getValue();
 
                         if(connectionDemands != null) {
@@ -425,6 +425,8 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                                         responsePerConnection.setSewageCurrentDemandAmount(responsePerConnection.getSewageCurrentDemandAmount().add(demandDetail.getTaxAmount()));
                                         responsePerConnection.setSewageCollectionAmount(responsePerConnection.getSewageCollectionAmount().add(demandDetail.getCollectionAmount()));
                                     }
+                                    if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_SPECIAL_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("SW_SPECIAL_REBATE"))
+                                        responsePerConnection.setSpecialRebateAmt((responsePerConnection.getRebateAmt().add(demandDetail.getTaxAmount())).subtract(demandDetail.getCollectionAmount()));
                                     if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_TIME_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_ANNUAL_PAYMENT_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_SPECIAL_REBATE") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("SW_SPECIAL_REBATE"))
                                         responsePerConnection.setRebateAmt((responsePerConnection.getRebateAmt().add(demandDetail.getTaxAmount())).subtract(demandDetail.getCollectionAmount()));
                                     if (demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("WS_ADVANCE_CARRYFORWARD") || demandDetail.getTaxHeadMasterCode().equalsIgnoreCase("SW_ADVANCE_CARRYFORWARD"))
@@ -454,6 +456,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             BigDecimal rebateAmt = responsePerConnection.getRebateAmt();
                             BigDecimal sewageCurrentDemandAmount = responsePerConnection.getSewageCurrentDemandAmount();
                             BigDecimal sewageCollectionAmount = responsePerConnection.getSewageCollectionAmount();
+                            BigDecimal specialRebateAmt = responsePerConnection.getSpecialRebateAmt();
 
 
                             
@@ -462,7 +465,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                                     penaltyAmt, advanceAmt, totalArrearAmt)));
                             responsePerConnection.setPayableAfterRebateAmt(wsReportUtils.CalculateAmtBeforeDueDateModified(taxAmt, collectedAmt,sewageCurrentDemandAmount,sewageCollectionAmount,
                                     penaltyAmt, advanceAmt, totalArrearAmt, rebateAmt));
-                            responsePerConnection.setTotalDueAmt(wsReportUtils.calculateTotalDueModified(taxAmt, collectedAmt,sewageCurrentDemandAmount,sewageCollectionAmount, penaltyAmt,
+                            responsePerConnection.setTotalDueAmt(wsReportUtils.calculateTotalDueModified(taxAmt, collectedAmt,sewageCurrentDemandAmount,sewageCollectionAmount, specialRebateAmt,
                                     advanceAmt, totalArrearAmt));
                             
                             
