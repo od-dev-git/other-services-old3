@@ -11,6 +11,8 @@ import java.util.TimeZone;
 import org.egov.report.service.WaterService;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.BeanProperty.Bogus;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -100,12 +102,23 @@ public class WSReportUtils {
     public BigDecimal CalculateAmtAfterDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt,
             BigDecimal penaltyAmt, BigDecimal advanceAmt, BigDecimal totalArrearAmt) {
         BigDecimal multiplyingFactor = new BigDecimal(1.05);
-        log.info(" Sewage Current Demand Amount during Calculation :  " + sewageTaxAmt.toString());
-        log.info(" Sewage Collection Amount during Calculation :  " + sewageCollectedAmt.toString());
-        BigDecimal amtAfterDueDate = (((sewageTaxAmt.subtract(sewageCollectedAmt)).add(taxAmt.subtract(collectedAmt)))
-                .multiply(multiplyingFactor)).add(advanceAmt)
-                .add(penaltyAmt).add(totalArrearAmt);
-        log.info(" Amount After Due Date during calculation:  " + amtAfterDueDate.toString());
+        BigDecimal amtAfterDueDate = BigDecimal.ZERO;
+        if (penaltyAmt.compareTo(BigDecimal.ZERO) == 0) {
+            amtAfterDueDate =((sewageTaxAmt.add(taxAmt))
+                    .multiply(multiplyingFactor))
+                    .add(advanceAmt)
+                    .add(totalArrearAmt)
+                    .subtract(sewageCollectedAmt)
+                    .subtract(collectedAmt);    
+        }else {
+            amtAfterDueDate =(sewageTaxAmt.add(taxAmt))
+                    .add(advanceAmt)
+                    .add(penaltyAmt)
+                    .add(totalArrearAmt)
+                    .subtract(sewageCollectedAmt)
+                    .subtract(collectedAmt);
+        }
+        
         if (amtAfterDueDate.compareTo(BigDecimal.ZERO) == 1)
             return amtAfterDueDate.setScale(0, RoundingMode.HALF_UP);
         else
@@ -115,25 +128,38 @@ public class WSReportUtils {
     public BigDecimal CalculateAmtBeforeDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt,
             BigDecimal penaltyAmt, BigDecimal advanceAmt, BigDecimal totalArrearAmt, BigDecimal rebateAmt) {
         BigDecimal multiplyingFactor = new BigDecimal(0.98);
-        log.info(" Sewage Current Demand Amount during Calculation :  " + sewageTaxAmt.toString());
-        log.info(" Sewage Collection Amount during Calculation :  " + sewageCollectedAmt.toString());
-        BigDecimal amtBeforeDueDate = (((sewageTaxAmt.subtract(sewageCollectedAmt)).add(taxAmt.subtract(collectedAmt)))
-                .multiply(multiplyingFactor)).add(advanceAmt)
-                .add(rebateAmt).add(totalArrearAmt);
-        log.info(" Amount Before Due Date during calculation:  " + amtBeforeDueDate.toString());
+        BigDecimal amtBeforeDueDate = BigDecimal.ZERO;
+        
+        if (rebateAmt.compareTo(BigDecimal.ZERO) == 0) {
+            amtBeforeDueDate =((sewageTaxAmt.add(taxAmt))
+                    .multiply(multiplyingFactor))
+                    .add(advanceAmt)
+                    .add(totalArrearAmt)
+                    .subtract(sewageCollectedAmt)
+                    .subtract(collectedAmt);    
+        }else {
+            amtBeforeDueDate =(sewageTaxAmt.add(taxAmt))
+                    .add(advanceAmt)
+                    .add(rebateAmt)
+                    .add(totalArrearAmt)
+                    .subtract(sewageCollectedAmt)
+                    .subtract(collectedAmt); 
+        }
+        
         if (amtBeforeDueDate.compareTo(BigDecimal.ZERO) == 1)
             return amtBeforeDueDate.setScale(0, RoundingMode.HALF_UP);
         else
             return BigDecimal.ZERO;
     }
 
-    public BigDecimal calculateTotalDueModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt, BigDecimal penaltyAmt,
-            BigDecimal advanceAmt, BigDecimal totalArrearAmt) {
-        log.info(" Sewage Current Demand Amount during Calculation :  " + sewageTaxAmt.toString());
-        log.info(" Sewage Collection Amount during Calculation :  " + sewageCollectedAmt.toString());
-        BigDecimal totalDue = taxAmt.add(sewageTaxAmt).add(penaltyAmt).add(advanceAmt).add(totalArrearAmt).subtract(collectedAmt).subtract(sewageCollectedAmt);
-        log.info(" Total Due Amount during calculation:  " + totalDue.toString());
-        log.info(" Total Due Amount returned :  " + totalDue.setScale(2, BigDecimal.ROUND_CEILING).toString());
+    public BigDecimal calculateTotalDueModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt, BigDecimal specialRebateAmt,
+            BigDecimal advanceAmt, BigDecimal totalArrearAmt) {//add special rebate  remove penalty
+        BigDecimal totalDue = taxAmt.add(sewageTaxAmt)
+                .add(specialRebateAmt)
+                .add(advanceAmt)
+                .add(totalArrearAmt)
+                .subtract(collectedAmt)
+                .subtract(sewageCollectedAmt);
         if (totalDue.compareTo(BigDecimal.ZERO) == 1)
             return totalDue.setScale(2, BigDecimal.ROUND_CEILING);
         else

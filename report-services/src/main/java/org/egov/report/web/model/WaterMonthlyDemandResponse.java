@@ -70,6 +70,10 @@ public class WaterMonthlyDemandResponse {
 	@Default
 	private BigDecimal rebateAmt = BigDecimal.ZERO;
 	
+	@JsonProperty("specialRebateAmount")
+    @Default
+    private BigDecimal specialRebateAmt = BigDecimal.ZERO;
+	
 	@JsonProperty("penaltyAmount")
 	@Default
 	private BigDecimal penaltyAmt = BigDecimal.ZERO;
