@@ -402,9 +402,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                 if (!CollectionUtils.isEmpty(demandsGroupedByConnectionNo)) {//use Collect To List
                     List<WaterMonthlyDemandResponse> tempResponse = demandsGroupedByConnectionNo.entrySet().parallelStream().map(connection ->{
                         
-
                         WaterMonthlyDemandResponse responsePerConnection = new WaterMonthlyDemandResponse();
                         String connectionNo = String.valueOf(connection.getKey());
+                        log.info(" Connection No :  " + connectionNo.toString());
                         List<Demand> connectionDemands = connection.getValue();
 
                         if(connectionDemands != null) {
@@ -453,7 +453,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             BigDecimal advanceAmt = responsePerConnection.getAdvanceAmt();
                             BigDecimal rebateAmt = responsePerConnection.getRebateAmt();
                             BigDecimal sewageCurrentDemandAmount = responsePerConnection.getSewageCurrentDemandAmount();
+                            log.info(" Sewage Current Demand Amount :  " + sewageCurrentDemandAmount.toString());
                             BigDecimal sewageCollectionAmount = responsePerConnection.getSewageCollectionAmount();
+                            log.info(" Sewage Collection Amount :  " + sewageCollectionAmount.toString());
 
 
                             
@@ -464,6 +466,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                                     penaltyAmt, advanceAmt, totalArrearAmt, rebateAmt));
                             responsePerConnection.setTotalDueAmt(wsReportUtils.calculateTotalDueModified(taxAmt, collectedAmt,sewageCurrentDemandAmount,sewageCollectionAmount, penaltyAmt,
                                     advanceAmt, totalArrearAmt));
+                            log.info(" Total Due Amount :  " + responsePerConnection.getTotalDueAmt().toString());
                             
                             
                             // set Water Connection details here

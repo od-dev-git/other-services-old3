@@ -8,9 +8,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import org.egov.report.service.WaterService;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class WSReportUtils {
 	
 	public Long addOneMonth(Long time) {
@@ -96,10 +100,12 @@ public class WSReportUtils {
     public BigDecimal CalculateAmtAfterDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt,
             BigDecimal penaltyAmt, BigDecimal advanceAmt, BigDecimal totalArrearAmt) {
         BigDecimal multiplyingFactor = new BigDecimal(1.05);
+        log.info(" Sewage Current Demand Amount during Calculation :  " + sewageTaxAmt.toString());
+        log.info(" Sewage Collection Amount during Calculation :  " + sewageCollectedAmt.toString());
         BigDecimal amtAfterDueDate = (((sewageTaxAmt.subtract(sewageCollectedAmt)).add(taxAmt.subtract(collectedAmt)))
                 .multiply(multiplyingFactor)).add(advanceAmt)
                 .add(penaltyAmt).add(totalArrearAmt);
-
+        log.info(" Amount After Due Date during calculation:  " + amtAfterDueDate.toString());
         if (amtAfterDueDate.compareTo(BigDecimal.ZERO) == 1)
             return amtAfterDueDate.setScale(0, RoundingMode.HALF_UP);
         else
@@ -109,10 +115,12 @@ public class WSReportUtils {
     public BigDecimal CalculateAmtBeforeDueDateModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt,
             BigDecimal penaltyAmt, BigDecimal advanceAmt, BigDecimal totalArrearAmt, BigDecimal rebateAmt) {
         BigDecimal multiplyingFactor = new BigDecimal(0.98);
+        log.info(" Sewage Current Demand Amount during Calculation :  " + sewageTaxAmt.toString());
+        log.info(" Sewage Collection Amount during Calculation :  " + sewageCollectedAmt.toString());
         BigDecimal amtBeforeDueDate = (((sewageTaxAmt.subtract(sewageCollectedAmt)).add(taxAmt.subtract(collectedAmt)))
                 .multiply(multiplyingFactor)).add(advanceAmt)
                 .add(rebateAmt).add(totalArrearAmt);
-
+        log.info(" Amount Before Due Date during calculation:  " + amtBeforeDueDate.toString());
         if (amtBeforeDueDate.compareTo(BigDecimal.ZERO) == 1)
             return amtBeforeDueDate.setScale(0, RoundingMode.HALF_UP);
         else
@@ -121,8 +129,11 @@ public class WSReportUtils {
 
     public BigDecimal calculateTotalDueModified(BigDecimal taxAmt, BigDecimal collectedAmt,BigDecimal sewageTaxAmt, BigDecimal sewageCollectedAmt, BigDecimal penaltyAmt,
             BigDecimal advanceAmt, BigDecimal totalArrearAmt) {
+        log.info(" Sewage Current Demand Amount during Calculation :  " + sewageTaxAmt.toString());
+        log.info(" Sewage Collection Amount during Calculation :  " + sewageCollectedAmt.toString());
         BigDecimal totalDue = taxAmt.add(sewageTaxAmt).add(penaltyAmt).add(advanceAmt).add(totalArrearAmt).subtract(collectedAmt).subtract(sewageCollectedAmt);
-
+        log.info(" Total Due Amount during calculation:  " + totalDue.toString());
+        log.info(" Total Due Amount returned :  " + totalDue.setScale(2, BigDecimal.ROUND_CEILING).toString());
         if (totalDue.compareTo(BigDecimal.ZERO) == 1)
             return totalDue.setScale(2, BigDecimal.ROUND_CEILING);
         else
