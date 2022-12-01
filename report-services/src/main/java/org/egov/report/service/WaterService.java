@@ -201,17 +201,14 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
         Long count = reportRepository.getConsumerMasterReportCount(criteria);
         Integer limit = configuration.getReportLimit();
-
         Integer offset = 0;
+        
         List<ConsumerMasterWSReportResponse> consumerMasterResponse = new ArrayList();
-        List<ConsumerMasterWSReportResponse> response = new ArrayList();
         if (count > 0) {
             while (count > 0) {
                 criteria.setLimit(limit);
                 criteria.setOffset(offset);
-                response = reportRepository.getComsumerMasterWSReport(requestInfo, criteria);
-                count = count - limit;
-                offset += limit;
+                List<ConsumerMasterWSReportResponse>  response = reportRepository.getComsumerMasterWSReport(requestInfo, criteria);
 
                 // Extracting user info
 				if (!CollectionUtils.isEmpty(response)) {
@@ -236,6 +233,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 					});
 				}
 				consumerMasterResponse.addAll(response);
+				
+				count = count - limit;
+                offset += limit;
 			}  
         }
         return consumerMasterResponse;
@@ -347,6 +347,7 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 	public List<ConsumerBillHistoryResponse> consumerBillHistoryReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
 		
 		wsValidator.validateConsumerBillHistoryReport(criteria);
+		log.info(" Search Criteria : " + criteria.toString());
 		
 		return reportRepository.getConsumerBillHistoryReport(criteria);
 		
@@ -624,11 +625,12 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 			WSReportSearchCriteria searchCriteria) {
 
 		wsValidator.validateWSConnectionElegibleForDemand(searchCriteria);
-
+		
+		log.info(" Search Criteria : " + searchCriteria.toString());
 		List<ULBWiseWaterConnectionDetails> response = reportRepository.getNoOfWSDemandConnections(requestInfo,searchCriteria);
+        log.info(" Response Size : " + response.size());
 
-
-		return response;
+        return response;
 	}
 
 
@@ -689,7 +691,7 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 	
 	public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedDemands(RequestInfo requestInfo,
 			WSReportSearchCriteria searchCriteria) {
-		log.info("inside water service");
+		log.info("Inside water service");
 		log.info("searchCriteria: "+searchCriteria.toString());
 		log.info("validating");
 		wsValidator.validateSchedulerDemandGeneration(searchCriteria);
@@ -697,9 +699,10 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 		log.info("entering into query");
 		Long count = reportRepository.getSchedulerBasedWSDemandCount(requestInfo, searchCriteria);
 		Integer limit = configuration.getReportLimit();
-
 		Integer offset =  0;
+		
 		List<WsSchedulerBasedDemandsGenerationReponse> response = new ArrayList();
+		
 		if(count > 0) {
 			while(count > 0) {	
 			    searchCriteria.setLimit(limit);
@@ -709,7 +712,6 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 				offset += limit;
 			}
 		}
-		log.info("back from query");
 		log.info("response: "+response);
 		
 		return response;

@@ -65,6 +65,10 @@ public class WSReportRepository {
 			List<Object> preparedStatement = new ArrayList<>();
 		
 			String query = queryBuilder.getQueryForConsumerMasterWSReport(preparedStatement,criteria); 
+			
+			log.info(" Query " + query);
+			log.info(" Prepared Statement : " + preparedStatement.toString());
+			log.info(" Search Criteria : " + criteria.toString());
 		
 			return jdbcTemplate.query(query, preparedStatement.toArray(), new ConsumerMasterRowMapper());
 		
@@ -94,6 +98,9 @@ public class WSReportRepository {
 			List<Object> preparedStmtList = new ArrayList<>();
 			
 			String query = queryBuilder.getConsumerBillHistoryQuery(criteria, preparedStmtList);
+			
+			log.info(" Query " + query);
+			log.info(" Prepared Statement : " + preparedStmtList.toString());
 
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new ConsumerBillHistoryRowMapper());
 		}
@@ -134,9 +141,7 @@ public class WSReportRepository {
 				WSReportSearchCriteria searchCriteria) {
 
 			List<Object> preparedStmtList = new ArrayList<>();
-
 			String query = queryBuilder.getElegibleWSConnectionsQuery(searchCriteria, preparedStmtList);
-
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WSConnectionsElegibleForDemandRowMapper());
 		}
 		
@@ -159,6 +164,7 @@ public class WSReportRepository {
 			log.info("going in query builder");
 			String query = queryBuilder.getSchedulerGeneratedDemandQuery(searchCriteria, preparedStmtList);
 			
+			log.info(" Prepared Statement : " + preparedStmtList.toString());
 			log.info("query: "+query);
 			log.info("returned from query builder");
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new SchedulerGeneratedDemandsRowMapper());
@@ -191,7 +197,8 @@ public class WSReportRepository {
 			List<Object> preparedStatement = new ArrayList<>();
 			
 			String query = queryBuilder.getSchedulerBasedWSDemandCount(preparedStatement,searchCriteria); 
-		
+			log.info(" Prepared Statement : " + preparedStatement.toString());
+			
 			return jdbcTemplate.queryForObject(query, preparedStatement.toArray(), Long.class);
 		}
 		
