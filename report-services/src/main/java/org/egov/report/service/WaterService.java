@@ -690,7 +690,7 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 	
 	public List<WsSchedulerBasedDemandsGenerationReponse> getSchedulerBasedDemands(RequestInfo requestInfo,
 			WSReportSearchCriteria searchCriteria) {
-		log.info("inside water service");
+		log.info("Inside water service");
 		log.info("searchCriteria: "+searchCriteria.toString());
 		log.info("validating");
 		wsValidator.validateSchedulerDemandGeneration(searchCriteria);
@@ -698,9 +698,10 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 		log.info("entering into query");
 		Long count = reportRepository.getSchedulerBasedWSDemandCount(requestInfo, searchCriteria);
 		Integer limit = configuration.getReportLimit();
-
 		Integer offset =  0;
+		
 		List<WsSchedulerBasedDemandsGenerationReponse> response = new ArrayList();
+		
 		if(count > 0) {
 			while(count > 0) {	
 			    searchCriteria.setLimit(limit);
@@ -710,7 +711,6 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 				offset += limit;
 			}
 		}
-		log.info("back from query");
 		log.info("response: "+response);
 		
 		return response;

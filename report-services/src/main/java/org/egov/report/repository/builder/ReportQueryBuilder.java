@@ -651,11 +651,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			preparedStmtList.add(searchCriteria.getWard());
 		}
 		
-//		query.append(" limit ? ");
-//		preparedStmtList.add(limit);
-//		
-//		query.append(" offset ? ");
-//		preparedStmtList.add(offset);
 		addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedStmtList);
 		
 		log.info(query.toString());

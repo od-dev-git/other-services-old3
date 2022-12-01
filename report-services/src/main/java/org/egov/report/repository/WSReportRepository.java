@@ -157,6 +157,7 @@ public class WSReportRepository {
 			log.info("going in query builder");
 			String query = queryBuilder.getSchedulerGeneratedDemandQuery(searchCriteria, preparedStmtList);
 			
+			log.info(" Prepared Statement : " + preparedStmtList.toString());
 			log.info("query: "+query);
 			log.info("returned from query builder");
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new SchedulerGeneratedDemandsRowMapper());
@@ -189,7 +190,8 @@ public class WSReportRepository {
 			List<Object> preparedStatement = new ArrayList<>();
 			
 			String query = queryBuilder.getSchedulerBasedWSDemandCount(preparedStatement,searchCriteria); 
-		
+			log.info(" Prepared Statement : " + preparedStatement.toString());
+			
 			return jdbcTemplate.queryForObject(query, preparedStatement.toArray(), Long.class);
 		}
 		

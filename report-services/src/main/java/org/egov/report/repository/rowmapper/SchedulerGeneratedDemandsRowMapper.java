@@ -10,37 +10,38 @@ import org.egov.report.web.model.WsSchedulerBasedDemandsGenerationReponse;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-public class SchedulerGeneratedDemandsRowMapper implements ResultSetExtractor<List<WsSchedulerBasedDemandsGenerationReponse>>{
+public class SchedulerGeneratedDemandsRowMapper
+        implements ResultSetExtractor<List<WsSchedulerBasedDemandsGenerationReponse>> {
 
-List<WsSchedulerBasedDemandsGenerationReponse> schedulerDemandResponse = new ArrayList<>();
+    List<WsSchedulerBasedDemandsGenerationReponse> schedulerDemandResponse = new ArrayList<>();
 
-	@Override
-	public List<WsSchedulerBasedDemandsGenerationReponse> extractData(ResultSet rs) throws SQLException, DataAccessException {
+    @Override
+    public List<WsSchedulerBasedDemandsGenerationReponse> extractData(ResultSet rs)
+            throws SQLException, DataAccessException {
 
-		while(rs.next()) {
+        while (rs.next()) {
 
-			WsSchedulerBasedDemandsGenerationReponse schedulerDemands = new WsSchedulerBasedDemandsGenerationReponse();
+            String ulb = (rs.getString("tenantid")).replace("od.", "");
+            ulb = ulb.substring(0, 1).toUpperCase() + ulb.substring(1).toLowerCase();
 
-			String ulb = (rs.getString("tenantid")).replace("od.", "");
-			ulb = ulb.substring(0,1).toUpperCase() + ulb.substring(1).toLowerCase();
-			schedulerDemands.setUlb(ulb);
+            WsSchedulerBasedDemandsGenerationReponse schedulerDemands = WsSchedulerBasedDemandsGenerationReponse
+                    .builder()
+                    .ulb(ulb)
+                    .ward(rs.getString("ward"))
+                    .consumerCode(rs.getString("consumercode"))
+                    .oldConnectionNo(rs.getString("oldconnectionno"))
+                    .connectionType(rs.getString("connectiontype"))
+                    .demandGenerationDate(rs.getString("createdtime"))
+                    .taxPeriodFrom(rs.getString("taxperiodfrom"))
+                    .taxPeriodto(rs.getString("taxperiodto"))
+                    .build();
 
-			schedulerDemands.setWard(rs.getString("ward"));
-			schedulerDemands.setConsumerCode(rs.getString("consumercode"));
-			schedulerDemands.setOldConnectionNo(rs.getString("oldconnectionno"));
-			schedulerDemands.setConnectionType(rs.getString("connectiontype"));
-			schedulerDemands.setDemandGenerationDate(rs.getString("createdtime"));
-			schedulerDemands.setTaxPeriodFrom(rs.getString("taxperiodfrom"));
-			schedulerDemands.setTaxPeriodto(rs.getString("taxperiodto"));
+            schedulerDemandResponse.add(schedulerDemands);
 
+        }
 
-		    schedulerDemandResponse.add(schedulerDemands);
+        return schedulerDemandResponse;
 
-		}
-
-		return schedulerDemandResponse;
-
-}
-
+    }
 
 }
