@@ -358,11 +358,6 @@ public class ReportQueryBuilder {
 			preparedStatement.add(criteria.getConnectionType());
 		}
 		
-//		query.append(" limit ? ");
-//		preparedStatement.add(limit);
-//		
-//		query.append(" offset ? ");
-//		preparedStatement.add(offset);
 		addPaginationIfRequired(query,criteria.getLimit(),criteria.getOffset(),preparedStatement);
 		
 		return query.toString();

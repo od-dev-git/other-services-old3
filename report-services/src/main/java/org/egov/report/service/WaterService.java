@@ -201,17 +201,14 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
         Long count = reportRepository.getConsumerMasterReportCount(criteria);
         Integer limit = configuration.getReportLimit();
-
         Integer offset = 0;
+        
         List<ConsumerMasterWSReportResponse> consumerMasterResponse = new ArrayList();
-        List<ConsumerMasterWSReportResponse> response = new ArrayList();
         if (count > 0) {
             while (count > 0) {
                 criteria.setLimit(limit);
                 criteria.setOffset(offset);
-                response = reportRepository.getComsumerMasterWSReport(requestInfo, criteria);
-                count = count - limit;
-                offset += limit;
+                List<ConsumerMasterWSReportResponse>  response = reportRepository.getComsumerMasterWSReport(requestInfo, criteria);
 
                 // Extracting user info
 				if (!CollectionUtils.isEmpty(response)) {
@@ -236,6 +233,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 					});
 				}
 				consumerMasterResponse.addAll(response);
+				
+				count = count - limit;
+                offset += limit;
 			}  
         }
         return consumerMasterResponse;

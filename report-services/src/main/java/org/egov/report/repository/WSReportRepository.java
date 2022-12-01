@@ -65,6 +65,10 @@ public class WSReportRepository {
 			List<Object> preparedStatement = new ArrayList<>();
 		
 			String query = queryBuilder.getQueryForConsumerMasterWSReport(preparedStatement,criteria); 
+			
+			log.info(" Query " + query);
+			log.info(" Prepared Statement : " + preparedStatement.toString());
+			log.info(" Search Criteria : " + criteria.toString());
 		
 			return jdbcTemplate.query(query, preparedStatement.toArray(), new ConsumerMasterRowMapper());
 		
