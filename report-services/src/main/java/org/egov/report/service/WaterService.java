@@ -347,6 +347,7 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 	public List<ConsumerBillHistoryResponse> consumerBillHistoryReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
 		
 		wsValidator.validateConsumerBillHistoryReport(criteria);
+		log.info(" Search Criteria : " + criteria.toString());
 		
 		return reportRepository.getConsumerBillHistoryReport(criteria);
 		

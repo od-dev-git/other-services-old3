@@ -94,6 +94,9 @@ public class WSReportRepository {
 			List<Object> preparedStmtList = new ArrayList<>();
 			
 			String query = queryBuilder.getConsumerBillHistoryQuery(criteria, preparedStmtList);
+			
+			log.info(" Query " + query);
+			log.info(" Prepared Statement : " + preparedStmtList.toString());
 
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new ConsumerBillHistoryRowMapper());
 		}
