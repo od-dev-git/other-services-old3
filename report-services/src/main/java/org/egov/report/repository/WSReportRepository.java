@@ -74,9 +74,8 @@ public class WSReportRepository {
 	public List<BillSummaryResponses> getBillSummaryDetails(WSReportSearchCriteria criteria)
 	{
 		List<Object> preparedStmtList = new ArrayList<>();
-		
 		String query = queryBuilder.getBillSummaryDetailsQuery(criteria, preparedStmtList);
-
+		log.info(" Prepared Statement " + preparedStmtList.toString());
 		return jdbcTemplate.query(query,preparedStmtList.toArray(), new BillSummaryRowMapper());
 		
 	}
