@@ -134,9 +134,7 @@ public class WSReportRepository {
 				WSReportSearchCriteria searchCriteria) {
 
 			List<Object> preparedStmtList = new ArrayList<>();
-
 			String query = queryBuilder.getElegibleWSConnectionsQuery(searchCriteria, preparedStmtList);
-
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WSConnectionsElegibleForDemandRowMapper());
 		}
 		

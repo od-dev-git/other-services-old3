@@ -188,7 +188,7 @@ public class ReportQueryBuilder {
 			+ AND + " ewc.applicationstatus ='CONNECTION_ACTIVATED' ";
 	
 	private static final String WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY = SELECT
-			+ "EWC.TENANTID ,EWC.ADDITIONALDETAILS->>'ward' as ward,count(distinct ewc.connectionno) as connectionscount "
+			+ "EWC.TENANTID ,EWC.ADDITIONALDETAILS->>'ward' as ward,count(ewc.connectionno) as connectionscount "
 			+ FROM + " eg_ws_connection ewc "
 			+ INNER_JOIN + " eg_ws_service ews  on ewc.id = ews.connection_id "
 			+ WHERE + " ews.connectiontype ='Non Metered' "
@@ -573,10 +573,11 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 	
 	public String getElegibleWSConnectionsQuery(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList) {
 
-		StringBuilder query = new StringBuilder(WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY);
-
+		StringBuilder query = new StringBuilder(WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY);//change itt
 		preparedStmtList.add(searchCriteria.getTenantId());
-
+		
+		log.info(" Prepared Statement : " + preparedStmtList.toString());
+		
 		return query.toString();
 	}
 	

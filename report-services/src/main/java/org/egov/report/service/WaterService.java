@@ -624,11 +624,12 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 			WSReportSearchCriteria searchCriteria) {
 
 		wsValidator.validateWSConnectionElegibleForDemand(searchCriteria);
-
+		
+		log.info(" Search Criteria : " + searchCriteria.toString());
 		List<ULBWiseWaterConnectionDetails> response = reportRepository.getNoOfWSDemandConnections(requestInfo,searchCriteria);
+        log.info(" Response Size : " + response.size());
 
-
-		return response;
+        return response;
 	}
 
 
