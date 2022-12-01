@@ -369,27 +369,26 @@ public class ReportQueryBuilder {
 	}
 	
 	public String getBillSummaryDetailsQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
-		
-       StringBuilder query = new StringBuilder(BILL_SUMMARY_QUERY2);
-       
-       Calendar c = Calendar.getInstance(); 
-     c.setTimeInMillis(criteria.getMonthYear());
-     
-     String mMonth = Integer.toString(c.get(Calendar.MONTH)+1);
-     if(mMonth.length()==1)
-    	 mMonth="0"+mMonth;
-     String mYear =   Integer.toString(c.get(Calendar.YEAR));
-      
 
-     preparedStmtList.add(mMonth);
-     preparedStmtList.add(mYear);
-     
-     if(StringUtils.hasText(criteria.getTenantId())) {
-			query.append(WHERE);
-			query.append(" demand.tenantid = '").append(criteria.getTenantId()).append("'");
-     }
-     
-     return query.toString();
+        StringBuilder query = new StringBuilder(BILL_SUMMARY_QUERY2);
+
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(criteria.getMonthYear());
+
+        String month = Integer.toString(c.get(Calendar.MONTH) + 1);
+        if (month.length() == 1)
+            month = "0" + month;
+        String year = Integer.toString(c.get(Calendar.YEAR));
+
+        preparedStmtList.add(month);
+        preparedStmtList.add(year);
+
+        if (StringUtils.hasText(criteria.getTenantId())) {
+            query.append(WHERE);
+            query.append(" demand.tenantid = '").append(criteria.getTenantId()).append("'");
+        }
+        log.info(query.toString());
+        return query.toString();
 	}
 
 	public String getPropertyDetailsQuery(PropertyDetailsSearchCriteria criteria, List<Object> preparedPropStmtList) {
