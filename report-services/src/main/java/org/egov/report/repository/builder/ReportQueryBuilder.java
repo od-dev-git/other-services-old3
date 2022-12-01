@@ -188,7 +188,7 @@ public class ReportQueryBuilder {
 			+ AND + " ewc.applicationstatus ='CONNECTION_ACTIVATED' ";
 	
 	private static final String WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY = SELECT
-			+ "EWC.TENANTID ,EWC.ADDITIONALDETAILS->>'ward' as ward,count(distinct ewc.connectionno) as connectionscount "
+			+ "EWC.TENANTID ,EWC.ADDITIONALDETAILS->>'ward' as ward,count(ewc.connectionno) as connectionscount "
 			+ FROM + " eg_ws_connection ewc "
 			+ INNER_JOIN + " eg_ws_service ews  on ewc.id = ews.connection_id "
 			+ WHERE + " ews.connectiontype ='Non Metered' "
@@ -358,38 +358,32 @@ public class ReportQueryBuilder {
 			preparedStatement.add(criteria.getConnectionType());
 		}
 		
-//		query.append(" limit ? ");
-//		preparedStatement.add(limit);
-//		
-//		query.append(" offset ? ");
-//		preparedStatement.add(offset);
 		addPaginationIfRequired(query,criteria.getLimit(),criteria.getOffset(),preparedStatement);
 		
 		return query.toString();
 	}
 	
 	public String getBillSummaryDetailsQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
-		
-       StringBuilder query = new StringBuilder(BILL_SUMMARY_QUERY2);
-       
-       Calendar c = Calendar.getInstance(); 
-     c.setTimeInMillis(criteria.getMonthYear());
-     
-     String mMonth = Integer.toString(c.get(Calendar.MONTH)+1);
-     if(mMonth.length()==1)
-    	 mMonth="0"+mMonth;
-     String mYear =   Integer.toString(c.get(Calendar.YEAR));
-      
 
-     preparedStmtList.add(mMonth);
-     preparedStmtList.add(mYear);
-     
-     if(StringUtils.hasText(criteria.getTenantId())) {
-			query.append(WHERE);
-			query.append(" demand.tenantid = '").append(criteria.getTenantId()).append("'");
-     }
-     
-     return query.toString();
+        StringBuilder query = new StringBuilder(BILL_SUMMARY_QUERY2);
+
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(criteria.getMonthYear());
+
+        String month = Integer.toString(c.get(Calendar.MONTH) + 1);
+        if (month.length() == 1)
+            month = "0" + month;
+        String year = Integer.toString(c.get(Calendar.YEAR));
+
+        preparedStmtList.add(month);
+        preparedStmtList.add(year);
+
+        if (StringUtils.hasText(criteria.getTenantId())) {
+            query.append(WHERE);
+            query.append(" demand.tenantid = '").append(criteria.getTenantId()).append("'");
+        }
+        log.info(query.toString());
+        return query.toString();
 	}
 
 	public String getPropertyDetailsQuery(PropertyDetailsSearchCriteria criteria, List<Object> preparedPropStmtList) {
@@ -574,10 +568,11 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 	
 	public String getElegibleWSConnectionsQuery(WSReportSearchCriteria searchCriteria, List<Object> preparedStmtList) {
 
-		StringBuilder query = new StringBuilder(WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY);
-
+		StringBuilder query = new StringBuilder(WS_CONNECTIONS_ELEGIBLE_FOR_DEMAND_QUERY);//change itt
 		preparedStmtList.add(searchCriteria.getTenantId());
-
+		
+		log.info(" Prepared Statement : " + preparedStmtList.toString());
+		
 		return query.toString();
 	}
 	
@@ -651,11 +646,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			preparedStmtList.add(searchCriteria.getWard());
 		}
 		
-//		query.append(" limit ? ");
-//		preparedStmtList.add(limit);
-//		
-//		query.append(" offset ? ");
-//		preparedStmtList.add(offset);
 		addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedStmtList);
 		
 		log.info(query.toString());

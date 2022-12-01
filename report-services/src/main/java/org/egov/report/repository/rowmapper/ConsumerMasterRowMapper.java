@@ -18,18 +18,18 @@ public class ConsumerMasterRowMapper implements ResultSetExtractor<List<Consumer
 		
 		while(rs.next())
 		{
-			ConsumerMasterWSReportResponse response = new ConsumerMasterWSReportResponse();
-		
-			response.setConnectionCategory(rs.getString("connectioncategory"));
-			response.setConnectionFacility(rs.getString("connectionfacility"));
-			String tenantId = rs.getString("tenantid");
-			response.setUlb(tenantId.substring(3));
-			response.setWardNo(rs.getString("ward"));
-			response.setConnectionNo(rs.getString("connectionno"));
-			response.setOldConnectionNo(rs.getString("oldconnectionno"));
-			response.setConnectionType(rs.getString("connectiontype"));
-			response.setUsageCategory(rs.getString("usagecategory"));
-			response.setUserId(rs.getString("uuid"));
+			ConsumerMasterWSReportResponse response = ConsumerMasterWSReportResponse
+			        .builder()
+			        .connectionCategory(rs.getString("connectioncategory"))
+			        .connectionFacility(rs.getString("connectionfacility"))
+			        .ulb((rs.getString("tenantid")).substring(3))
+			        .wardNo(rs.getString("ward"))
+			        .connectionNo(rs.getString("connectionno"))
+			        .oldConnectionNo(rs.getString("oldconnectionno"))
+			        .connectionType(rs.getString("connectiontype"))
+			        .usageCategory(rs.getString("usagecategory"))
+			        .userId(rs.getString("uuid"))
+			        .build();
 			
 			responseList.add(response);
 		}
