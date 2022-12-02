@@ -87,9 +87,8 @@ public class WSReportRepository {
 		public List<WaterNewConsumerMonthlyResponse> getWaterNewConsumerMonthlyReport(WSReportSearchCriteria criteria){
 			
 			List<Object> preparedStmtList = new ArrayList<>();
-			
 			String query = queryBuilder.getWaterNewConsumerQuery(criteria, preparedStmtList);
-
+			log.info(" Prepared Statement : " + preparedStmtList.toString());
 			return jdbcTemplate.query(query,preparedStmtList.toArray(), new WaterNewConsumerMonthlyRowMapper());
 		}
 		

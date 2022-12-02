@@ -415,7 +415,7 @@ public class ReportQueryBuilder {
 		preparedStmtList.add(criteria.getTenantId());
 		
 		query.append(AND_QUERY).append(" ews.connectionexecutiondate >= ? ");
-		preparedStmtList.add(criteria.getMonthYear());
+		preparedStmtList.add(wsReportUtils.getStartingTimeOfFirstDayOfMonthYear(criteria.getMonthYear()));
 		
 		query.append(AND_QUERY).append(" ews.connectionexecutiondate <= ? ");
 		preparedStmtList.add(wsReportUtils.addOneMonth(criteria.getMonthYear()));
