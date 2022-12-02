@@ -70,6 +70,7 @@ public class RevenueNotificationsRowMapper implements ResultSetExtractor<List<Re
 				revenueNotification.setCreatedTime(rs.getLong("createdtime"));
 				revenueNotification.setLastModifiedBy(rs.getString("lastmodifiedby"));
 				revenueNotification.setLastModifiedTime(rs.getLong("lastmodifiedtime"));
+				revenueNotification.setId(Id);
 
 				PGobject pgObj = (PGobject) rs.getObject("additionaldetails");
 				ObjectNode additionalDetails = null;

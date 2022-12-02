@@ -619,20 +619,72 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 		
 		wsValidator.validateEmployeeWiseCollectionReport(searchCriteria);
 		
-		List<EmployeeWiseWSCollectionResponse> response = wsRepository.getEmployeeWiseCollectionReport(searchCriteria);
+        Long count = reportRepository.getWaterConnectionCount(searchCriteria);
+        log.info("No of Water Connetcions : " + count.toString());
+        Integer limit = configuration.getReportConnectionsLimit();
+        Integer offset = 0;
+        
+        List<WaterMonthlyDemandResponse> finalResponse = new ArrayList<>();
+        
+        if (count > 0) {
+            while (count > 0) {
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                log.info("Water Search Criteria : " + searchCriteria.toString());
+                Set<String>  waterConnectionsSet = reportRepository.getWaterConnection(searchCriteria).stream().collect(Collectors.toSet());
+                log.info("Water Connetcions : " + waterConnectionsSet.toString());
+
+                searchCriteria.setConsumerNumbers(waterConnectionsSet);
+                
+                log.info("setting Payments Search Criteria");
+                PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
+                        .businessServices(Stream.of("WS","WS.ONE_TIME_FEE").collect(Collectors.toSet()))
+                        .consumerCodes(waterConnectionsSet)
+                        .fromDate(searchCriteria.getFromDate())
+                        .toDate(searchCriteria.getToDate())
+                        .build();
+                log.info(" Payments Search Criteria : " + paymentSearchCriteria.toString());
+                
+                if(StringUtils.hasText(searchCriteria.getPaymentMode())) {
+                    paymentSearchCriteria.setPaymentModes(Stream.of(searchCriteria.getPaymentMode().split(",")).collect(Collectors.toSet()));
+                }
+                
+                log.info("getting Payment Details");
+                List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+                if(payments.isEmpty()) {
+                    return Collections.emptyList();
+                }
+                
+                count = count - limit;
+                offset += limit;
+                
+            }
+        }
 		
 		if(!CollectionUtils.isEmpty(response)) {
-		List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct().collect(Collectors.toList());
-		List<OwnerInfo> usersInfo = userService.getUser(requestInfo, userIds);
-		Map<Long, OwnerInfo> userMap = usersInfo.stream().collect(Collectors.toMap(OwnerInfo::getId, Function.identity()));
 		
-		response.stream().forEach(item -> {
-			OwnerInfo user = userMap.get(Long.valueOf(item.getEmployeeId()));
-			if(user!=null) {
-				item.setEmployeeId(user.getUserName());
-				item.setEmployeeName(user.getName());
-			}
-		});
+//		log.info("setting UserIds");
+//        List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct().collect(Collectors.toList());
+//        log.info("setting User Search Criteria");
+//        org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
+//              .builder()
+//              .id(userIds)
+//              .build();
+//        log.info("getting User Details Here");
+//        List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+//              requestInfo);
+//         Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
+//               .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
+//         log.info("setting User Details Here");
+//        response.stream().forEach(item -> {
+//            org.egov.report.user.User user = userMap.get(Long.valueOf(item.getEmployeeId()));
+//            if(user!=null) {
+//                item.setEmployeeId(user.getUsername());
+//                item.setEmployeeName(user.getName());
+//            }
+//        });
+		
+		
 		}
 		
 		return response;
