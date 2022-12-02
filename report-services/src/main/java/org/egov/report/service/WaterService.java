@@ -315,34 +315,51 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 		return wsConnections;	
 	}
 	
-	public List<WaterNewConsumerMonthlyResponse> waterNewConsumerMonthlyReport(RequestInfo requestInfo,WSReportSearchCriteria criteria){
-		
-		wsValidator.validateWaterNewConsumerMonthlyReport(criteria);
-		
-		List<WaterNewConsumerMonthlyResponse> response = reportRepository.getWaterNewConsumerMonthlyReport(criteria);
-		
-		if(!CollectionUtils.isEmpty(response)) {
-		Set<String> userIds = response.stream().map(item -> item.getUserId()).distinct().collect(Collectors.toSet());
-		UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
-				.active(true)
-				.userType(UserSearchCriteria.CITIZEN)
-				.tenantId(criteria.getTenantId())
-				.build();
-		List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-		Map<String, User> userMap = usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity()));
-		
-		response.stream().forEach(item -> {
-			User user = userMap.get(item.getUserId());
-			if(user!=null) {
-				item.setMobile(user.getMobileNumber());
-				item.setUserName(user.getName());
-				item.setUserAddress(user.getCorrespondenceAddress());
-			}
-		});	
-		}
-		
-		return response;
-	}
+    public List<WaterNewConsumerMonthlyResponse> waterNewConsumerMonthlyReport(RequestInfo requestInfo,
+            WSReportSearchCriteria criteria) {
+
+        wsValidator.validateWaterNewConsumerMonthlyReport(criteria);
+
+        log.info(" Search Criteria : " + criteria.toString());
+
+        List<WaterNewConsumerMonthlyResponse> response = reportRepository.getWaterNewConsumerMonthlyReport(criteria);
+        log.info(" Response Size : " + response.toString());
+        
+        if (!CollectionUtils.isEmpty(response)) {
+            enrichResponseWithUserData(requestInfo, response);
+        }
+
+        return response;
+    }
+
+
+    private void enrichResponseWithUserData(RequestInfo requestInfo, List<WaterNewConsumerMonthlyResponse> response) {
+        List<String> userIds = response.stream().map(item -> item.getUserId()).distinct()
+                .collect(Collectors.toList());
+
+        org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
+                .builder()
+                .active(true)
+                .uuid(userIds)
+                .build();
+        
+        log.info("User Search Criteria : " + userSearchCriteria.toString() );
+
+        List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+                requestInfo);
+        Map<String, org.egov.report.user.User> userMap = usersInfo.stream()
+                .collect(Collectors.toMap(org.egov.report.user.User::getUuid, Function.identity()));
+        log.info("User Map : " + userMap.toString() );
+
+        response.stream().forEach(item -> {
+            org.egov.report.user.User user = userMap.get(item.getUserId());
+            if (user != null) {
+                item.setUserName(user.getName());
+                item.setMobile(user.getMobileNumber());
+                item.setUserAddress(user.getCorrespondenceAddress().getAddress());
+            }
+        });
+    }
 	
 	public List<ConsumerBillHistoryResponse> consumerBillHistoryReport(RequestInfo requestInfo, WSReportSearchCriteria criteria){
 		

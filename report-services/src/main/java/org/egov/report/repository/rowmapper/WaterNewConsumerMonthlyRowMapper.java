@@ -22,22 +22,20 @@ public class WaterNewConsumerMonthlyRowMapper implements ResultSetExtractor<List
 		
 		while(rs.next()) {
 			
-			WaterNewConsumerMonthlyResponse response = new WaterNewConsumerMonthlyResponse();
-			
-			response.setConnectionCategory(rs.getString("connectioncategory"));
-			response.setConnectionFacility(rs.getString("connectionfacility"));
-			String tenantId = rs.getString("tenantid");
-			response.setUlb(tenantId.substring(3));
-			response.setExecutionDate(wsReportUtils.getConvertedDate(rs.getLong("connectionexecutiondate")));
-			response.setSanctionDate(wsReportUtils.getConvertedDate(rs.getLong("estimationletterdate")));
-			response.setWard(rs.getString("ward"));
-			response.setConnectionNo(rs.getString("connectionno"));
-			response.setConnectionType(rs.getString("connectiontype"));
-			response.setUserId(rs.getString("userid"));
-			response.setConnectionPurpose(rs.getString("usagecategory"));
-			response.setApplicationNo(rs.getString("applicationno"));
-		
-			
+			WaterNewConsumerMonthlyResponse response = WaterNewConsumerMonthlyResponse
+			        .builder()
+			        .connectionCategory(rs.getString("connectioncategory"))
+			        .connectionFacility(rs.getString("connectionfacility"))
+			        .ulb((rs.getString("tenantid")).substring(3))
+			        .executionDate(wsReportUtils.getConvertedDate(rs.getLong("connectionexecutiondate")))
+			        .sanctionDate(wsReportUtils.getConvertedDate(rs.getLong("estimationletterdate")))
+			        .ward(rs.getString("ward"))
+			        .connectionNo(rs.getString("connectionno"))
+			        .connectionType(rs.getString("connectiontype"))
+			        .userId(rs.getString("userid"))
+			        .connectionPurpose(rs.getString("usagecategory"))
+			        .applicationNo(rs.getString("applicationno"))
+			        .build();
 			
 			responseList.add(response);
 		}
