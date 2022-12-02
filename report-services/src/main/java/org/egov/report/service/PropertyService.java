@@ -2,6 +2,8 @@ package org.egov.report.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +41,8 @@ import org.egov.report.web.model.PropertyWiseDemandResponse;
 import org.egov.report.web.model.TaxCollectorWiseCollectionResponse;
 import org.egov.report.web.model.ULBWiseTaxCollectionResponse;
 import org.egov.report.web.model.User;
+import org.egov.report.web.model.WaterConnectionDetails;
+import org.egov.report.web.model.WaterMonthlyDemandResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -226,65 +230,123 @@ public class PropertyService {
 		return prop;
 	}
 
-	public List<ULBWiseTaxCollectionResponse> getulbWiseTaxCollections(RequestInfo requestInfo,
+    public List<ULBWiseTaxCollectionResponse> getulbWiseTaxCollections(RequestInfo requestInfo,
             PropertyDetailsSearchCriteria searchCriteria) {
 
         prValidator.validatePropertyDetailsSearchCriteria(searchCriteria);
 
         List<ULBWiseTaxCollectionResponse> propertyResponse = new ArrayList<ULBWiseTaxCollectionResponse>();
 
-        Long count = pdRepository.getPropertyDemandDetailsCount(searchCriteria);
-        Integer limit = configuration.getReportLimit();
+        Long count = pdRepository.getPropertyCount(searchCriteria);
+        Integer limit = configuration.getReportConnectionsLimit();
         Integer offset = 0;
 
         if (count > 0) {
+            Set<String> allProperties = (pdRepository.getPropertyIds(searchCriteria)).stream().distinct()
+                    .collect(Collectors.toSet());
             while (count > 0) {
+
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
-                Map<String, List<PropertyDemandResponse>> propertyDemandResponse = pdRepository.getPropertyDemandDetails(searchCriteria);
-                count = count - limit;
-                offset += limit;
+                Set<String> tempPropertiesListSet = allProperties.stream().skip(offset).limit(limit)
+                        .collect(Collectors.toSet());
 
-                if (!CollectionUtils.isEmpty(propertyDemandResponse)) {
-                    propertyDemandResponse.entrySet().parallelStream().forEach(object -> {
-                        ULBWiseTaxCollectionResponse propertyInfo = new ULBWiseTaxCollectionResponse();
-                        object.getValue().forEach(demands -> {
-                            if (demands.getTaxperiodto() < System.currentTimeMillis()) {
-                                propertyInfo.setTotalarreartaxamount(
-                                        (propertyInfo.getTotalarreartaxamount()).add(demands.getTaxamount()));
-                            } else {
-                                propertyInfo
-                                        .setTotaltaxamount((propertyInfo.getTotaltaxamount()).add(demands.getTaxamount()));
-                            }
-                            propertyInfo.setTotalcollectionamount(
-                                    (propertyInfo.getTotalcollectionamount()).add(demands.getCollectionamount()));
-                        });
+                log.info("tempPropertiesListSet" + tempPropertiesListSet.toString());
+                searchCriteria.setPropertyIds(tempPropertiesListSet);
+                List<PropertyDetailsResponse> properties = pdRepository.getPropertyDetail(searchCriteria);
+                Map<String, List<PropertyDetailsResponse>> propertyMap = properties.stream()
+                        .collect(Collectors.groupingBy(
+                                PropertyDetailsResponse::getPropertyId,
+                                Collectors.mapping(
+                                        Function.identity(), Collectors.toList())));
 
-                        BigDecimal dueAmountWithTotalArrear = propertyInfo.getDueamount()
-                                .add(propertyInfo.getTotalarreartaxamount());
-                        BigDecimal dueAmountWithCurrentYearDemand = dueAmountWithTotalArrear
-                                .add(propertyInfo.getTotaltaxamount());
-                        BigDecimal dueAmountFinal = dueAmountWithCurrentYearDemand
-                                .subtract(propertyInfo.getTotalcollectionamount());
+                DemandCriteria demandCriteria = DemandCriteria
+                        .builder()
+                        .tenantId(searchCriteria.getUlbName())
+                        .consumerCode(tempPropertiesListSet)
+                        .build();
+                List<Demand> demands = demandService.getDemands(demandCriteria, requestInfo);
+                log.info("demands" + demands.toString());
+                log.info(" Demands Count fetched from DB " + demands.size());
+                ;
+                Map<Object, List<Demand>> demandsGroupedByConnectionNo = demands.stream()
+                        .collect(Collectors.groupingBy(Demand::getConsumerCode));
+                log.info("No of demands Grouped By Connection No : " + demandsGroupedByConnectionNo.size());
 
-                        propertyInfo.setPropertyId(object.getKey());
-                        propertyInfo.setDueamount(dueAmountFinal);
-                        propertyInfo.setUlb(object.getValue().get(0).getTenantid());
-                        propertyInfo.setOldpropertyid(object.getValue().get(0).getOldpropertyid());
-                        propertyInfo.setWard(object.getValue().get(0).getWard());
+                if (!CollectionUtils.isEmpty(demandsGroupedByConnectionNo)) {// use Collect To List
+                    List<ULBWiseTaxCollectionResponse> tempResponse = demandsGroupedByConnectionNo.entrySet()
+                            .parallelStream().map(connection -> {
 
-                        if(propertyInfo == null) {
-                            log.info("null object found " + propertyInfo.toString());
-                        }
-                        if (!Objects.isNull(propertyInfo) && StringUtils.hasText(propertyInfo.getUlb())) {
-                            propertyResponse.add(propertyInfo);
-                        }
-                    });
+                                ULBWiseTaxCollectionResponse responsePerConnection = new ULBWiseTaxCollectionResponse();
+                                String connectionNo = String.valueOf(connection.getKey());
+                                log.info(" Connection No :  " + connectionNo.toString());
+                                List<Demand> connectionDemands = connection.getValue();
+
+                                if (connectionDemands != null) {
+
+                                    Collections.sort(connectionDemands,
+                                            Comparator.comparing(e -> e.getTaxPeriodTo(), (s1, s2) -> {
+                                                return s2.compareTo(s1);
+                                            }));
+
+                                    List<DemandDetail> currentDemandDetails = connectionDemands.get(0)
+                                            .getDemandDetails();
+                                    if (currentDemandDetails != null) {
+
+                                        BigDecimal currentYearDemand = currentDemandDetails.stream()
+                                                .map(w -> w.getTaxAmount())
+                                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                                        responsePerConnection.setTotaltaxamount(currentYearDemand);
+                                    }
+
+                                    BigDecimal totalArrearDemandAmt = connectionDemands.stream().skip(1)
+                                            .flatMap(item -> item.getDemandDetails().stream())
+                                            .map(w -> w.getTaxAmount())
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                                    BigDecimal totalCollectionAmt = connectionDemands.stream()
+                                            .flatMap(item -> item.getDemandDetails().stream())
+                                            .map(w -> w.getCollectionAmount())
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                                    BigDecimal currentYearTaxAmt = responsePerConnection.getTotaltaxamount();
+                                    BigDecimal totalDueAmt = currentYearTaxAmt.add(totalArrearDemandAmt)
+                                            .subtract(totalCollectionAmt);
+
+                                    responsePerConnection.setTotalarreartaxamount(totalArrearDemandAmt);
+                                    responsePerConnection.setTotalcollectionamount(totalCollectionAmt);
+                                    responsePerConnection.setDueamount(totalDueAmt);
+                                    
+                                    responsePerConnection.setPropertyId(connectionNo);
+                                    String tenantId = connectionDemands.get(0).getTenantId();
+                                    String tenantIdStyled = tenantId.replace("od.", "");
+                                    tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase()
+                                            + tenantIdStyled.substring(1).toLowerCase();
+                                    responsePerConnection.setUlb(tenantIdStyled);
+
+                                    // setting properties data
+                                    List<PropertyDetailsResponse> propertyDetail = propertyMap
+                                            .get(responsePerConnection.getPropertyId());
+                                    if (propertyDetail != null) {
+                                        responsePerConnection
+                                                .setOldpropertyid(propertyDetail.get(0).getOldPropertyId());
+                                        responsePerConnection.setWard(propertyDetail.get(0).getWardNumber());
+
+                                    }
+
+                                }
+                                return responsePerConnection;
+                            }).collect(Collectors.toList());
+                    propertyResponse.addAll(tempResponse);
                 }
                 
-                
+                count = count - limit;
+                offset += limit;
             }
+
         }
+
         return propertyResponse;
     }
 
