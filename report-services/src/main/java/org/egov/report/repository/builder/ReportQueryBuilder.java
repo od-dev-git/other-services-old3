@@ -597,11 +597,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		query.append(AND_QUERY).append(" businessservice = ?");
 		preparedStmtList.add("WS");
 
-//		query.append(" limit ? ");
-//		preparedStmtList.add(limit);
-//
-//		query.append(" offset ? ");
-//		preparedStmtList.add(offset);
 		addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedStmtList);
 
 		return query.toString();

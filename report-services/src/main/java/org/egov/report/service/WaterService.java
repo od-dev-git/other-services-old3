@@ -754,7 +754,6 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
     public List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGeneration(RequestInfo requestInfo,
             WSReportSearchCriteria searchCriteria) {
 
-        
         wsValidator.validateMonthWisePendingBillGeneration(searchCriteria);
         searchCriteria.setConnectionType(ReportConstants.NON_METERED);
 
@@ -765,44 +764,48 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
         List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
         Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
 
-        
         if (count > 0) {
             while (count > 0) {
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
-                Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria);
+                Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria);// all
                 connectionResponse.putAll(response);
                 count = count - limit;
                 offset += limit;
             }
         }
+        log.info(" Total No Of Connections : " + connectionResponse.size());   
+        
+        if (!CollectionUtils.isEmpty(connectionResponse)) {
 
-                if (!CollectionUtils.isEmpty(connectionResponse)) {
+            count = reportRepository.getDemandsCount(searchCriteria);
+            List<String> demandResponses = new ArrayList<>();
 
-                    count = reportRepository.getDemandsCount(searchCriteria);
-                    List<String> demandResponses = new ArrayList<>();
-
-                    limit = configuration.getReportLimit();
-                    offset = 0;
-                    if (count > 0) {
-                        while (count > 0) {
-                            searchCriteria.setLimit(limit);
-                            searchCriteria.setOffset(offset);
-                            List<String> responses = reportRepository.getDemands(searchCriteria);
-                            demandResponses.addAll(responses);
-                            count = count - limit;
-                            offset += limit;
-                        }
-                    }
-
-                    responseList = connectionResponse.entrySet().parallelStream()
-                            .filter(wcd -> !demandResponses.contains(wcd.getKey()))
-                            .map(item -> MonthWisePendingBillGenerationResponse.builder()
-                                    .consumerCode(item.getKey())
-                                    .ulb(item.getValue().getTenantid().substring(3))
-                                    .build())
-                            .collect(Collectors.toList());
+            limit = configuration.getReportLimit();
+            offset = 0;
+            if (count > 0) {
+                while (count > 0) {
+                    searchCriteria.setLimit(limit);
+                    searchCriteria.setOffset(offset);
+                    List<String> responses = reportRepository.getDemands(searchCriteria);
+                    demandResponses.addAll(responses);
+                    count = count - limit;
+                    offset += limit;
                 }
+            }
+            
+            log.info(" Total No Of Connections For Which Demand Has Been Generated : " + connectionResponse.size());   
+
+            responseList = connectionResponse.entrySet().parallelStream()
+                    .filter(wcd -> !demandResponses.contains(wcd.getKey()))
+                    .map(item -> MonthWisePendingBillGenerationResponse.builder()
+                            .consumerCode(item.getKey())
+                            .ulb(item.getValue().getTenantid().substring(3))
+                            .build())
+                    .collect(Collectors.toList());
+            
+            log.info(" Final Response Size : " + responseList.size());  
+        }
         return responseList;
     }
 	
