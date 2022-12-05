@@ -547,15 +547,19 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 					.fromDate(criteria.getFromDate())
 					.toDate(criteria.getToDate())
 					.consumerCodes(responseConnection.keySet()).build();
+			log.info(" Payment Search Criteria  : " + paymentSearchCriteria.toString());
 			
 			List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+			log.info(" Payments Size  : " + payments.size());
 			
 			Comparator<BillDetail> comparator = (obj1, obj2) -> obj2.getFromPeriod().compareTo(obj1.getFromPeriod());
 			
 			String consumerCode = responseConnection.keySet().stream().findFirst().get();
+			log.info(" Setting Payments Response " );
 			
 			payments.forEach(item -> 
 			{
+			    log.info(" Iterating Payments " );
 				WSConsumerHistoryResponse res = WSConsumerHistoryResponse.builder()
 						.paymentMode(item.getPaymentMode().toString())
 						.paymentDate(wsReportUtils.getConvertedDate(item.getTransactionDate()))
