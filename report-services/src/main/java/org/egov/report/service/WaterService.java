@@ -244,25 +244,29 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
     }
 	
 	public List<ConsumerPaymentHistoryResponse> consumerPaymentHistory(RequestInfo requestInfo,WSReportSearchCriteria criteria){
-		
-wsValidator.validateconsumerPaymentHistoryReport(criteria);
-        
-        WSSearchCriteria wsSearchCriteria = WSSearchCriteria.builder().consumerNo(criteria.getConsumerCode())
-                .tenantId(criteria.getTenantId()).searchType("CONNECTION").build();
-        
-        List<WSConnection> connections = getWaterConnection(requestInfo, wsSearchCriteria);
-        
+
+        wsValidator.validateconsumerPaymentHistoryReport(criteria);
+
         PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
-                .businessServices(Stream.of("WS","WS.ONE_TIME_FEE").collect(Collectors.toSet()))
+                .businessServices(Stream.of("WS", "WS.ONE_TIME_FEE").collect(Collectors.toSet()))
                 .tenantId(criteria.getTenantId())
                 .consumerCodes(Stream.of(criteria.getConsumerCode()).collect(Collectors.toSet())).build();
-        
+        log.info("  Payment Search Criteria :  " + paymentSearchCriteria.toString());
         List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
-        if(payments.isEmpty()) {
+        if (payments.isEmpty()) {
             return Collections.emptyList();
         }
+        log.info("  No Of Payments  :  " + payments.size());
+
         
-        
+        // getting WS Details
+        WSSearchCriteria wsSearchCriteria = WSSearchCriteria.builder().consumerNo(criteria.getConsumerCode())
+                .tenantId(criteria.getTenantId()).searchType("CONNECTION").build();
+        log.info("  WSSearchCriteria :  " + wsSearchCriteria.toString());
+        List<WSConnection> connections = getWaterConnection(requestInfo, wsSearchCriteria);
+        log.info("  No Of WS Connection  :  " + connections.size());
+
+     // getting Payments
         List<ConsumerPaymentHistoryResponse> response = payments.stream()
                 .map(payment -> ConsumerPaymentHistoryResponse.builder()
                         .tenantId(payment.getTenantId()).ulb(payment.getTenantId().split("\\.")[1].toUpperCase())
@@ -273,22 +277,34 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
                         .monthYear(paymentUtil.getMonthYear(payment.getTransactionDate()))
                         .paidAmount(payment.getTotalAmountPaid()).transactionId(payment.getTransactionNumber())
                         .conumerName(connections.get(0).getConnectionHolders().get(0).get("name").toString())
-                        .consumerAddress(connections.get(0).getConnectionHolders().get(0).get("correspondenceAddress").toString())
+                        .consumerAddress(connections.get(0).getConnectionHolders().get(0).get("correspondenceAddress")
+                                .toString())
                         .ward(connections.get(0).getAdditionalDetails().get("ward").toString())
                         .build())
                 .collect(Collectors.toList());
-        
-        List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct().collect(Collectors.toList());
-        List<OwnerInfo> usersInfo = userService.getUser(requestInfo, userIds);
-        Map<Long, OwnerInfo> userMap = usersInfo.stream().collect(Collectors.toMap(OwnerInfo::getId, Function.identity()));
-        
+
+        // setting Employee Data
+        log.info("setting UserIds");
+        List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct()
+                .collect(Collectors.toList());
+        log.info("setting User Search Criteria");
+        org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
+                .builder()
+                .id(userIds)
+                .build();
+        log.info("getting User Details Here");
+        List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+                requestInfo);
+        Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
+                .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
+        log.info("setting User Details Here");
         response.stream().forEach(item -> {
-            OwnerInfo user = userMap.get(Long.valueOf(item.getEmployeeId()));
-            if(user!=null) {
-                item.setEmployeeId(user.getUserName());
+            org.egov.report.user.User user = userMap.get(Long.valueOf(item.getEmployeeId()));
+            if (user != null) {
+                item.setEmployeeId(user.getUsername());
                 item.setEmployeeName(user.getName());
             }
-        });     
+        });
 
         return response;
     }
