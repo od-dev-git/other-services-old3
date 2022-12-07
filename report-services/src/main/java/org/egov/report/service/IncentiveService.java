@@ -77,9 +77,14 @@ public class IncentiveService {
 		calculatorService.calculateIncentives(incentiveReportCriteria.getModule(), incentiveAnalysis);
 		
 		List<Long> userIds = incentiveAnalysis.keySet().stream().map(key -> Long.valueOf(key)).collect(Collectors.toList());
-		List<OwnerInfo> usersInfo =userService.getUser(requestInfo, userIds);
-		usersInfo = usersInfo.stream().filter(user -> user.getRoles().stream().map(role -> role.getCode()).collect(Collectors.toList()).contains(ReportConstants.ROLE_JALSATHI)).collect(Collectors.toList());
-		enrichUserData(incentiveAnalysis, usersInfo);
+        org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
+                .builder()
+                .id(userIds)
+                .build();
+        List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+                requestInfo);
+        usersInfo = usersInfo.stream().filter(user -> user.getRoles().stream().map(role -> role.getCode()).collect(Collectors.toList()).contains(ReportConstants.ROLE_JALSATHI)).collect(Collectors.toList());
+        enrichUserData(incentiveAnalysis, usersInfo);
 		
 		return IncentiveResponse.builder().incentiveAnalysis(incentiveAnalysis.values().stream()
 				.filter(ia -> ia.getIsJalsathiCollection()).collect(Collectors.toList())).build();
@@ -88,11 +93,11 @@ public class IncentiveService {
 	
 
 	private void enrichUserData(Map<String, IncentiveAnalysis> incentiveAnalysisMap,
-			List<OwnerInfo> users) {
-		for (OwnerInfo user : users) {
+	        List<org.egov.report.user.User> users) {
+		for (org.egov.report.user.User user : users) {
 			IncentiveAnalysis incentiveAnalysis = incentiveAnalysisMap.get(user.getId().toString());
 			incentiveAnalysis.setEmpName(user.getName());
-			incentiveAnalysis.setEmpId(user.getUserName());
+			incentiveAnalysis.setEmpId(user.getUsername());
 			incentiveAnalysis.setIsJalsathiCollection(Boolean.TRUE);
 		}
 	}
