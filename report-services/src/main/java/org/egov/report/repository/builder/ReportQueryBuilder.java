@@ -223,6 +223,11 @@ public class ReportQueryBuilder {
             + "inner join eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid  "
             + "inner join eg_ws_service ews on ewc.id = ews.connection_id "
             + "where ewc.isoldapplication = 'false' " + AND_QUERY+" EWC.APPLICATIONSTATUS = 'CONNECTION_ACTIVATED' "    ;
+    
+    private static final String QUERY_FOR_WS_MISCELLANEOUSDETAILS = SELECT 
+            + " ewc.additionaldetails->>'ward' as ward,ewc.connectionno,ewc.oldconnectionno " 
+            + FROM + " eg_ws_connection ewc "
+            + WHERE + " ewc.isoldapplication = false " + AND_QUERY + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' ";
 	
 	private static final String QUERY_FOR_WATER_MONTHLY_DEMANDS2 = SELECT 
             + demandsSelectValues + ", d.id, "
@@ -592,11 +597,6 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		query.append(AND_QUERY).append(" businessservice = ?");
 		preparedStmtList.add("WS");
 
-//		query.append(" limit ? ");
-//		preparedStmtList.add(limit);
-//
-//		query.append(" offset ? ");
-//		preparedStmtList.add(offset);
 		addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedStmtList);
 
 		return query.toString();
@@ -979,5 +979,20 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 
         return query.toString();
 
+    }
+
+    public String getMiscellaneousWaterDetailsQuery(WSReportSearchCriteria searchCriteria,
+            List<Object> preparedStmtList) {
+        StringBuilder query = new StringBuilder(QUERY_FOR_WS_MISCELLANEOUSDETAILS);
+
+        if (searchCriteria.getConsumerNumbers() != null && !searchCriteria.getConsumerNumbers().isEmpty()) {
+            addAndClause(query);
+            query.append("ewc.connectionno IN ("
+            + getIdQueryForStrings(searchCriteria.getConsumerNumbers()));
+        }
+
+        addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedStmtList);
+
+        return query.toString();
     }
 }
