@@ -45,8 +45,10 @@ import org.egov.report.web.model.ConsumerPaymentHistoryResponse;
 import org.egov.report.web.model.DemandCriteria;
 import org.egov.report.web.model.EmployeeDateWiseWSCollectionResponse;
 import org.egov.report.web.model.EmployeeWiseWSCollectionResponse;
+import org.egov.report.web.model.MiscellaneousWaterDetails;
 import org.egov.report.web.model.MonthWisePendingBillGenerationResponse;
 import org.egov.report.web.model.OwnerInfo;
+import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.ULBWiseWaterConnectionDetails;
 import org.egov.report.web.model.User;
 import org.egov.report.web.model.WSConsumerHistoryResponse;
@@ -242,25 +244,29 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
     }
 	
 	public List<ConsumerPaymentHistoryResponse> consumerPaymentHistory(RequestInfo requestInfo,WSReportSearchCriteria criteria){
-		
-wsValidator.validateconsumerPaymentHistoryReport(criteria);
-        
-        WSSearchCriteria wsSearchCriteria = WSSearchCriteria.builder().consumerNo(criteria.getConsumerCode())
-                .tenantId(criteria.getTenantId()).searchType("CONNECTION").build();
-        
-        List<WSConnection> connections = getWaterConnection(requestInfo, wsSearchCriteria);
-        
+
+        wsValidator.validateconsumerPaymentHistoryReport(criteria);
+
         PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
-                .businessServices(Stream.of("WS","WS.ONE_TIME_FEE").collect(Collectors.toSet()))
+                .businessServices(Stream.of("WS", "WS.ONE_TIME_FEE").collect(Collectors.toSet()))
                 .tenantId(criteria.getTenantId())
                 .consumerCodes(Stream.of(criteria.getConsumerCode()).collect(Collectors.toSet())).build();
-        
+        log.info("  Payment Search Criteria :  " + paymentSearchCriteria.toString());
         List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
-        if(payments.isEmpty()) {
+        if (payments.isEmpty()) {
             return Collections.emptyList();
         }
+        log.info("  No Of Payments  :  " + payments.size());
+
         
-        
+        // getting WS Details
+        WSSearchCriteria wsSearchCriteria = WSSearchCriteria.builder().consumerNo(criteria.getConsumerCode())
+                .tenantId(criteria.getTenantId()).searchType("CONNECTION").build();
+        log.info("  WSSearchCriteria :  " + wsSearchCriteria.toString());
+        List<WSConnection> connections = getWaterConnection(requestInfo, wsSearchCriteria);
+        log.info("  No Of WS Connection  :  " + connections.size());
+
+     // getting Payments
         List<ConsumerPaymentHistoryResponse> response = payments.stream()
                 .map(payment -> ConsumerPaymentHistoryResponse.builder()
                         .tenantId(payment.getTenantId()).ulb(payment.getTenantId().split("\\.")[1].toUpperCase())
@@ -271,22 +277,34 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
                         .monthYear(paymentUtil.getMonthYear(payment.getTransactionDate()))
                         .paidAmount(payment.getTotalAmountPaid()).transactionId(payment.getTransactionNumber())
                         .conumerName(connections.get(0).getConnectionHolders().get(0).get("name").toString())
-                        .consumerAddress(connections.get(0).getConnectionHolders().get(0).get("correspondenceAddress").toString())
+                        .consumerAddress(connections.get(0).getConnectionHolders().get(0).get("correspondenceAddress")
+                                .toString())
                         .ward(connections.get(0).getAdditionalDetails().get("ward").toString())
                         .build())
                 .collect(Collectors.toList());
-        
-        List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct().collect(Collectors.toList());
-        List<OwnerInfo> usersInfo = userService.getUser(requestInfo, userIds);
-        Map<Long, OwnerInfo> userMap = usersInfo.stream().collect(Collectors.toMap(OwnerInfo::getId, Function.identity()));
-        
+
+        // setting Employee Data
+        log.info("setting UserIds");
+        List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct()
+                .collect(Collectors.toList());
+        log.info("setting User Search Criteria");
+        org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
+                .builder()
+                .id(userIds)
+                .build();
+        log.info("getting User Details Here");
+        List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+                requestInfo);
+        Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
+                .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
+        log.info("setting User Details Here");
         response.stream().forEach(item -> {
-            OwnerInfo user = userMap.get(Long.valueOf(item.getEmployeeId()));
-            if(user!=null) {
-                item.setEmployeeId(user.getUserName());
+            org.egov.report.user.User user = userMap.get(Long.valueOf(item.getEmployeeId()));
+            if (user != null) {
+                item.setEmployeeId(user.getUsername());
                 item.setEmployeeName(user.getName());
             }
-        });     
+        });
 
         return response;
     }
@@ -545,15 +563,19 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 					.fromDate(criteria.getFromDate())
 					.toDate(criteria.getToDate())
 					.consumerCodes(responseConnection.keySet()).build();
+			log.info(" Payment Search Criteria  : " + paymentSearchCriteria.toString());
 			
 			List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+			log.info(" Payments Size  : " + payments.size());
 			
 			Comparator<BillDetail> comparator = (obj1, obj2) -> obj2.getFromPeriod().compareTo(obj1.getFromPeriod());
 			
 			String consumerCode = responseConnection.keySet().stream().findFirst().get();
+			log.info(" Setting Payments Response " );
 			
 			payments.forEach(item -> 
 			{
+			    log.info(" Iterating Payments " );
 				WSConsumerHistoryResponse res = WSConsumerHistoryResponse.builder()
 						.paymentMode(item.getPaymentMode().toString())
 						.paymentDate(wsReportUtils.getConvertedDate(item.getTransactionDate()))
@@ -616,27 +638,125 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
 
 	public List<EmployeeWiseWSCollectionResponse> employeeWiseWSCollection(RequestInfo requestInfo,
 			WSReportSearchCriteria searchCriteria) {
-		
-		wsValidator.validateEmployeeWiseCollectionReport(searchCriteria);
-		
-		List<EmployeeWiseWSCollectionResponse> response = wsRepository.getEmployeeWiseCollectionReport(searchCriteria);
-		
-		if(!CollectionUtils.isEmpty(response)) {
-		List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId())).distinct().collect(Collectors.toList());
-		List<OwnerInfo> usersInfo = userService.getUser(requestInfo, userIds);
-		Map<Long, OwnerInfo> userMap = usersInfo.stream().collect(Collectors.toMap(OwnerInfo::getId, Function.identity()));
-		
-		response.stream().forEach(item -> {
-			OwnerInfo user = userMap.get(Long.valueOf(item.getEmployeeId()));
-			if(user!=null) {
-				item.setEmployeeId(user.getUserName());
-				item.setEmployeeName(user.getName());
-			}
-		});
-		}
-		
-		return response;
-	}
+
+        wsValidator.validateEmployeeWiseCollectionReport(searchCriteria);
+
+        Long count = reportRepository.getWaterConnectionCount(searchCriteria);
+        log.info("No of Water Connetcions : " + count.toString());
+        Integer limit = configuration.getReportConnectionsLimit();
+        Integer offset = 0;
+
+        List<EmployeeWiseWSCollectionResponse> finalResponse = new ArrayList<>();
+
+        if (count > 0) {
+            while (count > 0) {
+                searchCriteria.setLimit(limit);
+                searchCriteria.setOffset(offset);
+                log.info("Water Search Criteria : " + searchCriteria.toString());
+                Set<String> waterConnectionsSet = reportRepository.getWaterConnection(searchCriteria).stream()
+                        .collect(Collectors.toSet());
+                log.info("Water Connetcions : " + waterConnectionsSet.toString());
+
+                searchCriteria.setConsumerNumbers(waterConnectionsSet);
+
+                log.info("setting Payments Search Criteria");
+                PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
+                        .businessServices(Stream.of("WS").collect(Collectors.toSet()))
+                        .consumerCodes(waterConnectionsSet)
+                        .fromDate(searchCriteria.getFromDate())
+                        .toDate(searchCriteria.getToDate())
+                        .build();
+                log.info(" Payments Search Criteria : " + paymentSearchCriteria.toString());
+
+                if (StringUtils.hasText(searchCriteria.getPaymentMode())) {
+                    paymentSearchCriteria.setPaymentModes(
+                            Stream.of(searchCriteria.getPaymentMode().split(",")).collect(Collectors.toSet()));
+                }
+
+                log.info("getting Payment Details");
+                List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+                if (!payments.isEmpty()) {
+                    List<EmployeeWiseWSCollectionResponse> response = payments.stream()
+                            .map(payment -> EmployeeWiseWSCollectionResponse.builder()
+                                    .employeeId(payment.getAuditDetails().getCreatedBy())
+                                    .tenantId(payment.getTenantId())
+                                    .ulb(payment.getTenantId().split("\\.")[1].toUpperCase())
+                                    .paymentDate(payment.getTransactionDate())
+                                    .paymentMode(payment.getPaymentMode().toString())
+                                    .consumerCode(payment.getPaymentDetails().get(0).getBill().getConsumerCode())
+                                    .receiptNo(payment.getPaymentDetails().get(0).getReceiptNumber())
+                                    .head("WATER")
+                                    .amount(payment.getTotalAmountPaid()).build())
+                            .collect(Collectors.toList());
+
+                    if (!CollectionUtils.isEmpty(response)) {
+
+                     // getting User Details
+                        enrichingWithUserDetails(requestInfo, response);
+
+                        // getting Water Details
+                        log.info("Fetching Water Details ");
+
+                        WSReportSearchCriteria searchingCriteria = WSReportSearchCriteria.builder()
+                                .tenantId(searchCriteria.getTenantId()).consumerNumbers(waterConnectionsSet).build();
+                        log.info(" WS Report Search Criteria " + searchingCriteria.toString() );
+                        
+                        enrichWaterDetails(response, searchingCriteria);
+
+                    }
+
+                    finalResponse.addAll(response);
+                }
+
+                count = count - limit;
+                offset += limit;
+
+            }
+        }
+
+        return finalResponse;
+    }
+
+
+    private void enrichingWithUserDetails(RequestInfo requestInfo, List<EmployeeWiseWSCollectionResponse> response) {
+        log.info("setting UserIds");
+        List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId()))
+                .distinct().collect(Collectors.toList());
+        log.info("setting User Search Criteria");
+        org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
+                .builder()
+                .id(userIds)
+                .build();
+        log.info("getting User Details Here");
+        List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
+                requestInfo);
+        Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
+                .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
+        log.info("setting User Details Here");
+        response.stream().forEach(item -> {
+            org.egov.report.user.User user = userMap.get(Long.valueOf(item.getEmployeeId()));
+            if (user != null) {
+                item.setEmployeeId(user.getUsername());
+                item.setEmployeeName(user.getName());
+            }
+        });
+    }
+
+
+    private void enrichWaterDetails(List<EmployeeWiseWSCollectionResponse> response,
+            WSReportSearchCriteria searchingCriteria) {
+        Map<String, MiscellaneousWaterDetails> waterMap = reportRepository
+                .getMiscellaneousWaterDetails(searchingCriteria);
+        log.info("Setting Water Details ");
+        response.parallelStream().forEach(collectionResponseRow -> {
+            MiscellaneousWaterDetails miscellaneousWaterDetails = waterMap
+                    .get(collectionResponseRow.getConsumerCode());
+            if (miscellaneousWaterDetails != null) {
+                collectionResponseRow.setOldConsumerNo(miscellaneousWaterDetails.getOldconnectionno());
+                collectionResponseRow.setWard(miscellaneousWaterDetails.getWard());
+            }
+        });
+    }
 	
 	public List<ULBWiseWaterConnectionDetails> getNoOfWSConnectionsElegibleForDemand(RequestInfo requestInfo,
 			WSReportSearchCriteria searchCriteria) {
@@ -654,7 +774,6 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
     public List<MonthWisePendingBillGenerationResponse> monthWisePendingBillGeneration(RequestInfo requestInfo,
             WSReportSearchCriteria searchCriteria) {
 
-        
         wsValidator.validateMonthWisePendingBillGeneration(searchCriteria);
         searchCriteria.setConnectionType(ReportConstants.NON_METERED);
 
@@ -665,44 +784,48 @@ wsValidator.validateconsumerPaymentHistoryReport(criteria);
         List<MonthWisePendingBillGenerationResponse> responseList = new ArrayList<>();
         Map<String, WaterConnectionDetails> connectionResponse = new HashMap<>();
 
-        
         if (count > 0) {
             while (count > 0) {
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
-                Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria);
+                Map<String, WaterConnectionDetails> response = reportRepository.getWaterConnections(searchCriteria);// all
                 connectionResponse.putAll(response);
                 count = count - limit;
                 offset += limit;
             }
         }
+        log.info(" Total No Of Connections : " + connectionResponse.size());   
+        
+        if (!CollectionUtils.isEmpty(connectionResponse)) {
 
-                if (!CollectionUtils.isEmpty(connectionResponse)) {
+            count = reportRepository.getDemandsCount(searchCriteria);
+            List<String> demandResponses = new ArrayList<>();
 
-                    count = reportRepository.getDemandsCount(searchCriteria);
-                    List<String> demandResponses = new ArrayList<>();
-
-                    limit = configuration.getReportLimit();
-                    offset = 0;
-                    if (count > 0) {
-                        while (count > 0) {
-                            searchCriteria.setLimit(limit);
-                            searchCriteria.setOffset(offset);
-                            List<String> responses = reportRepository.getDemands(searchCriteria);
-                            demandResponses.addAll(responses);
-                            count = count - limit;
-                            offset += limit;
-                        }
-                    }
-
-                    responseList = connectionResponse.entrySet().parallelStream()
-                            .filter(wcd -> !demandResponses.contains(wcd.getKey()))
-                            .map(item -> MonthWisePendingBillGenerationResponse.builder()
-                                    .consumerCode(item.getKey())
-                                    .ulb(item.getValue().getTenantid().substring(3))
-                                    .build())
-                            .collect(Collectors.toList());
+            limit = configuration.getReportLimit();
+            offset = 0;
+            if (count > 0) {
+                while (count > 0) {
+                    searchCriteria.setLimit(limit);
+                    searchCriteria.setOffset(offset);
+                    List<String> responses = reportRepository.getDemands(searchCriteria);
+                    demandResponses.addAll(responses);
+                    count = count - limit;
+                    offset += limit;
                 }
+            }
+            
+            log.info(" Total No Of Connections For Which Demand Has Been Generated : " + connectionResponse.size());   
+
+            responseList = connectionResponse.entrySet().parallelStream()
+                    .filter(wcd -> !demandResponses.contains(wcd.getKey()))
+                    .map(item -> MonthWisePendingBillGenerationResponse.builder()
+                            .consumerCode(item.getKey())
+                            .ulb(item.getValue().getTenantid().substring(3))
+                            .build())
+                    .collect(Collectors.toList());
+            
+            log.info(" Final Response Size : " + responseList.size());  
+        }
         return responseList;
     }
 	

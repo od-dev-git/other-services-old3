@@ -22,7 +22,7 @@ public class WaterConnectionRowMapper implements ResultSetExtractor<Map<String, 
 			
 			WaterConnectionDetails response = WaterConnectionDetails
 			        .builder()
-			        .tenantid(consumerCode)
+			        .tenantid(rs.getString("tenantid"))
 			        .userid(rs.getString("userid"))
 			        .ward(rs.getString("ward"))
 			        .connectiontype(rs.getString("connectiontype"))

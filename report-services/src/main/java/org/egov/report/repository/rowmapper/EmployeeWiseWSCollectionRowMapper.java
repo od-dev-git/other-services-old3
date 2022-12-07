@@ -18,19 +18,20 @@ public class EmployeeWiseWSCollectionRowMapper implements ResultSetExtractor<Lis
 		
 		while(rs.next()) {
 			
-			EmployeeWiseWSCollectionResponse response = new EmployeeWiseWSCollectionResponse();
-			String tenantId = rs.getString("tenantid");
-			response.setTenantId(tenantId);
-			response.setUlb(tenantId.substring(3));
-			response.setWard(rs.getString("ward"));
-			response.setAmount(rs.getBigDecimal("totalamountpaid"));
-			response.setConsumerCode(rs.getString("connectionno"));
-			response.setEmployeeId(rs.getString("createdby"));
-			response.setHead("WATER");
-			response.setPaymentDate(rs.getLong("transactiondate"));
-			response.setOldConsumerNo(rs.getString("oldconnectionno"));
-			response.setPaymentMode(rs.getString("paymentmode"));
-			response.setReceiptNo(rs.getString("receiptnumber"));
+         EmployeeWiseWSCollectionResponse response = EmployeeWiseWSCollectionResponse
+                 .builder()
+                 .tenantId(rs.getString("tenantid"))
+                 .ulb((rs.getString("tenantid")).substring(3))
+                 .ward(rs.getString("ward"))
+                 .amount(rs.getBigDecimal("totalamountpaid"))
+                 .consumerCode(rs.getString("connectionno"))
+                 .employeeId(rs.getString("createdby"))
+                 .head("WATER")
+                 .paymentDate(rs.getLong("transactiondate"))
+                 .oldConsumerNo(rs.getString("oldconnectionno"))
+                 .paymentMode(rs.getString("paymentmode"))
+                 .receiptNo(rs.getString("receiptnumber"))
+                 .build();
 			
 			responseList.add(response);
 		}
