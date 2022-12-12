@@ -245,6 +245,7 @@ public class MRConstants {
 
 	    public static final String DEFAULT_OBJECT_CORRECTION_MODIFIED_MSG = "Dear <1>, Your Marriage Registration Correction with application number <APPLICATION_NUMBER> was modified.Thank You. Govt. of Odisha";
 
+	    public static final String EMAIL_SUBJECT_ID_KEY = "<%application no%>";
 	    
 	    public static final List<String> NOTIFICATION_CODES = Collections.unmodifiableList(Arrays.asList(
 	    		CORRECTION_NOTIFICATION_DOC_VERIFICATION,CORRECTION_NOTIFICATION_FORWARD_DOC_VERIFICATION,NOTIFICATION_PENDINDG_PAYMENT,CORRECTION_NOTIFICATION_INITIATED, CORRECTION_NOTIFICATION_APPLIED , CORRECTION_NOTIFICATION_PENDINGAPPROVAL,
