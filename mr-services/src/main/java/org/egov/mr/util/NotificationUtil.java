@@ -591,16 +591,12 @@ public class NotificationUtil {
 	public List<EmailRequest> createEmailRequest(String message, Map<String, String> ownersEmailId,
 			MarriageRegistrationRequest request) {
 		
+		Set<String> emailTo = ownersEmailId.keySet().stream().collect(Collectors.toSet());
+		String subject = config.getEmailSubject().replaceAll(MRConstants.EMAIL_SUBJECT_ID_KEY, request.getMarriageRegistrations().get(0).getApplicationNumber());
+		
 		List<EmailRequest> emailRequest = new LinkedList<>();
-		for (Map.Entry<String, String> entryset : ownersEmailId.entrySet()) {
-			Set<String> emailTo = new HashSet<>();
-			String customizedMsg = message.replace("<1>", entryset.getValue());
-			customizedMsg = customizedMsg.replace(NOTIF_OWNER_NAME_KEY, entryset.getValue());
-			String subject = config.getEmailSubject();
-			subject = subject.replaceAll(MRConstants.EMAIL_SUBJECT_ID_KEY, request.getMarriageRegistrations().get(0).getApplicationNumber());
-			Email email = Email.builder().body(customizedMsg).emailTo(emailTo).subject(subject).build();
-			emailRequest.add(EmailRequest.builder().email(email).requestInfo(request.getRequestInfo()).build());
-		}
+		Email email = Email.builder().body(message).emailTo(emailTo).subject(subject).build();
+		emailRequest.add(EmailRequest.builder().email(email).requestInfo(request.getRequestInfo()).build());
 		return emailRequest;
 	}
 	
