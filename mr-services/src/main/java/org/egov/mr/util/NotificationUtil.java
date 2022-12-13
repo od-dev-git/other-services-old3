@@ -535,7 +535,7 @@ public class NotificationUtil {
 
 		String finalPath = UIHost + paymentPath;
 
-		message = message.replace(PAYMENT_LINK_PLACEHOLDER,getShortenedUrl(finalPath));
+//		message = message.replace(PAYMENT_LINK_PLACEHOLDER,getShortenedUrl(finalPath));
 		
 		return message;
 	}
