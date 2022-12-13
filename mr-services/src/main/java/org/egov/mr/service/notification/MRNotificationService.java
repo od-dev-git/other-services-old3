@@ -298,18 +298,22 @@ public class MRNotificationService {
             if(message==null) continue;
 
             Map<String,String > ownersEmailId = new HashMap<>();
-
-            Citizen citizen = marriageRegistrationUtil.getMobileNumberWithUuid(marriageRegistration.getAccountId(), request.getRequestInfo(), tenantId);
             
-            if (citizen != null)
-            	if(citizen.getEmailId() == null ){
-            		log.info("No Email Id present for application number : "+ marriageRegistration.getApplicationNumber());
-            		continue;
-            	}
-            	else {
-            		ownersEmailId.put(citizen.getEmailId() , citizen.getName());
-            	}
-            emailRequests.addAll(util.createEmailRequest(message,ownersEmailId, request));
+            if(CollectionUtils.isEmpty(marriageRegistration.getCoupleDetails())) {
+            	log.info("No Email Id present for application number : "+ marriageRegistration.getApplicationNumber());
+            } else {
+            	// Bride details
+            	String brideName=marriageRegistration.getCoupleDetails().get(0).getBride().getFirstName();
+            	String brideEmail=marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getEmailAddress();
+            	ownersEmailId.put(brideEmail, brideName);
+            	
+            	// Groom details
+            	String groomName=marriageRegistration.getCoupleDetails().get(0).getGroom().getFirstName();
+            	String groomEmail=marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress().getEmailAddress();
+            	ownersEmailId.put(groomEmail, groomName);
+            	
+            	emailRequests.addAll(util.createEmailRequest(message,ownersEmailId, request));
+            }
         }
     }
 

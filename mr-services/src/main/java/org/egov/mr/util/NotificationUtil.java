@@ -610,7 +610,7 @@ public class NotificationUtil {
 				log.info("Messages from localization couldn't be fetched!");
 			for (EmailRequest emailRequest : emailRequestList) {
 				producer.push(config.getEmailNotifTopic(), emailRequest);
-				log.info(" Email: " + emailRequest.getEmail());
+				log.info(" Email pushed to send: " + emailRequest.getEmail());
 			}
 		}
 	}
