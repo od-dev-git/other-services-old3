@@ -296,6 +296,9 @@ public class MRNotificationService {
 			
 			
             if(message==null) continue;
+            
+            if(message.contains("ID#"))
+            	message=message.split("ID#")[0];
 
             Map<String,String > ownersEmailId = new HashMap<>();
             
