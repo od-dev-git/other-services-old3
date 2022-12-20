@@ -60,7 +60,12 @@ public class MRNotificationService {
      * @param request The MarriageRegistrationRequest listenend on the kafka topic
      */
     public void process(MarriageRegistrationRequest request){
-
+    	String applicationStatus = request.getMarriageRegistrations().get(0).getStatus();
+    	if(MRConstants.NOTIFICATION_DISABLE_STATUSES.contains(applicationStatus)) {
+    		log.info("Notification Disabled For State :" + applicationStatus);
+			return;
+    	}
+    		
         String businessService = request.getMarriageRegistrations().isEmpty()?null:request.getMarriageRegistrations().get(0).getBusinessService();
 		if (businessService == null)
 			businessService = businessService_MR;
