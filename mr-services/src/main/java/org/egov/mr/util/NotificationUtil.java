@@ -10,8 +10,11 @@ import org.egov.mr.producer.Producer;
 import org.egov.mr.repository.ServiceRequestRepository;
 import org.egov.mr.web.models.AppointmentDetails;
 import org.egov.mr.web.models.Difference;
+import org.egov.mr.web.models.Email;
+import org.egov.mr.web.models.EmailRequest;
 import org.egov.mr.web.models.EventRequest;
 import org.egov.mr.web.models.MarriageRegistration;
+import org.egov.mr.web.models.MarriageRegistrationRequest;
 import org.egov.mr.web.models.RequestInfoWrapper;
 import org.egov.mr.web.models.SMSRequest;
 import org.egov.tracer.model.CustomException;
@@ -24,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import  static org.egov.mr.util.MRConstants.*;
 
@@ -531,7 +535,7 @@ public class NotificationUtil {
 
 		String finalPath = UIHost + paymentPath;
 
-		message = message.replace(PAYMENT_LINK_PLACEHOLDER,getShortenedUrl(finalPath));
+//		message = message.replace(PAYMENT_LINK_PLACEHOLDER,getShortenedUrl(finalPath));
 		
 		return message;
 	}
@@ -582,6 +586,29 @@ public class NotificationUtil {
 			return url;
 		}
 		else return res;
+	}
+
+	public List<EmailRequest> createEmailRequest(String message, Map<String, String> ownersEmailId,
+			MarriageRegistrationRequest request) {
+		
+		Set<String> emailTo = ownersEmailId.keySet().stream().collect(Collectors.toSet());
+		String subject = config.getEmailSubject().replaceAll(MRConstants.EMAIL_SUBJECT_ID_KEY, request.getMarriageRegistrations().get(0).getApplicationNumber());
+		
+		List<EmailRequest> emailRequest = new LinkedList<>();
+		Email email = Email.builder().body(message).emailTo(emailTo).subject(subject).build();
+		emailRequest.add(EmailRequest.builder().email(email).requestInfo(request.getRequestInfo()).build());
+		return emailRequest;
+	}
+	
+	public void sendEmail(List<EmailRequest> emailRequestList, boolean isEmailEnabled) {
+		if (isEmailEnabled) {
+			if (CollectionUtils.isEmpty(emailRequestList))
+				log.info("Messages from localization couldn't be fetched!");
+			for (EmailRequest emailRequest : emailRequestList) {
+				producer.push(config.getEmailNotifTopic(), emailRequest);
+				log.info(" Email pushed to send: " + emailRequest.getEmail());
+			}
+		}
 	}
 
 }

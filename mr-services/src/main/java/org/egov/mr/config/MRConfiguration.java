@@ -211,5 +211,15 @@ public class MRConfiguration {
     
     @Value("${egov.receipt.businessserviceMR}")
     private String businessServiceMR;
+    
+    //Email
+    @Value("${notification.email.enabled.forMR}")
+    private Boolean isEmailEnabled;
+    
+    @Value("${kafka.topics.notification.email}")
+    private String emailNotifTopic;
+    
+    @Value("${text.for.subject.email.notif}")
+    private String emailSubject;
 
 }

@@ -12,6 +12,7 @@ import org.egov.mr.util.MarriageRegistrationUtil;
 import org.egov.mr.util.NotificationUtil;
 import org.egov.mr.web.models.Action;
 import org.egov.mr.web.models.ActionItem;
+import org.egov.mr.web.models.EmailRequest;
 import org.egov.mr.web.models.Event;
 import org.egov.mr.web.models.EventRequest;
 import org.egov.mr.web.models.MarriageRegistration;
@@ -59,7 +60,12 @@ public class MRNotificationService {
      * @param request The MarriageRegistrationRequest listenend on the kafka topic
      */
     public void process(MarriageRegistrationRequest request){
-
+    	String applicationStatus = request.getMarriageRegistrations().get(0).getStatus();
+    	if(MRConstants.NOTIFICATION_DISABLE_STATUSES.contains(applicationStatus)) {
+    		log.info("Notification Disabled For State :" + applicationStatus);
+			return;
+    	}
+    		
         String businessService = request.getMarriageRegistrations().isEmpty()?null:request.getMarriageRegistrations().get(0).getBusinessService();
 		if (businessService == null)
 			businessService = businessService_MR;
@@ -67,6 +73,7 @@ public class MRNotificationService {
 		{
 			case businessService_MR:
 				List<SMSRequest> smsRequestsMR = new LinkedList<>();
+				List<EmailRequest> emailRequestsMR = new LinkedList<>();
 				if(null != config.getIsMRSMSEnabled()) {
 					if(config.getIsMRSMSEnabled()) {
 						enrichSMSRequest(request,smsRequestsMR);
@@ -79,6 +86,13 @@ public class MRNotificationService {
 						EventRequest eventRequest = getEventsForMR(request);
 						if(null != eventRequest)
 							util.sendEventNotification(eventRequest);
+					}
+				}
+				if(null != config.getIsEmailEnabled()) {
+					if(config.getIsEmailEnabled()) {
+						enrichEmailRequest(request, emailRequestsMR);
+						if(!CollectionUtils.isEmpty(emailRequestsMR)) 
+							util.sendEmail(emailRequestsMR, true);
 					}
 				}
 				break;
@@ -261,7 +275,55 @@ public class MRNotificationService {
     }
 
 
+    private void enrichEmailRequest(MarriageRegistrationRequest request,List<EmailRequest> emailRequests){
+        
+    	String tenantId = request.getMarriageRegistrations().get(0).getTenantId();
+    	
+    	String localizationMessagesForCorrection = mrCorrectionNotificationUtil.getLocalizationMessages(tenantId, request.getRequestInfo());
+    	String localizationMessagesForNew = util.getLocalizationMessages(tenantId, request.getRequestInfo());
+        for(MarriageRegistration marriageRegistration : request.getMarriageRegistrations()){
+			String businessService = marriageRegistration.getBusinessService();
+			if (businessService == null)
+				businessService = businessService_MR;
+			String message = null;
+			String applicationType = String.valueOf(marriageRegistration.getApplicationType());
+			if (businessService.equals(businessService_MR)) {
+				if(applicationType.equals(APPLICATION_TYPE_CORRECTION)){
+					//String localizationMessages = mrCorrectionNotificationUtil.getLocalizationMessages(tenantId, request.getRequestInfo());
+					message = mrCorrectionNotificationUtil.getCustomizedMsg(request.getRequestInfo(), marriageRegistration, localizationMessagesForCorrection);
+				}
+				else{
+					//String localizationMessages = util.getLocalizationMessages(tenantId, request.getRequestInfo());
+					message = util.getCustomizedMsg(request.getRequestInfo(), marriageRegistration, localizationMessagesForNew);
+				}
 
+			}
+			
+			
+            if(message==null) continue;
+            
+            if(message.contains("ID#"))
+            	message=message.split("ID#")[0];
+
+            Map<String,String > ownersEmailId = new HashMap<>();
+            
+            if(CollectionUtils.isEmpty(marriageRegistration.getCoupleDetails())) {
+            	log.info("No Email Id present for application number : "+ marriageRegistration.getApplicationNumber());
+            } else {
+            	// Bride details
+            	String brideName=marriageRegistration.getCoupleDetails().get(0).getBride().getFirstName();
+            	String brideEmail=marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getEmailAddress();
+            	ownersEmailId.put(brideEmail, brideName);
+            	
+            	// Groom details
+            	String groomName=marriageRegistration.getCoupleDetails().get(0).getGroom().getFirstName();
+            	String groomEmail=marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress().getEmailAddress();
+            	ownersEmailId.put(groomEmail, groomName);
+            	
+            	emailRequests.addAll(util.createEmailRequest(message,ownersEmailId, request));
+            }
+        }
+    }
 
 
 
