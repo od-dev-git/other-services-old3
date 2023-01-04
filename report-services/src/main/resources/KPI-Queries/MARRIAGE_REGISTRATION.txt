@@ -3,3 +3,33 @@ Marriage Registration Applications Data
 ---------------------------------------
 
 select * from eg_mr_application where tenantid != 'od.testing' and status != 'INITIATED';
+
+----------------------------------------------------------------------------------------------------------
+
+--------------------
+MR Collection Report
+--------------------
+
+
+select
+	initcap(split_part(epd.tenantid,'.',2)) as ulb
+	, to_timestamp(epd.receiptdate/1000)::date as receiptdate
+	, epd.receiptnumber
+	, to_timestamp(epd.createdtime/1000)::date as createdtime
+	, eb.consumercode AS consumercode
+	, epd.amountpaid
+	, ep.paymentmode
+	, case
+	   when epd.businessservice='WS.ONE_TIME_FEE' then 'WS Application Fee'
+	   when epd.businessservice='WS' then 'WS Monthly Fee'
+	   when epd.businessservice='BPA.NC_SAN_FEE' then 'BPA Sanction Fee'
+	   when epd.businessservice='BPA.NC_APP_FEE' then 'BPA Application Fee'
+	   when epd.businessservice='PT.MUTATION' then 'PT Mutation Fee'
+	   when epd.businessservice='PT' then 'Property Tax'
+       when epd.businessservice='MR' then 'MR Application Fee'
+	 end as feeType
+from egcl_paymentdetail epd
+inner join egcl_bill eb on eb.id = epd.billid
+inner join egcl_payment ep on ep.id = epd.paymentid
+where epd.businessservice in ('MR')
+and ep.paymentstatus != 'CANCELLED';
