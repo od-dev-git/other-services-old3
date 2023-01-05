@@ -432,7 +432,7 @@ public class ReportQueryBuilder {
 		
 		StringBuilder query = new StringBuilder(QUERY_FOR_CONSUMER_BILL_HISTORY);
 		
-		query.append(" d.businessservice ='WS' ");
+		query.append(" d.businessservice ='WS' and d.status !='CANCELLED' ");
 		query.append(AND_QUERY).append(" d.consumercode = ? ");
 		preparedStmtList.add(criteria.getConsumerCode());
 		
