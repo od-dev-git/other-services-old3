@@ -664,7 +664,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                 log.info("Water Search Criteria : " + searchCriteria.toString());
 
                 Map<String, MiscellaneousWaterDetails> waterMap = reportRepository.getWaterConnectionNoDetails(searchCriteria);
-                Set<String> waterConnectionsSet = waterMap.entrySet().parallelStream().map(waterConnection -> waterConnection.getKey()).collect(Collectors.toSet());
+                Set<String> waterConnectionsSet = waterMap.keySet();
                 
                 log.info("Water Connetcions : " + waterConnectionsSet.toString());
 
@@ -720,9 +720,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
     }
 
 
-    private void enrichingWithUserDetails(RequestInfo requestInfo, List<EmployeeWiseWSCollectionResponse> response) {
+    private void enrichingWithUserDetails(RequestInfo requestInfo, List<EmployeeWiseWSCollectionResponse> employeeWiseCollectionFinalResponse) {
         log.info("setting UserIds");
-        List<Long> userIds = response.parallelStream().map(item -> Long.valueOf(item.getEmployeeId()))
+        List<Long> userIds = employeeWiseCollectionFinalResponse.parallelStream().map(item -> Long.valueOf(item.getEmployeeId()))
                 .distinct().collect(Collectors.toList());
         log.info("setting User Search Criteria");
         org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
@@ -735,7 +735,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
                 .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
         log.info("setting User Details Here");
-        response.parallelStream().forEach(item -> {
+        employeeWiseCollectionFinalResponse.parallelStream().forEach(item -> {
             org.egov.report.user.User user = userMap.get(Long.valueOf(item.getEmployeeId()));
             if (user != null) {
                 item.setEmployeeId(user.getUsername());
