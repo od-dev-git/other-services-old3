@@ -268,5 +268,12 @@ public class WSReportRepository {
             String query = queryBuilder.getMiscellaneousWaterDetailsQuery(searchCriteria, preparedStmtList);
             return jdbcTemplate.query(query, preparedStmtList.toArray(), new MiscellaneousWaterDetailsRowMapper());
         }
+
+
+        public Map<String, MiscellaneousWaterDetails> getWaterConnectionNoDetails(WSReportSearchCriteria searchCriteria) {
+            List<Object> preparedStmtList = new ArrayList<>();
+            String query = queryBuilder.getMiscellaneousWaterConnectionDetailsQuery(searchCriteria, preparedStmtList);
+            return jdbcTemplate.query(query, preparedStmtList.toArray(), new MiscellaneousWaterDetailsRowMapper());
+        }
         
 }

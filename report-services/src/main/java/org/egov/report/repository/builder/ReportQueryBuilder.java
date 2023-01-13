@@ -995,4 +995,20 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 
         return query.toString();
     }
+
+    public String getMiscellaneousWaterConnectionDetailsQuery(WSReportSearchCriteria searchCriteria,
+            List<Object> preparedStmtList) {
+        StringBuilder query = new StringBuilder(QUERY_FOR_WS_MISCELLANEOUSDETAILS);
+
+        query.append(AND_QUERY).append(" ewc.tenantid = ? ");
+        preparedStmtList.add(searchCriteria.getTenantId());
+        if(StringUtils.hasText(searchCriteria.getWard())) {
+            query.append(AND_QUERY).append(" ewc.additionaldetails->> 'ward' = ? ");
+            preparedStmtList.add(searchCriteria.getWard());
+        }
+
+        addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedStmtList);
+
+        return query.toString();
+    }
 }
