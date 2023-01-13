@@ -643,30 +643,35 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
         Long count = reportRepository.getWaterConnectionCount(searchCriteria);
         log.info("No of Water Connetcions : " + count.toString());
-        Integer limit = configuration.getReportConnectionsLimit();
+        Integer limit = configuration.getReportLimit();
         Integer offset = 0;
 
         List<EmployeeWiseWSCollectionResponse> finalResponse = new ArrayList<>();
+        
+        log.info("setting Payments Search Criteria");
+        PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
+                .businessServices(Stream.of("WS").collect(Collectors.toSet()))
+  //            .consumerCodes(waterConnectionsSet)
+                .fromDate(searchCriteria.getFromDate())
+                .toDate(searchCriteria.getToDate())
+                .build();
+        log.info(" Payments Search Criteria : " + paymentSearchCriteria.toString());
 
         if (count > 0) {
             while (count > 0) {
                 searchCriteria.setLimit(limit);
                 searchCriteria.setOffset(offset);
                 log.info("Water Search Criteria : " + searchCriteria.toString());
-                Set<String> waterConnectionsSet = reportRepository.getWaterConnection(searchCriteria).stream()
-                        .collect(Collectors.toSet());
+
+                Map<String, MiscellaneousWaterDetails> waterMap = reportRepository.getWaterConnectionNoDetails(searchCriteria);
+                Set<String> waterConnectionsSet = waterMap.entrySet().parallelStream().map(waterConnection -> waterConnection.getKey()).collect(Collectors.toSet());
+                
                 log.info("Water Connetcions : " + waterConnectionsSet.toString());
 
                 searchCriteria.setConsumerNumbers(waterConnectionsSet);
 
-                log.info("setting Payments Search Criteria");
-                PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
-                        .businessServices(Stream.of("WS").collect(Collectors.toSet()))
-                        .consumerCodes(waterConnectionsSet)
-                        .fromDate(searchCriteria.getFromDate())
-                        .toDate(searchCriteria.getToDate())
-                        .build();
-                log.info(" Payments Search Criteria : " + paymentSearchCriteria.toString());
+                log.info("Setting Water Connections in Payments Search Criteria");
+                paymentSearchCriteria.setConsumerCodes(waterConnectionsSet);
 
                 if (StringUtils.hasText(searchCriteria.getPaymentMode())) {
                     paymentSearchCriteria.setPaymentModes(
@@ -691,17 +696,10 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
                     if (!CollectionUtils.isEmpty(response)) {
 
-                     // getting User Details
-                        enrichingWithUserDetails(requestInfo, response);
-
                         // getting Water Details
                         log.info("Fetching Water Details ");
-
-                        WSReportSearchCriteria searchingCriteria = WSReportSearchCriteria.builder()
-                                .tenantId(searchCriteria.getTenantId()).consumerNumbers(waterConnectionsSet).build();
-                        log.info(" WS Report Search Criteria " + searchingCriteria.toString() );
                         
-                        enrichWaterDetails(response, searchingCriteria);
+                        enrichWaterDetails(response, waterMap);
 
                     }
 
@@ -713,6 +711,10 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
             }
         }
+        
+        // getting User Details
+        enrichingWithUserDetails(requestInfo, finalResponse);
+        
 
         return finalResponse;
     }
@@ -720,7 +722,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
     private void enrichingWithUserDetails(RequestInfo requestInfo, List<EmployeeWiseWSCollectionResponse> response) {
         log.info("setting UserIds");
-        List<Long> userIds = response.stream().map(item -> Long.valueOf(item.getEmployeeId()))
+        List<Long> userIds = response.parallelStream().map(item -> Long.valueOf(item.getEmployeeId()))
                 .distinct().collect(Collectors.toList());
         log.info("setting User Search Criteria");
         org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
@@ -733,7 +735,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
         Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
                 .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
         log.info("setting User Details Here");
-        response.stream().forEach(item -> {
+        response.parallelStream().forEach(item -> {
             org.egov.report.user.User user = userMap.get(Long.valueOf(item.getEmployeeId()));
             if (user != null) {
                 item.setEmployeeId(user.getUsername());
@@ -743,10 +745,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
     }
 
 
+    
     private void enrichWaterDetails(List<EmployeeWiseWSCollectionResponse> response,
-            WSReportSearchCriteria searchingCriteria) {
-        Map<String, MiscellaneousWaterDetails> waterMap = reportRepository
-                .getMiscellaneousWaterDetails(searchingCriteria);
+            Map<String, MiscellaneousWaterDetails> waterMap) {
         log.info("Setting Water Details ");
         response.parallelStream().forEach(collectionResponseRow -> {
             MiscellaneousWaterDetails miscellaneousWaterDetails = waterMap
@@ -756,7 +757,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                 collectionResponseRow.setWard(miscellaneousWaterDetails.getWard());
             }
         });
-    }
+    }    
 	
 	public List<ULBWiseWaterConnectionDetails> getNoOfWSConnectionsElegibleForDemand(RequestInfo requestInfo,
 			WSReportSearchCriteria searchCriteria) {
