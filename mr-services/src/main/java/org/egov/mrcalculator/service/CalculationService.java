@@ -270,7 +270,7 @@ public class CalculationService {
 				
 				if(tatkalregistrationFeesMap == null || tatkalregistrationFeesMap.isEmpty())
 				{
-					throw new CustomException("BILLING ERROR","Tatkal Registration Fee Not Found  ");	
+					throw new CustomException("BILLING ERROR","Tatkal registration fee not configured.");	
 				}
 				
 //				if(developmentFeesMap == null || developmentFeesMap.isEmpty())
