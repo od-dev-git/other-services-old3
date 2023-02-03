@@ -61,7 +61,10 @@ public class MRCalculatorConfigs {
     
     @Value("${egov.taxhead.userFee}")
     private String userFeeTaxHead;
-
+    
+    @Value("${egov.taxhead.tatkalFee}")
+    private String tatkalFeeTaxHead;
+    
 
     //MDMS
     @Value("${egov.mdms.host}")

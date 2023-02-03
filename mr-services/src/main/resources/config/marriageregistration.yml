@@ -7,7 +7,7 @@ serviceMaps:
    isTransaction: true
    queryMaps:
 
-       - query: INSERT INTO eg_mr_application(id, accountid, tenantid, applicationtype, mrnumber, applicationnumber, applicationdate , marriagedate, issueddate, action, status, createdby, lastmodifiedby, createdtime, lastmodifiedtime, businessservice, workflowcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+       - query: INSERT INTO eg_mr_application(id, accountid, tenantid, applicationtype, mrnumber, applicationnumber, applicationdate , marriagedate, issueddate, action, status, createdby, lastmodifiedby, createdtime, lastmodifiedtime, businessservice, workflowcode, isTatkalApplication) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
          basePath: MarriageRegistrations.*
          jsonMaps:
           - jsonPath: $.MarriageRegistrations.*.id
@@ -43,6 +43,8 @@ serviceMaps:
           - jsonPath: $.MarriageRegistrations.*.businessService
 
           - jsonPath: $.MarriageRegistrations.*.workflowCode
+          
+          - jsonPath: $.MarriageRegistrations.*.isTatkalApplication
 
 
 
@@ -431,7 +433,7 @@ serviceMaps:
          jsonMaps:
           - jsonPath: $.MarriageRegistrations.*.coupleDetails.*.groom.witness.id   
 
-       - query: UPDATE public.eg_mr_application SET accountid=?,  mrnumber=? , marriagedate=? , issueddate=?, action=?, status=?, lastmodifiedby=?,  lastmodifiedtime=? ,businessservice = ?, applicationtype = ?, workflowcode = ? WHERE id = ?;
+       - query: UPDATE public.eg_mr_application SET accountid=?,  mrnumber=? , marriagedate=? , issueddate=?, action=?, status=?, lastmodifiedby=?,  lastmodifiedtime=? ,businessservice = ?, applicationtype = ?, workflowcode = ?, isTatkalApplication = ? WHERE id = ?;
          basePath: MarriageRegistrations.*
          jsonMaps:
           - jsonPath: $.MarriageRegistrations.*.accountId
@@ -455,6 +457,8 @@ serviceMaps:
           - jsonPath: $.MarriageRegistrations.*.applicationType          
       
           - jsonPath: $.MarriageRegistrations.*.workflowCode
+          
+          - jsonPath: $.MarriageRegistrations.*.isTatkalApplication
 
           - jsonPath: $.MarriageRegistrations.*.id
 
