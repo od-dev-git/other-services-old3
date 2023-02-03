@@ -6,6 +6,7 @@ import static org.egov.mr.util.MRConstants.MDMS_AFTER_30_DAYS_OF_MARRIAGE;
 import static org.egov.mr.util.MRConstants.MDMS_WITHIN_30_DAYS_OF_MARRIAGE;
 import static org.egov.mr.util.MRConstants.MDMS_AFTER_ONE_YEAR_OF_MARRIAGE;
 import static org.egov.mr.util.MRConstants.MDMS_WITHIN_ONE_YEAR_OF_MARRIAGE;
+import static org.egov.mr.util.MRConstants.MDMS_TATKAL_REGISTRATION_FEES;
 import static org.egov.mr.util.MRConstants.MDMS_CHALLAN_FEE;
 import static org.egov.mr.util.MRConstants.MDMS_REGISTRATION_FEE;
 import static org.egov.mr.util.MRConstants.MDMS_DEVELOPMENT_FEE;
@@ -247,6 +248,8 @@ public class CalculationService {
 				
 				LinkedHashMap<String,Object> registrationFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_REGISTRATION_FEE);
 				
+				LinkedHashMap<String,Object> tatkalregistrationFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_TATKAL_REGISTRATION_FEES);
+				
 //				LinkedHashMap<String,Object> developmentFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_DEVELOPMENT_FEE);
 				
 //				LinkedHashMap<String,Object> redcrossFeesMap  = (LinkedHashMap<String, Object>) mdmsMap.get(MDMS_REDCROSS_FEE);
@@ -263,6 +266,11 @@ public class CalculationService {
 				if(registrationFeesMap == null || registrationFeesMap.isEmpty())
 				{
 					throw new CustomException("BILLING ERROR","Registration Fee Not Found  ");	
+				}
+				
+				if(tatkalregistrationFeesMap == null || tatkalregistrationFeesMap.isEmpty())
+				{
+					throw new CustomException("BILLING ERROR","Tatkal Registration Fee Not Found  ");	
 				}
 				
 //				if(developmentFeesMap == null || developmentFeesMap.isEmpty())
@@ -283,6 +291,7 @@ public class CalculationService {
 				
 					BigDecimal challanFee ;
 					BigDecimal registrationFee ;
+					BigDecimal tatkalRegistrationFees = BigDecimal.ZERO;
 //					BigDecimal developmentFee ;
 //					BigDecimal redcrossFee ;
 //					BigDecimal userFee ;
@@ -310,7 +319,8 @@ public class CalculationService {
 						challanFee = new BigDecimal(challanFeesMap.get(MDMS_WITHIN_30_DAYS_OF_MARRIAGE).toString());
 					}else
 						challanFee = new BigDecimal(challanFeesMap.get(MDMS_AFTER_30_DAYS_OF_MARRIAGE).toString());
-
+                    
+										
 					Calendar fromDateForRegistration = new GregorianCalendar(); 
 					
 					fromDateForRegistration.setTimeInMillis(marriageDate);
@@ -325,6 +335,10 @@ public class CalculationService {
 					}else
 						registrationFee = new BigDecimal(registrationFeesMap.get(MDMS_AFTER_ONE_YEAR_OF_MARRIAGE).toString());
 					
+					if(marriageRegistration.getIsTatkalApplication() != null && marriageRegistration.getIsTatkalApplication() == Boolean.TRUE) {
+						tatkalRegistrationFees = new BigDecimal(tatkalregistrationFeesMap.get(MDMS_COST).toString());
+					}
+						
 //					developmentFee =  new BigDecimal(developmentFeesMap.get(MDMS_COST).toString());
 //					
 //					redcrossFee = new BigDecimal(redcrossFeesMap.get(MDMS_COST).toString());
@@ -336,6 +350,9 @@ public class CalculationService {
 
 					if(registrationFee.compareTo(BigDecimal.ZERO)==-1)
 						throw new CustomException("INVALID AMOUNT","Registration Fee amount is negative");
+					
+					if(tatkalRegistrationFees.compareTo(BigDecimal.ZERO)==-1)
+						throw new CustomException("INVALID AMOUNT","Tatkal Registration Fee amount is negative");
 					
 //					if(developmentFee.compareTo(BigDecimal.ZERO)==-1)
 //						throw new CustomException("INVALID AMOUNT","Development Fee amount is negative");
@@ -380,6 +397,17 @@ public class CalculationService {
 						registrationFeeEstimate.setTaxHeadCode(config.getRegistrationFeeTaxHead());
 						estimateList.add(registrationFeeEstimate);
 						
+					}
+					
+					if(marriageRegistration.getIsTatkalApplication() != null && marriageRegistration.getIsTatkalApplication() == Boolean.TRUE) {
+
+						TaxHeadEstimate tatkalFeeEstimate = new TaxHeadEstimate();
+
+						tatkalFeeEstimate.setEstimateAmount(tatkalRegistrationFees);
+						tatkalFeeEstimate.setCategory(Category.FEE);
+
+						tatkalFeeEstimate.setTaxHeadCode(config.getTatkalFeeTaxHead());
+						estimateList.add(tatkalFeeEstimate);
 					}
 					
 //					TaxHeadEstimate developmentFeeEstimate = new TaxHeadEstimate();

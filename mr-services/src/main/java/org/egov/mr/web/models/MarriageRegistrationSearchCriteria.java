@@ -61,6 +61,12 @@ public class MarriageRegistrationSearchCriteria {
 
     @JsonProperty("limit")
     private Integer limit;
+    
+    @JsonProperty("isTatkalApplication")
+    private Boolean isTatkalApplication;
+    
+    @JsonProperty("isInworkflow")
+    private Boolean isInworkflow;
 
 
 

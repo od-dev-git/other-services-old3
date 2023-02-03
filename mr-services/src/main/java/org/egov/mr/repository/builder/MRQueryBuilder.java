@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.mr.config.MRConfiguration;
+import org.egov.mr.util.MRConstants;
 import org.egov.mr.web.models.*;
 import org.egov.tracer.model.CustomException;
 import org.postgresql.util.PGobject;
@@ -48,7 +49,7 @@ public class MRQueryBuilder {
             "mrapldoc.id as mr_ap_doc_id,mrapldoc.documenttype as mr_ap_doc_documenttype,mrapldoc.filestoreid as mr_ap_doc_filestoreid,mrapldoc.active as mr_ap_doc_active," +
             "mrdscdetails.id as mr_dsc_details_id,mrdscdetails.documenttype as mr_dsc_details_documenttype,mrdscdetails.documentid  as mr_dsc_details_documentid,mrdscdetails.additionaldetail as  mr_dsc_details_additionaldetail,mrdscdetails.applicationnumber as mr_dsc_details_applicationnumber," +
             "mraptdtl.id as mr_apt_dtl_id,mraptdtl.startTime as mr_apt_dtl_startTime,mraptdtl.endTime as mr_apt_dtl_endTime,mraptdtl.active as mr_apt_dtl_active,mraptdtl.description as mr_apt_dtl_description,mraptdtl.additionalDetail as mr_apt_dtl_additionalDetail," +
-            "mrverdoc.id as mr_ver_doc_id,mrverdoc.documenttype as mr_ver_doc_documenttype,mrverdoc.filestoreid as mr_ver_doc_filestoreid,mrverdoc.active as mr_ver_doc_active FROM eg_mr_application mr " 
+            "mrverdoc.id as mr_ver_doc_id,mrverdoc.documenttype as mr_ver_doc_documenttype,mrverdoc.filestoreid as mr_ver_doc_filestoreid,mrverdoc.active as mr_ver_doc_active,mr.istatkalapplication as istatkalapplication FROM eg_mr_application mr " 
             +INNER_JOIN_STRING
             +"eg_mr_marriageplace mrp ON mrp.mr_id = mr.id"
             +INNER_JOIN_STRING
@@ -83,7 +84,8 @@ public class MRQueryBuilder {
               " result) result_offset " +
               "WHERE offset_ > ? AND offset_ <= ?";
       
-      
+      private final String IS_INWORKFLOW_QUERY = " mr.status not in ( '"+MRConstants.STATUS_APPROVED+"','"+MRConstants.STATUS_REJECTED+"','" +
+    		                                    MRConstants.STATUS_CANCELLED+"')";
       
       public String getMRDscDetailsQuery(MarriageRegistrationSearchCriteria criteria, List<Object> preparedStmtList) {
 
@@ -186,8 +188,17 @@ public class MRQueryBuilder {
                 builder.append("  mr.applicationDate <= ? ");
                 preparedStmtList.add(criteria.getToDate());
             }
-
-
+            
+            if (criteria.getIsTatkalApplication() != null && criteria.getIsTatkalApplication()) {
+                addClauseIfRequired(preparedStmtList, builder);
+                builder.append("  mr.isTatkalApplication = ? ");
+                preparedStmtList.add(criteria.getIsTatkalApplication());
+            }
+            
+            if(criteria.getIsInworkflow() != null && criteria.getIsInworkflow()) {
+            	  addClauseIfRequired(preparedStmtList, builder);
+            	  builder.append(IS_INWORKFLOW_QUERY);
+            }
 
         }
 

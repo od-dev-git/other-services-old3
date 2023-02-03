@@ -123,10 +123,15 @@ public class MarriageRegistrationService {
 		List<MarriageRegistration> marriageRegistrations;
 		// allow mobileNumber based search by citizen if interserviceCall
 		boolean isInterServiceCall = isInterServiceCall(headers);
+		if(criteria.getIsTatkalApplication() != null && criteria.getIsTatkalApplication()) {
+			marriageRegistrations = getMarriageRegistrationsForTatkal(criteria, requestInfo);
+		}
+		else {
 		mrValidator.validateSearch(requestInfo,criteria,serviceFromPath, isInterServiceCall);
 		criteria.setBusinessService(serviceFromPath);
 		enrichmentService.enrichSearchCriteriaWithAccountId(requestInfo,criteria);
-
+		}
+		
 		if(criteria.getMobileNumber()!=null){
 			marriageRegistrations = getMarriageRegistrationsFromMobileNumber(criteria, requestInfo);
         }
@@ -139,7 +144,12 @@ public class MarriageRegistrationService {
 
 		return marriageRegistrations;
 	}
-
+     
+	public List<MarriageRegistration> getMarriageRegistrationsForTatkal(MarriageRegistrationSearchCriteria criteria, RequestInfo requestInfo){
+        List<MarriageRegistration> marriageRegistrations = new LinkedList<>();
+        marriageRegistrations = repository.getMarriageRegistartions(criteria);
+        return marriageRegistrations;
+	}
 	
 	public List<MarriageRegistration> getMarriageRegistrationsFromMobileNumber(MarriageRegistrationSearchCriteria criteria, RequestInfo requestInfo){
         List<MarriageRegistration> marriageRegistrations = new LinkedList<>();
