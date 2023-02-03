@@ -94,7 +94,10 @@ public class EnrichmentService {
                 }
                
                 break;
-        }
+        }       
+			if(marriageRegistration.getIsTatkalApplication() == null)
+			marriageRegistration.setIsTatkalApplication(Boolean.FALSE);
+			
 
 			marriageRegistration.getCoupleDetails().forEach(couple -> {
 				couple.getBride().setTenantId(marriageRegistration.getTenantId());
@@ -438,8 +441,9 @@ public class EnrichmentService {
 
 				});
 
-
-			
+				if(marriageRegistration.getIsTatkalApplication() == null)
+					marriageRegistration.setIsTatkalApplication(Boolean.FALSE);
+				
 
 
 

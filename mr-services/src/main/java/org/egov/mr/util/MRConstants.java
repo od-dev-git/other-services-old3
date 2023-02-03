@@ -82,7 +82,9 @@ public class MRConstants {
 	 
 	 public static final String MDMS_AFTER_30_DAYS_OF_MARRIAGE = "after30daysOfMarriage";  
 	 
-	 public static final String MDMS_AFTER_ONE_YEAR_OF_MARRIAGE = "after1yearOfMarriage";  
+	 public static final String MDMS_AFTER_ONE_YEAR_OF_MARRIAGE = "after1yearOfMarriage"; 
+	 
+	 public static final String MDMS_TATKAL_REGISTRATION_FEES = "tatkalRegistrationFee";
 	 
 	 
 	 public static final String MDMS_WITHIN_ONE_YEAR_OF_MARRIAGE = "within1yearOfMarriage";  
