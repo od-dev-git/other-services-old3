@@ -230,7 +230,9 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 						if (user != null) {
 							item.setUserName(user.getName());
 							item.setUserMobile(user.getMobileNumber());
-							item.setUserAddress(user.getCorrespondenceAddress().getAddress());
+							if(user.getCorrespondenceAddress() != null ) {
+	                            item.setUserAddress(user.getCorrespondenceAddress().getAddress());   
+							}
 						}
 					});
 				}
