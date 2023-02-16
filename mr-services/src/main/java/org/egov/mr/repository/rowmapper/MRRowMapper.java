@@ -62,7 +62,8 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 				Long commencementDate = (Long) rs.getObject("marriageDate");
 				Long issuedDate = (Long) rs.getObject("issueddate");
 				Long applicationDate = (Long) rs.getObject("applicationdate");
-
+				Boolean isTatkalApplication = (Boolean) rs.getObject("istatkalapplication");
+				
 				AuditDetails auditdetails = AuditDetails.builder()
 						.createdBy(rs.getString("mr_createdBy"))
 						.createdTime(rs.getLong("mr_createdTime"))
@@ -82,6 +83,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 						.action(rs.getString("action"))
 						.status(rs.getString("status"))
 						.tenantId(tenantId)
+						.isTatkalApplication(isTatkalApplication)
 						.businessService(rs.getString("businessservice"))
 						.id(id)
 						.build();

@@ -97,6 +97,9 @@ public class MarriageRegistration {
     @JsonProperty("issuedDate")
     private Long issuedDate = null;
     
+    @JsonProperty("isTatkalApplication")
+	private Boolean isTatkalApplication ;
+    
     @NotNull
     @Size(max=64)
     @JsonProperty("action")
