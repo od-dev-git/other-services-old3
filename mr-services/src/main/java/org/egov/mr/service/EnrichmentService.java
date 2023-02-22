@@ -503,11 +503,7 @@ public class EnrichmentService {
 
 
 		if (marriageRegistrations.get(0).getApplicationType() != null && marriageRegistrations.get(0).getApplicationType().toString().equals(MRConstants.APPLICATION_TYPE_CORRECTION)) {
-			for(int i=0;i<marriageRegistrations.size();i++){
-				MarriageRegistration marriageRegistration = marriageRegistrations.get(i);
-				Long time = System.currentTimeMillis();
-				marriageRegistration.setIssuedDate(time);
-			}
+			return ;
 		}else {
 			for (int i = 0; i < marriageRegistrations.size(); i++) {
 				MarriageRegistration marriageRegistration = marriageRegistrations.get(i);
