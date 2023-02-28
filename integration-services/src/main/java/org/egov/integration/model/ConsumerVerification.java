@@ -37,9 +37,6 @@ public class ConsumerVerification {
 	@JsonProperty("owner")
 	private List<ConsumerVerificationOwner> consumerVerificationOwner;
 	
-	@JsonProperty("address")
-	private String address;
-	
 	@JsonProperty("status")
 	private String status;
 	
