@@ -32,22 +32,29 @@ public class ConsumerVerificationService {
 	case "BPA":
 		response = ConsumerVerification.builder().consumerNo("DCR72021ISSU0").businessService(businessService).consumerVerificationOwner(Arrays.asList(ownerinfo))
 				.tenantId("Cuttack").status("INACTIVE").build();
+		break;
     case "MR" :
     	response = ConsumerVerification.builder().consumerNo("MR/CTC/000011").businessService(businessService).consumerVerificationOwner(null)
 		.tenantId("Cuttack").status("ACTIVE").build();
+    	break;
     case "TL" :
     	ConsumerVerificationOwner ownerinfotl = ConsumerVerificationOwner.builder()
-		.ownerName("Amitabh").address("Near Udyog Vihar ").build();
+		.ownerName("Shahrukh").address("Shop No 68 ,Near Udyog Vihar ").build();
     	response = ConsumerVerification.builder().consumerNo("TL/CTC/000219").businessService(businessService).consumerVerificationOwner(Arrays.asList(ownerinfotl))
 		.tenantId("Cuttack").status("INACTIVE").build();
+    	break;
+    	
     case "WS" :
     	response = ConsumerVerification.builder().consumerNo("WS/BMC/1908399").businessService(businessService).consumerVerificationOwner(null)
 		.tenantId("Bhubaneswar").status("ACTIVE").build();
+    	break;
+    	
     case "PT" :
     	ConsumerVerificationOwner ownerinfotpt = ConsumerVerificationOwner.builder()
-		.ownerName("Amitabh").address("29-d , Arya Nagar , Sundargarh Colony ").build();
+		.ownerName("Charan").address("29-d , Arya Nagar , Sundargarh Colony ").build();
     	response = ConsumerVerification.builder().consumerNo("PT-SNG-689867").businessService(businessService).consumerVerificationOwner(Arrays.asList(ownerinfotpt))
 		.tenantId("Sundargarh").status("INACTIVE").build();
+    	
     
     }
 

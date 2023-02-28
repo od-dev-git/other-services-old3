@@ -20,10 +20,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class RequestInfoWrapper {
-
+	
 	@JsonProperty(value="RequestInfo")
 	private RequestInfo requestInfo;
 	
-	@JsonProperty("ConsumerVerificationRequestInfo")
+	@JsonProperty("criteria")
 	private @Valid ConsumerVerificationSearchCriteria consumerVerificationRequest;
 }

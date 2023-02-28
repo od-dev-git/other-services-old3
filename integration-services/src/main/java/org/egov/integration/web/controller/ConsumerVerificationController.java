@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/consumer/verification")
+@RequestMapping("/consumer")
 public class ConsumerVerificationController {
 	
 	@Autowired
@@ -30,15 +30,14 @@ public class ConsumerVerificationController {
 	@Autowired
 	private ConsumerVerificationService consumerVerificationService;
 
-	@PostMapping("/_search")
+	@PostMapping("/_verification")
 	public ResponseEntity<ConsumerVerificationResponse> search(@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		
 		ConsumerVerificationSearchCriteria searchCriteria = requestInfoWrapper.getConsumerVerificationRequest();
 		
 		List<ConsumerVerification> consumerVerificationInfo = consumerVerificationService.search(searchCriteria);
 		
-		ConsumerVerificationResponse response = ConsumerVerificationResponse.builder().consumerVerification(consumerVerificationInfo)
-				.responseInfo(responseInfoFactor.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		ConsumerVerificationResponse response = ConsumerVerificationResponse.builder().consumerVerification(consumerVerificationInfo).build();
 		return new ResponseEntity<ConsumerVerificationResponse>(response, HttpStatus.OK);
 	}
 }
