@@ -47,10 +47,10 @@ public class IntegrationConfiguration {
 	@Value("${egov.ws.search.path}")
 	private String wsSearchEndpoint;
 	
-	@Value("${daily.reconciliation.user.uuid}")
-    private String dailyReconciliationUserUuid;
+	@Value("${consumer.verification.user.uuid}")
+    private String consumerVerificationUserUuid;
     
-	@Value("${daily.reconciliation.user.type}")
-    private String dailyReconciliationUserType;
+	@Value("${consumer.verification.user.type}")
+    private String consumerVerificationUserType;
 
 }

@@ -61,8 +61,8 @@ public class ConsumerVerificationService implements InitializingBean{
 	public void afterPropertiesSet() throws Exception {
 
     	User userInfo = User.builder()
-                .uuid(configuration.getDailyReconciliationUserUuid())
-                .type(configuration.getDailyReconciliationUserType())
+                .uuid(configuration.getConsumerVerificationUserUuid())
+                .type(configuration.getConsumerVerificationUserType())
                 .roles(Collections.emptyList()).id(0L).build();
 
         requestInfo.setUserInfo(userInfo);
