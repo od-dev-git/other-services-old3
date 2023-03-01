@@ -2,12 +2,6 @@ package org.egov.integration.model;
 
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-
-import org.egov.integration.model.revenue.RevenueNotification;
-import org.egov.integration.model.revenue.RevenueOwner;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -23,8 +17,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @ToString
-public class ConsumerVerification {
-
+public class ConsumerVerificationServiceResponse {
+	
 	@JsonProperty("consumerNo")
 	private String consumerNo;
 	
@@ -34,10 +28,10 @@ public class ConsumerVerification {
 	@JsonProperty("businessService")
 	private String businessService;
 	
-	@JsonProperty("verificationowner")
-	private List<OwnerInfo> consumerVerificationOwner;
+	@JsonProperty("owners")
+	private List<VerificationOwner> verificationOwner;
 	
 	@JsonProperty("status")
 	private String status;
-	
+
 }
