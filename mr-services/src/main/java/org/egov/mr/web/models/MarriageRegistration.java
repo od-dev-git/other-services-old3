@@ -100,6 +100,10 @@ public class MarriageRegistration {
     @JsonProperty("isTatkalApplication")
 	private Boolean isTatkalApplication ;
     
+    @JsonProperty("scheduleSlaEndtime")
+    private Long scheduleSlaEndtime ;
+    
+    
     @NotNull
     @Size(max=64)
     @JsonProperty("action")

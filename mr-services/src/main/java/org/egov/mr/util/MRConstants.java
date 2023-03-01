@@ -249,6 +249,28 @@ public class MRConstants {
 
 	    public static final String EMAIL_SUBJECT_ID_KEY = "<%application no%>";
 	    
+	    public static final String MDMS_HOLIDAY_CALENDER = "$.MdmsRes.common-masters.HolidayCalender";
+	    
+	    public static final String MDMS_TATKAL_SLA_DEFS = "$.MdmsRes.MarriageRegistration.SlaDefs";
+	    
+	    public static final String HOLIDAY_CALENDER_JSON = "HolidayCalender";
+	    
+	    public static final String TATKAL_SLA_JSON = "SlaDefs";
+	    
+	    public static final String SLA_SCHEDULE = "schedule";
+	    
+	    public static final String SLA_APPROVE = "approve";
+	    
+	    public static final String SLA_HOURS = "slaHours";
+	    	    
+	    public static final String STATE_TENANT_ID = "od";
+	    
+	    public static final String SCHEDULE_SLA_END_DATE = "scheduleSlaEndDate";
+	    
+	    public static final String APPROVE_SLA_END_DATE = "approveSlaEndDate";
+	    
+	    public static final Long Hours_24 = Long.valueOf(24);
+	    
 	    public static final List<String> NOTIFICATION_CODES = Collections.unmodifiableList(Arrays.asList(
 	    		CORRECTION_NOTIFICATION_DOC_VERIFICATION,CORRECTION_NOTIFICATION_FORWARD_DOC_VERIFICATION,NOTIFICATION_PENDINDG_PAYMENT,CORRECTION_NOTIFICATION_INITIATED, CORRECTION_NOTIFICATION_APPLIED , CORRECTION_NOTIFICATION_PENDINGAPPROVAL,
 	            CORRECTION_NOTIFICATION_REJECTED,CORRECTION_NOTIFICATION_APPROVED,CORRECTION_NOTIFICATION_SENDBACK_CITIZEN,NOTIFICATION_INITIATED,NOTIFICATION_APPLIED ,NOTIFICATION_PENDING_APPROVAL,

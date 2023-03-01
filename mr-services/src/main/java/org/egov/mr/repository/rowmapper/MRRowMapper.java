@@ -63,6 +63,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 				Long issuedDate = (Long) rs.getObject("issueddate");
 				Long applicationDate = (Long) rs.getObject("applicationdate");
 				Boolean isTatkalApplication = (Boolean) rs.getObject("istatkalapplication");
+				Long scheduleSlaEndtime = (Long) rs.getObject("scheduleSlaEndtime");
 				
 				AuditDetails auditdetails = AuditDetails.builder()
 						.createdBy(rs.getString("mr_createdBy"))
@@ -84,6 +85,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 						.status(rs.getString("status"))
 						.tenantId(tenantId)
 						.isTatkalApplication(isTatkalApplication)
+						.scheduleSlaEndtime(scheduleSlaEndtime)
 						.businessService(rs.getString("businessservice"))
 						.id(id)
 						.build();
@@ -307,7 +309,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 				try {
 					Long startTime = (Long) rs.getObject("mr_apt_dtl_startTime");
 					Long endTime = (Long) rs.getObject("mr_apt_dtl_endTime");
-					
+					Long approveSlaEndtime = (Long) rs.getObject("approveSlaEndtime");
 					PGobject pgObj = (PGobject) rs.getObject("mr_apt_dtl_additionalDetail");
 
 					
@@ -319,6 +321,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 							.description(rs.getString("mr_apt_dtl_description"))
 							.tenantId(tenantId)
 							.active(rs.getBoolean("mr_apt_dtl_active"))
+							.approveSlaEndtime(approveSlaEndtime)
 							.build();
 					
 					if(pgObj!=null){

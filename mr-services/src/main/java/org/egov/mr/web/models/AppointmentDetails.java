@@ -49,6 +49,9 @@ public class AppointmentDetails   {
 
         @JsonProperty("auditDetails")
         private AuditDetails auditDetails = null;
+        
+        @JsonProperty("approveSlaEndtime")
+        private Long approveSlaEndtime ;
 
 
 }
