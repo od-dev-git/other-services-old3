@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.integration.model.ConsumerVerification;
+import org.egov.integration.model.ConsumerVerificationServiceResponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -24,6 +25,6 @@ public class ConsumerVerificationResponse {
     private ResponseInfo responseInfo;
 	
 	@JsonProperty("consumerVerificationInfo")
-	private List<ConsumerVerification> consumerVerification;
+	private List<ConsumerVerificationServiceResponse> consumerVerification;
 	
 }

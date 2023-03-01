@@ -40,5 +40,17 @@ public class IntegrationConfiguration {
 	
 	@Value("${egov.integration.revenue.notification.update.topic}")
 	private String updateRevenueNotification;
+	
+	@Value("${egov.ws.service.host}")
+	private String wsHost;
+	
+	@Value("${egov.ws.search.path}")
+	private String wsSearchEndpoint;
+	
+	@Value("${consumer.verification.user.uuid}")
+    private String consumerVerificationUserUuid;
+    
+	@Value("${consumer.verification.user.type}")
+    private String consumerVerificationUserType;
 
 }
