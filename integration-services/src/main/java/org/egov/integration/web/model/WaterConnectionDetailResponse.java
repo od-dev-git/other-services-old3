@@ -16,9 +16,9 @@ import lombok.NoArgsConstructor;
 public class WaterConnectionDetailResponse {
 
 	 @JsonProperty("responseInfo")
-	    ResponseInfo responseInfo;
+	 ResponseInfo responseInfo;
 	 
 	 @JsonProperty("WaterConnection")
-	    List<WSConnection> connections;
+	 List<WSConnection> connections;
 
 }

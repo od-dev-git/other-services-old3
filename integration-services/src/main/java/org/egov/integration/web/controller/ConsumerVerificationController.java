@@ -34,7 +34,7 @@ public class ConsumerVerificationController {
 	@PostMapping("/_verification")
 	public ResponseEntity<ConsumerVerificationResponse> search(@RequestBody @Valid final ConsumerVerificationSearchCriteria searchCriteria) {
 				
-		List<ConsumerVerificationServiceResponse> consumerVerificationInfo = consumerVerificationService.search(searchCriteria);
+		ConsumerVerificationServiceResponse consumerVerificationInfo = consumerVerificationService.search(searchCriteria);
 		
 		ConsumerVerificationResponse response = ConsumerVerificationResponse.builder().consumerVerification(consumerVerificationInfo).build();
 		return new ResponseEntity<ConsumerVerificationResponse>(response, HttpStatus.OK);
