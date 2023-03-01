@@ -40,5 +40,17 @@ public class IntegrationConfiguration {
 	
 	@Value("${egov.integration.revenue.notification.update.topic}")
 	private String updateRevenueNotification;
+	
+	@Value("${egov.ws.service.host}")
+	private String wsHost;
+	
+	@Value("${egov.ws.search.path}")
+	private String wsSearchEndpoint;
+	
+	@Value("${daily.reconciliation.user.uuid}")
+    private String dailyReconciliationUserUuid;
+    
+	@Value("${daily.reconciliation.user.type}")
+    private String dailyReconciliationUserType;
 
 }
