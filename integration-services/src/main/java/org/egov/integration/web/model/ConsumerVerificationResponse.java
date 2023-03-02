@@ -1,9 +1,5 @@
 package org.egov.integration.web.model;
 
-import java.util.List;
-
-import org.egov.common.contract.response.ResponseInfo;
-import org.egov.integration.model.ConsumerVerification;
 import org.egov.integration.model.ConsumerVerificationServiceResponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,10 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ConsumerVerificationResponse {
 	
-	@JsonProperty("ResponseInfo")
-    private ResponseInfo responseInfo;
-	
 	@JsonProperty("consumerVerificationInfo")
-	private List<ConsumerVerificationServiceResponse> consumerVerification;
+	private ConsumerVerificationServiceResponse consumerVerification;
 	
 }

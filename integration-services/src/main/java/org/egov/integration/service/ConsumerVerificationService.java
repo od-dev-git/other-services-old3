@@ -23,6 +23,8 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -68,7 +70,7 @@ public class ConsumerVerificationService implements InitializingBean{
         requestInfo.setUserInfo(userInfo);
 	}
 	
-	public List<ConsumerVerificationServiceResponse> search(ConsumerVerificationSearchCriteria searchCriteria) {
+	public ConsumerVerificationServiceResponse search(ConsumerVerificationSearchCriteria searchCriteria) {
 		
 	consumerVerificationValidator.validateSearch(searchCriteria);
 
@@ -77,7 +79,7 @@ public class ConsumerVerificationService implements InitializingBean{
 			.consumerVerificationOwner(null)
 			.tenantId(null)
 			.status(null)
-			.build(); 	
+			.build(); 	 	
 	OwnerInfo ownerinfo = OwnerInfo.builder()
 		.name("Amitabh").correspondenceAddress("Rajori Garden , Lal Chowk").build();
     String businessService = searchCriteria.getBusinessService();
@@ -99,7 +101,6 @@ public class ConsumerVerificationService implements InitializingBean{
     	break;
     	
     case "WS" :
-    	
 		getWSResponse(searchCriteria, response);
     	break;
     	
@@ -111,6 +112,9 @@ public class ConsumerVerificationService implements InitializingBean{
     	
     
     }
+    
+    if(!StringUtils.hasText(response.getConsumerNo()))
+    	return  ConsumerVerificationServiceResponse.builder().build();
     
     ConsumerVerificationServiceResponse finalResponse = ConsumerVerificationServiceResponse.builder()
     		.consumerNo(response.getConsumerNo())
@@ -128,18 +132,20 @@ public class ConsumerVerificationService implements InitializingBean{
 	});
 	finalResponse.setVerificationOwner(owners);
 
-		return Arrays.asList(finalResponse);
+		return finalResponse;
 	}
 
 	private void getWSResponse(ConsumerVerificationSearchCriteria searchCriteria, ConsumerVerification response) {
-		List<WSConnection> wsConnections = setURIandFetchResult(searchCriteria);
+		List<WSConnection> wsConnections = getWaterConnections(searchCriteria);
+		WSConnection connectionResponse=null;
+		if(!CollectionUtils.isEmpty(wsConnections)) {
+			connectionResponse = wsConnections.get(0);
+		} 
 		
-		WSConnection connectionResponse = wsConnections.get(0);
-		
-		setWSResponseInfo(response, connectionResponse);
+			setWSResponseInfo(response, connectionResponse);
 	}
 
-	private List<WSConnection> setURIandFetchResult(ConsumerVerificationSearchCriteria searchCriteria) {
+	private List<WSConnection> getWaterConnections(ConsumerVerificationSearchCriteria searchCriteria) {
 		StringBuilder uri = new StringBuilder(configuration.getWsHost())
 				.append(configuration.getWsSearchEndpoint()).append("?")
 				.append("tenantId="+searchCriteria.getTenantId()).append("&")
@@ -151,7 +157,10 @@ public class ConsumerVerificationService implements InitializingBean{
 				.requestInfo(requestInfo).build();
 		try {
 		Object fetchResponse = repository.fetchResult(uri, requestWrapper);
+		log.info("Water response: ", fetchResponse);
+		
 		WaterConnectionDetailResponse res = mapper.convertValue(fetchResponse, WaterConnectionDetailResponse.class);
+		log.info("Water response: " + String.valueOf(res));
 		wsConnections.addAll(res.getConnections());
 		}catch(Exception ex) {
 			log.error("External Service Call Erorr", ex);
@@ -164,7 +173,6 @@ public class ConsumerVerificationService implements InitializingBean{
 		if(connectionResponse != null) {
 			response.setTenantId(connectionResponse.getTenantId());
 			response.setConsumerNo(connectionResponse.getConnectionNo());
-			response.setBusinessService(connectionResponse.getConnectionFacility());
 			response.setStatus(connectionResponse.getApplicationStatus());
 			List<OwnerInfo> owners = new ArrayList<>();
 			
@@ -175,8 +183,8 @@ public class ConsumerVerificationService implements InitializingBean{
 						.correspondenceAddress(item.getCorrespondenceAddress()).build();
 				owners.add(owner);
 			});
-			response.setConsumerVerificationOwner(owners);
-							
+			response.setConsumerVerificationOwner(owners);	
+			
 		}
 	}
 
