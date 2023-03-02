@@ -1,7 +1,5 @@
 package org.egov.integration.model;
 
-import javax.validation.constraints.NotBlank;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -15,10 +13,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ConsumerVerificationOwner {
-
-	@JsonProperty("ownername")
-	private String ownerName;
+public class VerificationOwner {
+	
+	@JsonProperty("name")
+	private String name;
 	
 	@JsonProperty("address")
 	private String address; 

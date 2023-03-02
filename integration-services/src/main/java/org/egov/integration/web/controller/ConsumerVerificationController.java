@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.egov.integration.model.ConsumerVerification;
 import org.egov.integration.web.model.ConsumerVerificationResponse;
 import org.egov.integration.model.ConsumerVerificationSearchCriteria;
+import org.egov.integration.model.ConsumerVerificationServiceResponse;
 import org.egov.integration.service.ConsumerVerificationService;
 import org.egov.integration.util.ResponseInfoFactory;
 import org.egov.integration.web.model.RequestInfoWrapper;
@@ -33,7 +34,7 @@ public class ConsumerVerificationController {
 	@PostMapping("/_verification")
 	public ResponseEntity<ConsumerVerificationResponse> search(@RequestBody @Valid final ConsumerVerificationSearchCriteria searchCriteria) {
 				
-		List<ConsumerVerification> consumerVerificationInfo = consumerVerificationService.search(searchCriteria);
+		ConsumerVerificationServiceResponse consumerVerificationInfo = consumerVerificationService.search(searchCriteria);
 		
 		ConsumerVerificationResponse response = ConsumerVerificationResponse.builder().consumerVerification(consumerVerificationInfo).build();
 		return new ResponseEntity<ConsumerVerificationResponse>(response, HttpStatus.OK);
