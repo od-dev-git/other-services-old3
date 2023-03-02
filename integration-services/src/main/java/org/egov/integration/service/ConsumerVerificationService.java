@@ -24,6 +24,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -78,7 +79,7 @@ public class ConsumerVerificationService implements InitializingBean{
 			.consumerVerificationOwner(null)
 			.tenantId(null)
 			.status(null)
-			.build(); 	
+			.build(); 	 	
 	OwnerInfo ownerinfo = OwnerInfo.builder()
 		.name("Amitabh").correspondenceAddress("Rajori Garden , Lal Chowk").build();
     String businessService = searchCriteria.getBusinessService();
@@ -112,8 +113,8 @@ public class ConsumerVerificationService implements InitializingBean{
     
     }
     
-    if(response == null )
-    	return new ConsumerVerificationServiceResponse();
+    if(!StringUtils.hasText(response.getConsumerNo()))
+    	return  ConsumerVerificationServiceResponse.builder().build();
     
     ConsumerVerificationServiceResponse finalResponse = ConsumerVerificationServiceResponse.builder()
     		.consumerNo(response.getConsumerNo())
@@ -141,7 +142,7 @@ public class ConsumerVerificationService implements InitializingBean{
 			connectionResponse = wsConnections.get(0);
 		} 
 		
-		setWSResponseInfo(response, connectionResponse);
+			setWSResponseInfo(response, connectionResponse);
 	}
 
 	private List<WSConnection> getWaterConnections(ConsumerVerificationSearchCriteria searchCriteria) {
@@ -159,6 +160,7 @@ public class ConsumerVerificationService implements InitializingBean{
 		log.info("Water response: ", fetchResponse);
 		
 		WaterConnectionDetailResponse res = mapper.convertValue(fetchResponse, WaterConnectionDetailResponse.class);
+		log.info("Water response: " + String.valueOf(res));
 		wsConnections.addAll(res.getConnections());
 		}catch(Exception ex) {
 			log.error("External Service Call Erorr", ex);
@@ -181,8 +183,8 @@ public class ConsumerVerificationService implements InitializingBean{
 						.correspondenceAddress(item.getCorrespondenceAddress()).build();
 				owners.add(owner);
 			});
-			response.setConsumerVerificationOwner(owners);
-							
+			response.setConsumerVerificationOwner(owners);	
+			
 		}
 	}
 
