@@ -58,5 +58,11 @@ public class IntegrationConfiguration {
 	
 	@Value("${egov.tl.search.path}")
 	private String tlSearchEndpoint;
+	
+	@Value("${egov.pt.service.host}")
+	private String ptHost;
+	
+	@Value("${egov.pt.search.path}")
+	private String ptSearchEndpoint;
 
 }

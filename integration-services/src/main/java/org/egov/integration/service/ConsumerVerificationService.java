@@ -17,9 +17,11 @@ import org.egov.integration.model.ConsumerVerification;
 import org.egov.integration.model.ConsumerVerificationSearchCriteria;
 import org.egov.integration.model.ConsumerVerificationServiceResponse;
 import org.egov.integration.model.OwnerInfo;
+import org.egov.integration.model.Property;
 import org.egov.integration.model.TradeLicense;
 import org.egov.integration.model.VerificationOwner;
 import org.egov.integration.web.model.ConsumerVerificationResponse;
+import org.egov.integration.web.model.PropertyResponse;
 import org.egov.integration.web.model.RequestInfoWrapper;
 import org.egov.integration.web.model.TradeLicenseResponse;
 import org.egov.integration.web.model.WaterConnectionDetailResponse;
@@ -99,11 +101,8 @@ public class ConsumerVerificationService implements InitializingBean {
 			break;
 
 		case "PT":
-			VerificationOwner ownerinfotpt = VerificationOwner.builder().name("Dummy Name").address("Dummy Address")
-					.build();
-			response = ConsumerVerificationServiceResponse.builder().consumerNo("Dummy Consumer No")
-					.businessService(businessService).verificationOwner(Arrays.asList(ownerinfotpt))
-					.tenantId("Dummy City").status("Dummy Status").build();
+			response = getPTResponse(searchCriteria, new ConsumerVerificationServiceResponse());
+			break;
 
 		}
 
@@ -185,7 +184,6 @@ public class ConsumerVerificationService implements InitializingBean {
 		}
 
 		setTLResponseInfo(response, connectionResponse);
-		int a = 5;
 
 		return response;
 	}
@@ -243,7 +241,7 @@ public class ConsumerVerificationService implements InitializingBean {
 			add.append(address.getStreet() + ", ");
 		}
 		if (StringUtils.hasText(address.getWard())) {
-			add.append(address.getWard() + ", ");
+			add.append("Ward No : " + address.getWard() + ", ");
 		}
 		if (StringUtils.hasText(address.getCity())) {
 
@@ -259,6 +257,69 @@ public class ConsumerVerificationService implements InitializingBean {
 			add = add.delete(add.length() - 2, add.length());
 		}
 		return add;
+	}
+
+	private ConsumerVerificationServiceResponse getPTResponse(ConsumerVerificationSearchCriteria searchCriteria,
+			ConsumerVerificationServiceResponse response) {
+
+		List<Property> properties = getPTConnections(searchCriteria);
+		Property connectionResponse = null;
+
+		if (!CollectionUtils.isEmpty(properties)) {
+			// filtering only APPROVED applications
+			List<Property> connectionResponses = properties.parallelStream()
+					.filter(property -> property.getStatus().toString().equalsIgnoreCase("ACTIVE"))
+					.collect(Collectors.toList());
+
+			// getting latest Approved application
+			if (!CollectionUtils.isEmpty(connectionResponses)) {
+				connectionResponse = connectionResponses.get(0);
+			}
+		}
+
+		setPTResponseInfo(response, connectionResponse);
+
+		return response;
+	}
+
+	private List<Property> getPTConnections(ConsumerVerificationSearchCriteria searchCriteria) {
+		StringBuilder uri = new StringBuilder(configuration.getPtHost()).append(configuration.getPtSearchEndpoint())
+				.append("?").append("tenantId=" + searchCriteria.getTenantId()).append("&")
+				.append("propertyIds=" + searchCriteria.getConsumerNo());
+
+		List<Property> properties = new ArrayList<>();
+		RequestInfoWrapper requestWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
+		try {
+			Object fetchResponse = repository.fetchResult(uri, requestWrapper);
+			log.info("Property response: ", fetchResponse);
+
+			PropertyResponse res = mapper.convertValue(fetchResponse, PropertyResponse.class);
+			log.info("Property response: " + String.valueOf(res));
+			properties.addAll(res.getProperties());
+		} catch (Exception ex) {
+			log.error("External Service Call Erorr", ex);
+			throw new CustomException("PROPERTY FETCH ERROR", "Unable to fetch Property Information");
+		}
+		return properties;
+	}
+
+	private void setPTResponseInfo(ConsumerVerificationServiceResponse response, Property connectionResponse) {
+		if (connectionResponse != null) {
+			response.setTenantId(connectionResponse.getTenantId());
+			response.setConsumerNo(connectionResponse.getPropertyId());
+			response.setStatus(String.valueOf(connectionResponse.getStatus()));
+
+			StringBuilder address = getAddress(connectionResponse.getAddress());
+
+			List<VerificationOwner> owners = new ArrayList<>();
+			connectionResponse.getOwners().stream().forEach(item -> {
+				VerificationOwner owner = VerificationOwner.builder().name(item.getName())
+						.address(String.valueOf(address)).build();
+				owners.add(owner);
+			});
+			response.setVerificationOwner(owners);
+
+		}
 	}
 
 }
