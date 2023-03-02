@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
@@ -16,11 +17,14 @@ import org.egov.integration.model.Address;
 import org.egov.integration.model.ConsumerVerification;
 import org.egov.integration.model.ConsumerVerificationSearchCriteria;
 import org.egov.integration.model.ConsumerVerificationServiceResponse;
+import org.egov.integration.model.CoupleDetails;
+import org.egov.integration.model.MarriageRegistration;
 import org.egov.integration.model.OwnerInfo;
 import org.egov.integration.model.Property;
 import org.egov.integration.model.TradeLicense;
 import org.egov.integration.model.VerificationOwner;
 import org.egov.integration.web.model.ConsumerVerificationResponse;
+import org.egov.integration.web.model.MarriageRegistrationResponse;
 import org.egov.integration.web.model.PropertyResponse;
 import org.egov.integration.web.model.RequestInfoWrapper;
 import org.egov.integration.web.model.TradeLicenseResponse;
@@ -35,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -88,10 +93,9 @@ public class ConsumerVerificationService implements InitializingBean {
 					.status("Dummy Status").build();
 			break;
 		case "MR":
-			response = ConsumerVerificationServiceResponse.builder().consumerNo("Dummy Consumer No")
-					.businessService(businessService).verificationOwner(Arrays.asList(ownerinfo)).tenantId("Dummy City")
-					.status("Dummy Status").build();
+			response = getMRResponse(searchCriteria, new ConsumerVerificationServiceResponse());
 			break;
+
 		case "TL":
 			response = getTLResponse(searchCriteria, new ConsumerVerificationServiceResponse());
 			break;
@@ -253,6 +257,18 @@ public class ConsumerVerificationService implements InitializingBean {
 		if (StringUtils.hasText(address.getPincode())) {
 			add.append(address.getPincode() + ", ");
 		}
+		if (StringUtils.hasText(address.getPinCodeTL())) {
+			add.append(address.getPinCodeTL() + ", ");
+		}
+		if (StringUtils.hasText(address.getDistrict())) {
+			add.append(address.getDistrict() + ", ");
+		}
+		if (StringUtils.hasText(address.getState())) {
+			add.append(address.getState() + ", ");
+		}
+		if (StringUtils.hasText(address.getCountry())) {
+			add.append(address.getCountry() + ", ");
+		}
 		if (add.length() != 0) {
 			add = add.delete(add.length() - 2, add.length());
 		}
@@ -316,6 +332,85 @@ public class ConsumerVerificationService implements InitializingBean {
 				VerificationOwner owner = VerificationOwner.builder().name(item.getName())
 						.address(String.valueOf(address)).build();
 				owners.add(owner);
+			});
+			response.setVerificationOwner(owners);
+
+		}
+	}
+
+	private ConsumerVerificationServiceResponse getMRResponse(ConsumerVerificationSearchCriteria searchCriteria,
+			ConsumerVerificationServiceResponse response) {
+		List<MarriageRegistration> mrRegistrations = getMRRegistrations(searchCriteria);
+		MarriageRegistration mrRegistrationsResponse = null;
+
+		if (!CollectionUtils.isEmpty(mrRegistrations)) {
+			// filtering only APPROVED applications
+			List<MarriageRegistration> mrRegistrationsResponses = mrRegistrations.parallelStream()
+					.filter(tradeLicense -> tradeLicense.getStatus().equalsIgnoreCase("APPROVED"))
+					.collect(Collectors.toList());
+
+			// getting latest Approved application
+			if (!CollectionUtils.isEmpty(mrRegistrationsResponses)) {
+				Collections.sort(mrRegistrationsResponses,
+						Comparator.comparing(e -> e.getApplicationDate(), (s1, s2) -> {
+							return s2.compareTo(s1);
+						}));
+				mrRegistrationsResponse = mrRegistrationsResponses.get(0);
+			}
+		}
+
+		setMRResponseInfo(response, mrRegistrationsResponse);
+
+		return response;
+	}
+
+	private List<MarriageRegistration> getMRRegistrations(ConsumerVerificationSearchCriteria searchCriteria) {
+
+		StringBuilder uri = new StringBuilder(configuration.getMrHost()).append(configuration.getMrSearchEndpoint())
+				.append("?").append("tenantId=" + searchCriteria.getTenantId()).append("&").append("offset=0")
+				.append("&").append("mrNumbers=" + searchCriteria.getConsumerNo());
+
+		List<MarriageRegistration> mrRegistrations = new ArrayList<>();
+		RequestInfoWrapper requestWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
+		try {
+			Object fetchResponse = repository.fetchResult(uri, requestWrapper);
+			log.info("Marriage Registration response: ", fetchResponse);
+
+			MarriageRegistrationResponse res = mapper.convertValue(fetchResponse, MarriageRegistrationResponse.class);
+			log.info("Marriage Registration response: " + String.valueOf(res));
+			mrRegistrations.addAll(res.getMarriageRegistrations());
+		} catch (Exception ex) {
+			log.error("External Service Call Erorr", ex);
+			throw new CustomException("MARRIAGE_REGISTRATION FETCH ERROR",
+					"Unable to fetch Marriage Registration Information");
+		}
+		return mrRegistrations;
+	}
+
+	private void setMRResponseInfo(ConsumerVerificationServiceResponse response,
+			MarriageRegistration mrRegistrationsResponse) {
+		if (mrRegistrationsResponse != null) {
+			response.setTenantId(mrRegistrationsResponse.getTenantId());
+			response.setConsumerNo(mrRegistrationsResponse.getMrNumber());
+			response.setStatus(mrRegistrationsResponse.getStatus());
+
+			List<VerificationOwner> owners = new ArrayList<>();
+			mrRegistrationsResponse.getCoupleDetails().stream().forEach(couple -> {
+
+				Address brideAddress = couple.getBride().getAddress();
+				StringBuilder brideAdd = getAddress(brideAddress);
+
+				Address groomAddress = couple.getGroom().getAddress();
+				StringBuilder groomAdd = getAddress(groomAddress);
+
+				VerificationOwner bride = VerificationOwner.builder().name(couple.getBride().getFirstName())
+						.address(String.valueOf(brideAdd)).build();
+				owners.add(bride);
+
+				VerificationOwner groom = VerificationOwner.builder().name(couple.getGroom().getFirstName())
+						.address(String.valueOf(groomAdd)).build();
+				owners.add(groom);
+
 			});
 			response.setVerificationOwner(owners);
 

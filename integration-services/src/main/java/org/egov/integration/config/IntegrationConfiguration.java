@@ -64,5 +64,11 @@ public class IntegrationConfiguration {
 	
 	@Value("${egov.pt.search.path}")
 	private String ptSearchEndpoint;
+	
+	@Value("${egov.mr.service.host}")
+	private String mrHost;
+	
+	@Value("${egov.mr.search.path}")
+	private String mrSearchEndpoint;
 
 }
