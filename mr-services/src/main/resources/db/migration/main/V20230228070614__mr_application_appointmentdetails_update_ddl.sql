@@ -1,8 +1,12 @@
 ALTER TABLE eg_mr_application
-ADD COLUMN IF NOT EXISTS scheduleslaendtime int8;
+ADD COLUMN IF NOT EXISTS slaendtime int8;
 
 ALTER TABLE eg_mr_application_audit
-ADD COLUMN IF NOT EXISTS scheduleslaendtime int8;
+ADD COLUMN IF NOT EXISTS slaendtime int8;
 
-ALTER TABLE eg_mr_appointmentdetails
-ADD COLUMN IF NOT EXISTS approveslaendtime int8;
+ALTER TABLE eg_mr_application
+ADD COLUMN IF NOT EXISTS additionaldetails jsonb;
+
+ALTER TABLE eg_mr_application_audit
+ADD COLUMN IF NOT EXISTS additionaldetails jsonb;
+

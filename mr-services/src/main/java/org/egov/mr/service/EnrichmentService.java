@@ -1,5 +1,6 @@
 package org.egov.mr.service;
 
+import org.apache.catalina.startup.ClassLoaderFactory.Repository;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mr.config.MRConfiguration;
@@ -9,6 +10,7 @@ import org.egov.mr.model.user.UserResponse;
 import org.egov.mr.model.user.UserSearchRequest;
 import org.egov.mr.model.user.UserType;
 import org.egov.mr.repository.IdGenRepository;
+import org.egov.mr.repository.MRRepository;
 import org.egov.mr.repository.ServiceRequestRepository;
 import org.egov.mr.util.MRConstants;
 import org.egov.mr.util.MarriageRegistrationUtil;
@@ -32,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -55,11 +58,12 @@ public class EnrichmentService {
 	private WorkflowService workflowService;
     private ObjectMapper mapper;
     private ServiceRequestRepository serviceRequestRepository;
+    private MRRepository mrRepository;
     
     
 	@Autowired
 	public EnrichmentService(IdGenRepository idGenRepository, MRConfiguration config,
-			BoundaryService boundaryService,WorkflowService workflowService,MarriageRegistrationUtil marriageRegistrationUtil,ObjectMapper mapper,ServiceRequestRepository serviceRequestRepository) {
+			BoundaryService boundaryService,WorkflowService workflowService,MarriageRegistrationUtil marriageRegistrationUtil,ObjectMapper mapper,ServiceRequestRepository serviceRequestRepository,MRRepository mrRepository) {
 		this.idGenRepository = idGenRepository;
 		this.config = config;
 		this.marriageRegistrationUtil=marriageRegistrationUtil;
@@ -67,6 +71,7 @@ public class EnrichmentService {
 		this.workflowService = workflowService;
 		this.mapper = mapper;
 		this.serviceRequestRepository =serviceRequestRepository ;
+		this.mrRepository = mrRepository;
 	}
 
 
@@ -450,8 +455,11 @@ public class EnrichmentService {
 				if(marriageRegistration.getIsTatkalApplication() == null)
 					marriageRegistration.setIsTatkalApplication(Boolean.FALSE);
 				if (marriageRegistration.getIsTatkalApplication() == Boolean.TRUE && marriageRegistration.getAction().equalsIgnoreCase(ACTION_APPLY)) {
-					Long scheduleSlaEndtime = setSlaForTatkal(marriageRegistration, requestInfo);
-					marriageRegistration.setScheduleSlaEndtime(scheduleSlaEndtime);
+					HashMap<String, Object> additionalDetail = new HashMap<>();
+				    Long scheduleSlaEndtime = setSlaForTatkal(marriageRegistration, requestInfo);
+				    marriageRegistration.setSlaEndTime(scheduleSlaEndtime);
+					additionalDetail.put(SCHEDULE_SLA_END_DATE, scheduleSlaEndtime);
+					marriageRegistration.setAdditionalDetails(additionalDetail);					
 				}
 
 
@@ -478,6 +486,15 @@ public class EnrichmentService {
                 	dscDetails.setApprovedBy(requestInfo.getUserInfo().getUuid());
                 	dscDetailsList.add(dscDetails);
                 	marriageRegistration.setDscDetails(dscDetailsList);
+                	
+                	if(marriageRegistration.getIsTatkalApplication() != null && marriageRegistration.getIsTatkalApplication() == Boolean.TRUE) {
+    					MarriageRegistration searchResult = getMarriageRegistrationForUpdate(
+    							marriageRegistration.getApplicationNumber(), requestInfo);
+    				    HashMap<String, Object> additionalDetailsFromDb = mapper.convertValue(searchResult.getAdditionalDetails(),
+    							HashMap.class);
+    				    additionalDetailsFromDb.put(ACTUAL_APPROVAL_DATE, BigDecimal.valueOf(System.currentTimeMillis()));
+    				    marriageRegistration.setAdditionalDetails(additionalDetailsFromDb);	
+    				}
                 }else
                 {
                 	marriageRegistration.setDscDetails(null);
@@ -494,6 +511,17 @@ public class EnrichmentService {
 							appointment.setActive(true);
 						}
 					});
+				}
+				if(marriageRegistration.getIsTatkalApplication() != null && marriageRegistration.getIsTatkalApplication() == Boolean.TRUE) {
+					Long approveSlaEndtime = setSlaForTatkal(marriageRegistration, requestInfo);
+				    marriageRegistration.setSlaEndTime(approveSlaEndtime);
+				    MarriageRegistration searchResult = getMarriageRegistrationForUpdate(
+							marriageRegistration.getApplicationNumber(), requestInfo);
+				    HashMap<String, Object> additionalDetailsFromDb = mapper.convertValue(searchResult.getAdditionalDetails(),
+							HashMap.class);
+				    additionalDetailsFromDb.put(ACTUAL_SCHEDULE_DATE, marriageRegistration.getAppointmentDetails().get(0).getStartTime());
+				    additionalDetailsFromDb.put(APPROVE_SLA_END_DATE, approveSlaEndtime);
+					marriageRegistration.setAdditionalDetails(additionalDetailsFromDb);	
 				}
 			}
 
@@ -640,7 +668,7 @@ public class EnrichmentService {
 				slaDate = instant.toEpochMilli();
 			}
 			if (sla == null || sla.isEmpty()) {
-				throw new CustomException("SLA ERROR",
+				throw new CustomException("SLA_ERROR",
 						"SLA Defination for " + marriageRegistration.getAction() + " not found");
 			}
 
@@ -660,8 +688,18 @@ public class EnrichmentService {
 		return endDate;
 	}
 
+	public MarriageRegistration getMarriageRegistrationForUpdate(String id, RequestInfo requestInfo) {
+		MarriageRegistrationSearchCriteria criteria = new MarriageRegistrationSearchCriteria();
+		criteria.setApplicationNumber(id);
+		List<MarriageRegistration> marriageRegistration = mrRepository.getMarriageRegistartions(criteria);
+		if (CollectionUtils.isEmpty(marriageRegistration)) {
+			StringBuilder builder = new StringBuilder();
+			builder.append("MARRIAGE REGISTRATION NOT FOUND FOR: ").append(id).append(" :APPICATION NUMBER");
+			throw new CustomException("INVALID_MARRIAGEREGISTRATION_SEARCH", builder.toString());
+		}
 
-
+		return marriageRegistration.get(0);
+	}
 
 
 

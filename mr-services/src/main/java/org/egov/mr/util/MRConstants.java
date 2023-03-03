@@ -269,6 +269,10 @@ public class MRConstants {
 	    
 	    public static final String APPROVE_SLA_END_DATE = "approveSlaEndDate";
 	    
+	    public static final String ACTUAL_SCHEDULE_DATE = "actualScheduleDate";
+	    
+	    public static final String ACTUAL_APPROVAL_DATE = "actualApprovalDate";
+	    
 	    public static final Long Hours_24 = Long.valueOf(24);
 	    
 	    public static final List<String> NOTIFICATION_CODES = Collections.unmodifiableList(Arrays.asList(

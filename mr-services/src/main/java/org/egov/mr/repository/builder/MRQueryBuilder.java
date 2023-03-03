@@ -49,7 +49,7 @@ public class MRQueryBuilder {
             "mrapldoc.id as mr_ap_doc_id,mrapldoc.documenttype as mr_ap_doc_documenttype,mrapldoc.filestoreid as mr_ap_doc_filestoreid,mrapldoc.active as mr_ap_doc_active," +
             "mrdscdetails.id as mr_dsc_details_id,mrdscdetails.documenttype as mr_dsc_details_documenttype,mrdscdetails.documentid  as mr_dsc_details_documentid,mrdscdetails.additionaldetail as  mr_dsc_details_additionaldetail,mrdscdetails.applicationnumber as mr_dsc_details_applicationnumber," +
             "mraptdtl.id as mr_apt_dtl_id,mraptdtl.startTime as mr_apt_dtl_startTime,mraptdtl.endTime as mr_apt_dtl_endTime,mraptdtl.active as mr_apt_dtl_active,mraptdtl.description as mr_apt_dtl_description,mraptdtl.additionalDetail as mr_apt_dtl_additionalDetail," +
-            "mrverdoc.id as mr_ver_doc_id,mrverdoc.documenttype as mr_ver_doc_documenttype,mrverdoc.filestoreid as mr_ver_doc_filestoreid,mrverdoc.active as mr_ver_doc_active,mr.istatkalapplication as istatkalapplication,mr.scheduleslaendtime as scheduleSlaEndtime,mraptdtl.approveslaendtime as approveSlaEndtime FROM eg_mr_application mr " 
+            "mrverdoc.id as mr_ver_doc_id,mrverdoc.documenttype as mr_ver_doc_documenttype,mrverdoc.filestoreid as mr_ver_doc_filestoreid,mrverdoc.active as mr_ver_doc_active,mr.istatkalapplication as istatkalapplication,mr.slaendtime as slaEndTime, mr.additionaldetails as additionalDetails FROM eg_mr_application mr " 
             +INNER_JOIN_STRING
             +"eg_mr_marriageplace mrp ON mrp.mr_id = mr.id"
             +INNER_JOIN_STRING

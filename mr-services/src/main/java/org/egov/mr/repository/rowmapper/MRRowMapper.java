@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,7 +64,8 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 				Long issuedDate = (Long) rs.getObject("issueddate");
 				Long applicationDate = (Long) rs.getObject("applicationdate");
 				Boolean isTatkalApplication = (Boolean) rs.getObject("istatkalapplication");
-				Long scheduleSlaEndtime = (Long) rs.getObject("scheduleSlaEndtime");
+				Long slaEndtime = (Long) rs.getObject("slaEndTime");
+				PGobject pgObj = (PGobject) rs.getObject("additionalDetails");
 				
 				AuditDetails auditdetails = AuditDetails.builder()
 						.createdBy(rs.getString("mr_createdBy"))
@@ -85,12 +87,25 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 						.status(rs.getString("status"))
 						.tenantId(tenantId)
 						.isTatkalApplication(isTatkalApplication)
-						.scheduleSlaEndtime(scheduleSlaEndtime)
+						.slaEndTime(slaEndtime)
 						.businessService(rs.getString("businessservice"))
 						.id(id)
 						.build();
 
-				marriageRegistrationMap.put(id,currentMarriageRegistration);
+				ObjectNode additionalDetails = null;
+				if (pgObj != null) {
+					try {
+						additionalDetails = mapper.readValue(pgObj.getValue(), ObjectNode.class);
+					} catch (IOException ex) {
+						// TODO Auto-generated catch block
+						throw new CustomException("PARSING ERROR", "The additionalDetail json cannot be parsed");
+					}
+				} else {
+					additionalDetails = mapper.createObjectNode();
+				}
+
+				currentMarriageRegistration.setAdditionalDetails(additionalDetails);
+				marriageRegistrationMap.put(id, currentMarriageRegistration);
 			}
 
 
@@ -309,7 +324,7 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 				try {
 					Long startTime = (Long) rs.getObject("mr_apt_dtl_startTime");
 					Long endTime = (Long) rs.getObject("mr_apt_dtl_endTime");
-					Long approveSlaEndtime = (Long) rs.getObject("approveSlaEndtime");
+					
 					PGobject pgObj = (PGobject) rs.getObject("mr_apt_dtl_additionalDetail");
 
 					
@@ -321,7 +336,6 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 							.description(rs.getString("mr_apt_dtl_description"))
 							.tenantId(tenantId)
 							.active(rs.getBoolean("mr_apt_dtl_active"))
-							.approveSlaEndtime(approveSlaEndtime)
 							.build();
 					
 					if(pgObj!=null){
