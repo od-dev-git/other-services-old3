@@ -4,11 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotNull;
-
 import org.egov.integration.model.enums.Status;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,7 +25,6 @@ import lombok.ToString;
 public class Property {
 
 	@JsonProperty("owners")
-	@Valid
 	private List<OwnerInfo> owners;
 
 	@JsonProperty("propertyId")

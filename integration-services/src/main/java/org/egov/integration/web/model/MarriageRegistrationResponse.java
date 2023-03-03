@@ -3,8 +3,6 @@ package org.egov.integration.web.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.integration.model.MarriageRegistration;
 

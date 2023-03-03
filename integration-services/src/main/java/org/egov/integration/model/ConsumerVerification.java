@@ -2,12 +2,6 @@ package org.egov.integration.model;
 
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-
-import org.egov.integration.model.revenue.RevenueNotification;
-import org.egov.integration.model.revenue.RevenueOwner;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;

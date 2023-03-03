@@ -7,9 +7,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.integration.config.IntegrationConfiguration;
@@ -233,7 +230,7 @@ public class ConsumerVerificationService implements InitializingBean {
 		}
 	}
 
-	private StringBuilder getAddress(@NotNull Address address) {
+	private StringBuilder getAddress( Address address) {
 		StringBuilder add = new StringBuilder();
 		if (StringUtils.hasText(address.getDoorNo())) {
 			add.append(address.getDoorNo() + ", ");
