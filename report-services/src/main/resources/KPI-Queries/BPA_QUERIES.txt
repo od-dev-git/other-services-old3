@@ -20,8 +20,8 @@ select
 		when approvaldate >0 then to_timestamp(approvaldate / 1000)::date
 	end as approvaldate
 from
-	eg_bpa_buildingplan;
-
+	eg_bpa_buildingplan
+where tenantid != 'od.testing'	;
 
 
 

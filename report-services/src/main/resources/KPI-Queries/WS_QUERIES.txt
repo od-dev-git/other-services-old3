@@ -30,7 +30,8 @@ select
 	, additionaldetails ->> 'ward' as Ward
 from eg_ws_connection
 where 
-applicationtype not in ('NEW_WATER_CONNECTION','NEW_CONNECTION');
+applicationtype not in ('NEW_WATER_CONNECTION','NEW_CONNECTION') 
+and tenantid != 'od.testing';
 
 
 -----------------------------------------------------------------------------------------------------------
@@ -58,7 +59,8 @@ select
 	, additionaldetails ->> 'ward' as Ward
 from eg_ws_connection
 where oldconnectionno is null
-and applicationtype in ('NEW_WATER_CONNECTION','NEW_CONNECTION');
+and applicationtype in ('NEW_WATER_CONNECTION','NEW_CONNECTION') 
+and tenantid != 'od.testing';
 
 
  
