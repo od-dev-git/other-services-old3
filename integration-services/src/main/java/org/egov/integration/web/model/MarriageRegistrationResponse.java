@@ -27,7 +27,6 @@ public class MarriageRegistrationResponse {
      private ResponseInfo responseInfo = null;
 
      @JsonProperty("MarriageRegistrations")
-     @Valid
      private List<MarriageRegistration> marriageRegistrations = null;
 
 

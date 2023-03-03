@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Validated
 @Getter
 @Setter
 @AllArgsConstructor
@@ -32,6 +31,5 @@ public class CoupleDetails {
     private String firstName;
     
     @JsonProperty("address")
-    @Valid
     private Address address = null ;
 }

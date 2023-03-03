@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Validated
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,10 +20,8 @@ import lombok.Setter;
 public class Couple {
 
 	@JsonProperty("bride")
-    @Valid
 	private CoupleDetails bride ;
 	
 	@JsonProperty("groom")
-    @Valid
 	private CoupleDetails groom ;
 }

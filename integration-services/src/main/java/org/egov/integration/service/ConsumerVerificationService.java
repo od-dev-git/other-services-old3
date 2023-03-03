@@ -51,7 +51,7 @@ public class ConsumerVerificationService implements InitializingBean {
 	private static final RequestInfo requestInfo;
 
 	static {
-		User userInfo = User.builder().uuid("DAILY_RECONC_JOB").type("SYSTEM").roles(Collections.emptyList()).id(0L)
+		User userInfo = User.builder().uuid("TPA_VALIDATOR").type("SYSTEM").roles(Collections.emptyList()).id(0L)
 				.build();
 
 		requestInfo = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);

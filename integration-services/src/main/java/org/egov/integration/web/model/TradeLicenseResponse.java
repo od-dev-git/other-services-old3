@@ -27,7 +27,6 @@ public class TradeLicenseResponse {
      private ResponseInfo responseInfo = null;
 
      @JsonProperty("Licenses")
-     @Valid
      private List<TradeLicense> licenses = null;
 
 

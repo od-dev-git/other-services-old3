@@ -46,7 +46,6 @@ public class MarriageRegistration {
 	private String status = null;
 
 	@JsonProperty("coupleDetails")
-	@Valid
 	private List<Couple> coupleDetails = null;
 
 }
