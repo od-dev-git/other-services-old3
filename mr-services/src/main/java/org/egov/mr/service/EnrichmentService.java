@@ -1,5 +1,6 @@
 package org.egov.mr.service;
 
+import org.apache.catalina.startup.ClassLoaderFactory.Repository;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mr.config.MRConfiguration;
@@ -9,6 +10,7 @@ import org.egov.mr.model.user.UserResponse;
 import org.egov.mr.model.user.UserSearchRequest;
 import org.egov.mr.model.user.UserType;
 import org.egov.mr.repository.IdGenRepository;
+import org.egov.mr.repository.MRRepository;
 import org.egov.mr.repository.ServiceRequestRepository;
 import org.egov.mr.util.MRConstants;
 import org.egov.mr.util.MarriageRegistrationUtil;
@@ -27,10 +29,16 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,6 +48,7 @@ import static org.egov.mr.util.MRConstants.*;
 
 
 @Service
+@Slf4j
 public class EnrichmentService {
 
 	private IdGenRepository idGenRepository;
@@ -49,11 +58,12 @@ public class EnrichmentService {
 	private WorkflowService workflowService;
     private ObjectMapper mapper;
     private ServiceRequestRepository serviceRequestRepository;
+    private MRRepository mrRepository;
     
     
 	@Autowired
 	public EnrichmentService(IdGenRepository idGenRepository, MRConfiguration config,
-			BoundaryService boundaryService,WorkflowService workflowService,MarriageRegistrationUtil marriageRegistrationUtil,ObjectMapper mapper,ServiceRequestRepository serviceRequestRepository) {
+			BoundaryService boundaryService,WorkflowService workflowService,MarriageRegistrationUtil marriageRegistrationUtil,ObjectMapper mapper,ServiceRequestRepository serviceRequestRepository,MRRepository mrRepository) {
 		this.idGenRepository = idGenRepository;
 		this.config = config;
 		this.marriageRegistrationUtil=marriageRegistrationUtil;
@@ -61,6 +71,7 @@ public class EnrichmentService {
 		this.workflowService = workflowService;
 		this.mapper = mapper;
 		this.serviceRequestRepository =serviceRequestRepository ;
+		this.mrRepository = mrRepository;
 	}
 
 
@@ -443,7 +454,13 @@ public class EnrichmentService {
 
 				if(marriageRegistration.getIsTatkalApplication() == null)
 					marriageRegistration.setIsTatkalApplication(Boolean.FALSE);
-				
+				if (marriageRegistration.getIsTatkalApplication() == Boolean.TRUE && marriageRegistration.getAction().equalsIgnoreCase(ACTION_APPLY)) {
+					HashMap<String, Object> additionalDetail = new HashMap<>();
+				    Long scheduleSlaEndtime = setSlaForTatkal(marriageRegistration, requestInfo);
+				    marriageRegistration.setSlaEndTime(scheduleSlaEndtime);
+					additionalDetail.put(SCHEDULE_SLA_END_DATE, scheduleSlaEndtime);
+					marriageRegistration.setAdditionalDetails(additionalDetail);					
+				}
 
 
 
@@ -469,6 +486,15 @@ public class EnrichmentService {
                 	dscDetails.setApprovedBy(requestInfo.getUserInfo().getUuid());
                 	dscDetailsList.add(dscDetails);
                 	marriageRegistration.setDscDetails(dscDetailsList);
+                	
+                	if(marriageRegistration.getIsTatkalApplication() != null && marriageRegistration.getIsTatkalApplication() == Boolean.TRUE) {
+    					MarriageRegistration searchResult = getMarriageRegistrationForUpdate(
+    							marriageRegistration.getApplicationNumber(), requestInfo);
+    				    HashMap<String, Object> additionalDetailsFromDb = mapper.convertValue(searchResult.getAdditionalDetails(),
+    							HashMap.class);
+    				    additionalDetailsFromDb.put(ACTUAL_APPROVAL_DATE, BigDecimal.valueOf(System.currentTimeMillis()));
+    				    marriageRegistration.setAdditionalDetails(additionalDetailsFromDb);	
+    				}
                 }else
                 {
                 	marriageRegistration.setDscDetails(null);
@@ -485,6 +511,17 @@ public class EnrichmentService {
 							appointment.setActive(true);
 						}
 					});
+				}
+				if(marriageRegistration.getIsTatkalApplication() != null && marriageRegistration.getIsTatkalApplication() == Boolean.TRUE) {
+					Long approveSlaEndtime = setSlaForTatkal(marriageRegistration, requestInfo);
+				    marriageRegistration.setSlaEndTime(approveSlaEndtime);
+				    MarriageRegistration searchResult = getMarriageRegistrationForUpdate(
+							marriageRegistration.getApplicationNumber(), requestInfo);
+				    HashMap<String, Object> additionalDetailsFromDb = mapper.convertValue(searchResult.getAdditionalDetails(),
+							HashMap.class);
+				    additionalDetailsFromDb.put(ACTUAL_SCHEDULE_DATE, marriageRegistration.getAppointmentDetails().get(0).getStartTime());
+				    additionalDetailsFromDb.put(APPROVE_SLA_END_DATE, approveSlaEndtime);
+					marriageRegistration.setAdditionalDetails(additionalDetailsFromDb);	
 				}
 			}
 
@@ -591,8 +628,78 @@ public class EnrichmentService {
 			marriageRegistrations.setAssignee(new LinkedList<>(assignes));
 		}
 	}
+    
+	public Long setSlaForTatkal(MarriageRegistration marriageRegistration, RequestInfo requestInfo) {
+		Set<LocalDate> holidays = new HashSet<>();
+		Long slaDate = null;
+		LocalDate slaEndDate = null;
+		List<Integer> sla = new ArrayList<Integer>();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+		try {
+			Object mdmsHolidayCalenderData = marriageRegistrationUtil.mdmsCallForCalender(requestInfo);
+			List<LinkedHashMap<String, Object>> holidayList = JsonPath.read(mdmsHolidayCalenderData,
+					MDMS_HOLIDAY_CALENDER);
 
+			holidayList.forEach(hl -> hl
+					.forEach((k, v) -> holidays.add(LocalDate.parse(String.valueOf(hl.get("date")), formatter))));
+
+			Object mdmsSlaDefsData = marriageRegistrationUtil.mdmsCallForTatkalSla(marriageRegistration, requestInfo);
+
+			if (marriageRegistration.getAction().equalsIgnoreCase(ACTION_APPLY)) {
+				sla = JsonPath.read(mdmsSlaDefsData, "$.MdmsRes.MarriageRegistration.SlaDefs.[?(@.serviceCode=='"
+						+ MRConstants.SLA_SCHEDULE + "')].slaHours");
+				LocalDate applicationDate = Instant.ofEpochMilli(marriageRegistration.getApplicationDate())
+						.atZone(ZoneId.systemDefault()).toLocalDate();
+				LocalDate scheduleSlaEndDate = applicationDate.plusDays(((Integer) sla.get(0)).longValue() / Hours_24);
+				slaEndDate = getSlaEndDate(holidays, applicationDate, scheduleSlaEndDate);
+				Instant instant = slaEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+				slaDate = instant.toEpochMilli();
+			} else if (marriageRegistration.getAction().equalsIgnoreCase(ACTION_SCHEDULE)
+					|| marriageRegistration.getAction().equalsIgnoreCase(ACTION_RESCHEDULE)) {
+				sla = JsonPath.read(mdmsSlaDefsData, "$.MdmsRes.MarriageRegistration.SlaDefs.[?(@.serviceCode=='"
+						+ MRConstants.SLA_APPROVE + "')].slaHours");
+				LocalDate scheduleDate = Instant
+						.ofEpochMilli(marriageRegistration.getAppointmentDetails().get(0).getStartTime())
+						.atZone(ZoneId.systemDefault()).toLocalDate();
+				LocalDate approveSlaEndDate = scheduleDate.plusDays(((Integer) sla.get(0)).longValue() / Hours_24);
+				slaEndDate = getSlaEndDate(holidays, scheduleDate, approveSlaEndDate);
+				Instant instant = slaEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+				slaDate = instant.toEpochMilli();
+			}
+			if (sla == null || sla.isEmpty()) {
+				throw new CustomException("SLA_ERROR",
+						"SLA Defination for " + marriageRegistration.getAction() + " not found");
+			}
+
+		} catch (Exception e) {
+			log.error("Unable to set SLA for Schedule or Approve " + e.getLocalizedMessage());
+		}
+
+		return slaDate;
+	}
+
+	public LocalDate getSlaEndDate(Set<LocalDate> holidays, LocalDate startDate, LocalDate endDate) {
+       for (LocalDate holiday : holidays) {
+			if (((holiday.isAfter(startDate) && holiday.isBefore(endDate.plusDays(1))) || holiday.isEqual(startDate))) {
+				endDate= endDate.plusDays(1);
+			}
+		}
+		return endDate;
+	}
+
+	public MarriageRegistration getMarriageRegistrationForUpdate(String id, RequestInfo requestInfo) {
+		MarriageRegistrationSearchCriteria criteria = new MarriageRegistrationSearchCriteria();
+		criteria.setApplicationNumber(id);
+		List<MarriageRegistration> marriageRegistration = mrRepository.getMarriageRegistartions(criteria);
+		if (CollectionUtils.isEmpty(marriageRegistration)) {
+			StringBuilder builder = new StringBuilder();
+			builder.append("MARRIAGE REGISTRATION NOT FOUND FOR: ").append(id).append(" :APPICATION NUMBER");
+			throw new CustomException("INVALID_MARRIAGEREGISTRATION_SEARCH", builder.toString());
+		}
+
+		return marriageRegistration.get(0);
+	}
 
 
 
