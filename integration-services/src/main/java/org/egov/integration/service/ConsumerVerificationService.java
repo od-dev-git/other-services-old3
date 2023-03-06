@@ -391,7 +391,7 @@ public class ConsumerVerificationService implements InitializingBean {
 			response.setTenantId(mrRegistrationsResponse.getTenantId());
 			response.setConsumerNo(mrRegistrationsResponse.getMrNumber());
 			response.setStatus(mrRegistrationsResponse.getStatus());
-
+			response.setAddress(mrRegistrationsResponse.getMarriagePlace().getPlaceOfMarriage());
 			List<VerificationOwner> owners = new ArrayList<>();
 			mrRegistrationsResponse.getCoupleDetails().stream().forEach(couple -> {
 
