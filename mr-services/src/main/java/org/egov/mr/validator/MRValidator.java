@@ -11,14 +11,21 @@ import static org.egov.mr.util.MRConstants.businessService_MR_CORRECTION;
 import static org.egov.mr.util.MRConstants.BRIDE_DIVYANG_PROOF;
 import static org.egov.mr.util.MRConstants.GROOM_DIVYANG_PROOF;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -41,6 +48,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import com.jayway.jsonpath.JsonPath;
 
 @Component
 public class MRValidator {
@@ -549,6 +558,11 @@ public class MRValidator {
                 				errorMap.put("APPOINTMENT_DEATILS_ERROR", " Appointment Date and Time Cannot be Less than Present time ");
                 			}
                 		});
+                  if(marriageRegistration.getIsTatkalApplication() != null && marriageRegistration.getIsTatkalApplication() == Boolean.TRUE) {
+                	     Boolean isHoliday = isHoliday(marriageRegistrationRequest);
+                	     if(isHoliday == Boolean.TRUE)
+                	     errorMap.put("APPOINTMENT_DEATILS_ERROR", " Appointment Date for action SCHEDULE is a Holiday");
+                  } 
                 		
                 	if(apointmentDetailsActive.size() == 0)
                 		errorMap.put("APPOINTMENT_DEATILS_ERROR", " Atleast One Appointment Start and End time should be active if the action is SCHEDULE or RESCHEDULE ");
@@ -1138,5 +1152,35 @@ public class MRValidator {
 		}
 
     }
+	
+	public Boolean isHoliday(MarriageRegistrationRequest marriageRegistrationRequest) {
+		Set<LocalDate> holidays = new HashSet<>();
+		Boolean isHoliday = Boolean.FALSE;
+		Long scheduleDateLong = marriageRegistrationRequest.getMarriageRegistrations().get(0).getAppointmentDetails()
+				.get(0).getStartTime();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		LocalDate scheduleDate = Instant.ofEpochMilli(scheduleDateLong).atZone(ZoneId.systemDefault()).toLocalDate();
+        Object mdmsData = marriageRegistrationUtil
+					.mdmsCallForCalender(marriageRegistrationRequest.getRequestInfo());
+			List<LinkedHashMap<String, Object>> holidayList = JsonPath.read(mdmsData,
+					MRConstants.MDMS_HOLIDAY_CALENDER);
+			
+			if (mdmsData == null) {
+				throw new CustomException("Mdms Error",
+						"Holiday List Configuration for MR Tatkal registration not found");
+			}
 
+			holidayList.forEach(hl -> hl
+					.forEach((k, v) -> holidays.add(LocalDate.parse(String.valueOf(hl.get("date")), formatter))));
+			for (LocalDate holiday : holidays) {
+				if (holiday.equals(scheduleDate)) {
+					isHoliday = Boolean.TRUE;
+				}
+			}
+
+		
+		return isHoliday;
+
+	}
+	
 }
