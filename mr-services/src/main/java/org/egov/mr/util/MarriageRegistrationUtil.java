@@ -234,5 +234,55 @@ public class MarriageRegistrationUtil {
     	                    }
     	                }
     	}
+        
+		
 
+		public Object mdmsCallForCalender(RequestInfo requestInfo) {
+			ModuleDetail moduleDetail = getHolidayCalenderRequest();
+			List<ModuleDetail> holidayCalenderRequest = new LinkedList<>();
+			holidayCalenderRequest.add(moduleDetail);
+			MdmsCriteria mdmsCriteria = MdmsCriteria.builder().moduleDetails(holidayCalenderRequest)
+					.tenantId(MRConstants.STATE_TENANT_ID).build();
+			MdmsCriteriaReq mdmsCriteriaReq = MdmsCriteriaReq.builder().mdmsCriteria(mdmsCriteria)
+					.requestInfo(requestInfo).build();
+			Object result = serviceRequestRepository.fetchResult(getMdmsSearchUrl(), mdmsCriteriaReq);
+			return result;
+		}
+
+		private ModuleDetail getHolidayCalenderRequest() {
+
+			List<MasterDetail> mrMasterDetails = new ArrayList<>();
+
+			mrMasterDetails.add(MasterDetail.builder().name(MRConstants.HOLIDAY_CALENDER_JSON).build());
+
+			ModuleDetail mrModuleDtls = ModuleDetail.builder().masterDetails(mrMasterDetails)
+					.moduleName(MRConstants.COMMON_MASTERS_MODULE).build();
+
+			return mrModuleDtls;
+		}
+
+		public Object mdmsCallForTatkalSla(MarriageRegistration marriageRegistration, RequestInfo requestInfo) {
+			ModuleDetail moduleDetail = getSlaDefsRequest();
+			List<ModuleDetail> slaDefsRequest = new LinkedList<>();
+			slaDefsRequest.add(moduleDetail);
+			MdmsCriteria mdmsCriteria = MdmsCriteria.builder().moduleDetails(slaDefsRequest)
+					.tenantId(marriageRegistration.getTenantId()).build();
+			MdmsCriteriaReq mdmsCriteriaReq = MdmsCriteriaReq.builder().mdmsCriteria(mdmsCriteria)
+					.requestInfo(requestInfo).build();
+			Object result = serviceRequestRepository.fetchResult(getMdmsSearchUrl(), mdmsCriteriaReq);
+			return result;
+		}
+
+		private ModuleDetail getSlaDefsRequest() {
+
+			List<MasterDetail> mrMasterDetails = new ArrayList<>();
+
+			mrMasterDetails.add(MasterDetail.builder().name(MRConstants.TATKAL_SLA_JSON).build());
+
+			ModuleDetail mrModuleDtls = ModuleDetail.builder().masterDetails(mrMasterDetails)
+					.moduleName(MRConstants.MARRIAGE_REGISTRATION_MODULE).build();
+
+			return mrModuleDtls;
+		}
+	
 }

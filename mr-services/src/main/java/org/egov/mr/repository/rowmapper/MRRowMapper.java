@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,6 +64,8 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 				Long issuedDate = (Long) rs.getObject("issueddate");
 				Long applicationDate = (Long) rs.getObject("applicationdate");
 				Boolean isTatkalApplication = (Boolean) rs.getObject("istatkalapplication");
+				Long slaEndtime = (Long) rs.getObject("slaEndTime");
+				PGobject pgObj = (PGobject) rs.getObject("additionalDetails");
 				
 				AuditDetails auditdetails = AuditDetails.builder()
 						.createdBy(rs.getString("mr_createdBy"))
@@ -84,11 +87,25 @@ public class MRRowMapper  implements ResultSetExtractor<List<MarriageRegistratio
 						.status(rs.getString("status"))
 						.tenantId(tenantId)
 						.isTatkalApplication(isTatkalApplication)
+						.slaEndTime(slaEndtime)
 						.businessService(rs.getString("businessservice"))
 						.id(id)
 						.build();
 
-				marriageRegistrationMap.put(id,currentMarriageRegistration);
+				ObjectNode additionalDetails = null;
+				if (pgObj != null) {
+					try {
+						additionalDetails = mapper.readValue(pgObj.getValue(), ObjectNode.class);
+					} catch (IOException ex) {
+						// TODO Auto-generated catch block
+						throw new CustomException("PARSING ERROR", "The additionalDetail json cannot be parsed");
+					}
+				} else {
+					additionalDetails = mapper.createObjectNode();
+				}
+
+				currentMarriageRegistration.setAdditionalDetails(additionalDetails);
+				marriageRegistrationMap.put(id, currentMarriageRegistration);
 			}
 
 
