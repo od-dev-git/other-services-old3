@@ -219,11 +219,12 @@ public class ConsumerVerificationService implements InitializingBean {
 			response.setStatus(connectionResponse.getStatus());
 
 			StringBuilder address = getAddress(connectionResponse.getTradeLicenseDetail().getAddress());
-
+			response.setAddress(String.valueOf(address));
+			
 			List<VerificationOwner> owners = new ArrayList<>();
 			connectionResponse.getTradeLicenseDetail().getOwners().stream().forEach(item -> {
 				VerificationOwner owner = VerificationOwner.builder().name(item.getName())
-						.address(String.valueOf(address)).build();
+						.address(item.getCorrespondenceAddress()).build();
 				owners.add(owner);
 			});
 			response.setVerificationOwner(owners);
