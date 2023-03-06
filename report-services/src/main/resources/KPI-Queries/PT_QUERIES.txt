@@ -13,7 +13,8 @@ from eg_pt_asmt_assessment epaa
 join eg_pt_property epp on epaa.propertyid  = epp.propertyid 
 join eg_pt_address epa on epa.propertyid = epp.id
 where to_timestamp(epaa.createdtime/1000)::date > '2021-11-01'
-and to_timestamp(epaa.createdtime/1000)::date < '2022-04-05'
+and to_timestamp(epaa.createdtime/1000)::date < '2022-04-05' 
+and epp.tenantid != 'od.testing' 
 order by epaa.createdtime)
 
 UNION
@@ -28,7 +29,8 @@ epaa.status
 from eg_pt_asmt_assessment epaa
 join eg_pt_property epp on epaa.propertyid  = epp.propertyid 
 join eg_pt_address epa on epa.propertyid = epp.id
-where to_timestamp(epaa.createdtime/1000)::date > '2022-04-08'
+where to_timestamp(epaa.createdtime/1000)::date > '2022-04-08' 
+and epp.tenantid != 'od.testing' 
 order by epaa.createdtime)
 
 
@@ -64,7 +66,8 @@ to_timestamp(epp.lastmodifiedtime/1000)::date as lastmodifiedtime
 from eg_pt_property epp
 join eg_pt_address epa on epa.propertyid = epp.id 
 where to_timestamp(epp.createdtime/1000)::date > '2021-11-01'
-and epp.oldpropertyid is null
+and epp.oldpropertyid is null 
+and epp.tenantid != 'od.testing' 
 order by epp.createdtime;
 
 

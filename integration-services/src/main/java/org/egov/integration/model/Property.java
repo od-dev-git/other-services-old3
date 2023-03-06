@@ -1,8 +1,13 @@
 package org.egov.integration.model;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.egov.integration.model.enums.Status;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,27 +16,27 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+@ToString
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
-public class ConsumerVerification {
+public class Property {
 
-	@JsonProperty("consumerNo")
-	private String consumerNo;
-	
+	@JsonProperty("owners")
+	private List<OwnerInfo> owners;
+
+	@JsonProperty("propertyId")
+	private String propertyId;
+
 	@JsonProperty("tenantId")
 	private String tenantId;
-	
-	@JsonProperty("businessService")
-	private String businessService;
-	
-	@JsonProperty("verificationowner")
-	private List<OwnerInfo> consumerVerificationOwner;
-	
+
 	@JsonProperty("status")
-	private String status;
-	
+	private Status status;
+
+	@JsonProperty("address")
+	private Address address;
+
 }

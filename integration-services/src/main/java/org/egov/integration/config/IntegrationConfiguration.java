@@ -52,5 +52,23 @@ public class IntegrationConfiguration {
     
 	@Value("${consumer.verification.user.type}")
     private String consumerVerificationUserType;
+	
+	@Value("${egov.tl.service.host}")
+	private String tlHost;
+	
+	@Value("${egov.tl.search.path}")
+	private String tlSearchEndpoint;
+	
+	@Value("${egov.pt.service.host}")
+	private String ptHost;
+	
+	@Value("${egov.pt.search.path}")
+	private String ptSearchEndpoint;
+	
+	@Value("${egov.mr.service.host}")
+	private String mrHost;
+	
+	@Value("${egov.mr.search.path}")
+	private String mrSearchEndpoint;
 
 }
