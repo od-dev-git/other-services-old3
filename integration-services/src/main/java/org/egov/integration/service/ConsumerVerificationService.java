@@ -152,11 +152,13 @@ public class ConsumerVerificationService implements InitializingBean {
 			response.setTenantId(connectionResponse.getTenantId());
 			response.setConsumerNo(connectionResponse.getConnectionNo());
 			response.setStatus(connectionResponse.getApplicationStatus());
+						
 			List<VerificationOwner> owners = new ArrayList<>();
 
 			connectionResponse.getConnectionHolders().stream().forEach(item -> {
 				VerificationOwner owner = VerificationOwner.builder().name(item.getName())
 						.address(item.getCorrespondenceAddress()).build();
+				response.setAddress(item.getCorrespondenceAddress());
 				owners.add(owner);
 			});
 			response.setVerificationOwner(owners);
