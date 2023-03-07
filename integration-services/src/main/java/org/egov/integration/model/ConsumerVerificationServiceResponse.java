@@ -33,5 +33,8 @@ public class ConsumerVerificationServiceResponse {
 	
 	@JsonProperty("status")
 	private String status;
+	
+	@JsonProperty("address")
+	private String address;
 
 }
