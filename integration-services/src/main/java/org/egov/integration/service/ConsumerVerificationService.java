@@ -11,6 +11,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.integration.config.IntegrationConfiguration;
 import org.egov.integration.model.Address;
+import org.egov.integration.model.BPA;
 import org.egov.integration.model.ConsumerVerification;
 import org.egov.integration.model.ConsumerVerificationSearchCriteria;
 import org.egov.integration.model.ConsumerVerificationServiceResponse;
@@ -20,6 +21,7 @@ import org.egov.integration.model.OwnerInfo;
 import org.egov.integration.model.Property;
 import org.egov.integration.model.TradeLicense;
 import org.egov.integration.model.VerificationOwner;
+import org.egov.integration.web.model.BPAResponse;
 import org.egov.integration.web.model.ConsumerVerificationResponse;
 import org.egov.integration.web.model.MarriageRegistrationResponse;
 import org.egov.integration.web.model.PropertyResponse;
@@ -85,10 +87,9 @@ public class ConsumerVerificationService implements InitializingBean {
 
 		switch (businessService) {
 		case "BPA":
-			response = ConsumerVerificationServiceResponse.builder().consumerNo("Dummy Consumer No")
-					.businessService(businessService).verificationOwner(Arrays.asList(ownerinfo)).tenantId("Dummy City")
-					.status("Dummy Status").build();
+			response = getBPAResponse(searchCriteria, new ConsumerVerificationServiceResponse());
 			break;
+
 		case "MR":
 			response = getMRResponse(searchCriteria, new ConsumerVerificationServiceResponse());
 			break;
@@ -151,11 +152,13 @@ public class ConsumerVerificationService implements InitializingBean {
 			response.setTenantId(connectionResponse.getTenantId());
 			response.setConsumerNo(connectionResponse.getConnectionNo());
 			response.setStatus(connectionResponse.getApplicationStatus());
+						
 			List<VerificationOwner> owners = new ArrayList<>();
 
 			connectionResponse.getConnectionHolders().stream().forEach(item -> {
 				VerificationOwner owner = VerificationOwner.builder().name(item.getName())
 						.address(item.getCorrespondenceAddress()).build();
+				response.setAddress(item.getCorrespondenceAddress());
 				owners.add(owner);
 			});
 			response.setVerificationOwner(owners);
@@ -218,11 +221,12 @@ public class ConsumerVerificationService implements InitializingBean {
 			response.setStatus(connectionResponse.getStatus());
 
 			StringBuilder address = getAddress(connectionResponse.getTradeLicenseDetail().getAddress());
-
+			response.setAddress(String.valueOf(address));
+			
 			List<VerificationOwner> owners = new ArrayList<>();
 			connectionResponse.getTradeLicenseDetail().getOwners().stream().forEach(item -> {
 				VerificationOwner owner = VerificationOwner.builder().name(item.getName())
-						.address(String.valueOf(address)).build();
+						.address(item.getCorrespondenceAddress()).build();
 				owners.add(owner);
 			});
 			response.setVerificationOwner(owners);
@@ -230,7 +234,7 @@ public class ConsumerVerificationService implements InitializingBean {
 		}
 	}
 
-	private StringBuilder getAddress( Address address) {
+	private StringBuilder getAddress(Address address) {
 		StringBuilder add = new StringBuilder();
 		if (StringUtils.hasText(address.getDoorNo())) {
 			add.append(address.getDoorNo() + ", ");
@@ -323,11 +327,12 @@ public class ConsumerVerificationService implements InitializingBean {
 			response.setStatus(String.valueOf(connectionResponse.getStatus()));
 
 			StringBuilder address = getAddress(connectionResponse.getAddress());
-
+			response.setAddress(String.valueOf(address));
+			
 			List<VerificationOwner> owners = new ArrayList<>();
 			connectionResponse.getOwners().stream().forEach(item -> {
 				VerificationOwner owner = VerificationOwner.builder().name(item.getName())
-						.address(String.valueOf(address)).build();
+						.address(item.getCorrespondenceAddress()).build();
 				owners.add(owner);
 			});
 			response.setVerificationOwner(owners);
@@ -390,7 +395,7 @@ public class ConsumerVerificationService implements InitializingBean {
 			response.setTenantId(mrRegistrationsResponse.getTenantId());
 			response.setConsumerNo(mrRegistrationsResponse.getMrNumber());
 			response.setStatus(mrRegistrationsResponse.getStatus());
-
+			response.setAddress(mrRegistrationsResponse.getMarriagePlace().getPlaceOfMarriage());
 			List<VerificationOwner> owners = new ArrayList<>();
 			mrRegistrationsResponse.getCoupleDetails().stream().forEach(couple -> {
 
@@ -412,6 +417,62 @@ public class ConsumerVerificationService implements InitializingBean {
 			response.setVerificationOwner(owners);
 
 		}
+	}
+
+	private ConsumerVerificationServiceResponse getBPAResponse(ConsumerVerificationSearchCriteria searchCriteria,
+			ConsumerVerificationServiceResponse response) {
+		List<BPA> bpaRegistrations = getBPARegistrations(searchCriteria);
+		BPA bpaRegistrationsResponse = null;
+
+		if (!CollectionUtils.isEmpty(bpaRegistrations)) {
+			bpaRegistrationsResponse = bpaRegistrations.get(0);
+		}
+
+		setBPAResponseInfo(response, bpaRegistrationsResponse);
+
+		return response;
+	}
+
+	private void setBPAResponseInfo(ConsumerVerificationServiceResponse response, BPA bpaRegistrationsResponse) {
+		if (bpaRegistrationsResponse != null) {
+			response.setTenantId(bpaRegistrationsResponse.getTenantId());
+			response.setConsumerNo(bpaRegistrationsResponse.getApplicationNo());
+			response.setStatus(bpaRegistrationsResponse.getStatus());
+
+			StringBuilder address = getAddress(bpaRegistrationsResponse.getLandInfo().getAddress());
+			response.setAddress(String.valueOf(address));
+			
+			List<VerificationOwner> owners = new ArrayList<>();
+			bpaRegistrationsResponse.getLandInfo().getOwners().stream().forEach(item -> {
+				VerificationOwner owner = VerificationOwner.builder().name(item.getName())
+						.address(String.valueOf(item.getCorrespondenceAddress())).build();
+				owners.add(owner);
+			});
+			response.setVerificationOwner(owners);
+
+		}
+	}
+
+	private List<BPA> getBPARegistrations(ConsumerVerificationSearchCriteria searchCriteria) {
+		StringBuilder uri = new StringBuilder(configuration.getBpaHost()).append(configuration.getBpaSearchEndpoint())
+				.append("?").append("offset=0").append("&").append("limit=-1").append("&")
+				.append("tenantId=" + searchCriteria.getTenantId()).append("&")
+				.append("applicationNo=" + searchCriteria.getConsumerNo());
+
+		List<BPA> bpaRegistrations = new ArrayList<>();
+		RequestInfoWrapper requestWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
+		try {
+			Object fetchResponse = repository.fetchResult(uri, requestWrapper);
+			log.info("BPA response: ", fetchResponse);
+
+			BPAResponse res = mapper.convertValue(fetchResponse, BPAResponse.class);
+			log.info("BPA response: " + String.valueOf(res));
+			bpaRegistrations.addAll(res.getBPA());
+		} catch (Exception ex) {
+			log.error("External Service Call Erorr", ex);
+			throw new CustomException("BPA FETCH ERROR", "Unable to fetch BPA Information");
+		}
+		return bpaRegistrations;
 	}
 
 }

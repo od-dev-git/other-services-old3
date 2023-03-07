@@ -70,5 +70,11 @@ public class IntegrationConfiguration {
 	
 	@Value("${egov.mr.search.path}")
 	private String mrSearchEndpoint;
+	
+	@Value("${egov.bpa.service.host}")
+	private String bpaHost;
+	
+	@Value("${egov.bpa.search.path}")
+	private String bpaSearchEndpoint;	
 
 }

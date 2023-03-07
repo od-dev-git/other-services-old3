@@ -40,5 +40,8 @@ public class MarriageRegistration {
 
 	@JsonProperty("coupleDetails")
 	private List<Couple> coupleDetails = null;
+	
+	@JsonProperty("marriagePlace")
+    private MarriagePlace  marriagePlace ; 
 
 }
