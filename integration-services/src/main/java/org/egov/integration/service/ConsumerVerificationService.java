@@ -73,10 +73,8 @@ public class ConsumerVerificationService implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		Role employeeRole = Role.builder().name("Employee").code("EMPLOYEE").tenantId("od.cuttack").build();
-		
 		User userInfo = User.builder().uuid(configuration.getConsumerVerificationUserUuid())
-				.type(configuration.getConsumerVerificationUserType()).roles(Arrays.asList(employeeRole)).id(0L).build();
+				.type(configuration.getConsumerVerificationUserType()).roles(Collections.emptyList()).id(0L).build();
 
 		requestInfo.setUserInfo(userInfo);
 	}
@@ -88,7 +86,8 @@ public class ConsumerVerificationService implements InitializingBean {
 		VerificationOwner ownerinfo = VerificationOwner.builder().name("Dummy Name").address("Dummy Address").build();
 
 		String businessService = searchCriteria.getBusinessService();
-
+		requestInfo.setTs(null);
+		
 		switch (businessService) {
 		case "BPA":
 			response = getBPAResponse(searchCriteria, new ConsumerVerificationServiceResponse());
