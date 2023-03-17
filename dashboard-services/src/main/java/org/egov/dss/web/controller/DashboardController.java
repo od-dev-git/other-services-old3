@@ -34,7 +34,7 @@ public class DashboardController {
 
 	}
 	
-	@PostMapping("/startScheduler")
+	@PostMapping("/_generateData")
 	public ResponseEntity<DssResponse> startScheduler(@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
 		service.processRequest(requestInfoWrapper);
 		DssResponse response = DssResponse.builder()
