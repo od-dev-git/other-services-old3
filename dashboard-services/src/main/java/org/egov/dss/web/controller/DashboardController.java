@@ -25,12 +25,21 @@ public class DashboardController {
 
 	@PostMapping("/getChart")
 	public ResponseEntity<DssResponse> getChart(@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
-		
 		ResponseData responseData = service.serveRequest(requestInfoWrapper);
-		
+        DssResponse response = DssResponse
+				.builder().responseInfo(responseInfoFactory
+						.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.responseData(responseData).build();
+		return new ResponseEntity<DssResponse>(response, HttpStatus.OK);
+
+	}
+	
+	@PostMapping("/startScheduler")
+	public ResponseEntity<DssResponse> startScheduler(@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		service.processRequest(requestInfoWrapper);
 		DssResponse response = DssResponse.builder()
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
-				.responseData(responseData).build();
+				.build();
 		return new ResponseEntity<DssResponse>(response, HttpStatus.OK);
 		
 	}
