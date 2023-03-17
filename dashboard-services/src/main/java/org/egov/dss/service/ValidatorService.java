@@ -16,19 +16,19 @@ public class ValidatorService {
 			throw new CustomException(errorMap);
 	}
 
-	public void validateRequest(RequestInfoWrapper requestInfoWrapper) {
-		Map<String, String> errorMap = new HashMap<>();
-		
-		if(requestInfoWrapper.getChartCriteria() == null) {
-			errorMap.put("INVALID_CHART_CRITERIA", "Criteria should not be empty");
-		}
-		
-		if(!StringUtils.hasText(requestInfoWrapper.getChartCriteria().getVisualizationCode())) {
-			errorMap.put("INVALID_CHART_CRITERIA", "Visualization code can not be empty/blank");
-		}
-		
-		createCustomException(errorMap);
-		
+    public void validateRequest(RequestInfoWrapper requestInfoWrapper) {
+	Map<String, String> errorMap = new HashMap<>();
+	
+	if(requestInfoWrapper.getPayloadDetails() == null) {
+		errorMap.put("INVALID_PAYLOAD", "Payload Should not be empty or null");
 	}
+	
+	if(!StringUtils.hasText(requestInfoWrapper.getPayloadDetails().getVisualizationcode())) {
+		errorMap.put("INVALID_PAYLOAD", "Visualization code can not be empty/blank");
+	}
+	
+	createCustomException(errorMap);
+	
+}
 
 }

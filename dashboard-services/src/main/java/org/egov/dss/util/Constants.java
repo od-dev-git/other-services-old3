@@ -25,6 +25,7 @@ public class Constants {
 	
 	public interface ConfigurationFiles { 
 		final static String CHART_API_CONFIG = "ChartApiConfig.json"; 
+		final static String MASTER_DASHBOARD_CONFIG = "MasterDashboardConfig.json";
 	}
 	
 	public interface VisualizationCodes {

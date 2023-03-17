@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -45,6 +46,10 @@ public class PaymentQueryBuilder {
 	public static final String USAGE_TYPE_QUERY = "SELECT epp.propertyid, epp.usagecategory  "
 			+ "FROM eg_pt_property epp ";
 	
+	public static final String ALL_BUSINESS_SERVICE = " 'PT','WS','TL','MR','WS.ONE_TIME_FEE','SW','SW.ONE_TIME_FEE',"
+	        +" 'PT.MUTATION','BPA.NC_APP_FEE','BPA.NC_SAN_FEE','BPA.NC_OC_APP_FEE','BPA.NC_OC_SAN_FEE' "; 
+
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -75,12 +80,13 @@ public class PaymentQueryBuilder {
 
 		}
 
-		if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
-			if (searchCriteria.getBusinessServices() != null && searchCriteria.getBusinessServices().contains("TL")) {
-				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append(" py.totalamountpaid > 0");
-			}
-		}
+//		if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
+//			if (searchCriteria.getBusinessServices() != null && searchCriteria.getBusinessServices().contains("TL")) {
+//				addClauseIfRequired(preparedStatementValues, selectQuery);
+//				selectQuery.append(" py.totalamountpaid > 0");
+//				
+//			}
+//		}
 
 		if (!CollectionUtils.isEmpty(searchCriteria.getIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
