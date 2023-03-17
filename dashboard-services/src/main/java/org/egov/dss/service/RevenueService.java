@@ -25,7 +25,9 @@ import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 
 import org.apache.catalina.mapper.Mapper;
+import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.BillAccountDetail;
+import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.UsageTypeResponse;
@@ -51,31 +53,31 @@ public class RevenueService {
 	@Autowired
 	private DashboardUtils dashboardUtils;
 	
-	private PaymentSearchCriteria getPaymentSearchCriteria(ChartCriteria chartCriteria) {
+	private PaymentSearchCriteria getPaymentSearchCriteria(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = new PaymentSearchCriteria();
-		
-		if(StringUtils.hasText(chartCriteria.getModuleLevel())) {
-			criteria.setBusinessServices(Sets.newHashSet(chartCriteria.getModuleLevel()));
+
+	    if(StringUtils.hasText(payloadDetails.getModulelevel())){
+			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
 		}
 		
-		if(StringUtils.hasText(chartCriteria.getFilter().getTenantId())) {
-			criteria.setTenantIds(Sets.newHashSet(chartCriteria.getFilter().getTenantId()));
+		if(StringUtils.hasText(payloadDetails.getTenantid())) {
+			criteria.setTenantIds(Sets.newHashSet(payloadDetails.getTenantid()));
 		}
 		
-		if(chartCriteria.getFilter().getStartDate() != null && chartCriteria.getFilter().getStartDate() != 0) {
-			criteria.setFromDate(chartCriteria.getFilter().getStartDate());
+		if(payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
+			criteria.setFromDate(payloadDetails.getStartdate());
 		}
 		
-		if(chartCriteria.getFilter().getEndDate() != null && chartCriteria.getFilter().getEndDate() != 0) {
-			criteria.setToDate(chartCriteria.getFilter().getEndDate());
+		if(payloadDetails.getEnddate() != null && payloadDetails.getEnddate() != 0) {
+			criteria.setToDate(payloadDetails.getEnddate());
 		}
 		
 		return criteria;
 	}
 
-	public List<Data> totalCollection(ChartCriteria chartCriteria) {
+	public List<Data> totalCollection(PayloadDetails payloadDetails) {
 		
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		BigDecimal totalCollection = payments.parallelStream()
 				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
@@ -85,9 +87,9 @@ public class RevenueService {
 		return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
-	public List<Data> todaysCollection(ChartCriteria chartCriteria) {
+	public List<Data> todaysCollection(PayloadDetails payloadDetails) {
 		
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		BigDecimal todaysCollection = payments.parallelStream()
 				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
@@ -99,19 +101,19 @@ public class RevenueService {
 		return Arrays.asList(Data.builder().headerValue(todaysCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
-	public List<Data> targetCollection(ChartCriteria chartCriteria) {
+	public List<Data> targetCollection(PayloadDetails payloadDetails) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public List<Data> targetAchieved(ChartCriteria chartCriteria) {
+	public List<Data> targetAchieved(PayloadDetails payloadDetails) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public List<Data> totalMutationFeeCollection(ChartCriteria chartCriteria) {
+	public List<Data> totalMutationFeeCollection(PayloadDetails payloadDetails) {
 		
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		paymentSearchCriteria.setBusinessServices(Sets.newHashSet("PT.MUTATION"));
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		BigDecimal totalCollection = payments.parallelStream()
@@ -123,9 +125,9 @@ public class RevenueService {
 		return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
-	public List<Data> cumulativeCollection(ChartCriteria chartCriteria) {
+	public List<Data> cumulativeCollection(PayloadDetails payloadDetails) {
 		
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Plot> cumulativeMonthCollections = new ArrayList<>();
 		BigDecimal addedCumulativeCollection = BigDecimal.ZERO;
 		
@@ -175,9 +177,9 @@ public class RevenueService {
 		return Arrays.asList(Data.builder().headerValue(addedCumulativeCollection.setScale(2, RoundingMode.HALF_UP)).plots(cumulativeMonthCollections).build());
 	}
 
-	public List<Data> topPerformingUlbs(ChartCriteria chartCriteria) {
+	public List<Data> topPerformingUlbs(PayloadDetails payloadDetails) {
 		
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		Map<String, List<Payment>> tenantWisePayments = payments.parallelStream()
 				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
@@ -205,9 +207,9 @@ public class RevenueService {
 		return responseList;
 	}
 
-	public List<Data> bottomPerformingUlbs(ChartCriteria chartCriteria) {
+	public List<Data> bottomPerformingUlbs(PayloadDetails payloadDetails) {
 		
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		Map<String, List<Payment>> tenantWisePayments = payments.parallelStream()
 				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
@@ -236,9 +238,9 @@ public class RevenueService {
 		
 	}
 
-	public List<Data> collectionByUsageType(ChartCriteria chartCriteria) {
+	public List<Data> collectionByUsageType(PayloadDetails payloadDetails) {
 		
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		Map<String, List<Payment>> consumerCodeWisePayments = payments.parallelStream()
 				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
@@ -277,9 +279,9 @@ public class RevenueService {
 		return Arrays.asList(Data.builder().plots(plots).build()) ;
 	}
 
-	public List<Data> demandCollectionIndexDDRRevenue(ChartCriteria chartCriteria) {
+	public List<Data> demandCollectionIndexDDRRevenue(PayloadDetails payloadDetails) {
 		
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		Map<String, List<Payment>> tenantWisePayments = payments.parallelStream()
 				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
@@ -322,8 +324,8 @@ public class RevenueService {
 		return response;
 	}
 
-	public List<Data> taxheadsBreakupDDRRevenue(ChartCriteria chartCriteria) {
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+	public List<Data> taxheadsBreakupDDRRevenue(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		Map<String, List<Payment>> taxheadsBreakupTenantWise = payments.parallelStream()
 				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
@@ -360,9 +362,9 @@ public class RevenueService {
 	
 	
 	
-	public List<Data> taxHeadsBreakupUsage(ChartCriteria chartCriteria) {
+	public List<Data> taxHeadsBreakupUsage(PayloadDetails payloadDetails) {
 		
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		Map<String, List<Payment>> consumerCodeWisePayments = payments.parallelStream()
 				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
@@ -422,9 +424,9 @@ public class RevenueService {
         		return taxHeadBreakupResponse;
 	}
 	
-	public List<Data> demandCollectionIndexUsageRevenue(ChartCriteria chartCriteria) {
+	public List<Data> demandCollectionIndexUsageRevenue(PayloadDetails payloadDetails) {
 
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(chartCriteria);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
 		Map<String, List<Payment>> consumerCodeWisePayments = payments.parallelStream()
 				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
@@ -482,5 +484,5 @@ public class RevenueService {
 		return response;
 	}
 
-
+  
 }
