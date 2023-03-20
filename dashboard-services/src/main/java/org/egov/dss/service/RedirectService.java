@@ -20,6 +20,18 @@ public class RedirectService {
 	@Autowired
 	private WSService wsService;
 	
+	@Autowired
+	private TLService tlService;
+	
+	@Autowired
+	private MRService mrService;
+	
+	@Autowired
+	private BPAService bpaService;
+	
+	@Autowired
+	private PGRService pgrService;
+	
 	public List<Data> redirect(RequestInfoWrapper requestInfoWrapper) {
 		String visualizationCode=requestInfoWrapper.getPayloadDetails().getVisualizationcode();
 		
@@ -90,8 +102,25 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_TOP_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
 			return ptService.topPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_TL_TOTAL_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+			return tlService.totalApplications(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_MR_TOTAL_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+			return mrService.totalApplications(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_PGR_TOTAL_COMPLAINTS.equalsIgnoreCase(visualizationCode)) {
+			return pgrService.totalApplications(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_TOTAL_PERMITS.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.totalPermitIssued(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_MR_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.totalCollection(requestInfoWrapper.getPayloadDetails());
+		}
 		
-	
 		
 		return null;
 
