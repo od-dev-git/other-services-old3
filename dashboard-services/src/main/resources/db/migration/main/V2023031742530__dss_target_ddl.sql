@@ -7,9 +7,9 @@ CREATE TABLE eg_dss_target (
 	actualCollectionForMunicipalCorporation decimal(15,2)  NULL,
 	budgetProposedForMunicipalCorporation decimal(15,2) NULL,
 	actualCollectionBudgetedForMunicipalCorporation decimal(15,2) NULL,
-	financialYear jsonb NULL,
+	financialYear varchar NULL,
 	businessService varchar NULL,
-	Timestamp varchar NULL,
+	timestamp bigint NULL,
 	CONSTRAINT pk_eg_dss_target PRIMARY KEY (id)
 );
 
