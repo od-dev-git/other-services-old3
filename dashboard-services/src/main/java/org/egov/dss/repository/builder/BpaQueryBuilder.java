@@ -53,7 +53,7 @@ public static final String BPA_TOTAL_PERMITS_ISSUED = " select count(bpa.applica
 		
 		if (searchCriteria.getStatus() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" bpa.status <= :status");
+			selectQuery.append(" bpa.status = :status");
 			preparedStatementValues.put("status", searchCriteria.getStatus());
 		}
 

@@ -36,4 +36,6 @@ public class PropertySerarchCriteria {
 
     private Integer limit;
     
+    private String excludedTenantId;
+    
 }

@@ -12,12 +12,10 @@ public class PTServiceQueryBuilder {
 	
 	public static final String ASSESSED_PROPERTIES_SQL = " select count(distinct propertyid) from eg_pt_asmt_assessment epaa ";
     
-	public static String getAccessedPropertiesCountQuery(PropertySerarchCriteria criteria, Map<String, Object> preparedStatementValues) {
+	public static String getAccessedPropertiesCountQuery(PropertySerarchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(ASSESSED_PROPERTIES_SQL);
-		//addClauseIfRequired(preparedStatementValues, selectQuery);
-		 addWhereClause(selectQuery,preparedStatementValues ,criteria);
-		 String finalQuery = addStatusFilter(selectQuery);
-			return finalQuery;
+		return addWhereClause(selectQuery, preparedStatementValues, criteria);
 	}
 	
 	
@@ -29,7 +27,7 @@ public class PTServiceQueryBuilder {
 		}
 	}
 	
-	private static void addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			PropertySerarchCriteria searchCriteria) {
 
 		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
@@ -37,7 +35,7 @@ public class PTServiceQueryBuilder {
 			if (searchCriteria.getTenantId().split("\\.").length > 1) {
 				selectQuery.append(" epaa.tenantId =:tenantId");
 				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
+		} else {
 				selectQuery.append(" epaa.tenantId LIKE :tenantId");
 				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
 			}
@@ -54,14 +52,16 @@ public class PTServiceQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" epaa.createdtime <= :toDate");
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
-	  }
+	    }
 		
+		if (searchCriteria.getExcludedTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.tenantId <> :excludedTenantId");
+			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
+	    }
+		
+		return selectQuery.toString();
 	
-	}
-	
-	private static String addStatusFilter(StringBuilder selectQuery) {
-		return selectQuery.append(" AND epaa.status = 'ACTIVE' AND epaa.tenantId <> 'od.testing' ").toString();
-
 	}
 	
 }
