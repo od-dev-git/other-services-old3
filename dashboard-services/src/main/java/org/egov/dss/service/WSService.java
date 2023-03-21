@@ -24,6 +24,7 @@ public class WSService {
 		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
 		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
 		Integer activeConnectionCount =  (Integer) wsRepository.getActiveWaterConnectionCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(activeConnectionCount).build());
 	}

@@ -65,9 +65,16 @@ public class DashboardConstants {
 	public static final String BUSINESS_SERICE_BPA10 = "BPA10";
 	
 	public static final String MODULE_LEVEL_OBPS = "OBPS";
+	
+	public static final String MODULE_LEVEL_PT = "PT";  
+	
+	public static final String STATUS_APPROVED = "APPROVED";
 
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE));
+	
+	public static final List<String> PT_REVENUE_ALL_BS = Collections
+			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_PT, BUSINESS_SERVICE_PT_MUTATION));
 
 	public static final List<String> WS_REVENUE_ALL_BS = Collections.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_WS,
 			BUSINESS_SERVICE_SW, BUSINESS_SERVICE_WS_ONE_TIME_FEE, BUSINESS_SERVICE_SW_ONE_TIME_FEE));
