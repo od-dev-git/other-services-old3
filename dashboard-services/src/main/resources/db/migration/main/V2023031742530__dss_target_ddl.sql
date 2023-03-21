@@ -1,4 +1,4 @@
-CREATE TABLE eg_dss_target (
+CREATE TABLE IF NOT EXISTS eg_dss_target (
 	id varchar NOT NULL,
 	snoForMunicipalCorporation varchar NULL,
 	tenantIdForMunicipalCorporation varchar NULL,
