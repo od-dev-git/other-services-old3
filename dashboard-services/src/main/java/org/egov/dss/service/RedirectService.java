@@ -120,6 +120,12 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_MR_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.totalCollection(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.REVENUE_BPA_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.totalCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_WS_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.totalCollection(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		
 		return null;
