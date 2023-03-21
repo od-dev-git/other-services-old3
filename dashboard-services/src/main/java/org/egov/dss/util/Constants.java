@@ -65,13 +65,13 @@ public class Constants {
 		final static String SERVICE_XPTFY_BY_DDR = "xptFyByDDR";
 		
 		final static String SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS = "wstotalConnectionOverview";
-		final static String SERVICE_TL_TOTAL_APPLICATION = "dssTotalApplicationOverview";
 		final static String SERVICE_MR_TOTAL_APPLICATION = "mrtotalApplications";
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS = "totalComplaints";
 		final static String SERVICE_OBPS_TOTAL_PERMITS = "bpaTotalPermitsIssued";
 		final static String REVENUE_MR_TOTAL_COLLECTION = "mrtotalCollection";
 		final static String REVENUE_BPA_TOTAL_COLLECTION = "bpaTotalCollection";
 		final static String REVENUE_WS_TOTAL_COLLECTION = "wstotalCollection";
+		final static String SERVICE_PGR_SLA_ACHIEVED = "slaAchieved";
 	}
 
 }

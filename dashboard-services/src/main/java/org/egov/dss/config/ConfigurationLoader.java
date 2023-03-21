@@ -38,6 +38,25 @@ public class ConfigurationLoader {
     @Value("${config.schema.paths}") 
     private String RESOURCE_LOCATION; 
     
+    @Value("${sla.pgr.threshold}") 
+    private Long slaPgrThreshold ;
+    
+    @Value("${sla.mr.threshold}") 
+    private Long slaMrThreshold ;
+    
+    @Value("${sla.pt.threshold}") 
+    private Long slaPtThreshold ;
+    
+    @Value("${sla.ws.threshold}") 
+    private Long slaWsThreshold ;
+    
+    @Value("${sla.tl.threshold}") 
+    private Long slaTlThreshold ;
+    
+    @Value("${sla.bpa.threshold}") 
+    private Long slaBpaThreshold ;
+    
+    
     // private static final String RESOURCE_LOCATION = "file://home/darshan/Tarento/DataPlatform/analytics2/analytics/src/main/resources/schema/*.json";
     public static final String ROLE_DASHBOARD_CONFIG = "RoleDashboardMappingsConf.json";
     public static final String MASTER_DASHBOARD_CONFIG = "MasterDashboardConfig.json";

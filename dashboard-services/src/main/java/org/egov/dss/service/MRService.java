@@ -6,6 +6,7 @@ import java.util.List;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.MarriageSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
+import org.egov.dss.model.PgrSearchCriteria;
 import org.egov.dss.repository.MRRepository;
 import org.egov.dss.web.model.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,15 @@ public class MRService {
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		Integer totalApplication =  (Integer) mrRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+	
+	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
+		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalApplication = (Integer) mrRepository.getTotalApplications(criteria);
+		Integer slaAchievedAppCount = (Integer) mrRepository.getSlaAchievedAppCount(criteria);
+		return Arrays.asList(Data.builder()
+				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
 	
 	private MarriageSearchCriteria getMarriageSearchCriteria(PayloadDetails payloadDetails) {

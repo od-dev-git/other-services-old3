@@ -39,5 +39,7 @@ public class WaterSearchCriteria {
     
     private Boolean isOldApplication;
     
+    private Long slaThreshold;
+    
 
 }

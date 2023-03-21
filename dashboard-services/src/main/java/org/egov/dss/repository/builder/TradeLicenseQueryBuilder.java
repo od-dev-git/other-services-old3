@@ -50,10 +50,15 @@ public class TradeLicenseQueryBuilder {
 			selectQuery.append(" ett.createdtime <= :toDate");
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
 		}
+		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ett.lastmodifiedtime - ett.createdtime < " + searchCriteria.getSlaThreshold());
+		}
 
 		if (searchCriteria.getExcludedTenantId() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ett.tenantId <> :excludedTenantId");
+			selectQuery.append(" ett.tenantId != :excludedTenantId");
 			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
 		}
 

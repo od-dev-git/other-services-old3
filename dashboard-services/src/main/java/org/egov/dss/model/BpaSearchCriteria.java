@@ -36,5 +36,7 @@ public class BpaSearchCriteria {
 	private String excludedTenantId;
 
 	private String status;
+	
+	private Long slaThreshold;
 
 }

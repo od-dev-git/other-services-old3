@@ -56,10 +56,15 @@ public static final String BPA_TOTAL_PERMITS_ISSUED = " select count(bpa.applica
 			selectQuery.append(" bpa.status = :status");
 			preparedStatementValues.put("status", searchCriteria.getStatus());
 		}
+		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.lastmodifiedtime - bpa.createdtime < " + searchCriteria.getSlaThreshold());
+		}
 
 		if (searchCriteria.getExcludedTenantId() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" bpa.tenantId <> :excludedTenantId");
+			selectQuery.append(" bpa.tenantId != :excludedTenantId");
 			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
 		}
 
