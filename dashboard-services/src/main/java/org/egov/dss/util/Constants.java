@@ -70,6 +70,8 @@ public class Constants {
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS = "totalComplaints";
 		final static String SERVICE_OBPS_TOTAL_PERMITS = "bpaTotalPermitsIssued";
 		final static String REVENUE_MR_TOTAL_COLLECTION = "mrtotalCollection";
+		final static String REVENUE_BPA_TOTAL_COLLECTION = "bpaTotalCollection";
+		final static String REVENUE_WS_TOTAL_COLLECTION = "wstotalCollection";
 	}
 
 }
