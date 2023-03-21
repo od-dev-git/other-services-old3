@@ -65,6 +65,12 @@ public class WaterServiceQueryBuilder {
 			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
 		}
 		
+		if (searchCriteria.getIsOldApplication() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" conn.isoldapplication = :isoldapplication");
+			preparedStatementValues.put("isoldapplication", searchCriteria.getIsOldApplication());
+		}
+		
 		return selectQuery.toString();
 
 	}

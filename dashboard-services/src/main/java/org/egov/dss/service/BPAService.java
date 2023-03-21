@@ -23,6 +23,7 @@ public class BPAService {
 	public List<Data> totalPermitIssued(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
 		Integer totalApplication = (Integer) bpaRepository.getTotalPermitsIssued(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}

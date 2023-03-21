@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 
+import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.PTRepository;
@@ -34,7 +35,8 @@ public class PTService {
 
 	public List<Data> propertiesAssessed(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
-		Integer assessedPropertiesCount =  (Integer) ptRepository.getAssessedPropertiesCount(criteria);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer assessedPropertiesCount = (Integer) ptRepository.getAssessedPropertiesCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(assessedPropertiesCount).build());
 	}
 
