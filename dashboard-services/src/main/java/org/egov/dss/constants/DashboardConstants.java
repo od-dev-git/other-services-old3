@@ -37,7 +37,46 @@ public class DashboardConstants {
 	public static final String EG_BS_JSON_EXCEPTION_MSG = "Exception occured while parsing additional details";
 	
 	public static final String DB_TYPE_JSONB = "jsonb";
+
+	public static final String BS_HOME_REVENUE = "HOME_REVENUE";
+
+	public static final String TESTING_TENANT = "od.testing";
+
+	public static final String WS_CONNECTION_ACTIVATED = "CONNECTION_ACTIVATED";
+
+	public static final String BUSINESS_SERICE_BPA1 = "BPA1";
+
+	public static final String BUSINESS_SERICE_BPA2 = "BPA2";
+
+	public static final String BUSINESS_SERICE_BPA3 = "BPA3";
+
+	public static final String BUSINESS_SERICE_BPA4 = "BPA4";
+
+	public static final String BUSINESS_SERICE_BPA5 = "BPA5";
+
+	public static final String BUSINESS_SERICE_BPA6 = "BPA6";
+
+	public static final String BUSINESS_SERICE_BPA7 = "BPA7";
+
+	public static final String BUSINESS_SERICE_BPA8 = "BPA8";
+
+	public static final String BUSINESS_SERICE_BPA9 = "BPA9";
+
+	public static final String BUSINESS_SERICE_BPA10 = "BPA10";
 	
+	public static final String MODULE_LEVEL_OBPS = "OBPS";
+
+	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
+			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE));
+
+	public static final List<String> WS_REVENUE_ALL_BS = Collections.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_WS,
+			BUSINESS_SERVICE_SW, BUSINESS_SERVICE_WS_ONE_TIME_FEE, BUSINESS_SERVICE_SW_ONE_TIME_FEE));
+
+	public static final List<String> OBPS_ALL_BUSINESS_SERVICES = Collections
+			.unmodifiableList(Arrays.asList(BUSINESS_SERICE_BPA1, BUSINESS_SERICE_BPA2, BUSINESS_SERICE_BPA3,
+					BUSINESS_SERICE_BPA4, BUSINESS_SERICE_BPA5, BUSINESS_SERICE_BPA6, BUSINESS_SERICE_BPA7,
+					BUSINESS_SERICE_BPA8, BUSINESS_SERICE_BPA9, BUSINESS_SERICE_BPA10));
+
 	public static final List<String> ALL_REVENUE_BUSINESS_SERVICES = Collections.unmodifiableList(Arrays.asList(
 			BUSINESS_SERVICE_PT,BUSINESS_SERVICE_WS,BUSINESS_SERVICE_WS_ONE_TIME_FEE,BUSINESS_SERVICE_SW,BUSINESS_SERVICE_SW_ONE_TIME_FEE,
 			BUSINESS_SERVICE_MR,BUSINESS_SERVICE_TL,BUSINESS_SERVICE_BPA_APP_FEE,BUSINESS_SERVICE_BPA_SAN_FEE,BUSINESS_SERVICE_OC_APP_FEE,BUSINESS_SERVICE_OC_SAN_FEE));

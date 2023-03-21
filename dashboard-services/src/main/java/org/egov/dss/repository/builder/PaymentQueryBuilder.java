@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.TargetSearchCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -48,6 +49,9 @@ public class PaymentQueryBuilder {
 	
 	public static final String ALL_BUSINESS_SERVICE = " 'PT','WS','TL','MR','WS.ONE_TIME_FEE','SW','SW.ONE_TIME_FEE',"
 	        +" 'PT.MUTATION','BPA.NC_APP_FEE','BPA.NC_SAN_FEE','BPA.NC_OC_APP_FEE','BPA.NC_OC_SAN_FEE' "; 
+	
+	public static final String TARGET_COLLECTION_QUERY = " select COALESCE (sum(budgetproposedformunicipalcorporation),0) from eg_dss_target edt  ";
+			
 
 	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
@@ -227,5 +231,35 @@ public class PaymentQueryBuilder {
 		}
 		
 		return query.toString();
+	}
+	
+	public static String getTargetCollection(TargetSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TARGET_COLLECTION_QUERY);
+		return addWhereClauseForTaget(selectQuery, preparedStatementValues, criteria);
+	}
+	
+	private static String addWhereClauseForTaget(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			TargetSearchCriteria searchCriteria) {
+
+		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			if (searchCriteria.getTenantId().split("\\.").length > 1) {
+				selectQuery.append(" edt.tenantidformunicipalcorporation =:tenantId");
+				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
+			} else {
+				selectQuery.append(" edt.tenantidformunicipalcorporation LIKE :tenantId");
+				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
+			}
+
+		}
+
+		if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" pyd.businessService IN (:businessService)  ");
+			preparedStatementValues.put("businessService", searchCriteria.getBusinessServices());
+		}
+
+		return selectQuery.toString();
+
 	}
 }

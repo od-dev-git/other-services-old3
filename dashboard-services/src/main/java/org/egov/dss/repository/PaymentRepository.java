@@ -2,6 +2,8 @@ package org.egov.dss.repository;
 
 import static java.util.Collections.reverseOrder;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 import org.egov.dss.model.Bill;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UsageTypeResponse;
 import org.egov.dss.repository.builder.PaymentQueryBuilder;
 import org.egov.dss.repository.rowmapper.BillRowMapper;
@@ -103,6 +106,16 @@ public class PaymentRepository {
 		String query = paymentQueryBuilder.getUsageTypeQuery(paymentSearchCriteria, preparedStatementValues);
 		
 		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new CollectionByUsageRowMapper());
+	}
+	
+	public Object getTtargetCollection(TargetSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTargetCollection(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
 	}
 	
 }
