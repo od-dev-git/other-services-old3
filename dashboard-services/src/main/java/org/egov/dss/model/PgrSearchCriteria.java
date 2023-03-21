@@ -38,5 +38,7 @@ public class PgrSearchCriteria {
 	    
 	    private String status;
 	    
+	    private Long slaThreshold;
+	    
 
 }

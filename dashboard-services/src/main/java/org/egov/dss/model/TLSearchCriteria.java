@@ -37,4 +37,6 @@ public class TLSearchCriteria {
 	    
 	    private String status;
 	    
+	    private Long slaThreshold;
+	    
 }

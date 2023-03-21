@@ -71,6 +71,18 @@ public class WaterServiceQueryBuilder {
 			preparedStatementValues.put("isoldapplication", searchCriteria.getIsOldApplication());
 		}
 		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" conn.lastmodifiedtime - conn.createdtime < " + searchCriteria.getSlaThreshold());
+			
+		}
+		
+		if (searchCriteria.getExcludedTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" conn.tenantId != :excludedTenantId");
+			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
+		}
+		
 		return selectQuery.toString();
 
 	}

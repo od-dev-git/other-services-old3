@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.model.TLSearchCriteria;
 import org.egov.dss.repository.builder.TradeLicenseQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,20 @@ public class TLRepository {
 	@Autowired
 	private TradeLicenseQueryBuilder tlQueryBuilder;
 	
+	@Autowired
+	private ConfigurationLoader config;
+	
 	public Object getTotalApplications(TLSearchCriteria tlSearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = tlQueryBuilder.getTotalApplication(tlSearchCriteria, preparedStatementValues);
+        log.info("query: "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+    }
+	
+	public Object getSlaAchievedAppCount(TLSearchCriteria tlSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        tlSearchCriteria.setSlaThreshold(config.getSlaTlThreshold());
         String query = tlQueryBuilder.getTotalApplication(tlSearchCriteria, preparedStatementValues);
         log.info("query: "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));

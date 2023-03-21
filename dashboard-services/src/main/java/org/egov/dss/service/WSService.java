@@ -29,6 +29,15 @@ public class WSService {
 		return Arrays.asList(Data.builder().headerValue(activeConnectionCount).build());
 	}
 	
+	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalApplication = (Integer) wsRepository.getActiveWaterConnectionCount(criteria);
+		Integer slaAchievedAppCount = (Integer) wsRepository.getSlaAchievedAppCount(criteria);
+		return Arrays.asList(Data.builder()
+				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
+	}
+	
 	private WaterSearchCriteria getWaterSearchCriteria(PayloadDetails payloadDetails) {
 		WaterSearchCriteria criteria = new WaterSearchCriteria();
 
