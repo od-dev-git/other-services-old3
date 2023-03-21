@@ -36,5 +36,7 @@ public class MarriageSearchCriteria {
 	private String excludedTenantId;
 
 	private String status;
+	
+	private Long slaThreshold;
 
 }

@@ -66,7 +66,9 @@ public class DashboardConstants {
 	
 	public static final String MODULE_LEVEL_OBPS = "OBPS";
 	
-	public static final String MODULE_LEVEL_PT = "PT";  
+	public static final String MODULE_LEVEL_PT = "PT"; 
+	
+	public static final String MODULE_LEVEL_PGR = "PGR";  
 	
 	public static final String STATUS_APPROVED = "APPROVED";
 

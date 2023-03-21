@@ -2,6 +2,7 @@ package org.egov.dss.service;
 
 import java.util.List;
 
+import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.util.Constants;
 import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.RequestInfoWrapper;
@@ -31,6 +32,9 @@ public class RedirectService {
 	
 	@Autowired
 	private PGRService pgrService;
+	
+	@Autowired
+	private CommonService commonService;
 	
 	public List<Data> redirect(RequestInfoWrapper requestInfoWrapper) {
 		String visualizationCode=requestInfoWrapper.getPayloadDetails().getVisualizationcode();
@@ -105,8 +109,12 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
 			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
 		}
-		if(Constants.VisualizationCodes.SERVICE_TL_TOTAL_APPLICATION.equalsIgnoreCase(visualizationCode)) {
-			return tlService.totalApplications(requestInfoWrapper.getPayloadDetails());
+		if (Constants.VisualizationCodes.SERVICE_DSS_TOTAL_APPLICATION_OVERVIEW.equalsIgnoreCase(visualizationCode)) {
+			if (requestInfoWrapper.getPayloadDetails().getModulelevel()
+					.equalsIgnoreCase(DashboardConstants.BUSINESS_SERVICE_TL))
+				return tlService.totalApplications(requestInfoWrapper.getPayloadDetails());
+			else
+				return commonService.totalApplication(requestInfoWrapper.getPayloadDetails());
 		}
 		if(Constants.VisualizationCodes.SERVICE_MR_TOTAL_APPLICATION.equalsIgnoreCase(visualizationCode)) {
 			return mrService.totalApplications(requestInfoWrapper.getPayloadDetails());
@@ -126,7 +134,12 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_WS_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.totalCollection(requestInfoWrapper.getPayloadDetails());
 		}
-		
+		if (Constants.VisualizationCodes.SERVICE_PGR_SLA_ACHIEVED.equalsIgnoreCase(visualizationCode)) {
+			return pgrService.slaAchieved(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.SERVICE_DSS_SLA_ACHIEVED_OVERVIEW.equalsIgnoreCase(visualizationCode)) {
+			  return commonService.slaAchieved(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 

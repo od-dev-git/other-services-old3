@@ -54,9 +54,14 @@ public class PTServiceQueryBuilder {
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
 	    }
 		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.lastmodifiedtime - epaa.createdtime < " + searchCriteria.getSlaThreshold());
+		}
+		
 		if (searchCriteria.getExcludedTenantId() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" epaa.tenantId <> :excludedTenantId");
+			selectQuery.append(" epaa.tenantId != :excludedTenantId");
 			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
 	    }
 		

@@ -3,6 +3,7 @@ package org.egov.dss.service;
 import java.util.Arrays;
 import java.util.List;
 
+import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PgrSearchCriteria;
@@ -20,11 +21,22 @@ public class PGRService {
 	@Autowired
 	private PGRRepository pgrRepository;
 	
+	
 	public List<Data> totalApplications(PayloadDetails payloadDetails) {
 		PgrSearchCriteria criteria = getPgrSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		Integer totalApplication =  (Integer) pgrRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+	
+
+	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
+		PgrSearchCriteria criteria = getPgrSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalApplication = (Integer) pgrRepository.getTotalApplications(criteria);
+		Integer slaAchievedAppCount = (Integer) pgrRepository.getSlaAchievedAppCount(criteria);
+		return Arrays.asList(Data.builder()
+				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
 	
 	private PgrSearchCriteria getPgrSearchCriteria(PayloadDetails payloadDetails) {

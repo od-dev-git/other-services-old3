@@ -38,4 +38,6 @@ public class PropertySerarchCriteria {
     
     private String excludedTenantId;
     
+    private Long slaThreshold;
+    
 }

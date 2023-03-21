@@ -27,6 +27,15 @@ public class TLService {
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 	
+	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
+		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalApplication = (Integer) tlRepository.getTotalApplications(criteria);
+		Integer slaAchievedAppCount = (Integer) tlRepository.getSlaAchievedAppCount(criteria);
+		return Arrays.asList(Data.builder()
+				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
+	}
+	
 	private TLSearchCriteria getTlSearchCriteria(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = new TLSearchCriteria();
 
