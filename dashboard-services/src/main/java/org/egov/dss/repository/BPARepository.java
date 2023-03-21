@@ -1,42 +1,34 @@
 package org.egov.dss.repository;
 
-import static java.util.Collections.reverseOrder;
-
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.egov.dss.model.PropertySerarchCriteria;
-import org.egov.dss.repository.builder.PTServiceQueryBuilder;
+import org.egov.dss.model.BpaSearchCriteria;
+import org.egov.dss.repository.builder.BpaQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Repository
-public class PTRepository {
+public class BPARepository {
 	
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
 	@Autowired
-	private PTServiceQueryBuilder ptServiceQueryBuilder;
+	private BpaQueryBuilder bpaQueryBuilder;
 	
-	
-	public Object getAssessedPropertiesCount(PropertySerarchCriteria propertySearchCriteria) {
+	public Object getTotalPermitsIssued(BpaSearchCriteria bpaSearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
-        String query = ptServiceQueryBuilder.getAccessedPropertiesCountQuery(propertySearchCriteria, preparedStatementValues);
+        String query = bpaQueryBuilder.getTotalPermitIssued(bpaSearchCriteria, preparedStatementValues);
         log.info("query: "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
     }
-	
+
 }

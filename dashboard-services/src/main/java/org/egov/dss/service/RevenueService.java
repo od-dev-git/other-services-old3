@@ -30,6 +30,7 @@ import org.egov.dss.model.BillAccountDetail;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UsageTypeResponse;
 import org.egov.dss.model.enums.PaymentStatusEnum;
 import org.egov.dss.repository.PaymentRepository;
@@ -56,8 +57,15 @@ public class RevenueService {
 	private PaymentSearchCriteria getPaymentSearchCriteria(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = new PaymentSearchCriteria();
 
-	    if(StringUtils.hasText(payloadDetails.getModulelevel())){
-			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
+		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
+			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.BS_HOME_REVENUE))				
+				criteria.setBusinessServices(null);
+			else if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_OBPS))
+				criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_REVENUE_ALL_BS));
+			else if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.BUSINESS_SERVICE_WS))
+				criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.WS_REVENUE_ALL_BS));
+			else
+				criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
 		}
 		
 		if(StringUtils.hasText(payloadDetails.getTenantid())) {
@@ -102,13 +110,24 @@ public class RevenueService {
 	}
 
 	public List<Data> targetCollection(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
+		BigDecimal targetCollection = (BigDecimal) paymentRepository.getTtargetCollection(targerSearchCriteria);
+		return Arrays.asList(Data.builder().headerValue(targetCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
 	public List<Data> targetAchieved(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
+		BigDecimal totalCollection = payments.parallelStream()
+				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
+				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
+				.map(pay -> pay.getTotalAmountPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
+		BigDecimal targetCollection = (BigDecimal) paymentRepository.getTtargetCollection(targerSearchCriteria);
+		
+		Double targetAchieved = (totalCollection.doubleValue() / targetCollection.doubleValue())*100;
+		return Arrays.asList(Data.builder().headerValue(targetAchieved).build());
 	}
 
 	public List<Data> totalMutationFeeCollection(PayloadDetails payloadDetails) {
@@ -482,6 +501,32 @@ public class RevenueService {
 			response.add(Data.builder().headerName(key).headerName(key).plots(plots).build());
 		});	
 		return response;
+	}
+    
+	private TargetSearchCriteria getTargetSearchCriteria(PayloadDetails payloadDetails) {
+		TargetSearchCriteria criteria = new TargetSearchCriteria();
+
+		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
+			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.BS_HOME_REVENUE))
+				criteria.setBusinessServices(null);
+			else
+				criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
+		}
+		
+		if(StringUtils.hasText(payloadDetails.getTenantid())) {
+			criteria.setTenantIds(Sets.newHashSet(payloadDetails.getTenantid()));
+		}
+		
+		if(payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
+			criteria.setFromDate(payloadDetails.getStartdate());
+		}
+		
+		if(payloadDetails.getEnddate() != null && payloadDetails.getEnddate() != 0) {
+			criteria.setToDate(payloadDetails.getEnddate());
+		}
+		
+		
+		return criteria;
 	}
 
   
