@@ -140,6 +140,12 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.SERVICE_DSS_SLA_ACHIEVED_OVERVIEW.equalsIgnoreCase(visualizationCode)) {
 			  return commonService.slaAchieved(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.DIGITAL_COLLECTIONS_BY_VALUE.equals(visualizationCode)) {
+			return revenueService.digitalCollectionsByValue(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.DIGITAL_COLLECTIONS_BY_VOLUME.equals(visualizationCode)) {
+			return revenueService.digitalCollectionsByVolume(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 

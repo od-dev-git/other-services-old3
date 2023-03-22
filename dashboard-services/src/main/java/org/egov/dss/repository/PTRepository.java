@@ -42,6 +42,23 @@ public class PTRepository {
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
     }
+
+
+	public Integer getTotalPropertiesCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = ptServiceQueryBuilder.getTotalPropertiesCountQuery(propertySearchCriteria, preparedStatementValues);
+		log.info("query for total properties: "+ query);
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+		return result.get(0);
+	}
+	
+	public Integer getTotalApplicationsCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = ptServiceQueryBuilder.getTotalApplicationsCountQuery(propertySearchCriteria, preparedStatementValues);
+		log.info("query for total applications: "+ query);
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+		return result.get(0);
+	}
 	
 	public Object getSlaAchievedAppCount(PropertySerarchCriteria propertySearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
