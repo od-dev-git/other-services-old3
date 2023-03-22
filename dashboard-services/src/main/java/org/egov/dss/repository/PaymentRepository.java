@@ -118,4 +118,16 @@ public class PaymentRepository {
 
 	}
 	
+	public Object getTotalCollection(PaymentSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTotalCollection(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
+	}
+	
+	
+	
 }

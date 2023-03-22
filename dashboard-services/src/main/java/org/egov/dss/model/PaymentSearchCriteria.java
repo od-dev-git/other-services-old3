@@ -48,5 +48,7 @@ public class PaymentSearchCriteria {
     private Integer offset;
 
     private Integer limit;
+    
+    private String excludedTenant;
 
 }

@@ -86,13 +86,16 @@ public class RevenueService {
 	}
 
 	public List<Data> totalCollection(PayloadDetails payloadDetails) {
-		
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
-		BigDecimal totalCollection = payments.parallelStream()
-				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
-				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
-				.map(pay -> pay.getTotalAmountPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
+		//List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
+		
+//		BigDecimal totalCollection = payments.parallelStream()
+//				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
+//				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
+//				.map(pay -> pay.getTotalAmountPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
 		
 		return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
@@ -100,14 +103,9 @@ public class RevenueService {
 	public List<Data> todaysCollection(PayloadDetails payloadDetails) {
 		
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
-		BigDecimal todaysCollection = payments.parallelStream()
-				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
-				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
-				.filter(pay -> pay.getTransactionDate() >= dashboardUtils.getStartingTime(System.currentTimeMillis()))
-				.filter(pay -> pay.getTransactionDate() <= dashboardUtils.getEndingTime(System.currentTimeMillis()))
-				.map(pay -> pay.getTotalAmountPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
-		
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal todaysCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		return Arrays.asList(Data.builder().headerValue(todaysCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
@@ -119,15 +117,11 @@ public class RevenueService {
 
 	public List<Data> targetAchieved(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
-		BigDecimal totalCollection = payments.parallelStream()
-				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
-				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
-				.map(pay -> pay.getTotalAmountPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
-
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
 		BigDecimal targetCollection = (BigDecimal) paymentRepository.getTtargetCollection(targerSearchCriteria);
-		
 		Double targetAchieved = (totalCollection.doubleValue() / targetCollection.doubleValue())*100;
 		return Arrays.asList(Data.builder().headerValue(targetAchieved).build());
 	}
@@ -136,13 +130,9 @@ public class RevenueService {
 		
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		paymentSearchCriteria.setBusinessServices(Sets.newHashSet("PT.MUTATION"));
-		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
-		BigDecimal totalCollection = payments.parallelStream()
-				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
-				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
-				.filter(pay -> pay.getPaymentDetails().get(0).getBusinessService().equalsIgnoreCase("PT.MUTATION"))
-				.map(pay -> pay.getTotalAmountPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
-		
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
