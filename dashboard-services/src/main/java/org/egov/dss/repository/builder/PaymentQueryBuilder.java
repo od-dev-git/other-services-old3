@@ -59,6 +59,11 @@ public class PaymentQueryBuilder {
 	public static final String TRANSACTION_COUNT_QUERY = " select count(py.transactionnumber) from egcl_payment py "
             + "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
 	
+	public static final String TENANT_WISE_COLLECTION_QUERY = " select py.tenantid, COALESCE(sum(py.totalamountpaid),0) as totalamt from egcl_payment py "
+            + "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
+	
+	public static final String TENANT_WISE_TARGET_COLLECTION_QUERY = " select tenantidformunicipalcorporation as tenantid,COALESCE (sum(budgetproposedformunicipalcorporation),0) as totalamt from eg_dss_target edt  ";
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -285,5 +290,21 @@ public class PaymentQueryBuilder {
 		StringBuilder selectQuery = new StringBuilder(TRANSACTION_COUNT_QUERY);
 		 addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
 		 return selectQuery.toString();
+	}
+
+	public String getTenantWiseCollection(PaymentSearchCriteria paymentSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TENANT_WISE_COLLECTION_QUERY);
+		addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+		selectQuery.append(" group by py.tenantid  ");
+		return selectQuery.toString();
+	}
+
+	public String getTenantWiseTargetCollection(TargetSearchCriteria targerSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TENANT_WISE_TARGET_COLLECTION_QUERY);
+		addWhereClauseForTaget(selectQuery, preparedStatementValues, targerSearchCriteria);
+		selectQuery.append(" group by tenantid  ");
+		return selectQuery.toString();
 	}
 }
