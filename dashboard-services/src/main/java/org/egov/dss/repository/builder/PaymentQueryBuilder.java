@@ -14,6 +14,7 @@ import org.egov.dss.model.TargetSearchCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+
 @Component
 public class PaymentQueryBuilder {
 
@@ -51,6 +52,9 @@ public class PaymentQueryBuilder {
 	        +" 'PT.MUTATION','BPA.NC_APP_FEE','BPA.NC_SAN_FEE','BPA.NC_OC_APP_FEE','BPA.NC_OC_SAN_FEE' "; 
 	
 	public static final String TARGET_COLLECTION_QUERY = " select COALESCE (sum(budgetproposedformunicipalcorporation),0) from eg_dss_target edt  ";
+	
+	public static final String TOTAL_COLLECTION_QUERY = " select COALESCE(sum(py.totalamountpaid),0) from egcl_payment py "
+			                                          + "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
 			
 
 	
@@ -106,7 +110,7 @@ public class PaymentQueryBuilder {
 
 		if (!CollectionUtils.isEmpty(searchCriteria.getStatus())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" UPPER(py.paymentstatus) in (:status)");
+			selectQuery.append(" UPPER(py.paymentstatus) not in (:status)");
 			preparedStatementValues.put("status",
 					searchCriteria.getStatus().stream().map(String::toUpperCase).collect(toSet()));
 		}
@@ -140,13 +144,13 @@ public class PaymentQueryBuilder {
 
 		if (searchCriteria.getFromDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" py.transactionDate >= :fromDate");
+			selectQuery.append(" pyd.receiptdate >= :fromDate");
 			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
 		}
 
 		if (searchCriteria.getToDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" py.transactionDate <= :toDate");
+			selectQuery.append(" pyd.receiptdate <= :toDate");
 			/*Calendar c = Calendar.getInstance();
 			c.setTime(new Date(searchCriteria.getToDate()));
 			c.add(Calendar.DATE, 1);
@@ -178,6 +182,12 @@ public class PaymentQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" pyd.billid in (:billid)");
 			preparedStatementValues.put("billid", searchCriteria.getBillIds());
+		}
+		
+		if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" py.tenantid != :excludedTenant");
+			preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenant());
 		}
 
 	}
@@ -261,5 +271,11 @@ public class PaymentQueryBuilder {
 
 		return selectQuery.toString();
 
+	}
+	
+	public static String getTotalCollection(PaymentSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_COLLECTION_QUERY);
+		 addWhereClause(selectQuery, preparedStatementValues, criteria);
+		 return selectQuery.toString();
 	}
 }
