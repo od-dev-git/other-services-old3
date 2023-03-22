@@ -28,12 +28,15 @@ public class DashboardService {
 	private CommonRepository commonRepository;
 	
 	public void processRequest(RequestInfoWrapper requestInfoWrapper) {
+		Long schedulerStartTime = System.currentTimeMillis();
+		
 		ResponseData responseData = new ResponseData() ;
 		List<PayloadDetails> payloadList = getPayloadForScheduler();
 		for (PayloadDetails payloadDetails : payloadList) {
 			requestInfoWrapper.setPayloadDetails(payloadDetails);
 			responseData = serveRequest(requestInfoWrapper);
 			payloadDetails.setResponsedata(responseData);
+			payloadDetails.setLastModifiedTime(schedulerStartTime);
 			commonRepository.update(payloadDetails);
 			
 		}

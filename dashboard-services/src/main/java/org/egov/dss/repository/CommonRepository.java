@@ -58,7 +58,8 @@ public class CommonRepository {
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
 				ps.setObject(1, utils.getPGObject(payloadDetails.getResponsedata()));
-				ps.setString(2, payloadDetails.getId());
+				ps.setLong(2, payloadDetails.getLastModifiedTime());
+				ps.setString(3, payloadDetails.getId());
 
 			}
 
