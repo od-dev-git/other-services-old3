@@ -88,7 +88,7 @@ public class RevenueService {
 	public List<Data> totalCollection(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		//List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
-		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED));
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		
@@ -103,7 +103,7 @@ public class RevenueService {
 	public List<Data> todaysCollection(PayloadDetails payloadDetails) {
 		
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED));
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		BigDecimal todaysCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		return Arrays.asList(Data.builder().headerValue(todaysCollection.setScale(2, RoundingMode.HALF_UP)).build());
@@ -117,7 +117,7 @@ public class RevenueService {
 
 	public List<Data> targetAchieved(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED));
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
@@ -130,7 +130,7 @@ public class RevenueService {
 		
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		paymentSearchCriteria.setBusinessServices(Sets.newHashSet("PT.MUTATION"));
-		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED));
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
@@ -519,6 +519,43 @@ public class RevenueService {
 		
 		
 		return criteria;
+	}
+
+	public List<Data> digitalCollectionsByValue(PayloadDetails payloadDetails) {
+		
+		//Get Total Collection Here
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
+		
+		//Get Total Digital Collection Here
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ONLINE_PAYMENT,
+				DashboardConstants.NEFT_PAYMENT, DashboardConstants.RTGS_PAYMENT, DashboardConstants.CARD_PAYMENT));
+		BigDecimal digitalTotalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
+		
+		//Get Digital Collections by value using formula -> digitalCollectionAmount *100/totalCollectionAmount
+		BigDecimal digitalCollectionByValue = digitalTotalCollection.multiply(new BigDecimal(100)).divide(totalCollection, 2, RoundingMode.HALF_UP);
+		
+		return Arrays.asList(Data.builder().headerValue(digitalCollectionByValue.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+
+	public List<Data> digitalCollectionsByVolume(PayloadDetails payloadDetails) {
+		//Get Total Transaction count
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		
+		Long totalTransactionCount = (Long) paymentRepository.getTotalTransactionCount(paymentSearchCriteria);
+		//Get Total Digital Transaction Count Here
+				paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ONLINE_PAYMENT,
+						DashboardConstants.NEFT_PAYMENT, DashboardConstants.RTGS_PAYMENT, DashboardConstants.CARD_PAYMENT));
+		
+		Long digitalTransactionCount = (Long) paymentRepository.getTotalTransactionCount(paymentSearchCriteria);
+		
+		//Get Digital Transaction by volume using formula -> digitalCollectioncount *100/totalCollectionCount 
+		Long digitalCollectionByVolume = (digitalTransactionCount * 100)/totalTransactionCount;
+		return Arrays.asList(Data.builder().headerValue(digitalCollectionByVolume).build());
 	}
 
   
