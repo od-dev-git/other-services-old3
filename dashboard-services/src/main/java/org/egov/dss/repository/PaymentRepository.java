@@ -22,6 +22,7 @@ import org.egov.dss.repository.builder.PaymentQueryBuilder;
 import org.egov.dss.repository.rowmapper.BillRowMapper;
 import org.egov.dss.repository.rowmapper.CollectionByUsageRowMapper;
 import org.egov.dss.repository.rowmapper.PaymentRowMapper;
+import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.egov.dss.web.model.ChartCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
@@ -135,6 +136,20 @@ public class PaymentRepository {
 		List<Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(Long.class));
 		return result.get(0);
+	}
+
+	public HashMap<String, BigDecimal> getTenantWiseCollection(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTenantWiseCollection(paymentSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new TenantWiseCollectionRowMapper());
+	}
+
+	public HashMap<String, BigDecimal> getTenantWiseTargetCollection(TargetSearchCriteria targerSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTenantWiseTargetCollection(targerSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
 	}
 	
 	

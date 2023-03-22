@@ -38,6 +38,7 @@ import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.ChartCriteria;
 import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
+import org.egov.dss.web.model.PlotWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -189,62 +190,81 @@ public class RevenueService {
 	}
 
 	public List<Data> topPerformingUlbs(PayloadDetails payloadDetails) {
-		
+
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
-		Map<String, List<Payment>> tenantWisePayments = payments.parallelStream()
-				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
-				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
-				.collect(Collectors.groupingBy(Payment::getTenantId));
-		
-		HashMap<String, BigDecimal> tenantWiseAmountCollection = new HashMap<>();
-		tenantWisePayments.forEach((key,value) -> {
-			BigDecimal sum = value.stream().collect(Collectors.mapping(Payment::getTotalAmountPaid, Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)));
-			tenantWiseAmountCollection.put(key, sum);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+
+		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
+		HashMap<String, BigDecimal> tenantWiseTarget = paymentRepository
+				.getTenantWiseTargetCollection(targerSearchCriteria);
+
+		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
+
+		tenantWiseCollection.forEach((key, value) -> {
+			BigDecimal target = tenantWiseTarget.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(target, 2, RoundingMode.HALF_UP);
+			tenantWisePercentage.put(key, percentage);
 		});
-		
+
+		Map<String, BigDecimal> tenantWisePercentageSorted = tenantWisePercentage.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
 		List<Data> responseList = new ArrayList<>();
 		
-		Map<String, BigDecimal> tenantWiseAmountCollectionSorted = tenantWiseAmountCollection.entrySet().parallelStream()
-        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-		
-		tenantWiseAmountCollectionSorted.forEach((key,value) -> {
-			List<Plot> plots = Arrays.asList(Plot.builder().name(key).value(value).build());
-			responseList.add(Data.builder().plots(plots).build());
-		});
-		
+		int rank = 0;
+		for(Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
+			rank++;
+			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey()).value(tenantWisePercent.getValue()).symbol("percentage")
+					.label("DSS_TARGET_ACHIEVED").build());
+			responseList.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+
 		return responseList;
+
 	}
 
 	public List<Data> bottomPerformingUlbs(PayloadDetails payloadDetails) {
 		
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
-		Map<String, List<Payment>> tenantWisePayments = payments.parallelStream()
-				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
-				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
-				.collect(Collectors.groupingBy(Payment::getTenantId));
-		
-		HashMap<String, BigDecimal> tenantWiseAmountCollection = new HashMap<>();
-		tenantWisePayments.forEach((key,value) -> {
-			BigDecimal sum = value.stream().collect(Collectors.mapping(Payment::getTotalAmountPaid, Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)));
-			tenantWiseAmountCollection.put(key, sum);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+
+		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
+		HashMap<String, BigDecimal> tenantWiseTarget = paymentRepository
+				.getTenantWiseTargetCollection(targerSearchCriteria);
+
+		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
+
+		tenantWiseCollection.forEach((key, value) -> {
+			BigDecimal target = tenantWiseTarget.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(target, 2, RoundingMode.HALF_UP);
+			tenantWisePercentage.put(key, percentage);
 		});
-		
+
+		Map<String, BigDecimal> tenantWisePercentageSorted = tenantWisePercentage.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
 		List<Data> responseList = new ArrayList<>();
 		
-		Map<String, BigDecimal> tenantWiseAmountCollectionSorted = tenantWiseAmountCollection.entrySet().parallelStream()
-        .sorted(Map.Entry.comparingByValue())
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-		
-		tenantWiseAmountCollectionSorted.forEach((key,value) -> {
-			List<Plot> plots = Arrays.asList(Plot.builder().name(key).value(value).build());
-			responseList.add(Data.builder().plots(plots).build());
-		});
-		
+		int rank = tenantWisePercentageSorted.size()+1;
+		for(Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
+			rank--;
+			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey()).value(tenantWisePercent.getValue()).symbol("percentage")
+					.label("DSS_TARGET_ACHIEVED").build());
+			responseList.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+
 		return responseList;
 		
 	}
