@@ -50,10 +50,15 @@ public class MarriageQueryBuilder {
 			selectQuery.append(" ema.createdtime <= :toDate");
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
 		}
+		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ema.lastmodifiedtime - ema.createdtime < " + searchCriteria.getSlaThreshold());
+		}
 
 		if (searchCriteria.getExcludedTenantId() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ema.tenantId <> :excludedTenantId");
+			selectQuery.append(" ema.tenantId != :excludedTenantId");
 			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
 		}
 

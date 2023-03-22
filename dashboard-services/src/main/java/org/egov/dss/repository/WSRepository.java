@@ -3,6 +3,8 @@ package org.egov.dss.repository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.model.WaterSearchCriteria;
 import org.egov.dss.repository.builder.WaterServiceQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +23,21 @@ public class WSRepository {
 	
 	@Autowired
 	private WaterServiceQueryBuilder wsQueryBuilder;
+	
+	@Autowired
+	private ConfigurationLoader config;
 
 	public Object getActiveWaterConnectionCount(WaterSearchCriteria waterSearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = wsQueryBuilder.getActiveConnectionCount(waterSearchCriteria, preparedStatementValues);
+        log.info("query: "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+    }
+	
+	public Object getSlaAchievedAppCount(WaterSearchCriteria waterSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        waterSearchCriteria.setSlaThreshold(config.getSlaWsThreshold());
         String query = wsQueryBuilder.getActiveConnectionCount(waterSearchCriteria, preparedStatementValues);
         log.info("query: "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));

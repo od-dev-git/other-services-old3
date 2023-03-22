@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class PgrQueryBuilder {
 	
 public static final String PGR_TOTAL_APPLICATION = " select count(*) from eg_pgr_service eps ";
-	
+
 	public static String getTotalApplication(PgrSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(PGR_TOTAL_APPLICATION);
 		return addWhereClause(selectQuery, preparedStatementValues, criteria);
@@ -50,10 +50,15 @@ public static final String PGR_TOTAL_APPLICATION = " select count(*) from eg_pgr
 			selectQuery.append(" eps.createdtime <= :toDate");
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
 		}
+		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" eps.lastmodifiedtime - eps.createdtime < " + searchCriteria.getSlaThreshold());
+		}
 
 		if (searchCriteria.getExcludedTenantId() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" eps.tenantId <> :excludedTenantId");
+			selectQuery.append(" eps.tenantId != :excludedTenantId");
 			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
 		}
 

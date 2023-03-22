@@ -1,4 +1,4 @@
-CREATE TABLE eg_dss_response (
+CREATE TABLE IF NOT EXISTS eg_dss_response (
 	id varchar NOT NULL,
 	visualizationcode varchar NULL,
 	modulelevel varchar NULL,

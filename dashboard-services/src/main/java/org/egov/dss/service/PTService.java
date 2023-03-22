@@ -73,6 +73,15 @@ public class PTService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalApplication = (Integer) ptRepository.getAssessedPropertiesCount(criteria);
+		Integer slaAchievedAppCount = (Integer) ptRepository.getSlaAchievedAppCount(criteria);
+		return Arrays.asList(Data.builder()
+				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
+	}
     
 	private PropertySerarchCriteria getPropertySearchCriteria(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = new PropertySerarchCriteria();

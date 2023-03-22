@@ -6,6 +6,7 @@ import java.util.List;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.BpaSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
+import org.egov.dss.model.PgrSearchCriteria;
 import org.egov.dss.repository.BPARepository;
 import org.egov.dss.web.model.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,17 @@ public class BPAService {
 		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
 		Integer totalApplication = (Integer) bpaRepository.getTotalPermitsIssued(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}    
+	
+	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+		Integer totalApplication = (Integer) bpaRepository.getTotalPermitsIssued(criteria);
+		Integer slaAchievedAppCount = (Integer) bpaRepository.getSlaAchievedAppCount(criteria);
+		return Arrays.asList(Data.builder()
+				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
-
 	private BpaSearchCriteria getBpaSearchCriteria(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = new BpaSearchCriteria();
 
