@@ -51,13 +51,17 @@ public class PTService {
 	}
 
 	public List<Data> ptTotalApplications(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer assessedPropertiesCount = (Integer) ptRepository.getTotalApplicationsCount(criteria);
+		return Arrays.asList(Data.builder().headerValue(assessedPropertiesCount).build());
 	}
 
 	public List<Data> totalnoOfProperties(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalPropertiesCount = ptRepository.getTotalPropertiesCount(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalPropertiesCount).build());
 	}
 
 	public List<Data> cumulativePropertiesAssessed(PayloadDetails payloadDetails) {
