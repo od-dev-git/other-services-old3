@@ -56,7 +56,8 @@ public class PaymentQueryBuilder {
 	public static final String TOTAL_COLLECTION_QUERY = " select COALESCE(sum(py.totalamountpaid),0) from egcl_payment py "
 			                                          + "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
 			
-
+	public static final String TRANSACTION_COUNT_QUERY = " select count(py.transactionnumber) from egcl_payment py "
+            + "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
 	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
@@ -265,7 +266,7 @@ public class PaymentQueryBuilder {
 
 		if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" pyd.businessService IN (:businessService)  ");
+			selectQuery.append(" edt.businessService IN (:businessService)  ");
 			preparedStatementValues.put("businessService", searchCriteria.getBusinessServices());
 		}
 
@@ -276,6 +277,13 @@ public class PaymentQueryBuilder {
 	public static String getTotalCollection(PaymentSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_COLLECTION_QUERY);
 		 addWhereClause(selectQuery, preparedStatementValues, criteria);
+		 return selectQuery.toString();
+	}
+
+	public String getTransactionsCount(PaymentSearchCriteria paymentSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TRANSACTION_COUNT_QUERY);
+		 addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
 		 return selectQuery.toString();
 	}
 }

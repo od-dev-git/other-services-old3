@@ -127,6 +127,15 @@ public class PaymentRepository {
 		return result.get(0);
 
 	}
+
+	public Long getTotalTransactionCount(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTransactionsCount(paymentSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(Long.class));
+		return result.get(0);
+	}
 	
 	
 	

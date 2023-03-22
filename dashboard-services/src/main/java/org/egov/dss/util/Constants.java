@@ -43,6 +43,8 @@ public class Constants {
 		final static String REVENUE_TAXHEADS_BREAKUP_DDR_REVENUE = "taxHeadsBreakupDDRRevenue";
 		final static String REVENUE_TAXHEADS_BREAKUP_USAGE = "taxHeadsBreakupUsage";
 		final static String REVENUE_TOTAL_MUTATION_FEE_CALCULATION = "totalMutationFeeCalculation";
+		final static String DIGITAL_COLLECTIONS_BY_VALUE = "ptDigitalCollectionByValue";
+		final static String DIGITAL_COLLECTIONS_BY_VOLUME = "ptDigitalCollectionByVolume";
 		
 		
 		final static String SERVICE_DSS_TOTAL_APPLICATION_OVERVIEW = "dssTotalApplicationOverview";

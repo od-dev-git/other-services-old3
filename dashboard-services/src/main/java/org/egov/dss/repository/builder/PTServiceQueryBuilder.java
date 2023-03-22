@@ -11,7 +11,10 @@ import org.springframework.stereotype.Component;
 public class PTServiceQueryBuilder {
 	
 	public static final String ASSESSED_PROPERTIES_SQL = " select count(distinct propertyid) from eg_pt_asmt_assessment epaa ";
-    
+    public static final String TOTAL_PROPERTIES_SQL = " select count(distinct propertyid) from eg_pt_property epaa ";
+    public static final String TOTAL_APPLICATIONS_SQL = " select count(id) from eg_pt_property epaa ";
+	
+	
 	public static String getAccessedPropertiesCountQuery(PropertySerarchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(ASSESSED_PROPERTIES_SQL);
@@ -67,6 +70,21 @@ public class PTServiceQueryBuilder {
 		
 		return selectQuery.toString();
 	
+	}
+
+
+	public String getTotalPropertiesCountQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTIES_SQL);
+		selectQuery.append(" where epaa.status = :active ");
+		preparedStatementValues.put("active","ACTIVE");
+		return addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria);
+	}
+	
+	public String getTotalApplicationsCountQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_APPLICATIONS_SQL);
+		return addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria);
 	}
 	
 }
