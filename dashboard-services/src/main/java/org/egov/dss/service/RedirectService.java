@@ -9,6 +9,9 @@ import org.egov.dss.web.model.RequestInfoWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class RedirectService {
 	
@@ -38,14 +41,14 @@ public class RedirectService {
 	
 	public List<Data> redirect(RequestInfoWrapper requestInfoWrapper) {
 		String visualizationCode=requestInfoWrapper.getPayloadDetails().getVisualizationcode();
-		
+		log.info("Currently Processing :"+visualizationCode+"  Module level: "+requestInfoWrapper.getPayloadDetails().getModulelevel());
 		if(Constants.VisualizationCodes.REVENUE_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.totalCollection(requestInfoWrapper.getPayloadDetails());
 		}
 		
-    	if(Constants.VisualizationCodes.REVENUE_TODAYS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
-			return revenueService.todaysCollection(requestInfoWrapper.getPayloadDetails());
-		}
+//    	if(Constants.VisualizationCodes.REVENUE_TODAYS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+//			return revenueService.todaysCollection(requestInfoWrapper.getPayloadDetails());
+//		}
 		if(Constants.VisualizationCodes.REVENUE_TARGET_COLLECTION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.targetCollection(requestInfoWrapper.getPayloadDetails());
 		}
@@ -55,57 +58,57 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_TOTAL_MUTATION_FEE_CALCULATION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.totalMutationFeeCollection(requestInfoWrapper.getPayloadDetails());
 		}
-		if(Constants.VisualizationCodes.REVENUE_CUMULATIVE_COLLECTION.equalsIgnoreCase(visualizationCode)) {
-			return revenueService.cumulativeCollection(requestInfoWrapper.getPayloadDetails());
-		}
+//		if(Constants.VisualizationCodes.REVENUE_CUMULATIVE_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+//			return revenueService.cumulativeCollection(requestInfoWrapper.getPayloadDetails());
+//		}
 		if(Constants.VisualizationCodes.REVENUE_TOP_PERFORMING_ULBS.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.topPerformingUlbs(requestInfoWrapper.getPayloadDetails());
 		}
 		if(Constants.VisualizationCodes.REVENUE_BOTTOM_PERFORMING_ULBS.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.bottomPerformingUlbs(requestInfoWrapper.getPayloadDetails());
 		}
-		if(Constants.VisualizationCodes.REVENUE_COLLECTION_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
-			return revenueService.collectionByUsageType(requestInfoWrapper.getPayloadDetails());
-		}
-		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_DDR_REVENUE.equalsIgnoreCase(visualizationCode)) {
-			return revenueService.demandCollectionIndexDDRRevenue(requestInfoWrapper.getPayloadDetails());
-		}
-		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_DDR_REVENUE.equalsIgnoreCase(visualizationCode)) {
-			return revenueService.taxheadsBreakupDDRRevenue(requestInfoWrapper.getPayloadDetails());
-		}
-		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_USAGE.equalsIgnoreCase(visualizationCode)) {
-			return revenueService.taxHeadsBreakupUsage(requestInfoWrapper.getPayloadDetails());
-		}
-		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_USAGE_REVENUE.equalsIgnoreCase(visualizationCode)) {
-			return revenueService.demandCollectionIndexUsageRevenue(requestInfoWrapper.getPayloadDetails());
-		}
-		if(Constants.VisualizationCodes.SERVICE_TOTAL_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
-			return ptService.totalProprties(requestInfoWrapper.getPayloadDetails());
-		}
-		if(Constants.VisualizationCodes.SERVICE_PROPERTIES_PAID.equalsIgnoreCase(visualizationCode)) {
-			return ptService.propertiesPaid(requestInfoWrapper.getPayloadDetails());
-		}
+//		if(Constants.VisualizationCodes.REVENUE_COLLECTION_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
+//			return revenueService.collectionByUsageType(requestInfoWrapper.getPayloadDetails());
+//		}
+//		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_DDR_REVENUE.equalsIgnoreCase(visualizationCode)) {
+//			return revenueService.demandCollectionIndexDDRRevenue(requestInfoWrapper.getPayloadDetails());
+//		}
+//		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_DDR_REVENUE.equalsIgnoreCase(visualizationCode)) {
+//			return revenueService.taxheadsBreakupDDRRevenue(requestInfoWrapper.getPayloadDetails());
+//		}
+//		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_USAGE.equalsIgnoreCase(visualizationCode)) {
+//			return revenueService.taxHeadsBreakupUsage(requestInfoWrapper.getPayloadDetails());
+//		}
+//		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_USAGE_REVENUE.equalsIgnoreCase(visualizationCode)) {
+//			return revenueService.demandCollectionIndexUsageRevenue(requestInfoWrapper.getPayloadDetails());
+//		}
+//		if(Constants.VisualizationCodes.SERVICE_TOTAL_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
+//			return ptService.totalProprties(requestInfoWrapper.getPayloadDetails());
+//		}
+//		if(Constants.VisualizationCodes.SERVICE_PROPERTIES_PAID.equalsIgnoreCase(visualizationCode)) {
+//			return ptService.propertiesPaid(requestInfoWrapper.getPayloadDetails());
+//		}
 		if(Constants.VisualizationCodes.SERVICE_PROPERTIES_ASSESSED.equalsIgnoreCase(visualizationCode)) {
 			return ptService.propertiesAssessed(requestInfoWrapper.getPayloadDetails());
 		}
-		if(Constants.VisualizationCodes.SERVICE_ACTIVE_ULBS.equalsIgnoreCase(visualizationCode)) {
-			return ptService.activeUlbs(requestInfoWrapper.getPayloadDetails());
-		}
-		if(Constants.VisualizationCodes.SERVICE_TOTAL_MUTATION_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
-			return ptService.totalMutationProperties(requestInfoWrapper.getPayloadDetails());
-		}
+//		if(Constants.VisualizationCodes.SERVICE_ACTIVE_ULBS.equalsIgnoreCase(visualizationCode)) {
+//			return ptService.activeUlbs(requestInfoWrapper.getPayloadDetails());
+//		}
+//		if(Constants.VisualizationCodes.SERVICE_TOTAL_MUTATION_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
+//			return ptService.totalMutationProperties(requestInfoWrapper.getPayloadDetails());
+//		}
 		if(Constants.VisualizationCodes.SERVICE_PT_TOTAL_APPLICATIONS.equalsIgnoreCase(visualizationCode)) {
 			return ptService.ptTotalApplications(requestInfoWrapper.getPayloadDetails());
 		}
 		if(Constants.VisualizationCodes.SERVICE_TOTAL_NO_OF_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
 			return ptService.totalnoOfProperties(requestInfoWrapper.getPayloadDetails());
 		}
-		if(Constants.VisualizationCodes.SERVICE_CUMULATIVE_PROPERTIES_ASSESSED.equalsIgnoreCase(visualizationCode)) {
-			return ptService.cumulativePropertiesAssessed(requestInfoWrapper.getPayloadDetails());
-		}
-		if(Constants.VisualizationCodes.SERVICE_TOP_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
-			return ptService.topPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
-		}
+//		if(Constants.VisualizationCodes.SERVICE_CUMULATIVE_PROPERTIES_ASSESSED.equalsIgnoreCase(visualizationCode)) {
+//			return ptService.cumulativePropertiesAssessed(requestInfoWrapper.getPayloadDetails());
+//		}
+//		if(Constants.VisualizationCodes.SERVICE_TOP_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
+//			return ptService.topPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
+//		}
 		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
 			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
 		}
