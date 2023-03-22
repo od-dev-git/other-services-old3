@@ -1,11 +1,12 @@
 package org.egov.dss.service;
 
 import java.util.List;
+
 import org.egov.dss.config.ConfigurationLoader;
+import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.enums.ChartType;
 import org.egov.dss.repository.CommonRepository;
-import org.egov.dss.util.Constants;
 import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.RequestInfoWrapper;
 import org.egov.dss.web.model.ResponseData;
@@ -28,12 +29,15 @@ public class DashboardService {
 	private CommonRepository commonRepository;
 	
 	public void processRequest(RequestInfoWrapper requestInfoWrapper) {
+		Long schedulerStartTime = System.currentTimeMillis();
+		
 		ResponseData responseData = new ResponseData() ;
 		List<PayloadDetails> payloadList = getPayloadForScheduler();
 		for (PayloadDetails payloadDetails : payloadList) {
 			requestInfoWrapper.setPayloadDetails(payloadDetails);
 			responseData = serveRequest(requestInfoWrapper);
 			payloadDetails.setResponsedata(responseData);
+			payloadDetails.setLastModifiedTime(schedulerStartTime);
 			commonRepository.update(payloadDetails);
 			
 		}
@@ -65,9 +69,14 @@ public class DashboardService {
 		responseData.setChartType(chartType.toString());
 		responseData.setVisualizationCode(internalChartId);
 		//responseData.setDrillDownChartId(drillChart);
-		responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
-		if(!((chartType.toString()).equalsIgnoreCase(ChartType.TABLE.toString()) || (chartType.toString()).equalsIgnoreCase(ChartType.XTABLE.toString()))){
-			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+		if(chartType.equalsIgnoreCase(DashboardConstants.PERFORM)) {
+			responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
+			responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
+		}else {
+			responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
+			if(!((chartType.toString()).equalsIgnoreCase(ChartType.TABLE.toString()) || (chartType.toString()).equalsIgnoreCase(ChartType.XTABLE.toString()))){
+				responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			}
 		}
 		responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol(valueType)));
 	}

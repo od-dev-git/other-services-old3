@@ -60,5 +60,8 @@ public class PayloadDetails {
 	
 	@JsonProperty("responseData")
 	private Object responsedata = null;
+	
+	@JsonProperty("lastModifiedTime")
+	private Long lastModifiedTime;
 
 }

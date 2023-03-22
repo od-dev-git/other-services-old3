@@ -1,0 +1,1 @@
+ALTER TABLE eg_dss_response ADD COLUMN IF NOT EXISTS lastmodifiedtime bigint;
