@@ -11,8 +11,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.egov.dss.config.ConfigurationLoader;
+import org.egov.dss.model.Chart;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.builder.PTServiceQueryBuilder;
+import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -118,5 +120,13 @@ public class PTRepository {
         log.info("query for PT New Assessment Count : "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
+	}
+	
+	public List<Chart> getCumulativePropertiesAssessed(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getCumulativePropertiesAssessedQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query for Cumulative Properties Assessed Count : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
 	}
 }

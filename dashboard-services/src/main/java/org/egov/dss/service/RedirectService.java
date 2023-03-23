@@ -109,9 +109,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_PT_RE_ASSESSMENT_SHARE.equalsIgnoreCase(visualizationCode)) {
 			return ptService.ptReAssessmentShare(requestInfoWrapper.getPayloadDetails());
 		}
-//		if(Constants.VisualizationCodes.SERVICE_CUMULATIVE_PROPERTIES_ASSESSED.equalsIgnoreCase(visualizationCode)) {
-//			return ptService.cumulativePropertiesAssessed(requestInfoWrapper.getPayloadDetails());
-//		}
+		if(Constants.VisualizationCodes.SERVICE_CUMULATIVE_PROPERTIES_ASSESSED.equalsIgnoreCase(visualizationCode)) {
+			return ptService.cumulativePropertiesAssessed(requestInfoWrapper.getPayloadDetails());
+		}
 //		if(Constants.VisualizationCodes.SERVICE_TOP_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
 //			return ptService.topPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
 //		}

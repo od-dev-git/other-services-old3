@@ -2,14 +2,17 @@ package org.egov.dss.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.egov.dss.constants.DashboardConstants;
+import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.PTRepository;
 import org.egov.dss.web.model.Data;
+import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -90,8 +93,18 @@ public class PTService {
 	}
 	
 	public List<Data> cumulativePropertiesAssessed(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		getPropertySearchCriteria(payloadDetails);
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<Chart> cumulativePropertiesAssessed = ptRepository.getCumulativePropertiesAssessed(criteria);
+
+		List<Plot> plots = new ArrayList();
+		extractDataForChart(cumulativePropertiesAssessed, plots);	
+
+		BigDecimal total = cumulativePropertiesAssessed.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);		 
+
+		return Arrays.asList(Data.builder().headerName("Collections").headerValue(total).plots(plots).build());
 	}
 
 	public List<Data> topPerformingUlbsCompletionRate(PayloadDetails payloadDetails) {
@@ -128,5 +141,17 @@ public class PTService {
 		}
 		
 		return criteria;
+	}
+	
+	private void extractDataForChart(List<Chart> items, List<Plot> plots) {
+		
+//		Long total = 0L;
+//		for(Chart item : items) {
+//			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
+//			total = total + Long.valueOf(String.valueOf(item.getValue()));
+//		}
+		items.stream().forEach(item ->{
+			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
+		});
 	}
 }
