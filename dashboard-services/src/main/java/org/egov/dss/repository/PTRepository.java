@@ -103,4 +103,20 @@ public class PTRepository {
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
 	}
+	
+	public Integer getPtTotalAssessmentsCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getPtTotalAssessmentsCountQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query for PT Total Assessment Count : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+	}
+	
+	public Integer getPtTotalNewAssessmentsCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getPtTotalNewAssessmentsCountQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query for PT New Assessment Count : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+	}
 }

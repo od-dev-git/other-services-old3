@@ -17,7 +17,10 @@ public class PTServiceQueryBuilder {
 	public static final String TOTAL_PROPERTIES_NEW_SQL = " select count(*) noOfNewProperties  from eg_pt_property epaa ";
 	public static final String TOTAL_PROPERTIES_PAID_SQL = " select count(distinct bill.consumercode) from egcl_payment pay inner join egcl_paymentdetail pdtl on pdtl.paymentid = pay.id inner join egcl_bill bill on bill.id=pdtl.billid  ";
 	public static final String TOTAL_PROPERTY_ID_SQL = " select count(id) from eg_pt_property epaa";
-	
+	public static final String SELECT_SQL = "  select ";
+	public static final String TENANTID_SQL = " tenantid ";
+	public static final String TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + " count(assessmentnumber) as totalAsmt from eg_pt_asmt_assessment epaa ";
+	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + " count(*) as newAsmt  from eg_pt_property epaa ";
 	
 	public static String getAccessedPropertiesCountQuery(PropertySerarchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -160,6 +163,26 @@ public class PTServiceQueryBuilder {
 
 		return selectQuery.toString();
 	}
+	
+	public String getPtTotalAssessmentsCountQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL);
+		selectQuery.append(" where epaa.status = :active ");
+		preparedStatementValues.put("active","ACTIVE");
+		return addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,true);
+	}
+
+
+	public String getPtTotalNewAssessmentsCountQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL);
+		selectQuery.append(" where epaa.status = :active ");
+		preparedStatementValues.put("active","ACTIVE");
+		selectQuery.append(" and epaa.creationreason ='CREATE' ");
+		preparedStatementValues.put("creationReason", "CREATE");
+		return addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
+	}
+	
 	
 	private static String addWhereClauseWithLastModifiedTime(StringBuilder selectQuery,
 			Map<String, Object> preparedStatementValues, PropertySerarchCriteria searchCriteria) {
