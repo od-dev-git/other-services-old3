@@ -15,6 +15,7 @@ import org.egov.dss.model.Chart;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.builder.PTServiceQueryBuilder;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
+import org.egov.dss.repository.rowmapper.TableChartRowMapper;
 import org.egov.dss.repository.rowmapper.ULBPerformanceRateRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
@@ -150,7 +151,7 @@ public class PTRepository {
 	public List<Chart> getpropertiesByUsageType(PropertySerarchCriteria propertySearchCriteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = ptServiceQueryBuilder.getpropertiesByUsageTypeQuery(propertySearchCriteria, preparedStatementValues);
-        log.info("query: "+query);
+        log.info("query getpropertiesByUsageType : "+query);
         List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
         return result;
 	}
@@ -159,7 +160,7 @@ public class PTRepository {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
 		propertySearchCriteria.setSlaThreshold(config.getSlaPtThreshold());
         String query = ptServiceQueryBuilder.getSlaCompletionCountListQuery(propertySearchCriteria, preparedStatementValues);
-        log.info("query: "+query);
+        log.info("query getSlaCompletionCountList : "+query);
         HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
         propertySearchCriteria.setSlaThreshold(null);
         return result;
@@ -168,8 +169,17 @@ public class PTRepository {
 	public HashMap<String, Long> getTotalApplicationCompletionCountList(PropertySerarchCriteria propertySearchCriteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = ptServiceQueryBuilder.getTotalApplicationCompletionCountListQuery(propertySearchCriteria, preparedStatementValues);
-        log.info("query: "+query);
+        log.info("query getTotalApplicationCompletionCountList : "+query);
         HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
+        return result;
+	}
+
+
+	public List<HashMap<String, Object>> getPropertiesByFinancialYear(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getgetPropertiesByFinancialYearListQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query getTotalApplicationCompletionCountList : "+query);
+        List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
         return result;
 	}
 }
