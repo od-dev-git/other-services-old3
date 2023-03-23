@@ -9,7 +9,6 @@ import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.PTRepository;
-import org.egov.dss.web.model.ChartCriteria;
 import org.egov.dss.web.model.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,6 +71,24 @@ public class PTService {
 		return Arrays.asList(Data.builder().headerValue(totalPropertiesCount).build());
 	}
 
+	public List<Data> ptNewAssessmentShare(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer ptTotalAssessmentsCount = (Integer) ptRepository.getPtTotalAssessmentsCount(criteria);
+		Integer ptTotalNewAssessmentsCount = (Integer) ptRepository.getPtTotalNewAssessmentsCount(criteria);
+		return Arrays.asList(Data.builder()
+				.headerValue(Math.round((ptTotalNewAssessmentsCount.doubleValue() / ptTotalAssessmentsCount.doubleValue()) * 100)).build());
+	}
+
+	public List<Data> ptReAssessmentShare(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer ptTotalAssessmentsCount = (Integer) ptRepository.getPtTotalAssessmentsCount(criteria);
+		Integer ptTotalNewAssessmentsCount = (Integer) ptRepository.getPtTotalNewAssessmentsCount(criteria);
+		return Arrays.asList(Data.builder()
+				.headerValue(Math.round((1 -(ptTotalNewAssessmentsCount.doubleValue() / ptTotalAssessmentsCount.doubleValue())) * 100)).build());
+	}
+	
 	public List<Data> cumulativePropertiesAssessed(PayloadDetails payloadDetails) {
 		// TODO Auto-generated method stub
 		return null;
