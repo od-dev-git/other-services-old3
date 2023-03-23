@@ -69,4 +69,38 @@ public class PTRepository {
         return result.get(0);
     }
 	
+	public Object getActivePRopertyULBs(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getActiveULBsQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query for active property ULBs : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+	}
+
+
+	public Integer getTotalProperties(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getTotalPropertiesQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query for total Properties : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+	}
+
+
+	public Integer getTotalPropertiesPaid(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getTotalPropertiesPaidQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query for Total Properties Paid : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+	}
+
+
+	public Integer getTotalMutationPropertiesCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getTotalMutationPropertiesCountQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query for Total Mutation Property Count : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+	}
 }
