@@ -14,12 +14,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.egov.dss.model.Bill;
+import org.egov.dss.model.Chart;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UsageTypeResponse;
 import org.egov.dss.repository.builder.PaymentQueryBuilder;
 import org.egov.dss.repository.rowmapper.BillRowMapper;
+import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.CollectionByUsageRowMapper;
 import org.egov.dss.repository.rowmapper.PaymentRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
@@ -150,6 +152,21 @@ public class PaymentRepository {
 		String query = paymentQueryBuilder.getTenantWiseTargetCollection(targerSearchCriteria, preparedStatementValues);
 		log.info("query: " + query);
 		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+	
+	public HashMap<String, BigDecimal> getTenantWiseTransaction(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTenantWiseTransaction(paymentSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new TenantWiseCollectionRowMapper());
+	}
+	
+	public List<Chart> getCumulativeCollection(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = paymentQueryBuilder.getCumulativeCollection(paymentSearchCriteria, preparedStatementValues);
+        log.info("query for Cumulative Collection : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
 	}
 	
 	

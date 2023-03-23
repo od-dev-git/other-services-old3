@@ -180,6 +180,12 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_PT_BOTTOM_ULBS_BY_DIGITAL_COLLECTION.equals(visualizationCode)) {
 			return revenueService.bottomUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.REVENUE_PT_TOP_ULBS_COLLECTION_BY_VOLUME.equals(visualizationCode)) {
+			return revenueService.topUlbsDigitalCollectionByVolume(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_PT_BOTTOM_ULBS_COLLECTION_BY_VOLUME.equals(visualizationCode)) {
+			return revenueService.bottomUlbsDigitalCollectionByVolume(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 
