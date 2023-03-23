@@ -26,6 +26,14 @@ public class PTServiceQueryBuilder {
 	public static final String APPLICATIONS_TENANT_WISE_SQL = " select tenantid as name , count(*) as value from eg_pt_property epaa";
 	public static final String TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + TENANTID_SQL +" as name , count(assessmentnumber) as value from eg_pt_asmt_assessment epaa ";
 	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + TENANTID_SQL + " as name ,  count(*) as value  from eg_pt_property epaa ";
+	public static final String PROPERTIES_BY_FINANCIAL_YEAR_SQL = "    select epaa.tenantid, "
+			+ "    case when extract(month from to_timestamp(epaa.lastmodifiedtime/1000))>3 then concat(extract(year from to_timestamp(epaa.lastmodifiedtime/1000)),'-',extract(year from to_timestamp(epaa.lastmodifiedtime/1000))+1) "
+			+ "    when extract(month from to_timestamp(epaa.lastmodifiedtime/1000))<=3 then concat(extract(year from to_timestamp(epaa.lastmodifiedtime/1000))-1,'-',extract(year from to_timestamp(epaa.lastmodifiedtime/1000))) "
+			+ "    end createdFinYear, count(epaa.propertyid) propertyCount "
+			+ "    from eg_pt_property epaa";
+	public static final String GROUP_BY_CLAUSE_FOR_PROPERTIES_BY_FINANCIAL_YEAR_SQL = " epaa.tenantid, case when extract(month from to_timestamp(epaa.lastmodifiedtime/1000))>3 then concat(extract(year from to_timestamp(epaa.lastmodifiedtime/1000)),'-',extract(year from to_timestamp(epaa.lastmodifiedtime/1000))+1) "
+			+ "    when extract(month from to_timestamp(epaa.lastmodifiedtime/1000))<=3 then concat(extract(year from to_timestamp(epaa.lastmodifiedtime/1000))-1,'-',extract(year from to_timestamp(epaa.lastmodifiedtime/1000))) "
+			+ "    end ";
 	
 	public static String getAccessedPropertiesCountQuery(PropertySerarchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -291,5 +299,18 @@ public class PTServiceQueryBuilder {
     private static void addOrderByClause(StringBuilder demandQueryBuilder,String columnName) {
         demandQueryBuilder.append(" ORDER BY " + columnName);
     }
+
+	public String getgetPropertiesByFinancialYearListQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PROPERTIES_BY_FINANCIAL_YEAR_SQL);
+		selectQuery.append(" where epaa.status = :status ");
+		preparedStatementValues.put("status","ACTIVE");
+		selectQuery.append(" and epaa.creationreason = :reason ");
+		preparedStatementValues.put("reason", "CREATE");
+		selectQuery.append(" and epaa.tenantid != :tenant ");
+		preparedStatementValues.put("tenant", "od.testing");
+		addGroupByClause(selectQuery,GROUP_BY_CLAUSE_FOR_PROPERTIES_BY_FINANCIAL_YEAR_SQL);
+		return selectQuery.toString();
+	}
 
 }

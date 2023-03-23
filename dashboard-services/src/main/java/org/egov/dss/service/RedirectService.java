@@ -127,6 +127,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_PT_SHARE_OF_RE_ASSESSMENT.equalsIgnoreCase(visualizationCode)) {
 			return ptService.ptShareOfReAssessment(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_XPTFY_BY_DDR.equalsIgnoreCase(visualizationCode)) {
+			return ptService.ptByFinancalYear(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
 			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
 		}

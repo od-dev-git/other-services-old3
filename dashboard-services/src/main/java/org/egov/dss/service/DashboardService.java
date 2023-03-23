@@ -73,12 +73,16 @@ public class DashboardService {
 			responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
 			responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
 		}else {
-			responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
+			if(!chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString())) {
+				responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
+			}
 			if(!((chartType.toString()).equalsIgnoreCase(ChartType.TABLE.toString()) || (chartType.toString()).equalsIgnoreCase(ChartType.XTABLE.toString()) || (chartType.toString()).equalsIgnoreCase(ChartType.LINE.toString()))){
 				responseData.getData().forEach(data -> data.setHeaderName(chartName));
 			}
 		}
-		responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol(valueType)));
+		if(!chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString())) {
+			responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol(valueType)));
+		}
 	}
 	
 	public List<PayloadDetails> getPayloadForScheduler(){
