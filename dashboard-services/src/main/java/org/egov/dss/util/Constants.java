@@ -67,6 +67,8 @@ public class Constants {
 		final static String SERVICE_XPTFY_BY_DDR = "xptFyByDDR";
 		final static String SERVICE_PT_NEW_ASSESSMENT_SHARE = "ptNewAssessmentShare";
 		final static String SERVICE_PT_RE_ASSESSMENT_SHARE = "ptReAssessmentShare";
+		final static String SERVICE_PT_SHARE_OF_NEW_ASSESSMENT = "ptShareOfNewAssessments";
+		final static String SERVICE_PT_SHARE_OF_RE_ASSESSMENT = "ptShareOfReAssessments";
 		
 		final static String SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS = "wstotalConnectionOverview";
 		final static String SERVICE_MR_TOTAL_APPLICATION = "mrtotalApplications";

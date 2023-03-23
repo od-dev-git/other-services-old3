@@ -123,6 +123,22 @@ public class PTRepository {
         return result.get(0);
 	}
 	
+	public HashMap<String, Long> getPtTotalAssessmentsTenantwiseCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getPtTotalAssessmentsTenantwiseCountQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query for PT Total Assessment Tenantwise Count : "+query);
+        HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
+        return result;
+	}
+	
+	public HashMap<String, Long> getPtTotalNewAssessmentsTenantwiseCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getPtTotalNewAssessmentsTenantwiseCount(propertySearchCriteria, preparedStatementValues);
+        log.info("query for PT Total New Assessment Tenantwise Count : "+query);
+        HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
+        return result;
+	}
+	
 	public List<Chart> getCumulativePropertiesAssessed(PropertySerarchCriteria propertySearchCriteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = ptServiceQueryBuilder.getCumulativePropertiesAssessedQuery(propertySearchCriteria, preparedStatementValues);

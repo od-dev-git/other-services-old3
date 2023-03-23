@@ -167,14 +167,70 @@ public class PTService {
 
 		return response;
 	}
+	
+	public List<Data> ptShareOfNewAssessment(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> ptTotalAssessmentsTenantwiseCount = ptRepository.getPtTotalAssessmentsTenantwiseCount(criteria);
+		HashMap<String, Long> ptTotalNewAssessmentsTenantwiseCount = ptRepository.getPtTotalNewAssessmentsTenantwiseCount(criteria);
 
-	private List<Chart> mapTenantsForPerformanceRate(HashMap<String, Long> slaCompletionCount,
-			HashMap<String, Long> totalApplicationCompletionCount) {
+		List<Chart> percentList = mapTenantsForPerformanceRate(ptTotalNewAssessmentsTenantwiseCount, ptTotalAssessmentsTenantwiseCount);
+
+		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
+             return s2.compareTo(s1);
+         }));
+
+		 List<Data> response = new ArrayList();
+		 int Rank = 0;
+		 for( Chart obj : percentList) {
+			 Rank++;
+			 response.add(Data.builder().headerName("Rank").headerValue(Rank).plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName()).value(obj.getValue()).symbol("percentage").build())).headerSymbol("percentage").build());
+		 };
+
+		return response;
+	}
+
+	public List<Data> ptShareOfReAssessment(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> ptTotalAssessmentsTenantwiseCount = ptRepository.getPtTotalAssessmentsTenantwiseCount(criteria);
+		HashMap<String, Long> ptTotalNewAssessmentsTenantwiseCount = ptRepository.getPtTotalNewAssessmentsTenantwiseCount(criteria);
+
+		List<Chart> percentList = mapTenantsForSharePerformanceRate(ptTotalNewAssessmentsTenantwiseCount, ptTotalAssessmentsTenantwiseCount);
+
+		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
+             return s2.compareTo(s1);
+         }));
+
+		 List<Data> response = new ArrayList();
+		 int Rank = 0;
+		 for( Chart obj : percentList) {
+			 Rank++;
+			 response.add(Data.builder().headerName("Rank").headerValue(Rank).plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName()).value(obj.getValue()).symbol("percentage").build())).headerSymbol("percentage").build());
+		 };
+
+		return response;
+	}
+
+	private List<Chart> mapTenantsForPerformanceRate(HashMap<String, Long> numeratorMap,
+			HashMap<String, Long> denominatorMap) {
 		List<Chart> percentList = new ArrayList();
-		slaCompletionCount.entrySet().stream().forEach(item ->{
-			Long slaValue = item.getValue();
-			Long totalApplicationCompletionCountValue = totalApplicationCompletionCount.get(item.getKey());
-			BigDecimal percent =new BigDecimal(slaValue * 100) .divide(new BigDecimal(totalApplicationCompletionCountValue), 2, RoundingMode.HALF_EVEN);
+		numeratorMap.entrySet().stream().forEach(item ->{
+			Long numerator = item.getValue();
+			Long denominator = denominatorMap.get(item.getKey());
+			BigDecimal percent =new BigDecimal(numerator * 100) .divide(new BigDecimal(denominator), 2, RoundingMode.HALF_EVEN);
+			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
+		});
+		return percentList;
+	}
+	
+	private List<Chart> mapTenantsForSharePerformanceRate(HashMap<String, Long> numeratorMap,
+			HashMap<String, Long> denominatorMap) {
+		List<Chart> percentList = new ArrayList();
+		numeratorMap.entrySet().stream().forEach(item ->{
+			Long numerator = item.getValue();
+			Long denominator = denominatorMap.get(item.getKey());
+			BigDecimal percent = (new BigDecimal(denominator*100).subtract(new BigDecimal(numerator*100))).divide(new BigDecimal(denominator), 2, RoundingMode.HALF_EVEN);
 			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
 		});
 		return percentList;

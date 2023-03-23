@@ -19,11 +19,13 @@ public class PTServiceQueryBuilder {
 	public static final String TOTAL_PROPERTY_ID_SQL = " select count(id) from eg_pt_property epaa";
 	public static final String SELECT_SQL = "  select ";
 	public static final String TENANTID_SQL = " tenantid ";
-	public static final String TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + " count(assessmentnumber) as totalAsmt from eg_pt_asmt_assessment epaa ";
-	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + " count(*) as newAsmt  from eg_pt_property epaa ";
+	public static final String TOTAL_PROPERTY_ASSESSMENTS_SQL = SELECT_SQL + " count(assessmentnumber) as totalAsmt from eg_pt_asmt_assessment epaa ";
+	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_SQL = SELECT_SQL + " count(*) as newAsmt  from eg_pt_property epaa ";
 	public static final String CUMULATIVE_PROPERTIES_ASSESSED_SQL = " select to_char(monthYear, 'Mon-YYYY') as name, sum(assessedProperties) over (order by monthYear asc rows between unbounded preceding and current row) as value from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear ,count(distinct propertyid) assessedProperties from eg_pt_asmt_assessment epaa ";
 	public static final String PROPERTIES_BY_USAGETYPE_SQL = " select usagecategory as name , count(*) as value from eg_pt_property epaa";
 	public static final String APPLICATIONS_TENANT_WISE_SQL = " select tenantid as name , count(*) as value from eg_pt_property epaa";
+	public static final String TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + TENANTID_SQL +" as name , count(assessmentnumber) as value from eg_pt_asmt_assessment epaa ";
+	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + TENANTID_SQL + " as name ,  count(*) as value  from eg_pt_property epaa ";
 	
 	public static String getAccessedPropertiesCountQuery(PropertySerarchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -169,7 +171,7 @@ public class PTServiceQueryBuilder {
 	
 	public String getPtTotalAssessmentsCountQuery(PropertySerarchCriteria propertySearchCriteria,
 			Map<String, Object> preparedStatementValues) {
-		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL);
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_ASSESSMENTS_SQL);
 		selectQuery.append(" where epaa.status = :active ");
 		preparedStatementValues.put("active","ACTIVE");
 		return addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,true);
@@ -178,7 +180,7 @@ public class PTServiceQueryBuilder {
 
 	public String getPtTotalNewAssessmentsCountQuery(PropertySerarchCriteria propertySearchCriteria,
 			Map<String, Object> preparedStatementValues) {
-		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL);
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_NEW_ASSESSMENTS_SQL);
 		selectQuery.append(" where epaa.status = :active ");
 		preparedStatementValues.put("active","ACTIVE");
 		selectQuery.append(" and epaa.creationreason ='CREATE' ");
@@ -210,6 +212,28 @@ public class PTServiceQueryBuilder {
 		selectQuery.append(" and status='ACTIVE' ");
 		addGroupByClause(selectQuery," tenantid ");
 		addOrderByClause(selectQuery," count(*) ASC ");
+		return selectQuery.toString();
+	}
+	
+	public String getPtTotalAssessmentsTenantwiseCountQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL);
+		selectQuery.append(" where epaa.status = :active ");
+		preparedStatementValues.put("active","ACTIVE");
+		addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,true);
+		addGroupByClause(selectQuery," tenantid ");
+		return selectQuery.toString();
+	}
+	
+	public String getPtTotalNewAssessmentsTenantwiseCount(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL);
+		selectQuery.append(" where epaa.status = :active ");
+		preparedStatementValues.put("active","ACTIVE");
+		addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,true);
+		selectQuery.append(" and epaa.creationreason = :reason ");
+		preparedStatementValues.put("reason", "CREATE");
+		addGroupByClause(selectQuery," tenantid ");
 		return selectQuery.toString();
 	}
 
@@ -267,5 +291,5 @@ public class PTServiceQueryBuilder {
     private static void addOrderByClause(StringBuilder demandQueryBuilder,String columnName) {
         demandQueryBuilder.append(" ORDER BY " + columnName);
     }
-	
+
 }
