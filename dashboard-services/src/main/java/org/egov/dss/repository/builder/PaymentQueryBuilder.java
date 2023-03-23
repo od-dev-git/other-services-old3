@@ -190,6 +190,12 @@ public class PaymentQueryBuilder {
 			preparedStatementValues.put("billid", searchCriteria.getBillIds());
 		}
 		
+		if (!CollectionUtils.isEmpty(searchCriteria.getPaymentModes())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" py.paymentmode in (:paymentMode)");
+			preparedStatementValues.put("paymentMode", searchCriteria.getPaymentModes());
+		}
+		
 		if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.tenantid != :excludedTenant");

@@ -19,12 +19,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;  
 import java.util.Calendar;
 import java.util.Collection;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjuster;
-import java.time.temporal.TemporalAdjusters;
-
-import org.apache.catalina.mapper.Mapper;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.BillAccountDetail;
 import org.egov.dss.model.PayloadDetails;
@@ -92,22 +92,20 @@ public class RevenueService {
 		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
-		
-//		BigDecimal totalCollection = payments.parallelStream()
-//				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
-//				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
-//				.map(pay -> pay.getTotalAmountPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
-		
-		return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+        return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
 	public List<Data> todaysCollection(PayloadDetails payloadDetails) {
-		
+		Date date = new Date();
+		LocalDateTime localDateTime = LocalDateTime.ofInstant(date .toInstant(), ZoneId.systemDefault());
+	    ZonedDateTime zdt = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
-		BigDecimal todaysCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
-		return Arrays.asList(Data.builder().headerValue(todaysCollection.setScale(2, RoundingMode.HALF_UP)).build());
+		paymentSearchCriteria.setToDate(zdt.toEpochSecond());
+		paymentSearchCriteria.setFromDate(zdt.minusDays(1).toEpochSecond());
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
+        return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
 	public List<Data> targetCollection(PayloadDetails payloadDetails) {
@@ -577,6 +575,117 @@ public class RevenueService {
 		Long digitalCollectionByVolume = (digitalTransactionCount * 100)/totalTransactionCount;
 		return Arrays.asList(Data.builder().headerValue(digitalCollectionByVolume).build());
 	}
+	
+	public List<Data> revenueGrowthRate(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		BigDecimal growthRate = new BigDecimal(100);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
+		BigDecimal previousYearCollection = getPreviousYearCollection(payloadDetails);
+		if (previousYearCollection.intValue() != 0) {
+			growthRate = (totalCollection.divide(previousYearCollection).subtract(new BigDecimal(1)))
+					.multiply(new BigDecimal(100));
+		}
+
+		return Arrays.asList(Data.builder().headerValue(growthRate).build());
+	}
+
+	public BigDecimal getPreviousYearCollection(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		LocalDateTime fromDate = Instant.ofEpochMilli(payloadDetails.getStartdate()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+		LocalDateTime toDate = Instant.ofEpochMilli(payloadDetails.getEnddate()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+	    ZonedDateTime zdtFromDate = ZonedDateTime.of(fromDate, ZoneId.systemDefault());
+	    ZonedDateTime zdtToDate = ZonedDateTime.of(toDate, ZoneId.systemDefault());
+        paymentSearchCriteria.setFromDate(zdtFromDate.minusYears(1).toEpochSecond());
+		paymentSearchCriteria.setToDate(zdtToDate.minusYears(1).toEpochSecond());
+		BigDecimal previousYearCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
+		return previousYearCollection;
+	}
+	
+	public List<Data> topUlbsDigitalCollectionByValue(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+
+//		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
+//		HashMap<String, BigDecimal> tenantWiseTarget = paymentRepository
+//				.getTenantWiseTargetCollection(targerSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ALL_DIGITAL_PAYMENT_MODE));
+		HashMap<String, BigDecimal> tenantWiseDigitalCollection = paymentRepository.getTenantWiseCollection(paymentSearchCriteria);
+
+		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
+
+		tenantWiseCollection.forEach((key, value) -> {
+			BigDecimal digital = tenantWiseDigitalCollection.get(key);
+            BigDecimal percentage = digital.multiply(new BigDecimal(100)).divide(value ,2, RoundingMode.HALF_UP);
+			tenantWisePercentage.put(key, percentage);
+		});
+
+		Map<String, BigDecimal> tenantWisePercentageSorted = tenantWisePercentage.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+		List<Data> responseList = new ArrayList<>();
+		
+		int rank = 0;
+		for(Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
+			rank++;
+			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey()).value(tenantWisePercent.getValue()).symbol("percentage")
+					.label("DSS_COLLECTION_RATE").build());
+			responseList.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+
+		return responseList;
+
+	}
+	
+	public List<Data> bottomUlbsDigitalCollectionByValue(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+
+
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ALL_DIGITAL_PAYMENT_MODE));
+		HashMap<String, BigDecimal> tenantWiseDigitalCollection = paymentRepository.getTenantWiseCollection(paymentSearchCriteria);
+
+		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
+
+		tenantWiseCollection.forEach((key, value) -> {
+			BigDecimal digital = tenantWiseDigitalCollection.get(key);
+            BigDecimal percentage = digital.multiply(new BigDecimal(100)).divide(value ,2, RoundingMode.HALF_UP);
+			tenantWisePercentage.put(key, percentage);
+		});
+
+		Map<String, BigDecimal> tenantWisePercentageSorted = tenantWisePercentage.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+		List<Data> responseList = new ArrayList<>();
+		
+		int rank = tenantWisePercentageSorted.size()+1;
+		for(Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
+			rank--;
+			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey()).value(tenantWisePercent.getValue()).symbol("percentage")
+					.label("DSS_COLLECTION_RATE").build());
+			responseList.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+
+		return responseList;
+
+	}
+
 
   
 }
