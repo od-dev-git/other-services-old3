@@ -74,7 +74,7 @@ public class DashboardService {
 			responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
 		}else {
 			responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
-			if(!((chartType.toString()).equalsIgnoreCase(ChartType.TABLE.toString()) || (chartType.toString()).equalsIgnoreCase(ChartType.XTABLE.toString()))){
+			if(!((chartType.toString()).equalsIgnoreCase(ChartType.TABLE.toString()) || (chartType.toString()).equalsIgnoreCase(ChartType.XTABLE.toString()) || (chartType.toString()).equalsIgnoreCase(ChartType.LINE.toString()))){
 				responseData.getData().forEach(data -> data.setHeaderName(chartName));
 			}
 		}

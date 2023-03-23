@@ -2,14 +2,20 @@ package org.egov.dss.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import org.egov.dss.constants.DashboardConstants;
+import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.PTRepository;
 import org.egov.dss.web.model.Data;
+import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -90,13 +96,88 @@ public class PTService {
 	}
 	
 	public List<Data> cumulativePropertiesAssessed(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		getPropertySearchCriteria(payloadDetails);
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<Chart> cumulativePropertiesAssessed = ptRepository.getCumulativePropertiesAssessed(criteria);
+
+		List<Plot> plots = new ArrayList();
+		extractDataForChart(cumulativePropertiesAssessed, plots);	
+
+		BigDecimal total = cumulativePropertiesAssessed.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);		 
+
+		return Arrays.asList(Data.builder().headerName("Collections").headerValue(total).plots(plots).build());
+	}
+	
+	public List<Data> propertiesByUsageType(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<Chart> propertiesByUsageType = ptRepository.getpropertiesByUsageType(criteria);
+
+		List<Plot> plots = new ArrayList();
+		extractDataForChart(propertiesByUsageType, plots);	
+
+		BigDecimal total = propertiesByUsageType.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);		 
+
+		return Arrays.asList(Data.builder().headerName("DSS_PT_PROPERTIES_BY_USAGE_TYPE").headerValue(total).plots(plots).build());
 	}
 
 	public List<Data> topPerformingUlbsCompletionRate(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> slaCompletionCount = ptRepository.getSlaCompletionCountList(criteria);
+		HashMap<String, Long> totalApplicationCompletionCount = ptRepository.getTotalApplicationCompletionCountList(criteria);
+
+		List<Chart> percentList = mapTenantsForPerformanceRate(slaCompletionCount, totalApplicationCompletionCount);
+
+		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
+             return s2.compareTo(s1);
+         }));
+
+		 List<Data> response = new ArrayList();
+		 int Rank = 0;
+		 for( Chart obj : percentList) {
+			 Rank++;
+			 response.add(Data.builder().headerName("Rank").headerValue(Rank).plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName()).value(obj.getValue()).symbol("percentage").build())).headerSymbol("percentage").build());
+		 };
+
+		return response;
+	}
+
+	public List<Data> bottomPerformingUlbsCompletionRate(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> slaCompletionCount = ptRepository.getSlaCompletionCountList(criteria);
+		HashMap<String, Long> totalApplicationCompletionCount = ptRepository.getTotalApplicationCompletionCountList(criteria);
+
+		List<Chart> percentList = mapTenantsForPerformanceRate(slaCompletionCount, totalApplicationCompletionCount);
+
+		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
+             return s1.compareTo(s2);
+         }));
+
+		 List<Data> response = new ArrayList();
+		 int Rank = percentList.size();
+		 for( Chart obj : percentList) {
+			 response.add(Data.builder().headerName("Rank").headerValue(Rank).plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName()).value(obj.getValue()).symbol("percentage").build())).headerSymbol("percentage").build());
+			 Rank--;
+		 };
+
+		return response;
+	}
+
+	private List<Chart> mapTenantsForPerformanceRate(HashMap<String, Long> slaCompletionCount,
+			HashMap<String, Long> totalApplicationCompletionCount) {
+		List<Chart> percentList = new ArrayList();
+		slaCompletionCount.entrySet().stream().forEach(item ->{
+			Long slaValue = item.getValue();
+			Long totalApplicationCompletionCountValue = totalApplicationCompletionCount.get(item.getKey());
+			BigDecimal percent =new BigDecimal(slaValue * 100) .divide(new BigDecimal(totalApplicationCompletionCountValue));
+			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
+		});
+		return percentList;
 	}
 	
 	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
@@ -128,5 +209,17 @@ public class PTService {
 		}
 		
 		return criteria;
+	}
+	
+	private void extractDataForChart(List<Chart> items, List<Plot> plots) {
+		
+//		Long total = 0L;
+//		for(Chart item : items) {
+//			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
+//			total = total + Long.valueOf(String.valueOf(item.getValue()));
+//		}
+		items.stream().forEach(item ->{
+			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
+		});
 	}
 }
