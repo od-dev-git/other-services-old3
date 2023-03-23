@@ -82,21 +82,21 @@ public class RedirectService {
 //		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_USAGE_REVENUE.equalsIgnoreCase(visualizationCode)) {
 //			return revenueService.demandCollectionIndexUsageRevenue(requestInfoWrapper.getPayloadDetails());
 //		}
-//		if(Constants.VisualizationCodes.SERVICE_TOTAL_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
-//			return ptService.totalProprties(requestInfoWrapper.getPayloadDetails());
-//		}
-//		if(Constants.VisualizationCodes.SERVICE_PROPERTIES_PAID.equalsIgnoreCase(visualizationCode)) {
-//			return ptService.propertiesPaid(requestInfoWrapper.getPayloadDetails());
-//		}
+		if(Constants.VisualizationCodes.SERVICE_TOTAL_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
+			return ptService.totalProprties(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_PROPERTIES_PAID.equalsIgnoreCase(visualizationCode)) {
+			return ptService.propertiesPaid(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.SERVICE_PROPERTIES_ASSESSED.equalsIgnoreCase(visualizationCode)) {
 			return ptService.propertiesAssessed(requestInfoWrapper.getPayloadDetails());
 		}
-//		if(Constants.VisualizationCodes.SERVICE_ACTIVE_ULBS.equalsIgnoreCase(visualizationCode)) {
-//			return ptService.activeUlbs(requestInfoWrapper.getPayloadDetails());
-//		}
-//		if(Constants.VisualizationCodes.SERVICE_TOTAL_MUTATION_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
-//			return ptService.totalMutationProperties(requestInfoWrapper.getPayloadDetails());
-//		}
+		if(Constants.VisualizationCodes.SERVICE_ACTIVE_ULBS.equalsIgnoreCase(visualizationCode)) {
+			return ptService.activeUlbs(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_TOTAL_MUTATION_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
+			return ptService.totalMutationProperties(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.SERVICE_PT_TOTAL_APPLICATIONS.equalsIgnoreCase(visualizationCode)) {
 			return ptService.ptTotalApplications(requestInfoWrapper.getPayloadDetails());
 		}

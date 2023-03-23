@@ -24,13 +24,17 @@ public class PTService {
 	private PTRepository ptRepository;
 
 	public List<Data> totalProprties(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalProperties = (Integer) ptRepository.getTotalProperties(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalProperties).build());
 	}
 
 	public List<Data> propertiesPaid(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalPropertiesPaid = (Integer) ptRepository.getTotalPropertiesPaid(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalPropertiesPaid).build());
 	}
 
 	public List<Data> propertiesAssessed(PayloadDetails payloadDetails) {
@@ -41,13 +45,17 @@ public class PTService {
 	}
 
 	public List<Data> activeUlbs(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer activePropertyULBs = (Integer) ptRepository.getActivePRopertyULBs(criteria);
+		return Arrays.asList(Data.builder().headerValue(activePropertyULBs).build());
 	}
 
 	public List<Data> totalMutationProperties(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalMutationPropertiesCount = (Integer) ptRepository.getTotalMutationPropertiesCount(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalMutationPropertiesCount).build());
 	}
 
 	public List<Data> ptTotalApplications(PayloadDetails payloadDetails) {
