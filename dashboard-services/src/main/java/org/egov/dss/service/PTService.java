@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import org.egov.dss.constants.DashboardConstants;
@@ -122,8 +125,59 @@ public class PTService {
 	}
 
 	public List<Data> topPerformingUlbsCompletionRate(PayloadDetails payloadDetails) {
-		// TODO Auto-generated method stub
-		return null;
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> slaCompletionCount = ptRepository.getSlaCompletionCountList(criteria);
+		HashMap<String, Long> totalApplicationCompletionCount = ptRepository.getTotalApplicationCompletionCountList(criteria);
+
+		List<Chart> percentList = mapTenantsForPerformanceRate(slaCompletionCount, totalApplicationCompletionCount);
+
+		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
+             return s2.compareTo(s1);
+         }));
+
+		 List<Data> response = new ArrayList();
+		 int Rank = 0;
+		 for( Chart obj : percentList) {
+			 Rank++;
+			 response.add(Data.builder().headerName("Rank").headerValue(Rank).plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName()).value(obj.getValue()).symbol("percentage").build())).headerSymbol("percentage").build());
+		 };
+
+		return response;
+	}
+
+	public List<Data> bottomPerformingUlbsCompletionRate(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> slaCompletionCount = ptRepository.getSlaCompletionCountList(criteria);
+		HashMap<String, Long> totalApplicationCompletionCount = ptRepository.getTotalApplicationCompletionCountList(criteria);
+
+		List<Chart> percentList = mapTenantsForPerformanceRate(slaCompletionCount, totalApplicationCompletionCount);
+
+		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
+             return s1.compareTo(s2);
+         }));
+
+		 List<Data> response = new ArrayList();
+		 int Rank = percentList.size();
+		 for( Chart obj : percentList) {
+			 response.add(Data.builder().headerName("Rank").headerValue(Rank).plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName()).value(obj.getValue()).symbol("percentage").build())).headerSymbol("percentage").build());
+			 Rank--;
+		 };
+
+		return response;
+	}
+
+	private List<Chart> mapTenantsForPerformanceRate(HashMap<String, Long> slaCompletionCount,
+			HashMap<String, Long> totalApplicationCompletionCount) {
+		List<Chart> percentList = new ArrayList();
+		slaCompletionCount.entrySet().stream().forEach(item ->{
+			Long slaValue = item.getValue();
+			Long totalApplicationCompletionCountValue = totalApplicationCompletionCount.get(item.getKey());
+			BigDecimal percent =new BigDecimal(slaValue * 100) .divide(new BigDecimal(totalApplicationCompletionCountValue));
+			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
+		});
+		return percentList;
 	}
 	
 	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
