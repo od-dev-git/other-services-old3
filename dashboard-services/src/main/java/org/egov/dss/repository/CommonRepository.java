@@ -59,7 +59,8 @@ public class CommonRepository {
 			public void setValues(PreparedStatement ps) throws SQLException {
 				ps.setObject(1, utils.getPGObject(payloadDetails.getResponsedata()));
 				ps.setLong(2, payloadDetails.getLastModifiedTime());
-				ps.setString(3, payloadDetails.getId());
+				ps.setLong(3, payloadDetails.getEnddate());
+				ps.setString(4, payloadDetails.getId());
 
 			}
 

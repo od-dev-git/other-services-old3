@@ -46,9 +46,9 @@ public class RedirectService {
 			return revenueService.totalCollection(requestInfoWrapper.getPayloadDetails());
 		}
 		
-//    	if(Constants.VisualizationCodes.REVENUE_TODAYS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
-//			return revenueService.todaysCollection(requestInfoWrapper.getPayloadDetails());
-//		}
+    	if(Constants.VisualizationCodes.REVENUE_TODAYS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.todaysCollection(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.REVENUE_TARGET_COLLECTION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.targetCollection(requestInfoWrapper.getPayloadDetails());
 		}
@@ -58,30 +58,30 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_TOTAL_MUTATION_FEE_CALCULATION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.totalMutationFeeCollection(requestInfoWrapper.getPayloadDetails());
 		}
-//		if(Constants.VisualizationCodes.REVENUE_CUMULATIVE_COLLECTION.equalsIgnoreCase(visualizationCode)) {
-//			return revenueService.cumulativeCollection(requestInfoWrapper.getPayloadDetails());
-//		}
+		if(Constants.VisualizationCodes.REVENUE_CUMULATIVE_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.cumulativeCollection(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.REVENUE_TOP_PERFORMING_ULBS.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.topPerformingUlbs(requestInfoWrapper.getPayloadDetails());
 		}
 		if(Constants.VisualizationCodes.REVENUE_BOTTOM_PERFORMING_ULBS.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.bottomPerformingUlbs(requestInfoWrapper.getPayloadDetails());
 		}
-//		if(Constants.VisualizationCodes.REVENUE_COLLECTION_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
-//			return revenueService.collectionByUsageType(requestInfoWrapper.getPayloadDetails());
-//		}
-//		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_DDR_REVENUE.equalsIgnoreCase(visualizationCode)) {
-//			return revenueService.demandCollectionIndexDDRRevenue(requestInfoWrapper.getPayloadDetails());
-//		}
-//		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_DDR_REVENUE.equalsIgnoreCase(visualizationCode)) {
-//			return revenueService.taxheadsBreakupDDRRevenue(requestInfoWrapper.getPayloadDetails());
-//		}
-//		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_USAGE.equalsIgnoreCase(visualizationCode)) {
-//			return revenueService.taxHeadsBreakupUsage(requestInfoWrapper.getPayloadDetails());
-//		}
-//		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_USAGE_REVENUE.equalsIgnoreCase(visualizationCode)) {
-//			return revenueService.demandCollectionIndexUsageRevenue(requestInfoWrapper.getPayloadDetails());
-//		}
+		if(Constants.VisualizationCodes.REVENUE_COLLECTION_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.collectionByUsageType(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_DDR_REVENUE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.demandCollectionIndexDDRRevenue(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_DDR_REVENUE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.taxheadsBreakupDDRRevenue(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_TAXHEADS_BREAKUP_USAGE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.taxHeadsBreakupUsage(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_USAGE_REVENUE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.demandCollectionIndexUsageRevenue(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.SERVICE_TOTAL_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
 			return ptService.totalProprties(requestInfoWrapper.getPayloadDetails());
 		}
@@ -169,6 +169,16 @@ public class RedirectService {
 		}
 		if(Constants.VisualizationCodes.DIGITAL_COLLECTIONS_BY_VOLUME.equals(visualizationCode)) {
 			return revenueService.digitalCollectionsByVolume(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_PT_GROWTH_RATE.equals(visualizationCode)) {
+			return revenueService.revenueGrowthRate(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_PT_TOP_ULBS_BY_DIGITAL_COLLECTION.equals(visualizationCode)) {
+			return revenueService.topUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_PT_BOTTOM_ULBS_BY_DIGITAL_COLLECTION.equals(visualizationCode)) {
+			return revenueService.bottomUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
 		}
 		
 		return null;

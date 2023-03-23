@@ -1,5 +1,13 @@
 package org.egov.dss.service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
+import java.util.Date;
 import java.util.List;
 
 import org.egov.dss.config.ConfigurationLoader;
@@ -30,16 +38,23 @@ public class DashboardService {
 	
 	public void processRequest(RequestInfoWrapper requestInfoWrapper) {
 		Long schedulerStartTime = System.currentTimeMillis();
+		Date date = new Date();
+		LocalDateTime localDateTime = LocalDateTime.ofInstant(date .toInstant(), ZoneId.systemDefault());
+	    LocalDateTime endOfDate = localDateTime.with(ChronoField.NANO_OF_DAY, LocalTime.MAX.toNanoOfDay());
+	    ZonedDateTime zdt = ZonedDateTime.of(endOfDate, ZoneId.systemDefault());
 		
-		ResponseData responseData = new ResponseData() ;
+		ResponseData responseData = new ResponseData();
 		List<PayloadDetails> payloadList = getPayloadForScheduler();
 		for (PayloadDetails payloadDetails : payloadList) {
+			payloadDetails.setEnddate(zdt.toInstant().toEpochMilli());
 			requestInfoWrapper.setPayloadDetails(payloadDetails);
 			responseData = serveRequest(requestInfoWrapper);
 			payloadDetails.setResponsedata(responseData);
 			payloadDetails.setLastModifiedTime(schedulerStartTime);
-			commonRepository.update(payloadDetails);
-			
+			if (responseData.getData() != null) {
+				commonRepository.update(payloadDetails);
+			}
+
 		}
 	}
 	
@@ -48,8 +63,9 @@ public class DashboardService {
 		ResponseData responseData = ResponseData.builder().build();
 		List<Data> data = redirectService.redirect(requestInfoWrapper);
 		responseData.setData(data);
-        setConfiguration(requestInfoWrapper, responseData);
-		
+		if(data != null && !data.isEmpty()) {
+		setConfiguration(requestInfoWrapper, responseData);
+		}
 		return responseData;
 	}
 
