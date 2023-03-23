@@ -103,6 +103,12 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_TOTAL_NO_OF_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
 			return ptService.totalnoOfProperties(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_PT_NEW_ASSESSMENT_SHARE.equalsIgnoreCase(visualizationCode)) {
+			return ptService.ptNewAssessmentShare(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_PT_RE_ASSESSMENT_SHARE.equalsIgnoreCase(visualizationCode)) {
+			return ptService.ptReAssessmentShare(requestInfoWrapper.getPayloadDetails());
+		}
 //		if(Constants.VisualizationCodes.SERVICE_CUMULATIVE_PROPERTIES_ASSESSED.equalsIgnoreCase(visualizationCode)) {
 //			return ptService.cumulativePropertiesAssessed(requestInfoWrapper.getPayloadDetails());
 //		}
