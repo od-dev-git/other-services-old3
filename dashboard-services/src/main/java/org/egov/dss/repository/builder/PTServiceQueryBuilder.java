@@ -21,6 +21,9 @@ public class PTServiceQueryBuilder {
 	public static final String TENANTID_SQL = " tenantid ";
 	public static final String TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + " count(assessmentnumber) as totalAsmt from eg_pt_asmt_assessment epaa ";
 	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + " count(*) as newAsmt  from eg_pt_property epaa ";
+	public static final String CUMULATIVE_PROPERTIES_ASSESSED_SQL = " select to_char(monthYear, 'Mon-YYYY') as name, sum(assessedProperties) over (order by monthYear asc rows between unbounded preceding and current row) as value from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear ,count(distinct propertyid) assessedProperties from eg_pt_asmt_assessment epaa ";
+	public static final String PROPERTIES_BY_USAGETYPE_SQL = " select usagecategory as name , count(*) as value from eg_pt_property epaa";
+	public static final String APPLICATIONS_TENANT_WISE_SQL = " select tenantid as name , count(*) as value from eg_pt_property epaa";
 	
 	public static String getAccessedPropertiesCountQuery(PropertySerarchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -183,6 +186,42 @@ public class PTServiceQueryBuilder {
 		return addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
 	}
 	
+	public String getCumulativePropertiesAssessedQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(CUMULATIVE_PROPERTIES_ASSESSED_SQL);
+		addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
+		addGroupByClause(selectQuery,"to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY')");
+		addOrderByClause(selectQuery,"to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') ASC) asmt ");
+		return selectQuery.toString();
+	}
+	
+	public String getpropertiesByUsageTypeQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PROPERTIES_BY_USAGETYPE_SQL);
+		addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
+		selectQuery.append(" group  by usagecategory ");
+		return selectQuery.toString();
+	}
+	
+	public String getSlaCompletionCountListQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(APPLICATIONS_TENANT_WISE_SQL);
+		addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria ,true);
+		selectQuery.append(" and status='ACTIVE' ");
+		addGroupByClause(selectQuery," tenantid ");
+		addOrderByClause(selectQuery," count(*) ASC ");
+		return selectQuery.toString();
+	}
+
+	public String getTotalApplicationCompletionCountListQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(APPLICATIONS_TENANT_WISE_SQL);
+		addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria ,true);
+		selectQuery.append(" and status='ACTIVE' ");
+		addGroupByClause(selectQuery," tenantid ");
+		addOrderByClause(selectQuery," count(*) ASC ");
+		return selectQuery.toString();
+	}
 	
 	private static String addWhereClauseWithLastModifiedTime(StringBuilder selectQuery,
 			Map<String, Object> preparedStatementValues, PropertySerarchCriteria searchCriteria) {
