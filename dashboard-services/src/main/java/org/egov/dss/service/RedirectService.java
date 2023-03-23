@@ -112,6 +112,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_CUMULATIVE_PROPERTIES_ASSESSED.equalsIgnoreCase(visualizationCode)) {
 			return ptService.cumulativePropertiesAssessed(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_PROPERTIES_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
+			return ptService.propertiesByUsageType(requestInfoWrapper.getPayloadDetails());
+		}
 //		if(Constants.VisualizationCodes.SERVICE_TOP_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
 //			return ptService.topPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
 //		}

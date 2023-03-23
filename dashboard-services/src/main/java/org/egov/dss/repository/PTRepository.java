@@ -129,4 +129,12 @@ public class PTRepository {
         List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
         return result;
 	}
+	
+	public List<Chart> getpropertiesByUsageType(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getpropertiesByUsageTypeQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query: "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
 }

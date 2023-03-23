@@ -106,6 +106,20 @@ public class PTService {
 
 		return Arrays.asList(Data.builder().headerName("Collections").headerValue(total).plots(plots).build());
 	}
+	
+	public List<Data> propertiesByUsageType(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<Chart> propertiesByUsageType = ptRepository.getpropertiesByUsageType(criteria);
+
+		List<Plot> plots = new ArrayList();
+		extractDataForChart(propertiesByUsageType, plots);	
+
+		BigDecimal total = propertiesByUsageType.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);		 
+
+		return Arrays.asList(Data.builder().headerName("DSS_PT_PROPERTIES_BY_USAGE_TYPE").headerValue(total).plots(plots).build());
+	}
 
 	public List<Data> topPerformingUlbsCompletionRate(PayloadDetails payloadDetails) {
 		// TODO Auto-generated method stub
