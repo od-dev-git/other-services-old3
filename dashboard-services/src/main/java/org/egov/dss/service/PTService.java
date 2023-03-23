@@ -174,7 +174,7 @@ public class PTService {
 		slaCompletionCount.entrySet().stream().forEach(item ->{
 			Long slaValue = item.getValue();
 			Long totalApplicationCompletionCountValue = totalApplicationCompletionCount.get(item.getKey());
-			BigDecimal percent =new BigDecimal(slaValue * 100) .divide(new BigDecimal(totalApplicationCompletionCountValue));
+			BigDecimal percent =new BigDecimal(slaValue * 100) .divide(new BigDecimal(totalApplicationCompletionCountValue), 2, RoundingMode.HALF_EVEN);
 			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
 		});
 		return percentList;
