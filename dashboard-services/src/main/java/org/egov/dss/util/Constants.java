@@ -45,7 +45,7 @@ public class Constants {
 		final static String REVENUE_TOTAL_MUTATION_FEE_CALCULATION = "totalMutationFeeCalculation";
 		final static String DIGITAL_COLLECTIONS_BY_VALUE = "ptDigitalCollectionByValue";
 		final static String DIGITAL_COLLECTIONS_BY_VOLUME = "ptDigitalCollectionByVolume";
-		
+		final static String REVENUE_PT_TAX_HEADS_BREAKUP = "ptTaxHeadTable";
 		
 		final static String SERVICE_DSS_TOTAL_APPLICATION_OVERVIEW = "dssTotalApplicationOverview";
 		final static String SERVICE_DSS_CLOSED_APPLICATION_OVERVIEW = "dssClosedApplicationOverview";

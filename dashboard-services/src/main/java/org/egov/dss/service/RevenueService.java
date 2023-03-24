@@ -28,9 +28,11 @@ import java.time.ZonedDateTime;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.BillAccountDetail;
 import org.egov.dss.model.Chart;
+import org.egov.dss.model.FinancialYearWiseProperty;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UsageTypeResponse;
 import org.egov.dss.model.enums.PaymentStatusEnum;
@@ -730,6 +732,58 @@ public class RevenueService {
 		items.stream().forEach(item ->{
 			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
 		});
+	}
+
+	public List<Data> revenuePTTaxHeadsBreakup(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		List<HashMap<String, Object>> ptTaxHeadsBreakup = paymentRepository.getptTaxHeadsBreakup(criteria);
+		
+			 List<Data> response = new ArrayList();
+			 int serailNumber = 0 ;
+			 for( HashMap<String, Object> ptTaxHeadRow : ptTaxHeadsBreakup) {
+				 serailNumber++;
+		            String tenantId = String.valueOf(ptTaxHeadRow.get("tenantid"));
+		            String tenantIdStyled = tenantId.replace("od.", "");
+		            tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+				 List<Plot> row = new ArrayList<>();
+				row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+				row.add(Plot.builder().label(tenantIdStyled).name("DDRs").symbol("text").build());
+				
+				BigDecimal total = (new BigDecimal(String.valueOf(ptTaxHeadRow.get("holdingtaxcollection"))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("lighttaxcollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("watertaxcollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("servicetaxcollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("otherduescollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("drainagetaxcollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("latrinetaxcollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("penaltycollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("rebatecollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("interestcollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("parkingtaxcollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("ownershipexcemptioncollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("solidwasteuserchargecollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("usageexcemptioncollection")))));
+				
+				row.add(Plot.builder().name("Holding Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("holdingtaxcollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Light Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("lighttaxcollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Water Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("watertaxcollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Service Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("servicetaxcollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Other Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("otherduescollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Drainage Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("drainagetaxcollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Latrine Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("latrinetaxcollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Penalty").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("penaltycollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Rebate").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("rebatecollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Interest").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("interestcollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Parking Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("parkingtaxcollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Ownership Exemption").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("ownershipexcemptioncollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Solid Waste User charges").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("solidwasteuserchargecollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Usage Exemption").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("usageexcemptioncollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Total Amount").value(total).symbol("number").build());				
+
+				 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
+			 }	
+			
+		return response;
 	}
 	
   

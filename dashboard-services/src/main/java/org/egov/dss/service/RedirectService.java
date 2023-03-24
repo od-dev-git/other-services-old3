@@ -82,6 +82,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_DEMAND_COLLECTION_INDEX_USAGE_REVENUE.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.demandCollectionIndexUsageRevenue(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.REVENUE_PT_TAX_HEADS_BREAKUP.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.revenuePTTaxHeadsBreakup(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.SERVICE_TOTAL_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
 			return ptService.totalProprties(requestInfoWrapper.getPayloadDetails());
 		}
