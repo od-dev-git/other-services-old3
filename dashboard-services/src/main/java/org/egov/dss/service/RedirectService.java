@@ -130,6 +130,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_XPTFY_BY_DDR.equalsIgnoreCase(visualizationCode)) {
 			return ptService.ptByFinancalYear(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_PT_ASMT_STATUS_DDR.equalsIgnoreCase(visualizationCode)) {
+			return ptService.ptAsmtStatusDDR(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
 			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
 		}
