@@ -299,4 +299,66 @@ public class PTService {
 		 }
 		return response;
 	}
+
+	public List<Data> ptAsmtStatusDDR(PayloadDetails payloadDetails) {
+
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> ptTotalAssessmentsTenantwiseCount = ptRepository
+				.getPtTotalAssessmentsTenantwiseCount(criteria);
+		HashMap<String, Long> ptTotalNewAssessmentsTenantwiseCount = ptRepository
+				.getPtTotalNewAssessmentsTenantwiseCount(criteria);
+
+		List<Chart> newAsmtPercentList = mapTenantsForPerformanceRate(ptTotalNewAssessmentsTenantwiseCount,
+				ptTotalAssessmentsTenantwiseCount);
+		HashMap<String, BigDecimal> newAsmtShareList = new HashMap<>();
+		for (Chart tenant : newAsmtPercentList) {
+			newAsmtShareList.put(tenant.getName(), tenant.getValue());
+		}
+
+		List<Chart> reAsmtPercentList = mapTenantsForSharePerformanceRate(ptTotalNewAssessmentsTenantwiseCount,
+				ptTotalAssessmentsTenantwiseCount);
+		HashMap<String, BigDecimal> reAsmtShareList = new HashMap<>();
+		for (Chart tenant : reAsmtPercentList) {
+			reAsmtShareList.put(tenant.getName(), tenant.getValue());
+		}
+
+		List<Data> response = new ArrayList();
+		int serailNumber = 0;
+
+		for (HashMap.Entry<String, Long> entry : ptTotalNewAssessmentsTenantwiseCount.entrySet()) {
+
+			System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+
+			serailNumber++;
+			String tenantId = String.valueOf(entry.getKey());
+			String tenantIdStyled = tenantId.replace("od.", "");
+			tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+			Long newAsmt = entry.getValue();
+			Long reAsmt = ptTotalAssessmentsTenantwiseCount.get(entry.getKey()) - newAsmt;
+			BigDecimal newAsmtShare = newAsmtShareList.get(entry.getKey());
+			BigDecimal reAsmtShare = reAsmtShareList.get(entry.getKey());
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(tenantIdStyled).name("DDRs").symbol("text").build());
+
+			row.add(Plot.builder().name(String.valueOf("New Assessments"))
+					.value(new BigDecimal(String.valueOf(newAsmt))).symbol("number").build());
+
+			row.add(Plot.builder().name(String.valueOf("New_Assesment_Share"))
+					.value(new BigDecimal(String.valueOf(newAsmtShare))).symbol("percentage").build());
+
+			row.add(Plot.builder().name(String.valueOf("Reassessed Properties"))
+					.value(new BigDecimal(String.valueOf(reAsmt))).symbol("number").build());
+
+			row.add(Plot.builder().name(String.valueOf("Reassessment_Share"))
+					.value(new BigDecimal(String.valueOf(reAsmtShare))).symbol("percentage").build());
+
+			response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null)
+					.build());
+
+		}
+
+		return response;
+	}
 }
