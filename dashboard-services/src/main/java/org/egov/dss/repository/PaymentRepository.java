@@ -17,6 +17,7 @@ import org.egov.dss.model.Bill;
 import org.egov.dss.model.Chart;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UsageTypeResponse;
 import org.egov.dss.repository.builder.PaymentQueryBuilder;
@@ -169,6 +170,20 @@ public class PaymentRepository {
         return result;
 	}
 	
+	public List<Chart> getCollectionByUsageType(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = paymentQueryBuilder.getCollectionByUsageTypeQuery(paymentSearchCriteria, preparedStatementValues);
+        log.info("query for Usage Type Collection : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
 	
+	public HashMap<String, BigDecimal> getTenantWiseAssedProperties(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTenantWiseAssedProperties(paymentSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new TenantWiseCollectionRowMapper());
+	}
 	
+
 }

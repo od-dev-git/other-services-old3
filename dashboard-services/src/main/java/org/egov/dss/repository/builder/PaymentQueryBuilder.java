@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -70,6 +71,13 @@ public class PaymentQueryBuilder {
 	public static final String CUMULATIVE_COLLECTION_QUERY = " select to_char(monthYear, 'Mon-YYYY') as name, sum(totalCollection) over (order by monthYear asc rows between unbounded preceding and current row) as value "
 			+ "from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(pyd.receiptdate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(pyd.receiptdate/1000))),'DD-MM-YYYY') as monthYear,sum(py.totalamountpaid) as totalCollection from egcl_payment py "
 			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id  ";
+	
+	public static final String COLLECTION_BY_USAGE_TYPE = " select pt.usagecategory as name, COALESCE(sum(py.totalamountpaid),0) as value  from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
+			+ "inner join egcl_bill bill on bill.id = pyd.billid "
+			+ "inner join eg_pt_property pt on pt.propertyid = bill.consumercode ";
+	
+	public static final String TENANT_WISE_ASSESSED_PROPERTIES = " select tenantid as tenantid, count(distinct propertyid) as totalamt from eg_pt_asmt_assessment ";
 	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
@@ -203,6 +211,12 @@ public class PaymentQueryBuilder {
 			preparedStatementValues.put("paymentMode", searchCriteria.getPaymentModes());
 		}
 		
+		if (!StringUtils.isEmpty(searchCriteria.getPropertyStatus())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" pt.status = :propertyStatus");
+			preparedStatementValues.put("propertyStatus", searchCriteria.getPropertyStatus());
+		}
+		
 		if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.tenantid != :excludedTenant");
@@ -261,6 +275,48 @@ public class PaymentQueryBuilder {
 		
 		return query.toString();
 	}
+	
+	private static void addWhereClauseForProperties(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			PaymentSearchCriteria searchCriteria) {
+
+		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			if (searchCriteria.getTenantId().split("\\.").length > 1) {
+				selectQuery.append(" tenantId =:tenantId");
+				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
+			} else {
+				selectQuery.append(" tenantId LIKE :tenantId");
+				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
+			}
+
+		}
+
+       if (searchCriteria.getFromDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" createdtime >= :fromDate");
+			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+		}
+
+		if (searchCriteria.getToDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" createdtime <= :toDate");
+		    preparedStatementValues.put("toDate", searchCriteria.getToDate());
+		}
+
+		if (!StringUtils.isEmpty(searchCriteria.getPropertyStatus())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" status = :propertyStatus");
+			preparedStatementValues.put("propertyStatus", searchCriteria.getPropertyStatus());
+		}
+		
+		if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" tenantid != :excludedTenant");
+			preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenant());
+		}
+
+	}
+
 	
 	public static String getTargetCollection(TargetSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TARGET_COLLECTION_QUERY);
@@ -345,5 +401,23 @@ public class PaymentQueryBuilder {
 	    private static void addOrderByClause(StringBuilder demandQueryBuilder,String columnName) {
 	        demandQueryBuilder.append(" ORDER BY " + columnName);
 	    }
+	    
+	    
+	    public String getCollectionByUsageTypeQuery(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(COLLECTION_BY_USAGE_TYPE);
+			addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append(" group  by pt.usagecategory ");
+			return selectQuery.toString();
+		}
+	    
+	    public String getTenantWiseAssedProperties(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(TENANT_WISE_ASSESSED_PROPERTIES);
+			addWhereClauseForProperties(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append(" group by tenantid  ");
+			return selectQuery.toString();
+		}
+
 	
 }

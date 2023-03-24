@@ -84,14 +84,20 @@ public class DashboardConstants {
 	
 	public static final String CARD_PAYMENT = "CARD";
 	
+	public static final String CHEQUE_PAYMENT = "CHEQUE";
+	
+	public static final String CASH_PAYMENT = "CASH";
+	
 	public static final String PERFORM = "perform";
 	
 	public static final String RANK = "Rank";
 	
-	public static final String PAYMENT_MODE_ONLINE = "ONLINE";
+	public static final String STATUS_ACTIVE = "ACTIVE";
 	
-	public static final String PAYMENT_MODE_CARD = "CARD";
-
+	public static final String PREVIOUS_YEAR_TOTAL_COLLECTION = "Previous Year Total Collection";
+	
+	public static final String PREVIOUS_YEAR_TARGET_COLLECTION = "Previous Year Target Collection";
+	
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE));
 	
@@ -111,7 +117,7 @@ public class DashboardConstants {
 			BUSINESS_SERVICE_MR,BUSINESS_SERVICE_TL,BUSINESS_SERVICE_BPA_APP_FEE,BUSINESS_SERVICE_BPA_SAN_FEE,BUSINESS_SERVICE_OC_APP_FEE,BUSINESS_SERVICE_OC_SAN_FEE));
 	
 	public static final List<String> ALL_DIGITAL_PAYMENT_MODE = Collections.unmodifiableList(Arrays.asList(
-			PAYMENT_MODE_CARD, PAYMENT_MODE_ONLINE));
+			ONLINE_PAYMENT,NEFT_PAYMENT, RTGS_PAYMENT,CARD_PAYMENT));
 
 
 

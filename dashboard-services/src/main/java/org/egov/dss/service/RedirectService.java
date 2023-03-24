@@ -130,9 +130,6 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_XPTFY_BY_DDR.equalsIgnoreCase(visualizationCode)) {
 			return ptService.ptByFinancalYear(requestInfoWrapper.getPayloadDetails());
 		}
-		if(Constants.VisualizationCodes.SERVICE_PT_ASMT_STATUS_DDR.equalsIgnoreCase(visualizationCode)) {
-			return ptService.ptAsmtStatusDDR(requestInfoWrapper.getPayloadDetails());
-		}
 		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
 			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
 		}
@@ -188,6 +185,17 @@ public class RedirectService {
 		}
 		if(Constants.VisualizationCodes.REVENUE_PT_BOTTOM_ULBS_COLLECTION_BY_VOLUME.equals(visualizationCode)) {
 			return revenueService.bottomUlbsDigitalCollectionByVolume(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.REVENUE_PT_PREVIOUS_YEAR_TARGET_ACHIEVED.equals(visualizationCode)) {
+			return revenueService.previousYearTargetAchieved(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_PT_FINANCIAL_INDICATORS.equals(visualizationCode)) {
+			return revenueService.ptFinancialIndicatorsData(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_PT_PAYMENT_MODE_DDR.equals(visualizationCode)) {
+			return revenueService.ptPaymentModeData(requestInfoWrapper.getPayloadDetails());
 		}
 		
 		return null;
