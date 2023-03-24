@@ -295,7 +295,7 @@ public class PTService {
 			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
 			row.add(Plot.builder().label(tenantIdStyled).name("DDRs").symbol("text").build());
 			row.add(Plot.builder().name(String.valueOf(tenant.get("createdfinyear"))).value(new BigDecimal(String.valueOf(tenant.get("propertycount")))).symbol("number").build());
-			 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).build());
+			 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
 		 }
 		return response;
 	}
