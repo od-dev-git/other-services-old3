@@ -45,6 +45,26 @@ public class PaymentQueryBuilder {
 			+ "FROM egcl_bill b LEFT OUTER JOIN egcl_billdetial bd ON b.id = bd.billid AND b.tenantid = bd.tenantid "
 			+ "LEFT OUTER JOIN egcl_billaccountdetail ad ON bd.id = ad.billdetailid AND bd.tenantid = ad.tenantid "
 			+ "WHERE b.id IN (:id);"; 
+	
+	public static final String PT_TAXHEAD_WISE_COLLECTION_QUERY = "select tenantid, "
+			+ "coalesce(sum(holdingTax), 0) as holdingTaxCollection,coalesce(sum(otherDues), 0) as otherDuesCollection,coalesce(sum(drainageTax), 0) as drainageTaxCollection, "
+			+ "coalesce(sum(waterTax), 0) as waterTaxCollection,coalesce(sum(serviceTax), 0) as serviceTaxCollection,coalesce(sum(latrineTax), 0) as latrineTaxCollection, "
+			+ "coalesce(sum(solidWasteUserCharge), 0) as solidWasteUserChargeCollection,coalesce(sum(parkingTax), 0) as parkingTaxCollection, coalesce(sum(usageExcemption), 0) as usageExcemptionCollection, "
+			+ "coalesce(sum(lightTax), 0) as lightTaxCollection,coalesce(sum(ownershipExcemption), 0) as ownershipExcemptionCollection,coalesce(sum(penalty), 0) as penaltyCollection, "
+			+ "coalesce(sum(rebate), 0) as rebateCollection,coalesce(sum(interest), 0) as interestCollection "
+			+ "from  "
+			+ "(select py.tenantid, "
+			+ "case when bad.taxheadcode='PT_HOLDING_TAX' then bad.adjustedamount end as holdingTax,case when bad.taxheadcode='PT_OTHER_DUES' then bad.adjustedamount end as otherDues, "
+			+ "case when bad.taxheadcode='PT_DRAINAGE_TAX' then bad.adjustedamount end as drainageTax, case when bad.taxheadcode='PT_WATER_TAX' then bad.adjustedamount end as waterTax, "
+			+ "case when bad.taxheadcode='PT_SERVICE_TAX' then bad.adjustedamount end as serviceTax,case when bad.taxheadcode='PT_LATRINE_TAX' then bad.adjustedamount end as latrineTax, "
+			+ "case when bad.taxheadcode='PT_SOLID_WASTE_USER_CHARGES' then bad.adjustedamount end as solidWasteUserCharge,case when bad.taxheadcode='PT_PARKING_TAX' then bad.adjustedamount end as parkingTax, "
+			+ "case when bad.taxheadcode='PT_USAGE_EXCEMPTION' then bad.adjustedamount end as usageExcemption,case when bad.taxheadcode='PT_LIGHT_TAX' then bad.adjustedamount end as lightTax, "
+			+ "case when bad.taxheadcode='PT_OWNERSHIP_EXCEMPTION' then bad.adjustedamount end as ownershipExcemption,case when bad.taxheadcode in ('PT_PENALTY', 'PT_TIME_PENALTY') then bad.adjustedamount end as penalty, "
+			+ "case when bad.taxheadcode='PT_TIME_REBATE' then bad.adjustedamount end as rebate, case when bad.taxheadcode='PT_INTEREST' then bad.adjustedamount end as interest "
+			+ "from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id  "
+			+ "inner join egcl_billdetial bdtl on bdtl.billid = pyd.billid  "
+			+ "inner join egcl_billaccountdetail bad on bad.billdetailid = bdtl.id "; 
 
 	public static final String USAGE_TYPE_QUERY = "SELECT epp.propertyid, epp.usagecategory  "
 			+ "FROM eg_pt_property epp ";
@@ -401,7 +421,16 @@ public class PaymentQueryBuilder {
 	    private static void addOrderByClause(StringBuilder demandQueryBuilder,String columnName) {
 	        demandQueryBuilder.append(" ORDER BY " + columnName);
 	    }
-	    
+    
+		public String getptTaxHeadsBreakupListQuery(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(PT_TAXHEAD_WISE_COLLECTION_QUERY);
+			addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append( " ) coll ");
+			addGroupByClause(selectQuery," tenantid ");
+			return selectQuery.toString();
+		}
+	
 	    
 	    public String getCollectionByUsageTypeQuery(PaymentSearchCriteria paymentSearchCriteria,
 				Map<String, Object> preparedStatementValues) {
