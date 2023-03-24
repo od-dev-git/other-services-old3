@@ -8,9 +8,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.Chart;
+import org.egov.dss.model.FinancialYearWiseProperty;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.PTRepository;
@@ -284,19 +287,65 @@ public class PTService {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		List<HashMap<String, Object>> PropertiesByFinancialYear = ptRepository.getPropertiesByFinancialYear(criteria);
 
-		 List<Data> response = new ArrayList();
-		 int serailNumber = 0 ;
-		 for( HashMap<String, Object> tenant : PropertiesByFinancialYear) {
-			 serailNumber++;
-	            String tenantId = String.valueOf(tenant.get("tenantid"));
-	            String tenantIdStyled = tenantId.replace("od.", "");
-	            tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
-			 List<Plot> row = new ArrayList<>();
-			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
-			row.add(Plot.builder().label(tenantIdStyled).name("DDRs").symbol("text").build());
-			row.add(Plot.builder().name(String.valueOf(tenant.get("createdfinyear"))).value(new BigDecimal(String.valueOf(tenant.get("propertycount")))).symbol("number").build());
-			 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
+		
+		HashMap<String,Boolean> financialYearsMap = new HashMap<>();
+		
+			 for( HashMap<String, Object> tenant : PropertiesByFinancialYear) {
+		 if(!financialYearsMap.containsKey(tenant.get("createdfinyear"))) 
+			 financialYearsMap.put(String.valueOf(tenant.get("createdfinyear")), true); 
 		 }
+		
+			int financialYearCount = financialYearsMap.size();
+
+		
+		HashMap<String,Boolean> financialYears = new HashMap<>();
+		HashMap<String,List<FinancialYearWiseProperty>> financialYearWiseTenantProperty = new HashMap<>();
+		
+		for (HashMap<String, Object> tenantForFYMapping : PropertiesByFinancialYear) {
+
+			if (!financialYearWiseTenantProperty.containsKey(tenantForFYMapping.get("tenantid"))) {
+				List<FinancialYearWiseProperty> list = new ArrayList<>();
+				for (String year : financialYearsMap.keySet()) {
+					list.add(FinancialYearWiseProperty.builder().year(year).count(0L).build());
+
+				}
+				list.parallelStream().forEach(item ->{
+					if(item.getYear().equals(tenantForFYMapping.get("createdfinyear"))) {
+						item.setCount(Long.valueOf(String.valueOf(tenantForFYMapping.get("propertycount"))));
+					}
+				});
+				financialYearWiseTenantProperty.put(String.valueOf(tenantForFYMapping.get("tenantid")), list);
+
+			} else {
+				List<FinancialYearWiseProperty> lists = financialYearWiseTenantProperty.get(tenantForFYMapping.get("tenantid"));
+				lists.parallelStream().forEach(item ->{
+					if(item.getYear().equals(tenantForFYMapping.get("createdfinyear"))) {
+						item.setCount(Long.valueOf(String.valueOf(tenantForFYMapping.get("propertycount"))));
+					}
+				});
+				financialYearWiseTenantProperty.put(String.valueOf(tenantForFYMapping.get("tenantid")), lists);
+				
+			}
+
+		}
+		 
+			 List<Data> response = new ArrayList();
+			 int serailNumber = 0 ;
+			 for( HashMap.Entry<String, List<FinancialYearWiseProperty>> tenant : financialYearWiseTenantProperty.entrySet()) {
+				 serailNumber++;
+		            String tenantId = String.valueOf(tenant.getKey());
+		            String tenantIdStyled = tenantId.replace("od.", "");
+		            tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+				 List<Plot> row = new ArrayList<>();
+				row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+				row.add(Plot.builder().label(tenantIdStyled).name("DDRs").symbol("text").build());
+				List<FinancialYearWiseProperty> propertyYearWiseCount = tenant.getValue();
+				for(FinancialYearWiseProperty yearWiseCount :  propertyYearWiseCount) {
+					row.add(Plot.builder().name(yearWiseCount.getYear()).value(new BigDecimal(String.valueOf(yearWiseCount.getCount()))).symbol("number").build());				
+				}
+				 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
+			 }	
+			
 		return response;
 	}
 
