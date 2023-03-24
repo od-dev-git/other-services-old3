@@ -28,4 +28,7 @@ public class ResponseData {
 	
 	@JsonProperty("data")
 	private List<Data> data;
+	
+	@JsonProperty("filter")
+	private List<Filter> filter;
 }
