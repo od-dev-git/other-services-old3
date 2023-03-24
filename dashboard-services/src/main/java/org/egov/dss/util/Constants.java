@@ -45,7 +45,7 @@ public class Constants {
 		final static String REVENUE_TOTAL_MUTATION_FEE_CALCULATION = "totalMutationFeeCalculation";
 		final static String DIGITAL_COLLECTIONS_BY_VALUE = "ptDigitalCollectionByValue";
 		final static String DIGITAL_COLLECTIONS_BY_VOLUME = "ptDigitalCollectionByVolume";
-		
+		final static String REVENUE_PT_TAX_HEADS_BREAKUP = "ptTaxHeadTable";
 		
 		final static String SERVICE_DSS_TOTAL_APPLICATION_OVERVIEW = "dssTotalApplicationOverview";
 		final static String SERVICE_DSS_CLOSED_APPLICATION_OVERVIEW = "dssClosedApplicationOverview";
@@ -69,6 +69,7 @@ public class Constants {
 		final static String SERVICE_PT_RE_ASSESSMENT_SHARE = "ptReAssessmentShare";
 		final static String SERVICE_PT_SHARE_OF_NEW_ASSESSMENT = "ptShareOfNewAssessments";
 		final static String SERVICE_PT_SHARE_OF_RE_ASSESSMENT = "ptShareOfReAssessments";
+		final static String SERVICE_PT_ASMT_STATUS_DDR = "ptAssessmentStatusDDR";
 		
 		final static String SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS = "wstotalConnectionOverview";
 		final static String SERVICE_MR_TOTAL_APPLICATION = "mrtotalApplications";

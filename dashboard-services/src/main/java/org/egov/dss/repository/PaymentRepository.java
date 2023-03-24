@@ -25,6 +25,7 @@ import org.egov.dss.repository.rowmapper.BillRowMapper;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.CollectionByUsageRowMapper;
 import org.egov.dss.repository.rowmapper.PaymentRowMapper;
+import org.egov.dss.repository.rowmapper.TableChartRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.egov.dss.web.model.ChartCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,6 +168,14 @@ public class PaymentRepository {
         String query = paymentQueryBuilder.getCumulativeCollection(paymentSearchCriteria, preparedStatementValues);
         log.info("query for Cumulative Collection : "+query);
         List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<HashMap<String, Object>> getptTaxHeadsBreakup(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = paymentQueryBuilder.getptTaxHeadsBreakupListQuery(paymentSearchCriteria, preparedStatementValues);
+        log.info("query for pt Tax Heads Breakup  : "+query);
+        List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
         return result;
 	}
 	
