@@ -31,6 +31,7 @@ import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UsageTypeResponse;
 import org.egov.dss.model.enums.PaymentStatusEnum;
@@ -46,6 +47,8 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JacksonInject.Value;
 import com.google.common.collect.Sets;
+
+import net.logstash.logback.encoder.com.lmax.disruptor.LiteBlockingWaitStrategy;
 
 @Service
 public class RevenueService {
@@ -230,44 +233,19 @@ public class RevenueService {
 	}
 
 	public List<Data> collectionByUsageType(PayloadDetails payloadDetails) {
-		
-		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
-		Map<String, List<Payment>> consumerCodeWisePayments = payments.parallelStream()
-				.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
-				.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
-				.collect(Collectors.groupingBy(pay -> pay.getPaymentDetails().get(0).getBill().getConsumerCode()));
-		
-		HashMap<String, BigDecimal> consumerCodeWiseAmountPaid = new HashMap<>();
-		consumerCodeWisePayments.forEach((key,value) -> {
-			BigDecimal sum = value.stream().collect(Collectors.mapping(Payment::getTotalAmountPaid, Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)));
-			consumerCodeWiseAmountPaid.put(key, sum);
-		});
-			
-		List<UsageTypeResponse> usageTypeResponses = paymentRepository.getUsageTypes(paymentSearchCriteria);
-		
-		usageTypeResponses.parallelStream().forEach(item -> {
-			if(consumerCodeWiseAmountPaid.containsKey(item.getConsumerCode())) {
-				item.setAmount(consumerCodeWiseAmountPaid.get(item.getConsumerCode()));
-			}
-		});
-		
-		 Map<String, List<UsageTypeResponse>> usageCategoryWisePayments= usageTypeResponses.parallelStream()
-				 .collect(Collectors.groupingBy(UsageTypeResponse::getUsageCategory));
-		 
-		 HashMap<String, BigDecimal> usageCategoryWiseAmount = new HashMap<>();
-		 usageCategoryWisePayments.forEach((key,value) -> {
-				BigDecimal sum = value.stream().collect(Collectors.mapping(UsageTypeResponse::getAmount, Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)));
-				usageCategoryWiseAmount.put(key, sum);
-			});
-		 
-		 List<Plot> plots = new ArrayList<>();
-		 usageCategoryWiseAmount.forEach((key, value) -> {
-	     	Plot plot = Plot.builder().name(key).value(value).build();
-	     	plots.add(plot);
-			});
-		
-		return Arrays.asList(Data.builder().plots(plots).build()) ;
+		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		criteria.setPropertyStatus(DashboardConstants.STATUS_ACTIVE);
+		List<Chart> collectionByUsageType = paymentRepository.getCollectionByUsageType(criteria);
+
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(collectionByUsageType, plots);
+
+		BigDecimal total = collectionByUsageType.stream().map(usageCategory -> usageCategory.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return Arrays.asList(
+				Data.builder().headerName("DSS_PT_COLLECTION_BY_USAGE_TYPE").headerValue(total).plots(plots).build());
 	}
 
 	public List<Data> demandCollectionIndexDDRRevenue(PayloadDetails payloadDetails) {
@@ -732,5 +710,141 @@ public class RevenueService {
 		});
 	}
 	
-  
+	public List<Data> previousYearTargetAchieved(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+
+		BigDecimal previousYearCollection = getPreviousYearCollection(payloadDetails);
+		List<Chart> chart = new ArrayList<Chart>();
+		chart.add(Chart.builder().name(DashboardConstants.PREVIOUS_YEAR_TOTAL_COLLECTION).value(previousYearCollection)
+				.build());
+		chart.add(Chart.builder().name(DashboardConstants.PREVIOUS_YEAR_TARGET_COLLECTION).value(BigDecimal.ZERO)
+				.build());
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(chart, plots);
+		BigDecimal total = chart.stream().map(collection -> collection.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);
+
+		return Arrays.asList(
+				Data.builder().headerName("DSS_PREVIOUS_TARGET_ACHIEVED").headerValue(total).plots(plots).build());
+	}
+	
+	public List<Data> ptFinancialIndicatorsData(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseAmountCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseTransactions = paymentRepository
+				.getTenantWiseTransaction(paymentSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseAssessedProperties = paymentRepository
+				.getTenantWiseAssedProperties(paymentSearchCriteria);
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseCollection : tenantWiseAmountCollection.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(tenantWiseCollection.getKey().toString()).build());
+
+			plots.add(Plot.builder().name("Total Collection").value(tenantWiseCollection.getValue()).build());
+
+			plots.add(Plot.builder().name("Transactions")
+					.value(tenantWiseTransactions.get(tenantWiseCollection.getKey())).build());
+
+			plots.add(Plot.builder().name("Assessed Properties")
+					.value(tenantWiseAssessedProperties.get(tenantWiseCollection.getKey())).build());
+
+			serialNumber++;
+
+			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).build());
+
+		}
+
+		return response;
+	}
+	
+
+	public List<Data> ptPaymentModeData(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseAmountCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CARD_PAYMENT));
+		HashMap<String, BigDecimal> tenantWiseCardCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ONLINE_PAYMENT));
+		HashMap<String, BigDecimal> tenantWiseOnlineCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CHEQUE_PAYMENT));
+		HashMap<String, BigDecimal> tenantWiseChequeCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CASH_PAYMENT));
+		HashMap<String, BigDecimal> tenantWiseCashCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+
+		HashMap<String, BigDecimal> tenantWiseCardPercentage = new HashMap<>();
+		HashMap<String, BigDecimal> tenantWiseOnlinePercentage = new HashMap<>();
+		HashMap<String, BigDecimal> tenantWiseChequePercentage = new HashMap<>();
+		HashMap<String, BigDecimal> tenantWiseCashPercentage = new HashMap<>();
+
+		tenantWiseCardCollection.forEach((key, value) -> {
+			BigDecimal collection = tenantWiseAmountCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			tenantWiseCardPercentage.put(key, percentage);
+		});
+		tenantWiseOnlineCollection.forEach((key, value) -> {
+			BigDecimal collection = tenantWiseAmountCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			tenantWiseOnlinePercentage.put(key, percentage);
+		});
+		tenantWiseChequeCollection.forEach((key, value) -> {
+			BigDecimal collection = tenantWiseAmountCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			tenantWiseChequePercentage.put(key, percentage);
+		});
+		tenantWiseCashCollection.forEach((key, value) -> {
+			BigDecimal collection = tenantWiseAmountCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			tenantWiseCashPercentage.put(key, percentage);
+		});
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseCollection : tenantWiseAmountCollection.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(tenantWiseCollection.getKey().toString()).build());
+
+			plots.add(Plot.builder().name("Card Collection")
+					.value(tenantWiseCardPercentage.get(tenantWiseCollection.getKey())).build());
+
+			plots.add(Plot.builder().name("Online Collection")
+					.value(tenantWiseOnlinePercentage.get(tenantWiseCollection.getKey())).build());
+
+			plots.add(Plot.builder().name("Cheque Collection")
+					.value(tenantWiseChequePercentage.get(tenantWiseCollection.getKey())).build());
+
+			plots.add(Plot.builder().name("Cash Collection")
+					.value(tenantWiseCashPercentage.get(tenantWiseCollection.getKey())).build());
+
+			serialNumber++;
+
+			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).build());
+
+		}
+
+		return response;
+	}
+
 }

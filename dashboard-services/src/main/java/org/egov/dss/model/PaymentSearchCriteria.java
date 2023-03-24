@@ -50,5 +50,7 @@ public class PaymentSearchCriteria {
     private Integer limit;
     
     private String excludedTenant;
+    
+    private String propertyStatus;
 
 }
