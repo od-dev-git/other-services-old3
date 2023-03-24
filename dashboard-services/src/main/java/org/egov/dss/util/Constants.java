@@ -69,7 +69,6 @@ public class Constants {
 		final static String SERVICE_PT_RE_ASSESSMENT_SHARE = "ptReAssessmentShare";
 		final static String SERVICE_PT_SHARE_OF_NEW_ASSESSMENT = "ptShareOfNewAssessments";
 		final static String SERVICE_PT_SHARE_OF_RE_ASSESSMENT = "ptShareOfReAssessments";
-		final static String SERVICE_PT_ASMT_STATUS_DDR = "ptAssessmentStatusDDR";
 		
 		final static String SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS = "wstotalConnectionOverview";
 		final static String SERVICE_MR_TOTAL_APPLICATION = "mrtotalApplications";
@@ -84,7 +83,9 @@ public class Constants {
 		final static String REVENUE_PT_BOTTOM_ULBS_BY_DIGITAL_COLLECTION = "ptBottomDigitalCollectionByValue";
 		final static String REVENUE_PT_TOP_ULBS_COLLECTION_BY_VOLUME = "ptTopDigitalCollectionByVolume";
 		final static String REVENUE_PT_BOTTOM_ULBS_COLLECTION_BY_VOLUME = "ptBottomDigitalCollectionByVolume";
-
+		final static String REVENUE_PT_PREVIOUS_YEAR_TARGET_ACHIEVED = "previousTargetAchieved";
+		final static String REVENUE_PT_FINANCIAL_INDICATORS = "ptFinancialIndicatorTable";
+		final static String REVENUE_PT_PAYMENT_MODE_DDR = "ptPaymentModeDDR";
 	}
 
 }
