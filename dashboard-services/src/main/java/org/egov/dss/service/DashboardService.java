@@ -48,7 +48,8 @@ public class DashboardService {
 		ResponseData responseData = new ResponseData();
 		List<PayloadDetails> payloadList = getPayloadForScheduler();
 		for (PayloadDetails payloadDetails : payloadList) {
-			payloadDetails.setEnddate(zdt.toInstant().toEpochMilli());
+		//	payloadDetails.setEnddate(zdt.toInstant().toEpochMilli());
+			payloadDetails.setEnddate(schedulerStartTime);
 			requestInfoWrapper.setPayloadDetails(payloadDetails);
 			responseData = serveRequest(requestInfoWrapper);
 			payloadDetails.setResponsedata(responseData);
