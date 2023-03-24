@@ -27,6 +27,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.BillAccountDetail;
+import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
@@ -136,55 +137,16 @@ public class RevenueService {
 	}
 
 	public List<Data> cumulativeCollection(PayloadDetails payloadDetails) {
-		
-		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		List<Plot> cumulativeMonthCollections = new ArrayList<>();
-		BigDecimal addedCumulativeCollection = BigDecimal.ZERO;
-		
-		
-//		Calendar startDay = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-//		startDay.setTimeInMillis(paymentSearchCriteria.getFromDate());
-//		Calendar lastDay = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-//		lastDay.setTimeInMillis(paymentSearchCriteria.getToDate());
-//		Calendar endDay = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-//		endDay.setTimeInMillis(startDay.getTimeInMillis());
-//		endDay.add(Calendar.MONTH, 1);
-//		endDay.add(Calendar.SECOND, -1);
-		
-		
-		  Calendar startDay = dashboardUtils.getDayFromLong(paymentSearchCriteria.getFromDate());
-		  Calendar lastDay = dashboardUtils.getDayFromLong(paymentSearchCriteria.getToDate());
-		  Calendar endDay = dashboardUtils.addOneMonth(startDay.getTimeInMillis());
-		
-		for(int i = 0; startDay.getTimeInMillis() < lastDay.getTimeInMillis() ; i++) {
-		
-            paymentSearchCriteria.setFromDate(startDay.getTimeInMillis());
-			paymentSearchCriteria.setToDate(endDay.getTimeInMillis());
+		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		List<Chart> cumulativeCollection = paymentRepository.getCumulativeCollection(criteria);
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(cumulativeCollection, plots);
+        
+		BigDecimal total = cumulativeCollection.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);		 
 
-			Plot cumulativeMonthCollection = new Plot();
-			List<Payment> payments = paymentRepository.getPayments(paymentSearchCriteria);
-			BigDecimal cumulativeCollection = payments.parallelStream()
-					.filter(pay -> pay.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
-					.filter(pay -> !pay.getTenantId().equalsIgnoreCase("od.testing"))
-					.map(pay -> pay.getTotalAmountPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);	
-			
-			addedCumulativeCollection=addedCumulativeCollection.add(cumulativeCollection);	
-			
-			DateFormat dateFormat = new SimpleDateFormat("MMMM-yyyy");  
-			String strDate = dateFormat.format(startDay.getTime());
-			
-			cumulativeMonthCollection.setName(strDate);
-			cumulativeMonthCollection.setSymbol("amount");
-			cumulativeMonthCollection.setValue(addedCumulativeCollection);
-			
-			cumulativeMonthCollections.add(cumulativeMonthCollection);
-
-			startDay.add(Calendar.MONTH, 1);
-			endDay = dashboardUtils.addOneMonth(startDay.getTimeInMillis());
-			
-		}
-		
-		return Arrays.asList(Data.builder().headerValue(addedCumulativeCollection.setScale(2, RoundingMode.HALF_UP)).plots(cumulativeMonthCollections).build());
+		return Arrays.asList(Data.builder().headerName("Collections").headerSymbol("amount").headerValue(total).plots(plots).build());
 	}
 
 	public List<Data> topPerformingUlbs(PayloadDetails payloadDetails) {
@@ -614,17 +576,15 @@ public class RevenueService {
 		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
 				.getTenantWiseCollection(paymentSearchCriteria);
 
-//		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
-//		HashMap<String, BigDecimal> tenantWiseTarget = paymentRepository
-//				.getTenantWiseTargetCollection(targerSearchCriteria);
 		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ALL_DIGITAL_PAYMENT_MODE));
-		HashMap<String, BigDecimal> tenantWiseDigitalCollection = paymentRepository.getTenantWiseCollection(paymentSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseDigitalCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
 
 		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
 
-		tenantWiseCollection.forEach((key, value) -> {
-			BigDecimal digital = tenantWiseDigitalCollection.get(key);
-            BigDecimal percentage = digital.multiply(new BigDecimal(100)).divide(value ,2, RoundingMode.HALF_UP);
+		tenantWiseDigitalCollection.forEach((key, value) -> {
+			BigDecimal collection = tenantWiseCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
 			tenantWisePercentage.put(key, percentage);
 		});
 
@@ -633,12 +593,12 @@ public class RevenueService {
 						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
 		List<Data> responseList = new ArrayList<>();
-		
+
 		int rank = 0;
-		for(Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
+		for (Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
 			rank++;
-			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey()).value(tenantWisePercent.getValue()).symbol("percentage")
-					.label("DSS_COLLECTION_RATE").build());
+			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey())
+					.value(tenantWisePercent.getValue()).symbol("percentage").label("DSS_COLLECTION_RATE").build());
 			responseList.add(Data.builder().plots(plots).headerValue(rank).build());
 		}
 
@@ -656,15 +616,15 @@ public class RevenueService {
 		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
 				.getTenantWiseCollection(paymentSearchCriteria);
 
-
 		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ALL_DIGITAL_PAYMENT_MODE));
-		HashMap<String, BigDecimal> tenantWiseDigitalCollection = paymentRepository.getTenantWiseCollection(paymentSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseDigitalCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
 
 		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
 
-		tenantWiseCollection.forEach((key, value) -> {
-			BigDecimal digital = tenantWiseDigitalCollection.get(key);
-            BigDecimal percentage = digital.multiply(new BigDecimal(100)).divide(value ,2, RoundingMode.HALF_UP);
+		tenantWiseDigitalCollection.forEach((key, value) -> {
+			BigDecimal collection = tenantWiseCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
 			tenantWisePercentage.put(key, percentage);
 		});
 
@@ -673,12 +633,92 @@ public class RevenueService {
 						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
 		List<Data> responseList = new ArrayList<>();
-		
+
 		int rank = tenantWisePercentageSorted.size()+1;
-		for(Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
+		for (Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
 			rank--;
-			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey()).value(tenantWisePercent.getValue()).symbol("percentage")
-					.label("DSS_COLLECTION_RATE").build());
+			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey())
+					.value(tenantWisePercent.getValue()).symbol("percentage").label("DSS_COLLECTION_RATE").build());
+			responseList.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+
+		return responseList;
+
+	}
+	
+	public List<Data> topUlbsDigitalCollectionByVolume(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
+				.getTenantWiseTransaction(paymentSearchCriteria);
+
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ALL_DIGITAL_PAYMENT_MODE));
+		HashMap<String, BigDecimal> tenantWiseDigitalCollection = paymentRepository
+				.getTenantWiseTransaction(paymentSearchCriteria);
+
+		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
+
+		tenantWiseDigitalCollection.forEach((key, value) -> {
+			BigDecimal collection = tenantWiseCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			tenantWisePercentage.put(key, percentage);
+		});
+
+		Map<String, BigDecimal> tenantWisePercentageSorted = tenantWisePercentage.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+		List<Data> responseList = new ArrayList<>();
+
+		int rank = 0;
+		for (Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
+			rank++;
+			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey())
+					.value(tenantWisePercent.getValue()).symbol("percentage").label("DSS_COLLECTION_RATE").build());
+			responseList.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+
+		return responseList;
+
+	}
+	
+	public List<Data> bottomUlbsDigitalCollectionByVolume(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
+				.getTenantWiseTransaction(paymentSearchCriteria);
+
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ALL_DIGITAL_PAYMENT_MODE));
+		HashMap<String, BigDecimal> tenantWiseDigitalCollection = paymentRepository
+				.getTenantWiseTransaction(paymentSearchCriteria);
+
+		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
+
+		tenantWiseDigitalCollection.forEach((key, value) -> {
+			BigDecimal collection = tenantWiseCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			tenantWisePercentage.put(key, percentage);
+		});
+
+		Map<String, BigDecimal> tenantWisePercentageSorted = tenantWisePercentage.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+		List<Data> responseList = new ArrayList<>();
+
+		int rank = tenantWisePercentageSorted.size()+1;
+		for (Map.Entry<String, BigDecimal> tenantWisePercent : tenantWisePercentageSorted.entrySet()) {
+			rank--;
+			List<Plot> plots = Arrays.asList(Plot.builder().name(tenantWisePercent.getKey())
+					.value(tenantWisePercent.getValue()).symbol("percentage").label("DSS_COLLECTION_RATE").build());
 			responseList.add(Data.builder().plots(plots).headerValue(rank).build());
 		}
 
@@ -686,6 +726,11 @@ public class RevenueService {
 
 	}
 
-
+	private void extractDataForChart(List<Chart> items, List<Plot> plots) {
+		items.stream().forEach(item ->{
+			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
+		});
+	}
+	
   
 }

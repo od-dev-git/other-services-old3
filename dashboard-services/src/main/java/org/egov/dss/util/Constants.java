@@ -81,6 +81,8 @@ public class Constants {
 		final static String REVENUE_PT_GROWTH_RATE = "propertyTaxGrowthRate";
 		final static String REVENUE_PT_TOP_ULBS_BY_DIGITAL_COLLECTION = "ptTopDigitalCollectionByValue";
 		final static String REVENUE_PT_BOTTOM_ULBS_BY_DIGITAL_COLLECTION = "ptBottomDigitalCollectionByValue";
+		final static String REVENUE_PT_TOP_ULBS_COLLECTION_BY_VOLUME = "ptTopDigitalCollectionByVolume";
+		final static String REVENUE_PT_BOTTOM_ULBS_COLLECTION_BY_VOLUME = "ptBottomDigitalCollectionByVolume";
 
 	}
 
