@@ -64,6 +64,13 @@ public class PaymentQueryBuilder {
 	
 	public static final String TENANT_WISE_TARGET_COLLECTION_QUERY = " select tenantidformunicipalcorporation as tenantid,COALESCE (sum(budgetproposedformunicipalcorporation),0) as totalamt from eg_dss_target edt  ";
 	
+	public static final String TENANT_WISE_TRANSACTION_QUERY = " select py.tenantid, COALESCE(count(py.transactionnumber),0) as totalamt from egcl_payment py "
+            + "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
+	
+	public static final String CUMULATIVE_COLLECTION_QUERY = " select to_char(monthYear, 'Mon-YYYY') as name, sum(totalCollection) over (order by monthYear asc rows between unbounded preceding and current row) as value "
+			+ "from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(pyd.receiptdate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(pyd.receiptdate/1000))),'DD-MM-YYYY') as monthYear,sum(py.totalamountpaid) as totalCollection from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id  ";
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -190,6 +197,12 @@ public class PaymentQueryBuilder {
 			preparedStatementValues.put("billid", searchCriteria.getBillIds());
 		}
 		
+		if (!CollectionUtils.isEmpty(searchCriteria.getPaymentModes())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" py.paymentmode in (:paymentMode)");
+			preparedStatementValues.put("paymentMode", searchCriteria.getPaymentModes());
+		}
+		
 		if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.tenantid != :excludedTenant");
@@ -307,4 +320,30 @@ public class PaymentQueryBuilder {
 		selectQuery.append(" group by tenantid  ");
 		return selectQuery.toString();
 	}
+	
+	public String getTenantWiseTransaction(PaymentSearchCriteria paymentSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TENANT_WISE_TRANSACTION_QUERY);
+		addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+		selectQuery.append(" group by py.tenantid  ");
+		return selectQuery.toString();
+	}
+	
+	public String getCumulativeCollection(PaymentSearchCriteria paymentSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(CUMULATIVE_COLLECTION_QUERY);
+		addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+		addGroupByClause(selectQuery,"to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(pyd.receiptdate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(pyd.receiptdate/1000))),'DD-MM-YYYY')");
+		addOrderByClause(selectQuery,"to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(pyd.receiptdate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(pyd.receiptdate/1000))),'DD-MM-YYYY')) as payment");
+		return selectQuery.toString();
+	}
+	
+	 private static void addGroupByClause(StringBuilder demandQueryBuilder,String columnName) {
+	        demandQueryBuilder.append(" GROUP BY " + columnName);
+	    }
+
+	    private static void addOrderByClause(StringBuilder demandQueryBuilder,String columnName) {
+	        demandQueryBuilder.append(" ORDER BY " + columnName);
+	    }
+	
 }
