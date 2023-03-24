@@ -1,5 +1,6 @@
 package org.egov.dss.service;
 
+import java.util.Arrays;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -16,6 +17,7 @@ import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.enums.ChartType;
 import org.egov.dss.repository.CommonRepository;
 import org.egov.dss.web.model.Data;
+import org.egov.dss.web.model.Filter;
 import org.egov.dss.web.model.RequestInfoWrapper;
 import org.egov.dss.web.model.ResponseData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,16 +91,23 @@ public class DashboardService {
 			responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
 			responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
 		}else {
-			if(!chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString())) {
+			if(!(chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString()) || chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {
 				responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
 			}
 			if(!((chartType.toString()).equalsIgnoreCase(ChartType.TABLE.toString()) || (chartType.toString()).equalsIgnoreCase(ChartType.XTABLE.toString()) || (chartType.toString()).equalsIgnoreCase(ChartType.LINE.toString()))){
 				responseData.getData().forEach(data -> data.setHeaderName(chartName));
 			}
 		}
-		if(!chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString())) {
+		if(!(chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString()) || chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {
 			responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol(valueType)));
 		}
+		
+		if((chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString()) || chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {
+			responseData.setDrillDownChartId(null);
+			responseData.setFilter(Arrays.asList(Filter.builder().key(String.valueOf("tenantId")).column(String.valueOf("DDRs")).build()));
+		}
+		
+		
 	}
 	
 	public List<PayloadDetails> getPayloadForScheduler(){
