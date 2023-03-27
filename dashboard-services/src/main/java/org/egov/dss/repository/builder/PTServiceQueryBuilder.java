@@ -121,8 +121,8 @@ public class PTServiceQueryBuilder {
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTIES_NEW_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
-		selectQuery.append(" creationreason ='CREATE' ");
-		preparedStatementValues.put("creationReason", "CREATE");
+		selectQuery.append(" creationreason not in ('UPDATE','MUTATION') ");
+		preparedStatementValues.put("creationReason", "UPDATE");
 		return addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,false);
 	}
 

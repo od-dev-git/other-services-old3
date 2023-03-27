@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -131,8 +132,9 @@ public class RevenueService {
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
 		BigDecimal targetCollection = (BigDecimal) paymentRepository.getTtargetCollection(targerSearchCriteria);
-		Double targetAchieved = (totalCollection.doubleValue() / targetCollection.doubleValue())*100;
-		return Arrays.asList(Data.builder().headerValue(targetAchieved).build());
+		//BigDecimal targetAchieved = totalCollection.multiply(new BigDecimal(100)).divide(targetCollection);
+		BigDecimal targetAchieved = totalCollection.multiply(new BigDecimal(100)).divide(targetCollection, 2, RoundingMode.HALF_UP);
+		return Arrays.asList(Data.builder().headerValue(targetAchieved.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
 	public List<Data> totalMutationFeeCollection(PayloadDetails payloadDetails) {
@@ -531,8 +533,9 @@ public class RevenueService {
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		BigDecimal previousYearCollection = getPreviousYearCollection(payloadDetails);
 		if (previousYearCollection.intValue() != 0) {
-			growthRate = (totalCollection.divide(previousYearCollection).subtract(new BigDecimal(1)))
+			growthRate = (totalCollection.divide(previousYearCollection, 2, RoundingMode.HALF_UP).subtract(BigDecimal.ONE))
 					.multiply(new BigDecimal(100));
+		
 		}
 
 		return Arrays.asList(Data.builder().headerValue(growthRate).build());
@@ -540,12 +543,13 @@ public class RevenueService {
 
 	public BigDecimal getPreviousYearCollection(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		LocalDateTime fromDate = Instant.ofEpochMilli(payloadDetails.getStartdate()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-		LocalDateTime toDate = Instant.ofEpochMilli(payloadDetails.getEnddate()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-	    ZonedDateTime zdtFromDate = ZonedDateTime.of(fromDate, ZoneId.systemDefault());
-	    ZonedDateTime zdtToDate = ZonedDateTime.of(toDate, ZoneId.systemDefault());
-        paymentSearchCriteria.setFromDate(zdtFromDate.minusYears(1).toEpochSecond());
-		paymentSearchCriteria.setToDate(zdtToDate.minusYears(1).toEpochSecond());
+	/*	LocalDate fromDate = Instant.ofEpochMilli(payloadDetails.getStartdate()).atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate toDate = Instant.ofEpochMilli(payloadDetails.getEnddate()).atZone(ZoneId.systemDefault()).toLocalDate();
+	    LocalDate previousYearFromDate = fromDate.minusYears(1);
+	    LocalDate previousYearToDate = toDate.minusYears(1);
+        Instant fromDateInstant =  previousYearFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant(); */
+        paymentSearchCriteria.setFromDate(Long.valueOf("1617215400000"));
+		paymentSearchCriteria.setToDate(Long.valueOf("1648665000000"));
 		BigDecimal previousYearCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		return previousYearCollection;
 	}
@@ -623,8 +627,9 @@ public class RevenueService {
 		});
 
 		Map<String, BigDecimal> tenantWisePercentageSorted = tenantWisePercentage.entrySet().parallelStream()
-				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
+				.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
 						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+		
 
 		List<Data> responseList = new ArrayList<>();
 
@@ -713,7 +718,7 @@ public class RevenueService {
 		});
 
 		Map<String, BigDecimal> tenantWisePercentageSorted = tenantWisePercentage.entrySet().parallelStream()
-				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
+				.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
 						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
 		List<Data> responseList = new ArrayList<>();
@@ -797,7 +802,7 @@ public class RevenueService {
 		List<Chart> chart = new ArrayList<Chart>();
 		chart.add(Chart.builder().name(DashboardConstants.PREVIOUS_YEAR_TOTAL_COLLECTION).value(previousYearCollection)
 				.build());
-		chart.add(Chart.builder().name(DashboardConstants.PREVIOUS_YEAR_TARGET_COLLECTION).value(BigDecimal.ZERO)
+		chart.add(Chart.builder().name(DashboardConstants.PREVIOUS_YEAR_TARGET_COLLECTION).value(BigDecimal.ONE)
 				.build());
 		List<Plot> plots = new ArrayList<Plot>();
 		extractDataForChart(chart, plots);
