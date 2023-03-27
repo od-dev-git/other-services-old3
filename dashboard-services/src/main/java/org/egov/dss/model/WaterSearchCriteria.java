@@ -41,5 +41,9 @@ public class WaterSearchCriteria {
     
     private Long slaThreshold;
     
+    private String connectionType;
+
+    private String connectionFacility;
+    
 
 }

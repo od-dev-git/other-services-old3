@@ -71,7 +71,6 @@ public class Constants {
 		final static String SERVICE_PT_SHARE_OF_RE_ASSESSMENT = "ptShareOfReAssessments";
 		final static String SERVICE_PT_ASMT_STATUS_DDR = "ptAssessmentStatusDDR";
 		
-		final static String SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS = "wstotalConnectionOverview";
 		final static String SERVICE_MR_TOTAL_APPLICATION = "mrtotalApplications";
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS = "totalComplaints";
 		final static String SERVICE_OBPS_TOTAL_PERMITS = "bpaTotalPermitsIssued";
@@ -87,6 +86,30 @@ public class Constants {
 		final static String REVENUE_PT_PREVIOUS_YEAR_TARGET_ACHIEVED = "previousTargetAchieved";
 		final static String REVENUE_PT_FINANCIAL_INDICATORS = "ptFinancialIndicatorTable";
 		final static String REVENUE_PT_PAYMENT_MODE_DDR = "ptPaymentModeDDR";
+		
+		final static String REVENUE_WS_APP_FEE_COLLECTION = "wstotalApplicationFeesCollection";
+		final static String REVENUE_WS_DEMAND_FEE_COLLECTION = "wstotalDemandFeesCollection";
+		final static String REVENUE_WS_CUMULATIVE_COLLECTION = "wscumulativeCollections";
+		final static String REVENUE_WS_TOP_ULBS_BY_DIGITAL_COLLECTION = "wsTopDigitalCollectionByValue";
+		final static String REVENUE_WS_BOTTOM_ULBS_BY_DIGITAL_COLLECTION = "wsBottomDigitalCollectionByValue";
+		final static String REVENUE_WS_TOP_ULBS_COLLECTION_BY_VOLUME = "wsTopDigitalCollectionByVolume";
+		final static String REVENUE_WS_BOTTOM_ULBS_COLLECTION_BY_VOLUME = "wsBottomDigitalCollectionByVolume";
+		final static String REVENUE_WS_COLLECTION_BY_USAGE_TYPE = "wscollectionByUsage";
+		final static String REVENUE_WS_COLLECTION_BY_CHANNEL = "wscollectionByChannel";
+		final static String REVENUE_WS_TAX_HEADS_BREAKUP = "wsTaxHeadDDR";
+		final static String REVENUE_WS_KEY_FINANCIAL_INDICATOR = "wsFinancialIndicatorDDR";
+		
+		final static String SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS = "wstotalConnection";
+		final static String SERVICE_WS_ACTIVE_METERED_WATER_CONNECTIONS = "wsActiveMeteredWaterConnection";
+		final static String SERVICE_WS_ACTIVE_NON_METERED_WATER_CONNECTIONS = "wsActiveNonMeteredWaterConnection";
+		final static String SERVICE_WS_TOTAL_WATER_CONNECTIONS = "wstotalWaterConnection";
+		final static String SERVICE_WS_TOTAL_SEWERAGE_CONNECTIONS = "wstotalSewerageConnection";
+		final static String SERVICE_WS_TOTAL_WATER_SEWERAGE_CONNECTIONS = "wstotalWaterSewerageConnection";
+		final static String SERVICE_WS_TOTAL_CUMULATIVE_ACTIVE_CONNECTIONS = "wstotalCumulativeActiveConnection";
+		final static String SERVICE_WS_CUMULATIVE_CONNECTIONS = "wscumulativeConnections";
+		final static String SERVICE_WS_CONNECTIONS_BY_USAGE_TYPE = "wsWaterConsumersByUsageType";
+		final static String SERVICE_WS_CONNECTIONS_BY_TYPE = "wsConsumersByChannel";
+		final static String SERVICE_WS_CONNECTION_AGEING = "wsConnectionAgeingDDR";
 	}
 
 }

@@ -204,6 +204,81 @@ public class RedirectService {
 			return revenueService.ptPaymentModeData(requestInfoWrapper.getPayloadDetails());
 		}
 		
+		if(Constants.VisualizationCodes.REVENUE_WS_APP_FEE_COLLECTION.equals(visualizationCode)) {
+			return revenueService.getWsApplicationFeeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_DEMAND_FEE_COLLECTION.equals(visualizationCode)) {
+			return revenueService.getWsDemandFeeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_CUMULATIVE_COLLECTION.equals(visualizationCode)) {
+			return revenueService.getWSCumulativeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_TOP_ULBS_BY_DIGITAL_COLLECTION.equals(visualizationCode)) {
+			return revenueService.topUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_BOTTOM_ULBS_BY_DIGITAL_COLLECTION.equals(visualizationCode)) {
+			return revenueService.bottomUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_TOP_ULBS_COLLECTION_BY_VOLUME.equals(visualizationCode)) {
+			return revenueService.topUlbsDigitalCollectionByVolume(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_BOTTOM_ULBS_COLLECTION_BY_VOLUME.equals(visualizationCode)) {
+			return revenueService.bottomUlbsDigitalCollectionByVolume(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_COLLECTION_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.wsCollectionByUsageType(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_COLLECTION_BY_CHANNEL.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.wsCollectionByChannel(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_TAX_HEADS_BREAKUP.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.getWSTaxHeadsBreakup(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_WS_KEY_FINANCIAL_INDICATOR.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.getWSKeyFinancialIndicators(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_WS_ACTIVE_METERED_WATER_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveMeteredWaterConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_ACTIVE_NON_METERED_WATER_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveNonMeteredWaterConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_WATER_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveWaterConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_SEWERAGE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveSewerageConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_WATER_SEWERAGE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveWaterSewerageConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_CUMULATIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.cumulativeConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_CUMULATIVE_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_CONNECTIONS_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
+			return wsService.wsConnectionsByUsageType(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_CONNECTIONS_BY_TYPE.equalsIgnoreCase(visualizationCode)) {
+			return wsService.wsConnectionsByType(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_CONNECTION_AGEING.equalsIgnoreCase(visualizationCode)) {
+			return wsService.wsConnectionAgeing(requestInfoWrapper.getPayloadDetails());
+		}
+		
 		return null;
 
 	}
