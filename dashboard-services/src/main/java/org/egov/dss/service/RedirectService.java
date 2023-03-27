@@ -248,6 +248,37 @@ public class RedirectService {
 			return revenueService.getWSKeyFinancialIndicators(requestInfoWrapper.getPayloadDetails());
 		}
 		
+		if(Constants.VisualizationCodes.SERVICE_WS_ACTIVE_METERED_WATER_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveMeteredWaterConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_ACTIVE_NON_METERED_WATER_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveNonMeteredWaterConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_WATER_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveWaterConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_SEWERAGE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveSewerageConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_WATER_SEWERAGE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveWaterSewerageConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_CUMULATIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.cumulativeConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_CUMULATIVE_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_CONNECTIONS_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
+			return wsService.wsConnectionsByUsageType(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_CONNECTIONS_BY_TYPE.equalsIgnoreCase(visualizationCode)) {
+			return wsService.wsConnectionsByType(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_CONNECTION_AGEING.equalsIgnoreCase(visualizationCode)) {
+			return wsService.wsConnectionAgeing(requestInfoWrapper.getPayloadDetails());
+		}
+		
 		return null;
 
 	}

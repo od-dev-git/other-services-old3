@@ -98,6 +98,16 @@ public class DashboardConstants {
 	
 	public static final String PREVIOUS_YEAR_TARGET_COLLECTION = "Previous Year Target Collection";
 	
+	public static final String WS_CONNECTION_TYPE_METERED = "Metered";
+
+	public static final String WS_CONNECTION_TYPE_NON_METERED = "Non Metered";
+
+	public static final String WS_CONNECTIONFACILITY_WATER = "WATER";
+
+	public static final String WS_CONNECTIONFACILITY_SEWERAGE = "SEWERAGE";
+
+	public static final String WS_CONNECTIONFACILITY_WATER_SEWERAGE = "WATER-SEWERAGE";
+	
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE));
 	
