@@ -1,13 +1,18 @@
 package org.egov.dss.service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.egov.dss.constants.DashboardConstants;
+import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.WaterSearchCriteria;
 import org.egov.dss.repository.WSRepository;
 import org.egov.dss.web.model.Data;
+import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -34,6 +39,7 @@ public class WSService {
 	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
 		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
 		Integer totalApplication = (Integer) wsRepository.getActiveWaterConnectionCount(criteria);
 		Integer slaAchievedAppCount = (Integer) wsRepository.getSlaAchievedAppCount(criteria);
 		return Arrays.asList(Data.builder()
@@ -60,6 +66,152 @@ public class WSService {
 		}
 		
 		return criteria;
+	}
+	
+	public List<Data> totalActiveMeteredWaterConnections(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
+		criteria.setConnectionType(DashboardConstants.WS_CONNECTION_TYPE_METERED);
+		Integer activeMeteredWaterConnectionCount =  (Integer) wsRepository.getTotalActiveMeteredWaterConnectionsCount(criteria);
+		return Arrays.asList(Data.builder().headerValue(activeMeteredWaterConnectionCount).build());
+	}
+
+	public List<Data> totalActiveNonMeteredWaterConnections(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
+		criteria.setConnectionType(DashboardConstants.WS_CONNECTION_TYPE_NON_METERED);
+		Integer activeNonMeteredWaterConnectionCount =  (Integer) wsRepository.getTotalActiveNonMeteredWaterConnectionsCount(criteria);
+		return Arrays.asList(Data.builder().headerValue(activeNonMeteredWaterConnectionCount).build());
+	}
+
+	public List<Data> totalActiveWaterConnections(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
+		criteria.setConnectionType(DashboardConstants.WS_CONNECTION_TYPE_NON_METERED);
+		criteria.setConnectionFacility(DashboardConstants.WS_CONNECTIONFACILITY_WATER);
+		Integer activeNonMeteredWaterConnectionCount =  (Integer) wsRepository.getTotalActiveWaterConnectionsCount(criteria);
+		return Arrays.asList(Data.builder().headerValue(activeNonMeteredWaterConnectionCount).build());
+	}
+
+	public List<Data> totalActiveSewerageConnections(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
+		criteria.setConnectionType(DashboardConstants.WS_CONNECTION_TYPE_NON_METERED);
+		criteria.setConnectionFacility(DashboardConstants.WS_CONNECTIONFACILITY_SEWERAGE);
+		Integer activeNonMeteredWaterConnectionCount =  (Integer) wsRepository.getTotalActiveSewerageConnectionsCount(criteria);
+		return Arrays.asList(Data.builder().headerValue(activeNonMeteredWaterConnectionCount).build());
+	}
+
+	public List<Data> totalActiveWaterSewerageConnections(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
+		criteria.setConnectionType(DashboardConstants.WS_CONNECTION_TYPE_NON_METERED);
+		criteria.setConnectionFacility(DashboardConstants.WS_CONNECTIONFACILITY_WATER_SEWERAGE);
+		Integer activeNonMeteredWaterConnectionCount =  (Integer) wsRepository.getTotalActiveWaterSewerageConnectionsCount(criteria);
+		return Arrays.asList(Data.builder().headerValue(activeNonMeteredWaterConnectionCount).build());
+	}
+
+	public List<Data> cumulativeConnections(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<Chart> cumulativeConnections = wsRepository.getCumulativeConnections(criteria);
+
+		List<Plot> plots = new ArrayList();
+		Long total = 0L;
+		total = extractDataForChart(cumulativeConnections, plots ,total);	
+
+		return Arrays.asList(Data.builder().headerName("Water & Sewerage Connections").headerValue(total).plots(plots).build());
+	}
+
+
+	private Long extractDataForChart(List<Chart> items, List<Plot> plots, Long total) {
+		for (Chart item : items) {
+			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
+			total = total + Long.valueOf(String.valueOf(item.getValue()));
+		}
+
+		return total ;
+
+	}
+
+	public List<Data> wsConnectionsByUsageType(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
+		List<Chart> wsConnectionsByUsageType = wsRepository.getwsConnectionsByUsageType(criteria);
+
+		List<Plot> plots = new ArrayList();
+		Long total = 0L;
+		total = extractDataForChart(wsConnectionsByUsageType, plots ,total);		 
+
+		return Arrays.asList(Data.builder().headerName("DSS_WS_WATER_CONNECTION_BY_USAGE").headerValue(total).plots(plots).build());
+	}
+
+	public List<Data> wsConnectionsByType(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
+		List<Chart> wsConnectionsByType = wsRepository.getwsConnectionsByType(criteria);
+
+		List<Plot> plots = new ArrayList();
+		Long total = 0L;
+		total = extractDataForChart(wsConnectionsByType, plots ,total);	 
+
+		return Arrays.asList(Data.builder().headerName("DSS_WS_CONNECTION_BY_CHANNEL").headerValue(total).plots(plots).build());
+	}
+
+	public List<Data> wsConnectionAgeing(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<HashMap<String, Object>> wsConnectionAgeingBreakup = wsRepository.getWSConnectionAgeing(criteria);
+
+			 List<Data> response = new ArrayList();
+			 int serailNumber = 0 ;
+			 for( HashMap<String, Object> tenantWiseRow : wsConnectionAgeingBreakup) {
+				 serailNumber++;
+		            String tenantId = String.valueOf(tenantWiseRow.get("tenantid"));
+		            String tenantIdStyled = tenantId.replace("od.", "");
+		            tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+				 List<Plot> row = new ArrayList<>();
+				row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+				row.add(Plot.builder().label(tenantIdStyled).name("DDRs").symbol("text").build());
+
+				row.add(Plot.builder().name("Pending_from_0_to_3_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_0_to_3_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Pending_from_3_to_7_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_3_to_7_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Pending_from_7_to_15_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_7_to_15_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Pending_from_more_than_15_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_more_than_15_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Total_Pending_Applications").value(new BigDecimal(String.valueOf(tenantWiseRow.get("total_pending_applications")))).symbol("number").build());				
+
+				 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
+			 }	
+
+		return response;
 	}
 
 }

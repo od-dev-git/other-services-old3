@@ -97,7 +97,38 @@ public class PaymentQueryBuilder {
 			+ "inner join egcl_bill bill on bill.id = pyd.billid "
 			+ "inner join eg_pt_property pt on pt.propertyid = bill.consumercode ";
 	
+	public static final String WS_COLLECTION_BY_USAGE_TYPE = " select ws.usagecategory as name, COALESCE(sum(py.totalamountpaid),0) as value from egcl_payment py "
+			+ " inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
+			+ " inner join egcl_bill bill on bill.id=pyd.billid "
+			+ " inner join eg_ws_connection conn on conn.applicationno = bill.consumercode "
+			+ " inner join eg_ws_service ws on ws.connection_id = conn.id ";
+	
 	public static final String TENANT_WISE_ASSESSED_PROPERTIES = " select tenantid as tenantid, count(distinct propertyid) as totalamt from eg_pt_asmt_assessment ";
+	
+	public static final String COLLECTION_CHANNEL_QUERY = " select py.paymentmode as name, COALESCE(sum(py.totalamountpaid),0) as value from egcl_payment py "
+			+ " inner join egcl_paymentdetail pyd on pyd.paymentid = py.id ";
+	
+	public static final String WS_TAXHEAD_WISE_COLLECTION_QUERY = "select tenantid, "
+			+ "coalesce(sum(waterCharge), 0) as waterChargeCollection, "
+			+ "coalesce(sum(sewerageCharge), 0) as sewerageChargesCollection, "
+			+ "coalesce(sum(sewerageAdhocCharge), 0) as sewerageAdhocChargeCollection, "
+			+ "coalesce(sum(penalty), 0) as penaltyCollection, "
+			+ "coalesce(sum(rebate), 0) as rebateCollection, "
+			+ "coalesce(sum(interest), 0) as interestCollection "
+			+ "from  "
+			+ "(select py.tenantid, "
+			+ "case when bad.taxheadcode='WS_CHARGE' then bad.adjustedamount end as waterCharge, "
+			+ "case when bad.taxheadcode='SW_CHARGE' then bad.adjustedamount end as sewerageCharge, "
+			+ "case when bad.taxheadcode='SW_ADHOC_CHARGE' then bad.adjustedamount end as sewerageAdhocCharge, "
+			+ "case when bad.taxheadcode in ('WS_PENALTY', 'WS_TIME_PENALTY') then bad.adjustedamount end as penalty, "
+			+ "case when bad.taxheadcode in ('WS_TIME_REBATE', 'WS_SPECIAL_REBATE','SW_SPECIAL_REBATE','SW_TIME_REBATE','WS_ANNUAL_PAYMENT_REBATE') then bad.adjustedamount end as rebate, "
+			+ "case when bad.taxheadcode in ('WS_TIME_INTEREST','SW_TIME_INTEREST') then bad.adjustedamount end as interest "
+			+ "from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
+			+ "inner join egcl_billdetial bdtl on bdtl.billid = pyd.billid "
+			+ "inner join egcl_billaccountdetail bad on bad.billdetailid = bdtl.id ";
+	
+	public static final String TENANT_WISE_WS_CONNECTIONS = " select tenantid as tenantid, count(*) as connections from eg_ws_connection py where py.applicationstatus = :status and py.isoldapplication = 'false' ";
 	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
@@ -443,6 +474,40 @@ public class PaymentQueryBuilder {
 	    public String getTenantWiseAssedProperties(PaymentSearchCriteria paymentSearchCriteria,
 				Map<String, Object> preparedStatementValues) {
 			StringBuilder selectQuery = new StringBuilder(TENANT_WISE_ASSESSED_PROPERTIES);
+			addWhereClauseForProperties(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append(" group by tenantid  ");
+			return selectQuery.toString();
+		}
+	    
+	    public String getWSCollectionByUsageTypeQuery(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(WS_COLLECTION_BY_USAGE_TYPE);
+			addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append(" group by ws.usagecategory ");
+			return selectQuery.toString();
+		}
+
+		public String getWSCollectionByChannel(PaymentSearchCriteria criteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(COLLECTION_CHANNEL_QUERY);
+			addWhereClause(selectQuery, preparedStatementValues, criteria);
+			selectQuery.append(" group by py.paymentmode ");
+			return selectQuery.toString();
+		}
+		
+		public String getWSTaxHeadsBreakupListQuery(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(WS_TAXHEAD_WISE_COLLECTION_QUERY);
+			addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append( " ) coll ");
+			addGroupByClause(selectQuery," tenantid ");
+			return selectQuery.toString();
+		}
+
+		public String getTenantWiseWSConnections(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(TENANT_WISE_WS_CONNECTIONS);
+			preparedStatementValues.put("status", "CONNECTION_ACTIVATED");
 			addWhereClauseForProperties(selectQuery, preparedStatementValues, paymentSearchCriteria);
 			selectQuery.append(" group by tenantid  ");
 			return selectQuery.toString();
