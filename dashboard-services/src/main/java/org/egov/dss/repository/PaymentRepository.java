@@ -27,6 +27,7 @@ import org.egov.dss.repository.rowmapper.CollectionByUsageRowMapper;
 import org.egov.dss.repository.rowmapper.PaymentRowMapper;
 import org.egov.dss.repository.rowmapper.TableChartRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
+import org.egov.dss.repository.rowmapper.TenantWiseConnectionsRowMapper;
 import org.egov.dss.web.model.ChartCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
@@ -192,6 +193,38 @@ public class PaymentRepository {
 		String query = paymentQueryBuilder.getTenantWiseAssedProperties(paymentSearchCriteria, preparedStatementValues);
 		log.info("query: " + query);
 		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new TenantWiseCollectionRowMapper());
+	}
+
+	public List<Chart> getWSCollectionByUsageType(PaymentSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = paymentQueryBuilder.getWSCollectionByUsageTypeQuery(criteria, preparedStatementValues);
+        log.info("query for WS Usage Type Collection : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> getWSCollectionByChannel(PaymentSearchCriteria criteria) {
+		
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = paymentQueryBuilder.getWSCollectionByChannel(criteria, preparedStatementValues);
+        log.info("query for WS Collection By Channel : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+	
+	public List<HashMap<String, Object>> getWSTaxHeadsBreakup(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = paymentQueryBuilder.getWSTaxHeadsBreakupListQuery(paymentSearchCriteria, preparedStatementValues);
+        log.info("query for WS Tax Heads Breakup  : "+query);
+        List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
+        return result;
+	}
+
+	public HashMap<String, Long> getTenantWiseWSConnections(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTenantWiseWSConnections(paymentSearchCriteria, preparedStatementValues);
+		log.info("query Tenant Wise WS connections: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new TenantWiseConnectionsRowMapper());
 	}
 	
 
