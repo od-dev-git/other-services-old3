@@ -278,6 +278,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_WS_CONNECTION_AGEING.equalsIgnoreCase(visualizationCode)) {
 			return wsService.wsConnectionAgeing(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_WS_SLA_ACHIEVED.equalsIgnoreCase(visualizationCode)) {
+			return wsService.slaAchieved(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 
