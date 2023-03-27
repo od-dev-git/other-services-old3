@@ -25,6 +25,8 @@ public class WSService {
 		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
 		Integer activeConnectionCount =  (Integer) wsRepository.getActiveWaterConnectionCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(activeConnectionCount).build());
 	}
