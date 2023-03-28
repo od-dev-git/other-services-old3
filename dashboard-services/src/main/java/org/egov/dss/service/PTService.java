@@ -76,6 +76,8 @@ public class PTService {
 	public List<Data> totalnoOfProperties(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
 		Integer totalPropertiesCount = ptRepository.getTotalPropertiesCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalPropertiesCount).build());
 	}
