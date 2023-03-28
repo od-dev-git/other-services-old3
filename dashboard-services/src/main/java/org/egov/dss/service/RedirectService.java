@@ -267,7 +267,7 @@ public class RedirectService {
 			return wsService.cumulativeConnections(requestInfoWrapper.getPayloadDetails());
 		}
 		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_CUMULATIVE_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
-			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
+			return wsService.totalCumulativeActiveConnections(requestInfoWrapper.getPayloadDetails());
 		}
 		if(Constants.VisualizationCodes.SERVICE_WS_CONNECTIONS_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
 			return wsService.wsConnectionsByUsageType(requestInfoWrapper.getPayloadDetails());
@@ -280,6 +280,9 @@ public class RedirectService {
 		}
 		if(Constants.VisualizationCodes.SERVICE_WS_SLA_ACHIEVED.equalsIgnoreCase(visualizationCode)) {
 			return wsService.slaAchieved(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_APPLICATIONS.equalsIgnoreCase(visualizationCode)) {
+			return wsService.wsTotalApplications(requestInfoWrapper.getPayloadDetails());
 		}
 		
 		return null;
