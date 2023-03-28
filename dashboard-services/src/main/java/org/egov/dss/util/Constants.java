@@ -111,6 +111,7 @@ public class Constants {
 		final static String SERVICE_WS_CONNECTIONS_BY_TYPE = "wsConsumersByChannel";
 		final static String SERVICE_WS_CONNECTION_AGEING = "wsConnectionAgeingDDR";
 		final static String SERVICE_WS_SLA_ACHIEVED = "wsSlaAchieved";
+		final static String SERVICE_WS_TOTAL_APPLICATIONS = "wstotalApplications";
 	}
 
 }
