@@ -220,7 +220,7 @@ public class PaymentRepository {
         return result;
 	}
 
-	public HashMap<String, Long> getTenantWiseWSConnections(PaymentSearchCriteria paymentSearchCriteria) {
+	public HashMap<String, BigDecimal> getTenantWiseWSConnections(PaymentSearchCriteria paymentSearchCriteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = paymentQueryBuilder.getTenantWiseWSConnections(paymentSearchCriteria, preparedStatementValues);
 		log.info("query Tenant Wise WS connections: " + query);
