@@ -14,7 +14,11 @@ public class WaterServiceQueryBuilder {
 
 	public static final String TOTAL_APPLICATIONS_COUNT = " select count(*) from eg_ws_connection  conn ";
 
-	public static final String CUMULATIVE_CONNECTIONS_SQL = " select to_char(monthYear, 'Mon-YYYY') as name, sum(conCount) over (order by monthYear asc rows between unbounded preceding and current row) as value from  (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear , count(connectionno) conCount from eg_ws_connection conn ";
+	public static final String CUMULATIVE_CONNECTIONS_SQL = " select to_char(monthYear, 'Mon-YYYY') as name, sum(conCount) over (order by monthYear asc rows between unbounded preceding and current row) as value "
+			+ "from "
+			+ "(select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(conn.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(conn.lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear , "
+			+ "count(conn.connectionno) conCount "
+			+ "from eg_ws_connection conn inner join eg_ws_service ws on ws.connection_id = conn.id  ";
 
 	public static final String WS_CONNECTIONS_BY_USAGE_TYPE = " select ws.usagecategory as name , count(*) as value from eg_ws_connection conn inner join eg_ws_service ws on ws.connection_id = conn.id  ";
 
@@ -30,8 +34,8 @@ public class WaterServiceQueryBuilder {
 	
 	public static String getActiveConnectionCount(WaterSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
-		StringBuilder selectQuery = new StringBuilder(TOTAL_APPLICATIONS_COUNT);
-		return addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, criteria,true);
+		StringBuilder selectQuery = new StringBuilder(WATER_ACTIVE_CONNECTIONS_COUNT);
+		return addWhereClause(selectQuery, preparedStatementValues, criteria);
 	}
 
 	private static void addClauseIfRequired(Map<String, Object> values, StringBuilder queryString) {
@@ -124,10 +128,9 @@ public class WaterServiceQueryBuilder {
 	public String getCumulativeConnectionsQuery(WaterSearchCriteria waterSearchCriteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(CUMULATIVE_CONNECTIONS_SQL);
-		addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, waterSearchCriteria,false);
-		selectQuery.append(" and conn.applicationtype in ('NEW_WATER_CONNECTION','NEW_CONNECTION') ");
-		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') ");
-		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') asc) wsconn ");
+		addWhereClause(selectQuery, preparedStatementValues, waterSearchCriteria);
+		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(conn.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(conn.lastmodifiedtime/1000))),'DD-MM-YYYY') ");
+		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(conn.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(conn.lastmodifiedtime/1000))),'DD-MM-YYYY') asc) wsconn ");
 		return selectQuery.toString();
 	}
 
@@ -139,8 +142,8 @@ public class WaterServiceQueryBuilder {
         demandQueryBuilder.append(" ORDER BY " + columnName);
     }
 
-    private static String addWhereClauseWithLastModifiedTime(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
-			WaterSearchCriteria searchCriteria , Boolean flag) {
+    private static String addWhereClauseWithCreatedTime(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			WaterSearchCriteria searchCriteria ) {
 
 		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -153,24 +156,15 @@ public class WaterServiceQueryBuilder {
 			}
 
 		}
-
-	if(flag == true) {
 		if (searchCriteria.getFromDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" conn.createdtime >= :fromDate");
 			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
 		}
-	}else {
-		if (searchCriteria.getFromDate() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" conn.lastmodifiedtime >= :fromDate");
-			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
-		}
-	}
 
 		if (searchCriteria.getToDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" conn.lastmodifiedtime <= :toDate");
+			selectQuery.append(" conn.createdtime <= :toDate");
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
 		}
 
@@ -198,18 +192,6 @@ public class WaterServiceQueryBuilder {
 			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
 		}
 
-		if (searchCriteria.getConnectionType() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ws.connectiontype = :connectiontype");
-			preparedStatementValues.put("connectiontype", searchCriteria.getConnectionType());
-		}
-
-		if (searchCriteria.getConnectionFacility() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ws.connectionfacility = :connectionfacility");
-			preparedStatementValues.put("connectionfacility", searchCriteria.getConnectionFacility());
-		}
-
 		return selectQuery.toString();
 
 	}
@@ -233,11 +215,25 @@ public class WaterServiceQueryBuilder {
 	public String getWSConnectionAgeingQuery(WaterSearchCriteria waterSearchCriteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(WS_CONNECTIONS_AGEING_QUERY);
-		addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, waterSearchCriteria,true);
+		addClauseIfRequired(preparedStatementValues, selectQuery);
+		selectQuery.append(" conn.tenantId != :excludedTenantId");
+		preparedStatementValues.put("excludedTenantId", waterSearchCriteria.getExcludedTenantId());
+		
+		selectQuery.append(" and conn.createdtime >= :fromdate");
+		preparedStatementValues.put("fromdate", waterSearchCriteria.getFromDate());
+		
+		selectQuery.append(" and conn.lastmodifiedtime <= :todate");
+		preparedStatementValues.put("todate", waterSearchCriteria.getToDate());
 		selectQuery.append(" and conn.applicationstatus not in ('CONNECTION_ACTIVATED', 'REJECTED', 'CONNECTION_DISCONNECTED','CONNECTION_CLOSED')  ");
 		selectQuery.append( " ) tmp ");
 		addGroupByClause(selectQuery," tenantid ");
 		return selectQuery.toString();
+	}
+
+	public String getWsTotalApplicationsCount(WaterSearchCriteria waterSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_APPLICATIONS_COUNT);
+		return addWhereClauseWithCreatedTime(selectQuery, preparedStatementValues, waterSearchCriteria);
 	}
 
 }

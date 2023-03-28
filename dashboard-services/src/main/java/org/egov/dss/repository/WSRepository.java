@@ -41,7 +41,7 @@ public class WSRepository {
 	public Object getSlaAchievedAppCount(WaterSearchCriteria waterSearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
         waterSearchCriteria.setSlaThreshold(config.getSlaWsThreshold());
-        String query = wsQueryBuilder.getActiveConnectionCount(waterSearchCriteria, preparedStatementValues);
+        String query = wsQueryBuilder.getWsTotalApplicationsCount(waterSearchCriteria, preparedStatementValues);
         log.info("query: "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
@@ -117,6 +117,14 @@ public class WSRepository {
         log.info("query for WS Connection Ageing  : "+query);
         List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
         return result;
+	}
+
+	public Integer getWsTotalApplicationsCount(WaterSearchCriteria waterSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = wsQueryBuilder.getWsTotalApplicationsCount(waterSearchCriteria, preparedStatementValues);
+        log.info("query FOR WS total  Connection Count : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
 	}
 
 }
