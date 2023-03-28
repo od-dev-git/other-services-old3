@@ -558,10 +558,6 @@ public class RevenueService {
 
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		
-		if (payloadDetails.getVisualizationcode()
-				.equals(Constants.VisualizationCodes.REVENUE_WS_TOP_ULBS_BY_DIGITAL_COLLECTION))
-			paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS));
-		
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
@@ -602,10 +598,6 @@ public class RevenueService {
 	public List<Data> bottomUlbsDigitalCollectionByValue(PayloadDetails payloadDetails) {
 
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		
-		if (payloadDetails.getVisualizationcode()
-				.equals(Constants.VisualizationCodes.REVENUE_WS_BOTTOM_ULBS_BY_DIGITAL_COLLECTION))
-			paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS));
 		
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
@@ -649,10 +641,6 @@ public class RevenueService {
 
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		
-		if (payloadDetails.getVisualizationcode()
-				.equals(Constants.VisualizationCodes.REVENUE_WS_TOP_ULBS_COLLECTION_BY_VOLUME))
-			paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS));
-		
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
@@ -693,10 +681,6 @@ public class RevenueService {
 	public List<Data> bottomUlbsDigitalCollectionByVolume(PayloadDetails payloadDetails) {
 
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		
-		if (payloadDetails.getVisualizationcode()
-				.equals(Constants.VisualizationCodes.REVENUE_WS_BOTTOM_ULBS_COLLECTION_BY_VOLUME))
-			paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS));
 		
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
@@ -839,8 +823,11 @@ public class RevenueService {
 			plots.add(Plot.builder().name("Total Collection").value(tenantWiseCollection.getValue()).symbol("amount")
 					.build());
 
-			plots.add(Plot.builder().name("Transactions")
-					.value(tenantWiseTransactions.get(tenantWiseCollection.getKey())).symbol("number").build());
+			plots.add(
+					Plot.builder().name("Transactions")
+							.value(tenantWiseTransactions.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseTransactions.get(tenantWiseCollection.getKey()))
+							.symbol("number").build());
 
 			plots.add(Plot.builder().name("Assessed Properties")
 					.value(tenantWiseAssessedProperties.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
@@ -959,8 +946,8 @@ public class RevenueService {
 	public List<Data> getWSCumulativeCollection(PayloadDetails payloadDetails) {
 		
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS));
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		List<Chart> cumulativeCollection = paymentRepository.getCumulativeCollection(criteria);
 		List<Plot> plots = new ArrayList<Plot>();
 		extractDataForChart(cumulativeCollection, plots);
@@ -974,7 +961,8 @@ public class RevenueService {
 	
 	public List<Data> wsCollectionByUsageType(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS_ONE_TIME_FEE));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS_ONE_TIME_FEE,
+				DashboardConstants.BUSINESS_SERVICE_SW_ONE_TIME_FEE));
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		List<Chart> collectionByUsageType = paymentRepository.getWSCollectionByUsageType(criteria);
@@ -992,7 +980,6 @@ public class RevenueService {
 	public List<Data> wsCollectionByChannel(PayloadDetails payloadDetails) {
 		
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS));
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		List<Chart> collectionByChannel = paymentRepository.getWSCollectionByChannel(criteria);
@@ -1010,6 +997,8 @@ public class RevenueService {
 	public List<Data> getWSTaxHeadsBreakup(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS));
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		List<HashMap<String, Object>> wsTaxHeadsBreakup = paymentRepository.getWSTaxHeadsBreakup(criteria);
 
 		List<Data> response = new ArrayList();
@@ -1069,7 +1058,7 @@ public class RevenueService {
 				.getTenantWiseCollection(paymentSearchCriteria);
 		HashMap<String, BigDecimal> tenantWiseTransactions = paymentRepository
 				.getTenantWiseTransaction(paymentSearchCriteria);
-		HashMap<String, Long> tenantWiseConnections = paymentRepository
+		HashMap<String, BigDecimal> tenantWiseConnections = paymentRepository
 				.getTenantWiseWSConnections(paymentSearchCriteria);
 		
 		List<Data> response = new ArrayList<>();
@@ -1084,23 +1073,17 @@ public class RevenueService {
 			plots.add(Plot.builder().name("Total Collection").value(tenantWiseCollection.getValue())
 					.symbol("amount").build());
 
-			plots.add(Plot.builder().name("Transactions")
-					.value(tenantWiseTransactions.get(tenantWiseCollection.getKey()))
-					.symbol("number").build());
+			plots.add(
+					Plot.builder().name("Transactions")
+							.value(tenantWiseTransactions.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseTransactions.get(tenantWiseCollection.getKey()))
+							.symbol("number").build());
 
 			plots.add(
 					Plot.builder().name("Total_Connections")
-							.value(new BigDecimal(tenantWiseConnections.get(tenantWiseCollection.getKey())))
-							.symbol("number")
-							.build());
-
-			plots.add(Plot.builder().name("Target Collection")
-					.value(BigDecimal.ZERO)
-					.symbol("amount").build());
-			
-			plots.add(Plot.builder().name("Target Achieved")
-					.value(BigDecimal.ZERO)
-					.symbol("percentage").build());
+							.value(tenantWiseConnections.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseConnections.get(tenantWiseCollection.getKey()))
+							.symbol("number").build());
 
 			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots)
 					.headerValue(serialNumber).headerName(tenantWiseCollection.getKey().toString())
