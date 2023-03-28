@@ -103,7 +103,7 @@ public class PaymentQueryBuilder {
 			+ " inner join eg_ws_connection conn on conn.applicationno = bill.consumercode "
 			+ " inner join eg_ws_service ws on ws.connection_id = conn.id ";
 	
-	public static final String TENANT_WISE_ASSESSED_PROPERTIES = " select tenantid as tenantid, count(distinct propertyid) as totalamt from eg_pt_asmt_assessment ";
+	public static final String TENANT_WISE_ASSESSED_PROPERTIES = " select tenantid as tenantid, coalesce(count(distinct propertyid),0) as totalamt from eg_pt_asmt_assessment ";
 	
 	public static final String COLLECTION_CHANNEL_QUERY = " select py.paymentmode as name, COALESCE(sum(py.totalamountpaid),0) as value from egcl_payment py "
 			+ " inner join egcl_paymentdetail pyd on pyd.paymentid = py.id ";
