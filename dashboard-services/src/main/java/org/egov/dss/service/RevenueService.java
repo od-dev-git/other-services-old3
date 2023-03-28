@@ -150,6 +150,7 @@ public class RevenueService {
 	public List<Data> cumulativeCollection(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		List<Chart> cumulativeCollection = paymentRepository.getCumulativeCollection(criteria);
 		List<Plot> plots = new ArrayList<Plot>();
 		extractDataForChart(cumulativeCollection, plots);
@@ -244,6 +245,8 @@ public class RevenueService {
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		criteria.setPropertyStatus(DashboardConstants.STATUS_ACTIVE);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+
 		List<Chart> collectionByUsageType = paymentRepository.getCollectionByUsageType(criteria);
 
 		List<Plot> plots = new ArrayList<Plot>();
