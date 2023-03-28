@@ -31,7 +31,7 @@ public class WaterServiceQueryBuilder {
 	public static String getActiveConnectionCount(WaterSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_APPLICATIONS_COUNT);
-		return addWhereClause(selectQuery, preparedStatementValues, criteria);
+		return addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, criteria,true);
 	}
 
 	private static void addClauseIfRequired(Map<String, Object> values, StringBuilder queryString) {

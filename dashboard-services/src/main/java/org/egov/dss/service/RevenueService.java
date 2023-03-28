@@ -833,25 +833,29 @@ public class RevenueService {
 			List<Plot> plots = new ArrayList();
 			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
 
-			plots.add(Plot.builder().name("Ulb").label(tenantWiseCollection.getKey().toString()).build());
+			plots.add(
+					Plot.builder().name("ULBs").label(tenantWiseCollection.getKey().toString()).symbol("text").build());
 
-			plots.add(Plot.builder().name("Total Collection").value(tenantWiseCollection.getValue()).build());
+			plots.add(Plot.builder().name("Total Collection").value(tenantWiseCollection.getValue()).symbol("amount")
+					.build());
 
 			plots.add(Plot.builder().name("Transactions")
-					.value(tenantWiseTransactions.get(tenantWiseCollection.getKey())).build());
+					.value(tenantWiseTransactions.get(tenantWiseCollection.getKey())).symbol("number").build());
 
 			plots.add(Plot.builder().name("Assessed Properties")
-					.value(tenantWiseAssessedProperties.get(tenantWiseCollection.getKey())).build());
+					.value(tenantWiseAssessedProperties.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+							: tenantWiseAssessedProperties.get(tenantWiseCollection.getKey()))
+					.symbol("number").build());
+
+			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).headerValue(serialNumber)
+					.headerName(tenantWiseCollection.getKey()).build());
 
 			serialNumber++;
-
-			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).build());
 
 		}
 
 		return response;
 	}
-	
 
 	public List<Data> ptPaymentModeData(PayloadDetails payloadDetails) {
 
@@ -907,23 +911,23 @@ public class RevenueService {
 			List<Plot> plots = new ArrayList();
 			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
 
-			plots.add(Plot.builder().name("Ulb").label(tenantWiseCollection.getKey().toString()).build());
+			plots.add(Plot.builder().name("ULBs").label(tenantWiseCollection.getKey().toString()).symbol("text").build());
 
 			plots.add(Plot.builder().name("Card Collection")
-					.value(tenantWiseCardPercentage.get(tenantWiseCollection.getKey())).build());
+					.value(tenantWiseCardPercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : tenantWiseCardPercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
 
 			plots.add(Plot.builder().name("Online Collection")
-					.value(tenantWiseOnlinePercentage.get(tenantWiseCollection.getKey())).build());
+					.value(tenantWiseOnlinePercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : tenantWiseOnlinePercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
 
 			plots.add(Plot.builder().name("Cheque Collection")
-					.value(tenantWiseChequePercentage.get(tenantWiseCollection.getKey())).build());
+					.value(tenantWiseChequePercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : tenantWiseChequePercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
 
 			plots.add(Plot.builder().name("Cash Collection")
-					.value(tenantWiseCashPercentage.get(tenantWiseCollection.getKey())).build());
+					.value(tenantWiseCashPercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : tenantWiseCashPercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
 
+			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).headerValue(serialNumber).build());
+			
 			serialNumber++;
-
-			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).build());
 
 		}
 
