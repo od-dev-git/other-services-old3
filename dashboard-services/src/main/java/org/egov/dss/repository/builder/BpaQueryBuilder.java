@@ -92,25 +92,7 @@ public static final String TENANTWISE_PERMITS_ISSUED_LIST_SQL = " select tenanti
 		return selectQuery.toString();
 
 	}
-	
-    private static String getForINClause(Set<String> listSet) {
-
-        StringBuilder query = new StringBuilder();
-        if (!listSet.isEmpty()) {
-
-            String[] list = listSet.toArray(new String[listSet.size()]);
-            query.append("'"+list[0]+"'");
-            for (int i = 1; i < listSet.size(); i++) {
-                query.append("," + "'"+list[i]+"'");
-            }
-        }
-        return query.append(")").toString();
-    }
     
-    private static void addAndClause(StringBuilder queryString) {
-        queryString.append(" AND ");
-    }
-
 	public String getGeneralQuery(BpaSearchCriteria bpaSearchCriteria,
 			Map<String, Object> preparedStatementValues) {
 		
