@@ -155,6 +155,42 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_OBPS_TOTAL_PERMITS.equalsIgnoreCase(visualizationCode)) {
 			return bpaService.totalPermitIssued(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_TOTAL_APPLICATIONS_RECEIVED.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.totalApplicationsReceived(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_TOTAL_APPLICATIONS_REJECTED.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.totalApplicationsRejected(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_TOTAL_APPLICATIONS_PENDING.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.totalApplicationsPending(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_AVG_DAYS_TO_ISSUE_PERMIT.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.avgDaysToIssuePermit(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_MIN_DAYS_TO_ISSUE_PERMIT.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.minDaysToIssuePermit(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_MAX_DAYS_TO_ISSUE_PERMIT.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.maxDaysToIssuePermit(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_SLA_COMPLIANCE_PERMIT.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.slaCompliancePermit(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_SLA_COMPLIANCE_OTHER_THAN_LOW_RISK.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.slaComplianceOtherThanLowRisk(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_SLA_COMPLIANCE_PREAPPROVED_PLAN.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.slaCompliancePreApprovedPlan(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_SLA_COMPLIANCE_BUILDING_PERMIT.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.slaComplianceBuildingPermit(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_TOP_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.topUlbByPerformance(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_BOTTOM_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.bottomUlbByPerformance(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.REVENUE_MR_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.totalCollection(requestInfoWrapper.getPayloadDetails());
 		}

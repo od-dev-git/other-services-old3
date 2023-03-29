@@ -56,6 +56,18 @@ public class ConfigurationLoader {
     @Value("${sla.bpa.threshold}") 
     private Long slaBpaThreshold ;
     
+    @Value("${sla.bpapermits.threshold}") 
+    private Long slaBpaPermitsThreshold ;
+    
+    @Value("${sla.bpaotherthanlowrisk.threshold}") 
+    private Long slaBpaOtherThanLowRiskThreshold ;
+    
+    @Value("${sla.bpapreapprovedplan.threshold}") 
+    private Long slaBpaPreApprovedPlanThreshold ;
+    
+    @Value("${sla.bpabuildingpermit.threshold}") 
+    private Long slaBpaBuildingPermitThreshold ;
+    
     
     // private static final String RESOURCE_LOCATION = "file://home/darshan/Tarento/DataPlatform/analytics2/analytics/src/main/resources/schema/*.json";
     public static final String ROLE_DASHBOARD_CONFIG = "RoleDashboardMappingsConf.json";
