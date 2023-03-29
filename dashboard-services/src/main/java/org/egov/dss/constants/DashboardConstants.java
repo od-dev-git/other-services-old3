@@ -72,6 +72,8 @@ public class DashboardConstants {
 	
 	public static final String STATUS_APPROVED = "APPROVED";
 	
+	public static final String STATUS_REJECTED = "REJECTED";
+	
 	public static final String STATUS_CANCELLED = "CANCELLED";
 	
 	public static final String STATUS_DISHONOURED = "DISHONOURED";
@@ -108,8 +110,22 @@ public class DashboardConstants {
 
 	public static final String WS_CONNECTIONFACILITY_WATER_SEWERAGE = "WATER-SEWERAGE";
 	
+	public static final String STATUS_INITIATED = "INITIATED";
+
+	public static final String STATUS_CITIZEN_APPROVAL_INPROCESS = "CITIZEN_APPROVAL_INPROCESS";
+
+	public static final String STATUS_INPROGRESS = "INPROGRESS";
+
+	public static final String STATUS_PENDING_APPL_FEE = "PENDING_APPL_FEE";
+	
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE));
+	
+	public static final List<String> OBPS_REJECTED_STATUSES = Collections
+			.unmodifiableList(Arrays.asList(STATUS_INITIATED, STATUS_CITIZEN_APPROVAL_INPROCESS,STATUS_INPROGRESS,STATUS_PENDING_APPL_FEE));
+	
+	public static final List<String> OBPS_REJECTED_STATUS_TOTAL_APPLICATIONS_PENDING = Collections
+			.unmodifiableList(Arrays.asList(STATUS_INITIATED, STATUS_CITIZEN_APPROVAL_INPROCESS,STATUS_INPROGRESS,STATUS_PENDING_APPL_FEE,STATUS_APPROVED,STATUS_REJECTED));
 	
 	public static final List<String> PT_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_PT, BUSINESS_SERVICE_PT_MUTATION));
@@ -121,6 +137,14 @@ public class DashboardConstants {
 			.unmodifiableList(Arrays.asList(BUSINESS_SERICE_BPA1, BUSINESS_SERICE_BPA2, BUSINESS_SERICE_BPA3,
 					BUSINESS_SERICE_BPA4, BUSINESS_SERICE_BPA5, BUSINESS_SERICE_BPA6, BUSINESS_SERICE_BPA7,
 					BUSINESS_SERICE_BPA8, BUSINESS_SERICE_BPA9, BUSINESS_SERICE_BPA10));
+	
+	public static final List<String> OBPS_SLA_COMPLIANCE_OTHER_THAN_LOW_RISK_STATUS = Collections
+			.unmodifiableList(Arrays.asList(BUSINESS_SERICE_BPA2, BUSINESS_SERICE_BPA3,
+					BUSINESS_SERICE_BPA4));
+	
+	public static final List<String> OBPS_SLA_COMPLIANCE_BUILDING_PERMIT_STATUS = Collections
+			.unmodifiableList(Arrays.asList(BUSINESS_SERICE_BPA1,BUSINESS_SERICE_BPA2, BUSINESS_SERICE_BPA3,
+					BUSINESS_SERICE_BPA4,BUSINESS_SERICE_BPA6));
 
 	public static final List<String> ALL_REVENUE_BUSINESS_SERVICES = Collections.unmodifiableList(Arrays.asList(
 			BUSINESS_SERVICE_PT,BUSINESS_SERVICE_WS,BUSINESS_SERVICE_WS_ONE_TIME_FEE,BUSINESS_SERVICE_SW,BUSINESS_SERVICE_SW_ONE_TIME_FEE,

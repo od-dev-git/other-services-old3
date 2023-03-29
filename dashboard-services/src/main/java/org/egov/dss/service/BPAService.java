@@ -31,39 +31,32 @@ import com.jayway.jsonpath.Criteria;
 
 @Service
 public class BPAService {
-	
+
 	@Autowired
 	private BPARepository bpaRepository;
-	
+
 	@Autowired
 	private ConfigurationLoader config;
 
 	public List<Data> totalPermitIssued(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
-		
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		Integer totalApplication = (Integer) bpaRepository.getTotalPermitsIssued(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
-	}    
-	
+	}
+
 	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
 		Integer totalApplication = (Integer) bpaRepository.getTotalPermitsIssued(criteria);
 		Integer slaAchievedAppCount = (Integer) bpaRepository.getSlaAchievedAppCount(criteria);
 		return Arrays.asList(Data.builder()
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
+
 	private BpaSearchCriteria getBpaSearchCriteria(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = new BpaSearchCriteria();
 
@@ -90,29 +83,17 @@ public class BPAService {
 	public List<Data> totalApplicationsReceived(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"INITIATED","CITIZEN_APPROVAL_INPROCESS","INPROGRESS","PENDING_APPL_FEE"};   
-		Set <String> statusNotIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatusNotIn(statusNotIn);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
-		
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		Integer totalApplication = (Integer) bpaRepository.totalApplicationsReceived(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 
 	public List<Data> totalApplicationsRejected(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
-		
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"REJECTED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_REJECTED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		Integer totalApplication = (Integer) bpaRepository.totalApplicationsRejected(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
@@ -120,75 +101,44 @@ public class BPAService {
 	public List<Data> totalApplicationsPending(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"INITIATED","CITIZEN_APPROVAL_INPROCESS","INPROGRESS","PENDING_APPL_FEE","APPROVED","REJECTED"};   
-		Set <String> statusNotIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatusNotIn(statusNotIn);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
-		
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUS_TOTAL_APPLICATIONS_PENDING));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		Integer totalApplication = (Integer) bpaRepository.totalApplicationsPending(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 
 	public List<Data> avgDaysToIssuePermit(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
-		
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
-		BigDecimal totalApplication = (BigDecimal) bpaRepository.getAvgDaysToIssuePermit(criteria);//change it
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		BigDecimal totalApplication = (BigDecimal) bpaRepository.getAvgDaysToIssuePermit(criteria);// change it
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 
 	public List<Data> minDaysToIssuePermit(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
-		
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		Integer totalApplication = (Integer) bpaRepository.getMinDaysToIssuePermit(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 
 	public List<Data> maxDaysToIssuePermit(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
-		
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		Integer totalApplication = (Integer) bpaRepository.getMaxDaysToIssuePermit(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 
-	
 	public List<Data> slaCompliancePermit(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
-		
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		criteria.setSlaThreshold(config.getSlaBpaPermitsThreshold());
 		Integer totalApplication = (Integer) bpaRepository.getSlaCompliancePermit(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
@@ -196,15 +146,10 @@ public class BPAService {
 
 	public List<Data> slaComplianceOtherThanLowRisk(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
-		
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
-		String[] businessService = {"BPA2","BPA3","BPA4"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(
+				Sets.newHashSet(DashboardConstants.OBPS_SLA_COMPLIANCE_OTHER_THAN_LOW_RISK_STATUS));
 		criteria.setSlaThreshold(config.getSlaBpaOtherThanLowRiskThreshold());
 		Integer totalApplication = (Integer) bpaRepository.getSlaComplianceOtherThanLowRisk(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
@@ -212,15 +157,9 @@ public class BPAService {
 
 	public List<Data> slaCompliancePreApprovedPlan(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
-		
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
-		String[] businessService = {"BPA6"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERICE_BPA6));
 		criteria.setSlaThreshold(config.getSlaBpaPreApprovedPlanThreshold());
 		Integer totalApplication = (Integer) bpaRepository.getSlaCompliancePreApprovedPlan(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
@@ -228,27 +167,22 @@ public class BPAService {
 
 	public List<Data> slaComplianceBuildingPermit(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
-	
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		String[] status = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA6"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_SLA_COMPLIANCE_BUILDING_PERMIT_STATUS));
 		criteria.setSlaThreshold(config.getSlaBpaBuildingPermitThreshold());
 		Integer totalApplication = (Integer) bpaRepository.getSlaComplianceBuildingPermit(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
-	
+
 	private List<Chart> mapTenantsForPerformanceRate(HashMap<String, Long> numeratorMap,
 			HashMap<String, Long> denominatorMap) {
 		List<Chart> percentList = new ArrayList();
-		numeratorMap.entrySet().stream().forEach(item ->{
+		numeratorMap.entrySet().stream().forEach(item -> {
 			Long numerator = item.getValue();
 			Long denominator = denominatorMap.get(item.getKey());
-			BigDecimal percent =new BigDecimal(numerator * 100) .divide(new BigDecimal(denominator), 2, RoundingMode.HALF_EVEN);
+			BigDecimal percent = new BigDecimal(numerator * 100).divide(new BigDecimal(denominator), 2,
+					RoundingMode.HALF_EVEN);
 			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
 		});
 		return percentList;
@@ -257,37 +191,30 @@ public class BPAService {
 	public List<Data> topUlbByPerformance(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
-		
-		String[] statusIncluded = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(statusIncluded).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
 		HashMap<String, Long> tenantWisePermitsIssuedList = bpaRepository.getTenantWisePermitsIssuedList(criteria);
 		criteria.setStatus(null);
-		
-		
-		String[] status = {"INITIATED","CITIZEN_APPROVAL_INPROCESS","INPROGRESS","PENDING_APPL_FEE"};   
-		Set <String> statusNotIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatusNotIn(statusNotIn);
-		
-		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository.getTenantWiseApplicationsReceivedList(criteria);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
+				.getTenantWiseApplicationsReceivedList(criteria);
+		List<Chart> percentList = mapTenantsForPerformanceRate(tenantWisePermitsIssuedList,
+				tenantWiseApplicationsReceivedList);
+		Collections.sort(percentList, Comparator.comparing(e -> e.getValue(), (s1, s2) -> {
+			return s2.compareTo(s1);
+		}));
 
-		List<Chart> percentList = mapTenantsForPerformanceRate(tenantWisePermitsIssuedList, tenantWiseApplicationsReceivedList);
-
-		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
-             return s2.compareTo(s1);
-         }));
-
-		 List<Data> response = new ArrayList();
-		 int Rank = 0;
-		 for( Chart obj : percentList) {
-			 Rank++;
-			 response.add(Data.builder().headerName("Rank").headerValue(Rank).plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName()).value(obj.getValue()).symbol("percentage").build())).headerSymbol("percentage").build());
-		 };
+		List<Data> response = new ArrayList();
+		int Rank = 0;
+		for (Chart obj : percentList) {
+			Rank++;
+			response.add(
+					Data.builder().headerName("Rank").headerValue(Rank)
+							.plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName())
+									.value(obj.getValue()).symbol("percentage").build()))
+							.headerSymbol("percentage").build());
+		}
+		;
 
 		return response;
 	}
@@ -295,37 +222,30 @@ public class BPAService {
 	public List<Data> bottomUlbByPerformance(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		
-		String[] businessService = {"BPA1","BPA2","BPA3","BPA4","BPA5","BPA6","BPA7","BPA8","BPA9","BPA10"};   
-		Set <String> businessServiceIn = Arrays.asList(businessService).stream().collect(Collectors.toSet());
-		criteria.setBusinessServices(businessServiceIn);
-		
-		String[] statusIncluded = {"APPROVED"};   
-		Set <String> statusIn = Arrays.asList(statusIncluded).stream().collect(Collectors.toSet());
-		criteria.setStatus(statusIn);
-		
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
 		HashMap<String, Long> tenantWisePermitsIssuedList = bpaRepository.getTenantWisePermitsIssuedList(criteria);
 		criteria.setStatus(null);
-		
-		
-		String[] status = {"INITIATED","CITIZEN_APPROVAL_INPROCESS","INPROGRESS","PENDING_APPL_FEE"};   
-		Set <String> statusNotIn = Arrays.asList(status).stream().collect(Collectors.toSet());
-		criteria.setStatusNotIn(statusNotIn);
-		
-		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository.getTenantWiseApplicationsReceivedList(criteria);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
+				.getTenantWiseApplicationsReceivedList(criteria);
+		List<Chart> percentList = mapTenantsForPerformanceRate(tenantWisePermitsIssuedList,
+				tenantWiseApplicationsReceivedList);
+		Collections.sort(percentList, Comparator.comparing(e -> e.getValue(), (s1, s2) -> {
+			return s1.compareTo(s2);
+		}));
 
-		List<Chart> percentList = mapTenantsForPerformanceRate(tenantWisePermitsIssuedList, tenantWiseApplicationsReceivedList);
-
-		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
-             return s1.compareTo(s2);
-         }));
-
-		 List<Data> response = new ArrayList();
-		 int Rank = 0;
-		 for( Chart obj : percentList) {
-			 Rank++;
-			 response.add(Data.builder().headerName("Rank").headerValue(Rank).plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName()).value(obj.getValue()).symbol("percentage").build())).headerSymbol("percentage").build());
-		 };
+		List<Data> response = new ArrayList();
+		int Rank = 0;
+		for (Chart obj : percentList) {
+			Rank++;
+			response.add(
+					Data.builder().headerName("Rank").headerValue(Rank)
+							.plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName())
+									.value(obj.getValue()).symbol("percentage").build()))
+							.headerSymbol("percentage").build());
+		}
+		;
 
 		return response;
 	}
