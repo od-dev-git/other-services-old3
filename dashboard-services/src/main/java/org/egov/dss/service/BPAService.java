@@ -1,43 +1,62 @@
 package org.egov.dss.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.BpaSearchCriteria;
+import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PgrSearchCriteria;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.BPARepository;
 import org.egov.dss.web.model.Data;
+import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
+import com.jayway.jsonpath.Criteria;
 
 @Service
 public class BPAService {
-	
+
 	@Autowired
 	private BPARepository bpaRepository;
+
+	@Autowired
+	private ConfigurationLoader config;
 
 	public List<Data> totalPermitIssued(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		Integer totalApplication = (Integer) bpaRepository.getTotalPermitsIssued(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
-	}    
-	
+	}
+
 	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
 		Integer totalApplication = (Integer) bpaRepository.getTotalPermitsIssued(criteria);
 		Integer slaAchievedAppCount = (Integer) bpaRepository.getSlaAchievedAppCount(criteria);
 		return Arrays.asList(Data.builder()
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
+
 	private BpaSearchCriteria getBpaSearchCriteria(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = new BpaSearchCriteria();
 
@@ -61,4 +80,173 @@ public class BPAService {
 		return criteria;
 	}
 
+	public List<Data> totalApplicationsReceived(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		Integer totalApplication = (Integer) bpaRepository.totalApplicationsReceived(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	public List<Data> totalApplicationsRejected(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_REJECTED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		Integer totalApplication = (Integer) bpaRepository.totalApplicationsRejected(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	public List<Data> totalApplicationsPending(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUS_TOTAL_APPLICATIONS_PENDING));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		Integer totalApplication = (Integer) bpaRepository.totalApplicationsPending(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	public List<Data> avgDaysToIssuePermit(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		BigDecimal totalApplication = (BigDecimal) bpaRepository.getAvgDaysToIssuePermit(criteria);// change it
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	public List<Data> minDaysToIssuePermit(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		Integer totalApplication = (Integer) bpaRepository.getMinDaysToIssuePermit(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	public List<Data> maxDaysToIssuePermit(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		Integer totalApplication = (Integer) bpaRepository.getMaxDaysToIssuePermit(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	public List<Data> slaCompliancePermit(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		criteria.setSlaThreshold(config.getSlaBpaPermitsThreshold());
+		Integer totalApplication = (Integer) bpaRepository.getSlaCompliancePermit(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	public List<Data> slaComplianceOtherThanLowRisk(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(
+				Sets.newHashSet(DashboardConstants.OBPS_SLA_COMPLIANCE_OTHER_THAN_LOW_RISK_STATUS));
+		criteria.setSlaThreshold(config.getSlaBpaOtherThanLowRiskThreshold());
+		Integer totalApplication = (Integer) bpaRepository.getSlaComplianceOtherThanLowRisk(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	public List<Data> slaCompliancePreApprovedPlan(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERICE_BPA6));
+		criteria.setSlaThreshold(config.getSlaBpaPreApprovedPlanThreshold());
+		Integer totalApplication = (Integer) bpaRepository.getSlaCompliancePreApprovedPlan(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	public List<Data> slaComplianceBuildingPermit(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_SLA_COMPLIANCE_BUILDING_PERMIT_STATUS));
+		criteria.setSlaThreshold(config.getSlaBpaBuildingPermitThreshold());
+		Integer totalApplication = (Integer) bpaRepository.getSlaComplianceBuildingPermit(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+
+	private List<Chart> mapTenantsForPerformanceRate(HashMap<String, Long> numeratorMap,
+			HashMap<String, Long> denominatorMap) {
+		List<Chart> percentList = new ArrayList();
+		numeratorMap.entrySet().stream().forEach(item -> {
+			Long numerator = item.getValue();
+			Long denominator = denominatorMap.get(item.getKey());
+			BigDecimal percent = new BigDecimal(numerator * 100).divide(new BigDecimal(denominator), 2,
+					RoundingMode.HALF_EVEN);
+			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
+		});
+		return percentList;
+	}
+
+	public List<Data> topUlbByPerformance(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		HashMap<String, Long> tenantWisePermitsIssuedList = bpaRepository.getTenantWisePermitsIssuedList(criteria);
+		criteria.setStatus(null);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
+				.getTenantWiseApplicationsReceivedList(criteria);
+		List<Chart> percentList = mapTenantsForPerformanceRate(tenantWisePermitsIssuedList,
+				tenantWiseApplicationsReceivedList);
+		Collections.sort(percentList, Comparator.comparing(e -> e.getValue(), (s1, s2) -> {
+			return s2.compareTo(s1);
+		}));
+
+		List<Data> response = new ArrayList();
+		int Rank = 0;
+		for (Chart obj : percentList) {
+			Rank++;
+			response.add(
+					Data.builder().headerName("Rank").headerValue(Rank)
+							.plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName())
+									.value(obj.getValue()).symbol("percentage").build()))
+							.headerSymbol("percentage").build());
+		}
+		;
+
+		return response;
+	}
+
+	public List<Data> bottomUlbByPerformance(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		HashMap<String, Long> tenantWisePermitsIssuedList = bpaRepository.getTenantWisePermitsIssuedList(criteria);
+		criteria.setStatus(null);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
+				.getTenantWiseApplicationsReceivedList(criteria);
+		List<Chart> percentList = mapTenantsForPerformanceRate(tenantWisePermitsIssuedList,
+				tenantWiseApplicationsReceivedList);
+		Collections.sort(percentList, Comparator.comparing(e -> e.getValue(), (s1, s2) -> {
+			return s1.compareTo(s2);
+		}));
+
+		List<Data> response = new ArrayList();
+		int Rank = 0;
+		for (Chart obj : percentList) {
+			Rank++;
+			response.add(
+					Data.builder().headerName("Rank").headerValue(Rank)
+							.plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName())
+									.value(obj.getValue()).symbol("percentage").build()))
+							.headerSymbol("percentage").build());
+		}
+		;
+
+		return response;
+	}
 }
