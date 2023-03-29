@@ -487,7 +487,7 @@ public class PaymentQueryBuilder {
 			return selectQuery.toString();
 		}
 
-		public String getWSCollectionByChannel(PaymentSearchCriteria criteria,
+		public String getCollectionByChannel(PaymentSearchCriteria criteria,
 				Map<String, Object> preparedStatementValues) {
 			StringBuilder selectQuery = new StringBuilder(COLLECTION_CHANNEL_QUERY);
 			addWhereClause(selectQuery, preparedStatementValues, criteria);

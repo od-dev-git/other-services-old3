@@ -985,7 +985,7 @@ public class RevenueService {
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
-		List<Chart> collectionByChannel = paymentRepository.getWSCollectionByChannel(criteria);
+		List<Chart> collectionByChannel = paymentRepository.getCollectionByChannel(criteria);
 		
 		List<Plot> plots = new ArrayList<Plot>();
 		extractDataForChart(collectionByChannel, plots);
@@ -1054,8 +1054,6 @@ public class RevenueService {
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
-		
-		paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS));
 
 		HashMap<String, BigDecimal> tenantWiseAmountCollection = paymentRepository
 				.getTenantWiseCollection(paymentSearchCriteria);
@@ -1097,5 +1095,95 @@ public class RevenueService {
 
 		return response;
 	}
+
+	public List<Data> bpaFeeCollection(PayloadDetails payloadDetails) {
+		String visulizationCode = payloadDetails.getVisualizationcode();
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_APP_FEE_COLLECTIONS.equalsIgnoreCase(visulizationCode))
+			paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_BPA_APP_FEE));
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_SANC_FEE_COLLECTIONS.equalsIgnoreCase(visulizationCode))
+			paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_BPA_SAN_FEE));
+		
+		if(Constants.VisualizationCodes.REVENUE_OC_APP_FEE_COLLECTIONS.equalsIgnoreCase(visulizationCode))
+			paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_OC_APP_FEE));
+		
+		if(Constants.VisualizationCodes.REVENUE_OC_SANC_FEE_COLLECTIONS.equalsIgnoreCase(visulizationCode))
+			paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_OC_SAN_FEE));
+		
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
+        return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+
+	public List<Data> getBPACumulativeCollection(PayloadDetails payloadDetails) {
+		
+		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		List<Chart> cumulativeCollection = paymentRepository.getCumulativeCollection(criteria);
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(cumulativeCollection, plots);
+        
+		BigDecimal total = cumulativeCollection.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);		 
+
+		return Arrays.asList(Data.builder().headerName("DSS_BPA_TOTAL_CUMULATIVE_COLLECTION").headerSymbol("amount").headerValue(total).plots(plots).build());
+	}
+	
+	public List<Data> bpaCollectionByChannel(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		List<Chart> collectionByChannel = paymentRepository.getCollectionByChannel(criteria);
+
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(collectionByChannel, plots);
+
+		BigDecimal total = collectionByChannel.stream().map(paymentmode -> paymentmode.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return Arrays.asList(
+				Data.builder().headerName("DSS_OBPS_COLLECTION_BY_PAYMENT_MODE").headerValue(total).plots(plots).build());
+	}
+
+	public List<Data> bpaCollectionReport(PayloadDetails payloadDetails) {
+		
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseAmountCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseCollection : tenantWiseAmountCollection.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(tenantWiseCollection.getKey().toString()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Collection").value(tenantWiseCollection.getValue())
+					.symbol("amount").build());
+
+
+			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots)
+					.headerValue(serialNumber).headerName(tenantWiseCollection.getKey().toString())
+					.build());
+
+			serialNumber++;
+		}
+
+		return response;
+
+	}
+	
+	
 
 }

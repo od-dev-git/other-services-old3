@@ -203,11 +203,11 @@ public class PaymentRepository {
         return result;
 	}
 
-	public List<Chart> getWSCollectionByChannel(PaymentSearchCriteria criteria) {
+	public List<Chart> getCollectionByChannel(PaymentSearchCriteria criteria) {
 		
 		Map<String, Object> preparedStatementValues = new HashMap<>();
-        String query = paymentQueryBuilder.getWSCollectionByChannel(criteria, preparedStatementValues);
-        log.info("query for WS Collection By Channel : "+query);
+        String query = paymentQueryBuilder.getCollectionByChannel(criteria, preparedStatementValues);
+        log.info("query for Collection By Channel : "+query);
         List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
         return result;
 	}
