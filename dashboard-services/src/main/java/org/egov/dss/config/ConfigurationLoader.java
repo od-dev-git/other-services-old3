@@ -68,6 +68,9 @@ public class ConfigurationLoader {
     @Value("${sla.bpabuildingpermit.threshold}") 
     private Long slaBpaBuildingPermitThreshold ;
     
+    @Value("${sla.oc.threshold}") 
+    private Long slaOcPermitThreshold ;
+    
     
     // private static final String RESOURCE_LOCATION = "file://home/darshan/Tarento/DataPlatform/analytics2/analytics/src/main/resources/schema/*.json";
     public static final String ROLE_DASHBOARD_CONFIG = "RoleDashboardMappingsConf.json";
