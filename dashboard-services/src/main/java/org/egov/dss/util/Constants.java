@@ -125,6 +125,20 @@ public class Constants {
 		final static String SERVICE_OBPS_SLA_COMPLIANCE_BUILDING_PERMIT = "bpaSLAComplianceBuildingPermit";
 		final static String SERVICE_OBPS_TOP_ULB_BY_PERFORMANCE = "obpsTopUlbByPerformance";
 		final static String SERVICE_OBPS_BOTTOM_ULB_BY_PERFORMANCE = "obpsBottomUlbByPerformance";
+		
+		final static String REVENUE_BPA_APP_FEE_COLLECTIONS = "bpaApplicationFeesCollection";
+		final static String REVENUE_BPA_SANC_FEE_COLLECTIONS = "bpaSanctionFeesCollection";
+		final static String REVENUE_OC_APP_FEE_COLLECTIONS = "ocApplicationFeesCollection";
+		final static String REVENUE_OC_SANC_FEE_COLLECTIONS = "ocSanctionFeesCollection";
+		final static String REVENUE_BPA_CUMULATIVE_COLLECTION = "bpaCumulativeCollections";
+		final static String REVENUE_BPA_TOP_BY_VALUE = "obpsTopDigitalCollectionByValue";
+		final static String REVENUE_BPA_BOTTOM_BY_VALUE = "obpsBottomDigitalCollectionByValue";
+		final static String REVENUE_BPA_TOP_BY_VOLUME = "obpsTopDigitalCollectionByVolume";
+		final static String REVENUE_BPA_BOTTOM_BY_VOLUME = "obpsBottomDigitalCollectionByVolume";
+		final static String REVENUE_BPA_COLLECTION_PAYMENT_MODE = "obpsCollectionByPaymentMode";
+		final static String REVENUE_BPA_COLLECTION_REPORT = "obpsCollectionReport";
+		
+		
 	}
 
 }
