@@ -2,13 +2,18 @@ package org.egov.dss.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -248,5 +253,82 @@ public class BPAService {
 		;
 
 		return response;
+	}
+
+	public List<Data> permitsAndOcIssuedAndOcSubmitted(PayloadDetails payloadDetails) {
+		List<Data> response = new ArrayList<>();
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_SERVICES));
+
+		LinkedHashMap<String,Long> monthYearPermit= bpaRepository.getMonthYearData(criteria);
+		LinkedHashMap<String,Long> monthYearOCIssued= bpaRepository.getMonthYearData(criteria);
+		LinkedHashMap<String,Long> monthYearOCSubmitted= bpaRepository.getMonthYearData(criteria);
+
+
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		List<Chart> totalPermitsIssuedMonthWise = bpaRepository.getTotalPermitsIssuedVsTotalOcIssuedVsTotalOcSubmitted(criteria);
+		
+		List<Plot> plotsForTotalPermitsIssuedMonthWise = extractedMonthYearData(monthYearPermit,
+				totalPermitsIssuedMonthWise);
+		
+		Long totalPermitsIssued = monthYearPermit.values().stream().mapToLong(Long::longValue).sum();
+		response.add(Data.builder().headerName("TotalPermitIssued").headerValue(totalPermitsIssued).plots(plotsForTotalPermitsIssuedMonthWise).build());
+		
+
+		
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_OC_BUSINESS_SERVICES));
+		List<Chart> totalOcIssuedMonthWise = bpaRepository.getTotalPermitsIssuedVsTotalOcIssuedVsTotalOcSubmitted(criteria);
+		
+		List<Plot> plotsForTotalOcIssuedMonthWise = extractedMonthYearData(monthYearOCIssued,
+				totalOcIssuedMonthWise);
+		
+		
+		Long totalOcIssued = monthYearOCIssued.values().stream().mapToLong(Long::longValue).sum();
+		response.add(Data.builder().headerName("TotalOCissued").headerValue(totalOcIssued).plots(plotsForTotalOcIssuedMonthWise).build());
+
+		
+
+		
+		criteria.setStatus(null);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_OC_BUSINESS_SERVICES));
+		List<Chart> totalOcSubmittedMonthWise = bpaRepository.getTotalPermitsIssuedVsTotalOcIssuedVsTotalOcSubmitted(criteria);
+		
+		List<Plot> plotsForTotalOcSubmittedMonthWise = extractedMonthYearData(monthYearOCSubmitted,
+				totalOcSubmittedMonthWise);
+		
+		
+		Long totalOcSubmitted = monthYearOCSubmitted.values().stream().mapToLong(Long::longValue).sum();
+		response.add(Data.builder().headerName("TotalOCSubmitted").headerValue(totalOcSubmitted).plots(plotsForTotalOcSubmittedMonthWise).build());
+
+
+		return response;		
+
+	}
+
+	private List<Plot> extractedMonthYearData(LinkedHashMap<String, Long> monthYearPermit,
+			List<Chart> totalPermitsIssuedMonthWise) {
+		totalPermitsIssuedMonthWise.forEach(item -> {
+			if(monthYearPermit.containsKey(item.getName())) {
+				BigDecimal value =  item.getValue();
+				monthYearPermit.replace(item.getName(), value.longValue());
+			}
+		});
+		List<Plot> plotsForTotalPermitsIssuedMonthWise = new ArrayList();
+		monthYearPermit.forEach((key,value) ->{
+			plotsForTotalPermitsIssuedMonthWise.add(Plot.builder().name(key).value(new BigDecimal(value)).symbol("number").build());
+		});
+		return plotsForTotalPermitsIssuedMonthWise;
+	}
+	
+	private Long extractDataForChart(List<Chart> items, List<Plot> plots, Long total) {
+		for (Chart item : items) {
+			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
+			total = total + Long.valueOf(String.valueOf(item.getValue()));
+		}
+		return total ;
 	}
 }

@@ -139,6 +139,7 @@ public class Constants {
 		final static String REVENUE_BPA_COLLECTION_REPORT = "obpsCollectionReport";
 		
 		
+		final static String SERVICE_OBPS_PERMITS_AND_OC_ISSUED_AND_OC_SUBMITTED = "permitsandOCissued";
 	}
 
 }
