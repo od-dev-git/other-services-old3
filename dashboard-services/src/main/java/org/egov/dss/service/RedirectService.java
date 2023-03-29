@@ -321,6 +321,50 @@ public class RedirectService {
 			return wsService.wsTotalApplications(requestInfoWrapper.getPayloadDetails());
 		}
 		
+		if(Constants.VisualizationCodes.REVENUE_BPA_APP_FEE_COLLECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.bpaFeeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_SANC_FEE_COLLECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.bpaFeeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_OC_APP_FEE_COLLECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.bpaFeeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_OC_SANC_FEE_COLLECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.bpaFeeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_CUMULATIVE_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.getBPACumulativeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_TOP_BY_VALUE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.topUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_BOTTOM_BY_VALUE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.bottomUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_TOP_BY_VOLUME.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.topUlbsDigitalCollectionByVolume(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_BOTTOM_BY_VOLUME.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.bottomUlbsDigitalCollectionByVolume(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_COLLECTION_PAYMENT_MODE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.bpaCollectionByChannel(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_BPA_COLLECTION_REPORT.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.bpaCollectionReport(requestInfoWrapper.getPayloadDetails());
+		}
+		
 		return null;
 
 	}

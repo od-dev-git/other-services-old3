@@ -119,7 +119,8 @@ public class DashboardConstants {
 	public static final String STATUS_PENDING_APPL_FEE = "PENDING_APPL_FEE";
 	
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
-			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE));
+			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
+					BUSINESS_SERVICE_OC_APP_FEE, BUSINESS_SERVICE_OC_SAN_FEE));
 	
 	public static final List<String> OBPS_REJECTED_STATUSES = Collections
 			.unmodifiableList(Arrays.asList(STATUS_INITIATED, STATUS_CITIZEN_APPROVAL_INPROCESS,STATUS_INPROGRESS,STATUS_PENDING_APPL_FEE));
