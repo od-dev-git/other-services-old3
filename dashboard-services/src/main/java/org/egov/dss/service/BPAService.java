@@ -241,14 +241,14 @@ public class BPAService {
 		}));
 
 		List<Data> response = new ArrayList();
-		int Rank = 0;
+		int Rank = percentList.size();
 		for (Chart obj : percentList) {
-			Rank++;
 			response.add(
 					Data.builder().headerName("Rank").headerValue(Rank)
 							.plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName())
 									.value(obj.getValue()).symbol("percentage").build()))
 							.headerSymbol("percentage").build());
+			Rank--;
 		}
 		;
 
