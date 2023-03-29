@@ -112,6 +112,19 @@ public class Constants {
 		final static String SERVICE_WS_CONNECTION_AGEING = "wsConnectionAgeingDDR";
 		final static String SERVICE_WS_SLA_ACHIEVED = "wsSlaAchieved";
 		final static String SERVICE_WS_TOTAL_APPLICATIONS = "wstotalApplications";
+		
+		final static String SERVICE_OBPS_TOTAL_APPLICATIONS_RECEIVED = "bpaTotalApplicationsSubmitted";
+		final static String SERVICE_OBPS_TOTAL_APPLICATIONS_REJECTED = "bpaTotalRejectedApplications";
+		final static String SERVICE_OBPS_TOTAL_APPLICATIONS_PENDING = "bpaTotalPendingApplications";
+		final static String SERVICE_OBPS_AVG_DAYS_TO_ISSUE_PERMIT = "bpaAverageDaysToIssuePermit";
+		final static String SERVICE_OBPS_MIN_DAYS_TO_ISSUE_PERMIT = "bpaMinDaysToIssuePermit";
+		final static String SERVICE_OBPS_MAX_DAYS_TO_ISSUE_PERMIT = "bpaMaxDaysToIssuePermit";
+		final static String SERVICE_OBPS_SLA_COMPLIANCE_PERMIT = "bpaSLACompliance";
+		final static String SERVICE_OBPS_SLA_COMPLIANCE_OTHER_THAN_LOW_RISK = "bpaSLAComplianceOtherThanLowRisk";
+		final static String SERVICE_OBPS_SLA_COMPLIANCE_PREAPPROVED_PLAN = "bpaSLACompliancePreApprovedPlan";
+		final static String SERVICE_OBPS_SLA_COMPLIANCE_BUILDING_PERMIT = "bpaSLAComplianceBuildingPermit";
+		final static String SERVICE_OBPS_TOP_ULB_BY_PERFORMANCE = "obpsTopUlbByPerformance";
+		final static String SERVICE_OBPS_BOTTOM_ULB_BY_PERFORMANCE = "obpsBottomUlbByPerformance";
 	}
 
 }
