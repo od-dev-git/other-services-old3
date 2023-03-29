@@ -137,8 +137,16 @@ public class Constants {
 		final static String REVENUE_BPA_BOTTOM_BY_VOLUME = "obpsBottomDigitalCollectionByVolume";
 		final static String REVENUE_BPA_COLLECTION_PAYMENT_MODE = "obpsCollectionByPaymentMode";
 		final static String REVENUE_BPA_COLLECTION_REPORT = "obpsCollectionReport";
-		
-		
+        final static String SERVICE_OBPS_TOTAL_OC_APPLICATION = "totalOCApplications";
+        final static String SERVICE_OBPS_TOTAL_OC_ISSUED = "bpaTotalOCIssued";
+        final static String SERVICE_OBPS_TOTAL_OC_REJECTED_APPLICATION = "totalOCRejectedApplications";
+        final static String SERVICE_OBPS_TOTAL_OC_PENDING_APPLICATION = "totalOCPendingApplications";
+        final static String SERVICE_OBPS_AVG_DAYS_TO_ISSUE_OC = "bpaAverageDaysToIssueOC";
+        final static String SERVICE_OBPS_MIN_DAYS_TO_ISSUE_OC = "bpaMinimumDaysToIssueOC";
+        final static String SERVICE_OBPS_MAX_DAYS_TO_ISSUE_OC = "bpaMaximumDaysToIssueOC";
+        final static String SERVICE_OBPS_OC_SLA_COMPLIANCE = "bpaSLAComplianceOC";
+        final static String SERVICE_OBPS_SERVICE_REPORT = "obpsServiceReport";
+		final static String SERVICE_OBPS_PERMITS_AND_OC_ISSUED_AND_OC_SUBMITTED = "permitsandOCissued";
 	}
 
 }

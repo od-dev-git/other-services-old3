@@ -15,9 +15,20 @@ public static final String BPA_AVG_DAYS = " select avg((lastmodifiedtime-created
 public static final String BPA_MIN_DAYS = " select min((lastmodifiedtime-createdtime)/86400000) from eg_bpa_buildingplan bpa  ";
 public static final String BPA_MAX_DAYS = " select max((lastmodifiedtime-createdtime)/86400000) from eg_bpa_buildingplan bpa  ";
 public static final String TENANTWISE_PERMITS_ISSUED_LIST_SQL = " select tenantid as name , count(applicationno) as value from eg_bpa_buildingplan bpa  ";
+public static final String TOTAL_PERMIITS_ISSUED_VS_TOTAL_OC_ISSUED_VS_TOTAL_OC_SUBMITTED_QUERY = " select to_char(monthYear, 'Mon-YYYY') as name, sum(conCount) over (order by monthYear asc rows between unbounded preceding and current row) as value "
+		+ "	from "
+		+ "	(select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear , "
+		+ "	count(applicationno) conCount from eg_bpa_buildingplan bpa  ";
+
+public static final String MONTH_YEAR_QUERY = " select to_char(monthYear, 'Mon-YYYY') as name , 0 as value "
+		+ "from ( "
+		+ "select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear from eg_bpa_buildingplan bpa  ";
+
+public static final String BPA_TENANT_WISE_TOTAL_APPLICATIONS = " select bpa.tenantid as tenantid, count(bpa.applicationno) as totalamt from eg_bpa_buildingplan bpa  ";
+
+public static final String BPA_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED = " select bpa.tenantid as tenantid , avg((bpa.lastmodifiedtime-bpa.createdtime)/86400000) as totalamt from eg_bpa_buildingplan bpa  ";
 
 
-	
 	public static String getTotalPermitIssued(BpaSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATIONS);
 		return addWhereClause(selectQuery, preparedStatementValues, criteria);
@@ -157,6 +168,47 @@ public static final String TENANTWISE_PERMITS_ISSUED_LIST_SQL = " select tenanti
 		addGroupByClause(selectQuery," tenantid ");
 		return selectQuery.toString();
 	}
+
+	public String getTotalPermitsIssuedVsTotalOcIssuedVsTotalOcSubmittedQuery(BpaSearchCriteria bpaSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PERMIITS_ISSUED_VS_TOTAL_OC_ISSUED_VS_TOTAL_OC_SUBMITTED_QUERY);
+		addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
+		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') ");
+		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') asc) bpa_tmp ");
+		return selectQuery.toString();
+	}
+	
+    private static void addOrderByClause(StringBuilder demandQueryBuilder,String columnName) {
+        demandQueryBuilder.append(" ORDER BY " + columnName);
+    }
+
+	public String getMonthYearDataQuery(BpaSearchCriteria bpaSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(MONTH_YEAR_QUERY);
+		addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
+		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') ");
+		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') asc) bpa_tmp ");
+		return selectQuery.toString();
+	}
+
+
+	public String getTenantWiseBpaApplicationQuery(BpaSearchCriteria bpaSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(BPA_TENANT_WISE_TOTAL_APPLICATIONS);
+	        addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
+	        addGroupByClause(selectQuery," bpa.tenantid ");
+	        return selectQuery.toString();
+	    }
+	    
+	    public String getTenantWiseAvgPermitIssue(BpaSearchCriteria bpaSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(BPA_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED);
+	        addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
+	        addGroupByClause(selectQuery," bpa.tenantid ");
+	        return selectQuery.toString();
+	    }
+
+
 
 
 }
