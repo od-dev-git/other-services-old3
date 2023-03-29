@@ -13,6 +13,7 @@ import org.egov.dss.model.Chart;
 import org.egov.dss.repository.builder.BpaQueryBuilder;
 import org.egov.dss.repository.rowmapper.BPAPerformanceRateRowMapper;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
+import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.egov.dss.repository.rowmapper.ULBPerformanceRateRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
@@ -163,6 +164,23 @@ public class BPARepository {
         LinkedHashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new BPAPerformanceRateRowMapper());
         return result;
 	}
+	
+	public HashMap<String, BigDecimal> getTenantWiseBpaTotalApplication(BpaSearchCriteria bpaSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = bpaQueryBuilder.getTenantWiseBpaApplicationQuery(bpaSearchCriteria, preparedStatementValues);
+        log.info("query for BPA Tenant Wise Application List : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
+    
+    public HashMap<String, BigDecimal> getTenantWiseAvgDaysPermitIssued(BpaSearchCriteria bpaSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = bpaQueryBuilder.getTenantWiseAvgPermitIssue(bpaSearchCriteria, preparedStatementValues);
+        log.info("query for BPA Tenant Wise Permit Issued Avg Days : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
+
 
 
 }

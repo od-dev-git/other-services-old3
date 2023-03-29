@@ -24,6 +24,11 @@ public static final String MONTH_YEAR_QUERY = " select to_char(monthYear, 'Mon-Y
 		+ "from ( "
 		+ "select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear from eg_bpa_buildingplan bpa  ";
 
+public static final String BPA_TENANT_WISE_TOTAL_APPLICATIONS = " select bpa.tenantid as tenantid, count(bpa.applicationno) as totalamt from eg_bpa_buildingplan bpa  ";
+
+public static final String BPA_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED = " select bpa.tenantid as tenantid , avg((bpa.lastmodifiedtime-bpa.createdtime)/86400000) as totalamt from eg_bpa_buildingplan bpa  ";
+
+
 	public static String getTotalPermitIssued(BpaSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATIONS);
 		return addWhereClause(selectQuery, preparedStatementValues, criteria);
@@ -185,6 +190,25 @@ public static final String MONTH_YEAR_QUERY = " select to_char(monthYear, 'Mon-Y
 		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') asc) bpa_tmp ");
 		return selectQuery.toString();
 	}
+
+
+	public String getTenantWiseBpaApplicationQuery(BpaSearchCriteria bpaSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(BPA_TENANT_WISE_TOTAL_APPLICATIONS);
+	        addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
+	        addGroupByClause(selectQuery," bpa.tenantid ");
+	        return selectQuery.toString();
+	    }
+	    
+	    public String getTenantWiseAvgPermitIssue(BpaSearchCriteria bpaSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(BPA_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED);
+	        addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
+	        addGroupByClause(selectQuery," bpa.tenantid ");
+	        return selectQuery.toString();
+	    }
+
+
 
 
 }

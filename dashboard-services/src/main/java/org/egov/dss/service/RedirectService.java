@@ -367,6 +367,41 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_BPA_COLLECTION_REPORT.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.bpaCollectionReport(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_TOTAL_OC_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.totalOcApplicationsReceived(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_OBPS_TOTAL_OC_ISSUED.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.totalOcIssued(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_OBPS_TOTAL_OC_REJECTED_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.totalOcRejected(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_OBPS_TOTAL_OC_PENDING_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.totalOcPending(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_OBPS_AVG_DAYS_TO_ISSUE_OC.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.avgDaysToIssueOc(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_OBPS_MIN_DAYS_TO_ISSUE_OC.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.minDaysToIssueOc(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_OBPS_MAX_DAYS_TO_ISSUE_OC.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.maxDaysToIssueOc(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_OBPS_OC_SLA_COMPLIANCE.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.slaComplianceOc(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_OBPS_SERVICE_REPORT.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.serviceReport(requestInfoWrapper.getPayloadDetails());
+        }
 		
 		return null;
 
