@@ -1183,6 +1183,100 @@ public class RevenueService {
 		return response;
 
 	}
+
+	public List<Data> tlCollectionsByLicenseType(PayloadDetails payloadDetails) {
+		
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		
+		List<Chart> licenseTypeWiseAmtCollected = paymentRepository
+				.getTlCollectionsByLicenseType(paymentSearchCriteria);
+		
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(licenseTypeWiseAmtCollected, plots);
+
+		BigDecimal total = licenseTypeWiseAmtCollected.stream().map(amount -> amount.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return Arrays.asList(
+				Data.builder().headerName("DSS_TL_LICENSE_BY_TYPE").headerValue(total).plots(plots).build());
+	}
+
+	public List<Data> tlKeyFinancialIndicators(PayloadDetails payloadDetails) {
+		
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		
+		TargetSearchCriteria targetSearchCriteria = getTargetSearchCriteria(payloadDetails);
+		
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseAmountCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseTransactions = paymentRepository
+				.getTenantWiseTransaction(paymentSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseLicensesIssued = paymentRepository
+				.getTenantWiseLicensesIssued(paymentSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseTargetCollection = paymentRepository
+				.getTenantWiseTargetCollection(targetSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseTargetAchieved = new HashMap<>();
+		
+		tenantWiseAmountCollection.forEach((key,value) -> {
+			
+			if(tenantWiseTargetCollection.containsKey(key)) {
+				BigDecimal target = tenantWiseTargetCollection.get(key);
+				BigDecimal targetAchieved = value.divide(target,2,RoundingMode.HALF_UP);
+				tenantWiseTargetAchieved.put(key, targetAchieved);
+			}		
+		});
+		
+		
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseCollection : tenantWiseAmountCollection.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(
+					Plot.builder().name("ULBs").label(tenantWiseCollection.getKey().toString()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Collection").value(tenantWiseCollection.getValue()).symbol("amount")
+					.build());
+
+			plots.add(
+					Plot.builder().name("Transactions")
+							.value(tenantWiseTransactions.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseTransactions.get(tenantWiseCollection.getKey()))
+							.symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Licenses Issued")
+					.value(tenantWiseLicensesIssued.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+							: tenantWiseLicensesIssued.get(tenantWiseCollection.getKey()))
+					.symbol("number").build());
+			
+			plots.add(Plot.builder().name("Target Collection")
+					.value(tenantWiseTargetCollection.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+							: tenantWiseTargetCollection.get(tenantWiseCollection.getKey()))
+					.symbol("number").build());
+			
+			plots.add(Plot.builder().name("Target Achieved")
+					.value(tenantWiseTargetAchieved.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+							: tenantWiseTargetAchieved.get(tenantWiseCollection.getKey()))
+					.symbol("number").build());
+
+			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).headerValue(serialNumber)
+					.headerName(tenantWiseCollection.getKey()).build());
+
+			serialNumber++;
+
+		}
+
+		return response;
+	}
 	
 	
 
