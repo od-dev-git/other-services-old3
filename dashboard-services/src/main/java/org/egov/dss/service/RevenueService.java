@@ -1228,7 +1228,7 @@ public class RevenueService {
 			
 			if(tenantWiseTargetCollection.containsKey(key)) {
 				BigDecimal target = tenantWiseTargetCollection.get(key);
-				BigDecimal targetAchieved = value.divide(target,2,RoundingMode.HALF_UP);
+				BigDecimal targetAchieved = value.multiply(new BigDecimal(100)).divide(target,2,RoundingMode.HALF_UP);
 				tenantWiseTargetAchieved.put(key, targetAchieved);
 			}		
 		});
@@ -1266,7 +1266,7 @@ public class RevenueService {
 			plots.add(Plot.builder().name("Target Achieved")
 					.value(tenantWiseTargetAchieved.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
 							: tenantWiseTargetAchieved.get(tenantWiseCollection.getKey()))
-					.symbol("number").build());
+					.symbol("percentage").build());
 
 			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).headerValue(serialNumber)
 					.headerName(tenantWiseCollection.getKey()).build());
