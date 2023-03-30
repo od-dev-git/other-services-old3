@@ -118,11 +118,24 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_PROPERTIES_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
 			return ptService.propertiesByUsageType(requestInfoWrapper.getPayloadDetails());
 		}
-		if(Constants.VisualizationCodes.SERVICE_TOP_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
-			return ptService.topPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
+		if (Constants.VisualizationCodes.SERVICE_TOP_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
+			if (requestInfoWrapper.getPayloadDetails().getModulelevel()
+					.equalsIgnoreCase(DashboardConstants.BUSINESS_SERVICE_PT)) {
+				return ptService.topPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
+			} else if (requestInfoWrapper.getPayloadDetails().getModulelevel()
+					.equalsIgnoreCase(DashboardConstants.BUSINESS_SERVICE_TL)) {
+				return tlService.topPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
+			}
+
 		}
 		if(Constants.VisualizationCodes.SERVICE_BOTTOM_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
-			return ptService.bottomPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
+			if (requestInfoWrapper.getPayloadDetails().getModulelevel()
+					.equalsIgnoreCase(DashboardConstants.BUSINESS_SERVICE_PT)) {
+				return ptService.bottomPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
+			} else if (requestInfoWrapper.getPayloadDetails().getModulelevel()
+					.equalsIgnoreCase(DashboardConstants.BUSINESS_SERVICE_TL)) {
+				return tlService.bottomPerformingUlbsCompletionRate(requestInfoWrapper.getPayloadDetails());
+			}
 		}
 		if(Constants.VisualizationCodes.SERVICE_PT_SHARE_OF_NEW_ASSESSMENT.equalsIgnoreCase(visualizationCode)) {
 			return ptService.ptShareOfNewAssessment(requestInfoWrapper.getPayloadDetails());
@@ -402,6 +415,44 @@ public class RedirectService {
         if(Constants.VisualizationCodes.SERVICE_OBPS_SERVICE_REPORT.equalsIgnoreCase(visualizationCode)) {
             return bpaService.serviceReport(requestInfoWrapper.getPayloadDetails());
         }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_TOTAL_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.totalApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_TOTAL_NEW_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.totalNewApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_TOTAL_RENEWAL_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.totalRenewalApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_LICENSE_ISSUED.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.licenseIssued(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_ACTIVE_ULBS.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.activeUlbs(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_SLA_ACHIEVED.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.tlSlaComplience(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_CUMULATIVE_LICENSE_ISSUED.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.cumulativeLicenseIssued(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_APPLICATION_BY_STATUS.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.tlApplicationByStatus(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_STATUS_BY_DDR.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.tlStatusByBoundary(requestInfoWrapper.getPayloadDetails());
+        }
+        
+		
         
         if(Constants.VisualizationCodes.REVENUE_TL_TOP_ULBS_BY_VALUE.equalsIgnoreCase(visualizationCode)) {
             return revenueService.topUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());

@@ -39,4 +39,9 @@ public class TLSearchCriteria {
 	    
 	    private Long slaThreshold;
 	    
+	    private String applicationType;
+	    
+	    private Boolean isApplicationDate;
+	    
+	    
 }
