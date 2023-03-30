@@ -130,6 +130,15 @@ public class PaymentQueryBuilder {
 	
 	public static final String TENANT_WISE_WS_CONNECTIONS = " select tenantid as tenantid, count(*) as connections from eg_ws_connection py where py.applicationstatus = :status and py.isoldapplication = 'false' ";
 	
+	public static final String TL_COLLECTIONS_By_LICENSE_QUERY = "select tunit.tradetype as name, sum(py.totalamountpaid) as value from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
+			+ "inner join egcl_bill bill on bill.id = pyd.billid  "
+			+ "inner join eg_tl_tradelicense tl on tl.applicationnumber = bill.consumercode "
+			+ "inner join eg_tl_tradelicensedetail dtl on dtl.tradelicenseid = tl.id "
+			+ "inner join eg_tl_tradeunit tunit on tunit.tradelicensedetailid = dtl.id";
+	
+	public static final String TL_TENANT_WISE_LICENSES_ISSUED = "select tenantid as tenantid, count(applicationnumber) as connections from eg_tl_tradelicense tl  where businessservice = 'TL' and status = :status ";
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -452,6 +461,41 @@ public class PaymentQueryBuilder {
 	    private static void addOrderByClause(StringBuilder demandQueryBuilder,String columnName) {
 	        demandQueryBuilder.append(" ORDER BY " + columnName);
 	    }
+	    
+	    private void addWhereClauseForTL(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+				PaymentSearchCriteria searchCriteria) {
+	    	
+	    	if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				if (searchCriteria.getTenantId().split("\\.").length > 1) {
+					selectQuery.append(" tenantId =:tenantId");
+					preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
+				} else {
+					selectQuery.append(" tenantId LIKE :tenantId");
+					preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
+				}
+
+			}
+
+	       if (searchCriteria.getFromDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" lastmodifiedtime >= :fromDate");
+				preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+			}
+
+			if (searchCriteria.getToDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" lastmodifiedtime <= :toDate");
+			    preparedStatementValues.put("toDate", searchCriteria.getToDate());
+			}
+			
+			if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" tenantid != :excludedTenant");
+				preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenant());
+			}
+	
+		}
     
 		public String getptTaxHeadsBreakupListQuery(PaymentSearchCriteria paymentSearchCriteria,
 				Map<String, Object> preparedStatementValues) {
@@ -512,6 +556,26 @@ public class PaymentQueryBuilder {
 			selectQuery.append(" group by tenantid  ");
 			return selectQuery.toString();
 		}
+
+		public String getTlCollectionsByLicenseTypeQuery(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {	
+			StringBuilder selectQuery = new StringBuilder(TL_COLLECTIONS_By_LICENSE_QUERY);
+			addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append(" group by tunit.tradetype  ");
+			return selectQuery.toString();
+		}
+
+		public String getTenantWiseLicensesIssued(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			
+			StringBuilder selectQuery = new StringBuilder(TL_TENANT_WISE_LICENSES_ISSUED);
+			preparedStatementValues.put("status", "APPROVED");
+			addWhereClauseForTL(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append(" group by tenantid  ");
+			return selectQuery.toString();
+		}
+
+		
 
 	
 }
