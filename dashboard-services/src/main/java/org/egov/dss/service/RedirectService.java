@@ -402,6 +402,31 @@ public class RedirectService {
         if(Constants.VisualizationCodes.SERVICE_OBPS_SERVICE_REPORT.equalsIgnoreCase(visualizationCode)) {
             return bpaService.serviceReport(requestInfoWrapper.getPayloadDetails());
         }
+        
+        if(Constants.VisualizationCodes.REVENUE_TL_TOP_ULBS_BY_VALUE.equalsIgnoreCase(visualizationCode)) {
+            return revenueService.topUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.REVENUE_TL_BOTTOM_ULBS_BY_VALUE.equalsIgnoreCase(visualizationCode)) {
+            return revenueService.bottomUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.REVENUE_TL_TOP_ULBS_BY_VOLUME.equalsIgnoreCase(visualizationCode)) {
+            return revenueService.topUlbsDigitalCollectionByVolume(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.REVENUE_TL_BOTTOM_ULBS_BY_VOLUME.equalsIgnoreCase(visualizationCode)) {
+            return revenueService.bottomUlbsDigitalCollectionByVolume(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.REVENUE_TL_COLLECTION_BY_LICENSE_TYPE.equalsIgnoreCase(visualizationCode)) {
+            return revenueService.tlCollectionsByLicenseType(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.REVENUE_TL_KEY_FINALCIAL_INDICATORS.equalsIgnoreCase(visualizationCode)) {
+            return revenueService.tlKeyFinancialIndicators(requestInfoWrapper.getPayloadDetails());
+        }
+        
 		
 		return null;
 
