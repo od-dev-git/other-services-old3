@@ -38,5 +38,9 @@ public class MarriageSearchCriteria {
 	private String status;
 	
 	private Long slaThreshold;
+	
+	private Boolean isApplicationDate;
+	
+	private String applicationType;
 
 }
