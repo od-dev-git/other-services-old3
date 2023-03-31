@@ -178,7 +178,9 @@ public class RevenueService {
 		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
 
 		tenantWiseCollection.forEach((key, value) -> {
-			BigDecimal target = tenantWiseTarget.get(key);
+			BigDecimal target = BigDecimal.ONE;
+			if(tenantWiseTarget.containsKey(key))
+				target = tenantWiseTarget.get(key);
 			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(target, 2, RoundingMode.HALF_UP);
 			tenantWisePercentage.put(key, percentage);
 		});
@@ -218,7 +220,9 @@ public class RevenueService {
 		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
 
 		tenantWiseCollection.forEach((key, value) -> {
-			BigDecimal target = tenantWiseTarget.get(key);
+			BigDecimal target = BigDecimal.ONE;
+			if(tenantWiseTarget.containsKey(key))
+				target = tenantWiseTarget.get(key);
 			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(target, 2, RoundingMode.HALF_UP);
 			tenantWisePercentage.put(key, percentage);
 		});
@@ -1267,6 +1271,58 @@ public class RevenueService {
 					.value(tenantWiseTargetAchieved.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
 							: tenantWiseTargetAchieved.get(tenantWiseCollection.getKey()))
 					.symbol("percentage").build());
+
+			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).headerValue(serialNumber)
+					.headerName(tenantWiseCollection.getKey()).build());
+
+			serialNumber++;
+
+		}
+
+		return response;
+	}
+
+	public List<Data> mrKeyFinancialIndicators(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+
+		TargetSearchCriteria targetSearchCriteria = getTargetSearchCriteria(payloadDetails);
+
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> tenantWiseAmountCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseTransactions = paymentRepository
+				.getTenantWiseTransaction(paymentSearchCriteria);
+		HashMap<String, BigDecimal> tenantWiseMrApplications = paymentRepository
+				.getTenantWiseMrApplications(paymentSearchCriteria);
+
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseCollection : tenantWiseAmountCollection.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(
+					Plot.builder().name("ULBs").label(tenantWiseCollection.getKey().toString()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Collection").value(tenantWiseCollection.getValue()).symbol("amount")
+					.build());
+
+			plots.add(
+					Plot.builder().name("Transactions")
+							.value(tenantWiseTransactions.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseTransactions.get(tenantWiseCollection.getKey()))
+							.symbol("number").build());
+
+			plots.add(
+					Plot.builder().name("Total Applications")
+							.value(tenantWiseMrApplications.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseMrApplications.get(tenantWiseCollection.getKey()))
+							.symbol("number").build());
+
 
 			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).headerValue(serialNumber)
 					.headerName(tenantWiseCollection.getKey()).build());
