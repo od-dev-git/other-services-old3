@@ -164,6 +164,13 @@ public class Constants {
 		final static String SERVICE_TL_CUMULATIVE_LICENSE_ISSUED = "cumulativeLicenseIssued";
 		final static String SERVICE_TL_APPLICATION_BY_STATUS = "licenseApplicationByStatus";
 		final static String SERVICE_TL_STATUS_BY_DDR = "tlStatusByDDR";
+		
+		final static String REVENUE_MR_CUMULATIVE_COLLECTIONS = "mrcumulativeCollections";
+		final static String REVENUE_MR_TOP_DIGITAL_BY_VALUE = "mrTopDigitalCollectionByValue";
+		final static String REVENUE_MR_BOTTOM_DIGITAL_BY_VALUE = "mrBottomDigitalCollectionByValue";
+		final static String REVENUE_MR_TOP_DIGITAL_BY_VOLUME = "mrTopDigitalCollectionByVolume";
+		final static String REVENUE_MR_BOTTOM_DIGITAL_BY_VOLUME = "mrBottomDigitalCollectionByVolume";
+		final static String REVENUE_MR_KEY_FINANCIAL_INDICATORS = "mrFinancialIndicatorDDR";
 	}
 
 }

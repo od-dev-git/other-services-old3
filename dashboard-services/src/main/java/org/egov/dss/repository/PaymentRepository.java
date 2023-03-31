@@ -243,6 +243,14 @@ public class PaymentRepository {
 		log.info("query Tenant Wise TL Licenses Issued: " + query);
 		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new TenantWiseConnectionsRowMapper());
 	}
+
+	public HashMap<String, BigDecimal> getTenantWiseMrApplications(PaymentSearchCriteria paymentSearchCriteria) {
+		
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTenantWiseMrApplications(paymentSearchCriteria, preparedStatementValues);
+		log.info("query Tenant Wise MR Applications: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new TenantWiseConnectionsRowMapper());
+	}
 	
 
 }

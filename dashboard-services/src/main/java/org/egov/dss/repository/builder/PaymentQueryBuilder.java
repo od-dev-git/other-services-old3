@@ -8,16 +8,23 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 
+
 @Component
 public class PaymentQueryBuilder {
+	
+	
+	@Autowired
+	private ConfigurationLoader configLoader;
 
 	public static final String SELECT_PAYMENT_SQL = "SELECT py.*,pyd.*,"
 			+ "py.id as py_id,py.tenantId as py_tenantId,py.totalAmountPaid as py_totalAmountPaid,py.createdBy as py_createdBy,py.createdtime as py_createdtime,"
@@ -138,6 +145,8 @@ public class PaymentQueryBuilder {
 			+ "inner join eg_tl_tradeunit tunit on tunit.tradelicensedetailid = dtl.id";
 	
 	public static final String TL_TENANT_WISE_LICENSES_ISSUED = "select tenantid as tenantid, count(applicationnumber) as connections from eg_tl_tradelicense tl  where businessservice = 'TL' and status = :status ";
+	
+	public static final String MR_TENANT_WISE_APPLICATIONS = " select tenantid, count(applicationnumber) connections from eg_mr_application ";
 	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
@@ -497,6 +506,41 @@ public class PaymentQueryBuilder {
 	
 		}
     
+	    private void addWhereClauseForMR(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+				PaymentSearchCriteria searchCriteria) {
+	    	
+	    	if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				if (searchCriteria.getTenantId().split("\\.").length > 1) {
+					selectQuery.append(" tenantId =:tenantId");
+					preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
+				} else {
+					selectQuery.append(" tenantId LIKE :tenantId");
+					preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
+				}
+
+			}
+
+	       if (searchCriteria.getFromDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" applicationdate >= :fromDate");
+				preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+			}
+
+			if (searchCriteria.getToDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" applicationdate <= :toDate");
+			    preparedStatementValues.put("toDate", searchCriteria.getToDate());
+			}
+			
+			if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" tenantid != :excludedTenant");
+				preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenant());
+			}
+	
+		}
+	    
 		public String getptTaxHeadsBreakupListQuery(PaymentSearchCriteria paymentSearchCriteria,
 				Map<String, Object> preparedStatementValues) {
 			StringBuilder selectQuery = new StringBuilder(PT_TAXHEAD_WISE_COLLECTION_QUERY);
@@ -562,6 +606,8 @@ public class PaymentQueryBuilder {
 			StringBuilder selectQuery = new StringBuilder(TL_COLLECTIONS_By_LICENSE_QUERY);
 			addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
 			selectQuery.append(" group by tunit.tradetype  ");
+			selectQuery.append(" order by value desc  limit :limit");
+			preparedStatementValues.put("limit", configLoader.getCollectionByTradeLimit());
 			return selectQuery.toString();
 		}
 
@@ -571,6 +617,15 @@ public class PaymentQueryBuilder {
 			StringBuilder selectQuery = new StringBuilder(TL_TENANT_WISE_LICENSES_ISSUED);
 			preparedStatementValues.put("status", "APPROVED");
 			addWhereClauseForTL(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append(" group by tenantid  ");
+			return selectQuery.toString();
+		}
+
+		public String getTenantWiseMrApplications(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+	
+			StringBuilder selectQuery = new StringBuilder(MR_TENANT_WISE_APPLICATIONS);
+			addWhereClauseForMR(selectQuery, preparedStatementValues, paymentSearchCriteria);
 			selectQuery.append(" group by tenantid  ");
 			return selectQuery.toString();
 		}
