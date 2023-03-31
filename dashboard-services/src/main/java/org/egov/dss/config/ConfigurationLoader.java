@@ -71,6 +71,9 @@ public class ConfigurationLoader {
     @Value("${sla.oc.threshold}") 
     private Long slaOcPermitThreshold ;
     
+    @Value("${tl.collection.by.trade.limit}")
+    private Long collectionByTradeLimit;
+    
     
     // private static final String RESOURCE_LOCATION = "file://home/darshan/Tarento/DataPlatform/analytics2/analytics/src/main/resources/schema/*.json";
     public static final String ROLE_DASHBOARD_CONFIG = "RoleDashboardMappingsConf.json";
