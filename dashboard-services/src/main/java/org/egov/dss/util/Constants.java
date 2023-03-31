@@ -164,6 +164,16 @@ public class Constants {
 		final static String SERVICE_TL_CUMULATIVE_LICENSE_ISSUED = "cumulativeLicenseIssued";
 		final static String SERVICE_TL_APPLICATION_BY_STATUS = "licenseApplicationByStatus";
 		final static String SERVICE_TL_STATUS_BY_DDR = "tlStatusByDDR";
+		
+		final static String SERVICE_MR_NEW_APPLICATION = "mrtotalNewApplications";
+		final static String SERVICE_MR_CORRECTION_APPLICATION = "mrtotalCorrectionApplications";
+		final static String SERVICE_MR_APPROVED_APPLICATION = "mrtotalApprovedApplications";
+		final static String SERVICE_MR_SLA_ACHIEVED = "mrSlaAchieved";
+		final static String SERVICE_MR_CUMULATIVE_APPLICATION = "mrCumulativeApplications";
+		final static String SERVICE_MR_TOP_PERFORMANCE_ULBS = "mrTopUlbByPerformance";
+		final static String SERVICE_MR_BOTTOM_PERFORMANCE_ULBS = "mrBottomUlbByPerformance";
+		final static String SERVICE_MR_APPLICATION_BY_STATUS = "mrApplicationByStatus";
+		final static String SERVICE_MR_STATUS_BY_BOUNDARY = "mrStatusByDDR";
 	}
 
 }

@@ -140,7 +140,9 @@ public class DashboardConstants {
 	
 	public static final String APPLICATION_STATUS_NEW = "NEW";
 	
-	public static final String APPLICATION_STATUS_RENEWAL = "RENEWAL";
+	public static final String APPLICATION_STATUS_RENEWAL = "RENEWAL"; 
+	
+	public static final String APPLICATION_STATUS_CORRECTION = "CORRECTION";
 	
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,

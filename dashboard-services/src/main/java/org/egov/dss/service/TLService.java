@@ -172,6 +172,7 @@ public class TLService {
 	
 	public List<Data> tlStatusByBoundary(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		List<HashMap<String, Object>> tlStatusByBoundary = tlRepository.getTlStatusByBoundary(criteria);
 
 		List<Data> response = new ArrayList();
