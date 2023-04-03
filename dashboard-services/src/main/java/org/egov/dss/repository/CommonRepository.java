@@ -14,6 +14,7 @@ import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.repository.builder.CommonQueryBuilder;
 import org.egov.dss.repository.rowmapper.PayloadDetailsRowMapper;
 import org.egov.dss.util.DashboardUtils;
+import org.egov.dss.web.model.ChartCriteria;
 import org.egov.dss.web.model.ResponseData;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +45,11 @@ public class CommonRepository {
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
-	public List<PayloadDetails> fetchSchedulerPayloads() {
+	public List<PayloadDetails> fetchSchedulerPayloads(ChartCriteria criteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
-        String query = commonQueryBuilder.PAYLOAD_QUERY_SQL;
+        String query  = commonQueryBuilder.fetchSchedulerPayloads(criteria , preparedStatementValues);
         log.info("query: "+query);
+        log.info("startDate: "+criteria.getStartDate()+" endDate: "+criteria.getEndDate());
         return namedParameterJdbcTemplate.query(query, preparedStatementValues, new PayloadDetailsRowMapper());
        
     }
