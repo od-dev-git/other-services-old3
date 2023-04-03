@@ -27,6 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class DashboardService {
 	
@@ -51,18 +54,24 @@ public class DashboardService {
 		requestEnrich(requestInfoWrapper.getChartCriteria());
 		List<PayloadDetails> payloadList = getPayloadForScheduler(requestInfoWrapper.getChartCriteria());
 		for (PayloadDetails payloadDetails : payloadList) {
-		  // payloadDetails.setEnddate(schedulerStartTime);
-			payloadDetails.setEnddate(requestInfoWrapper.getChartCriteria().getEndDate());
-			requestInfoWrapper.setPayloadDetails(payloadDetails);
-			responseData = serveRequest(requestInfoWrapper);
-			payloadDetails.setResponsedata(responseData);
-			payloadDetails.setLastModifiedTime(schedulerStartTime);
-			if (responseData.getData() != null) {
-				commonRepository.update(payloadDetails);
+			try {
+				payloadDetails.setEnddate(requestInfoWrapper.getChartCriteria().getEndDate());
+				requestInfoWrapper.setPayloadDetails(payloadDetails);
+				responseData = serveRequest(requestInfoWrapper);
+				payloadDetails.setResponsedata(responseData);
+				payloadDetails.setLastModifiedTime(schedulerStartTime);
+				if (responseData.getData() != null) {
+					commonRepository.update(payloadDetails);
+				}
+			} catch (Exception e) {
+				log.error("Unable to process for visualization code :" + payloadDetails.getVisualizationcode()
+						+ " Module :" + payloadDetails.getModulelevel());
+				e.printStackTrace();
+
 			}
 
 		}
-	  
+
 	}
 	
 	public ResponseData serveRequest(RequestInfoWrapper requestInfoWrapper) {
