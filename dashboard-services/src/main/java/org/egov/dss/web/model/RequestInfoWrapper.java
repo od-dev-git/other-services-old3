@@ -15,11 +15,13 @@ public class RequestInfoWrapper {
 	@JsonProperty(value="requestInfo")
 	private RequestInfo requestInfo;
 	
-//	@JsonProperty(value = "criteria")
-//	private ChartCriteria chartCriteria;
+	@JsonProperty(value = "criteria")
+	private ChartCriteria chartCriteria;
 	
 	@JsonProperty(value = "payloadDetails")
 	private PayloadDetails payloadDetails;
+	
+	
 	
 	
 }
