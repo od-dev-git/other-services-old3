@@ -1,6 +1,7 @@
 package org.egov.dss.service;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -16,12 +17,15 @@ import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.enums.ChartType;
 import org.egov.dss.repository.CommonRepository;
+import org.egov.dss.util.DashboardUtils;
+import org.egov.dss.web.model.ChartCriteria;
 import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Filter;
 import org.egov.dss.web.model.RequestInfoWrapper;
 import org.egov.dss.web.model.ResponseData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class DashboardService {
@@ -38,18 +42,17 @@ public class DashboardService {
 	@Autowired
 	private CommonRepository commonRepository;
 	
+	@Autowired
+	private DashboardUtils utils;
+	
 	public void processRequest(RequestInfoWrapper requestInfoWrapper) {
 		Long schedulerStartTime = System.currentTimeMillis();
-		Date date = new Date();
-		LocalDateTime localDateTime = LocalDateTime.ofInstant(date .toInstant(), ZoneId.systemDefault());
-	    LocalDateTime endOfDate = localDateTime.with(ChronoField.NANO_OF_DAY, LocalTime.MAX.toNanoOfDay());
-	    ZonedDateTime zdt = ZonedDateTime.of(endOfDate, ZoneId.systemDefault());
-		
 		ResponseData responseData = new ResponseData();
-		List<PayloadDetails> payloadList = getPayloadForScheduler();
+		requestEnrich(requestInfoWrapper.getChartCriteria());
+		List<PayloadDetails> payloadList = getPayloadForScheduler(requestInfoWrapper.getChartCriteria());
 		for (PayloadDetails payloadDetails : payloadList) {
-		//	payloadDetails.setEnddate(zdt.toInstant().toEpochMilli());
-			payloadDetails.setEnddate(schedulerStartTime);
+		  // payloadDetails.setEnddate(schedulerStartTime);
+			payloadDetails.setEnddate(requestInfoWrapper.getChartCriteria().getEndDate());
 			requestInfoWrapper.setPayloadDetails(payloadDetails);
 			responseData = serveRequest(requestInfoWrapper);
 			payloadDetails.setResponsedata(responseData);
@@ -59,6 +62,7 @@ public class DashboardService {
 			}
 
 		}
+	  
 	}
 	
 	public ResponseData serveRequest(RequestInfoWrapper requestInfoWrapper) {
@@ -111,9 +115,19 @@ public class DashboardService {
 		
 	}
 	
-	public List<PayloadDetails> getPayloadForScheduler(){
-	  List<PayloadDetails> payloadList = commonRepository.fetchSchedulerPayloads();
+	public List<PayloadDetails> getPayloadForScheduler(ChartCriteria criteria){
+	  List<PayloadDetails> payloadList = commonRepository.fetchSchedulerPayloads(criteria);
 	   return payloadList;
+	}
+	
+	public void requestEnrich(ChartCriteria criteria) {
+		if(criteria == null || !StringUtils.hasText(criteria.getFinancialYear())) {
+		// ChartCriteria.builder().financialYear(utils.getCurrentFinancialYear()).build();
+			criteria.setFinancialYear(utils.getCurrentFinancialYear());
+		}
+		criteria.setStartDate(utils.getStartDate(criteria.getFinancialYear()));
+		criteria.setEndDate(utils.getEndDate(criteria.getFinancialYear()));
+		
 	}
 	
 
