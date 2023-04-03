@@ -78,6 +78,7 @@ public class DashboardUtils {
 	
 	public Long getStartDate(String financialYear) {
 		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("IST"));
 		cal.set(Calendar.DAY_OF_MONTH, 1);
 		cal.set(Calendar.MONTH, Calendar.APRIL);
 		cal.set(Calendar.YEAR, Integer.parseInt(financialYear.split("-")[0]));
@@ -93,6 +94,7 @@ public class DashboardUtils {
 	public Long getEndDate(String financialYear) {
 		Long today = Calendar.getInstance().getTimeInMillis();
 		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("IST"));
 		cal.set(Calendar.DAY_OF_MONTH, 31);
 		cal.set(Calendar.MONTH, Calendar.MARCH);
 		cal.set(Calendar.YEAR, Integer.parseInt(financialYear.split("-")[0]) + 1);
