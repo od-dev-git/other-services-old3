@@ -8,10 +8,12 @@ import org.egov.tracer.model.CustomException;
 import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jaegertracing.thriftjava.BaggageRestrictionManager.AsyncProcessor.getBaggageRestrictions;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -73,5 +75,56 @@ public class DashboardUtils {
 		}
 		return json;
 	}
+	
+	public Long getStartDate(String financialYear) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("IST"));
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.MONTH, Calendar.APRIL);
+		cal.set(Calendar.YEAR, Integer.parseInt(financialYear.split("-")[0]));
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		cal.set(Calendar.AM_PM, Calendar.AM);
+		return cal.getTimeInMillis();
+
+	}
+	
+	public Long getEndDate(String financialYear) {
+		Long today = Calendar.getInstance().getTimeInMillis();
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("IST"));
+		cal.set(Calendar.DAY_OF_MONTH, 31);
+		cal.set(Calendar.MONTH, Calendar.MARCH);
+		cal.set(Calendar.YEAR, Integer.parseInt(financialYear.split("-")[0]) + 1);
+		cal.set(Calendar.HOUR, 11);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+		cal.set(Calendar.MILLISECOND, 0);
+		cal.set(Calendar.AM_PM, Calendar.PM);
+		if (cal.getTimeInMillis() > today) {
+			return today;
+		} else {
+			return cal.getTimeInMillis();
+		}
+
+	}
+	
+	public String getCurrentFinancialYear() {
+		int previousYear;
+		int currentYear;
+		Calendar cal = Calendar.getInstance();
+		if (cal.get(Calendar.MONTH) < 3) {
+			previousYear = cal.get(Calendar.YEAR) - 1;
+			currentYear = cal.get(Calendar.YEAR);
+		} else {
+			previousYear = cal.get(Calendar.YEAR);
+			currentYear = cal.get(Calendar.YEAR) + 1;
+		}
+		return String.valueOf(previousYear).concat("-").concat(String.valueOf(currentYear));
+
+	}
+	
 
 }

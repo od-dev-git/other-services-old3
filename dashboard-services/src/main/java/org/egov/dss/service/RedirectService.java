@@ -478,6 +478,42 @@ public class RedirectService {
             return revenueService.tlKeyFinancialIndicators(requestInfoWrapper.getPayloadDetails());
         }
         
+        if(Constants.VisualizationCodes.SERVICE_MR_NEW_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+            return mrService.totalNewApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_MR_CORRECTION_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+            return mrService.totalCorrectionApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_MR_APPROVED_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+            return mrService.totalApprovedApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_MR_SLA_ACHIEVED.equalsIgnoreCase(visualizationCode)) {
+            return mrService.slaAchievedCount(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_MR_CUMULATIVE_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+            return mrService.cumulativeApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_MR_TOP_PERFORMANCE_ULBS.equalsIgnoreCase(visualizationCode)) {
+            return mrService.topPerformingUlbs(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_MR_BOTTOM_PERFORMANCE_ULBS.equalsIgnoreCase(visualizationCode)) {
+            return mrService.bottomPerformingUlbs(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_MR_APPLICATION_BY_STATUS.equalsIgnoreCase(visualizationCode)) {
+            return mrService.mrApplicationsByStatus(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_MR_STATUS_BY_BOUNDARY.equalsIgnoreCase(visualizationCode)) {
+            return mrService.mrStatusByBoundary(requestInfoWrapper.getPayloadDetails());
+        }
+        
         if(Constants.VisualizationCodes.REVENUE_MR_CUMULATIVE_COLLECTIONS.equalsIgnoreCase(visualizationCode)) {
             return revenueService.cumulativeCollection(requestInfoWrapper.getPayloadDetails());
         }
