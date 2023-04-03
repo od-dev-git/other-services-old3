@@ -29,6 +29,47 @@ public class PgrQueryBuilder {
 			+ "from ( "
 			+ "select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear from eg_ws_connection eps  ";
 	
+	public static final String PGR_COMPLAINTS_BY_STATUS = " select status as name, count(servicerequestid) as value from eg_pgr_service eps ";
+	public static final String PGR_COMPLAINTS_BY_DEPARTMENT = " select servicecode as name, count(servicerequestid) as value from eg_pgr_service eps ";
+	public static final String PGR_COMPLAINTS_BY_CHANNEL = " select source as name, count(servicerequestid) as value from eg_pgr_service eps ";
+	public static final String PGR_EVENT_DURATION_GRAPH = " select to_char(monthYear, 'Mon-YYYY') as name, "
+			+ "avg(procesTime) as value "
+			+ "from ( "
+			+ "select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear, "
+			+ "(slaendtime-createdtime)/3600000 as procesTime "
+			+ "from eg_pgr_service eps ";
+
+	public static final String PGR_UNIQUE_CITIZENS = " select to_char(to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(eps.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(eps.lastmodifiedtime/1000))),'DD-MM-YYYY'), 'Mon-YYYY') as name, "
+			+ "count(distinct eps.accountid) as value from eg_pgr_service eps ";
+
+
+	public static final String PGR_MONTH_YEAR = " select to_char(monthYear, 'Mon-YYYY') as name ";
+	public static final String PGR_CLOSED_STATUS_COUNT = " coalesce(sum(closed),0) as value ";
+	public static final String PGR_OPEN_STATUS_COUNT = " coalesce(sum(open),0) as value ";
+	public static final String PGR_TOTAL_COMPLAINTS_BY_STATUS = " from  "
+			+ "(select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear, "
+			+ "case when status in ('closed','resolved','rejected') then 1 end as closed, "
+			+ "case when status not in ('closed','resolved','rejected') then 1 end as open "
+			+ "from eg_pgr_service eps ";
+	public static final String PGR_CLOSED_STATUS_MONTHWISE_COUNT = PGR_MONTH_YEAR +" , "+PGR_CLOSED_STATUS_COUNT+PGR_TOTAL_COMPLAINTS_BY_STATUS;
+	public static final String PGR_OPEN_STATUS_MONTHWISE_COUNT = PGR_MONTH_YEAR +" , "+PGR_OPEN_STATUS_COUNT+PGR_TOTAL_COMPLAINTS_BY_STATUS;
+	
+	public static final String PGR_WHATSAPP_COUNT = " coalesce(sum(whatsapp),0) as value ";
+	public static final String PGR_IVR_COUNT = " coalesce(sum(ivr),0) as value ";
+	public static final String PGR_WEB_COUNT = " coalesce(sum(web),0) as value ";
+	public static final String PGR_MOBILEAPP_COUNT = " coalesce(sum(mobileapp),0) as value ";
+	public static final String PGR_TOTAL_COMPLAINTS_BY_SOURCE = " from "
+			+ "(select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(eps.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(eps.lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear, "
+			+ "case when  source ='mobileapp' then 1 end as mobileapp, case when  source ='ivr' then 1 end as ivr, "
+			+ "case when  source ='web' then 1 end as web, case when  source ='whatsapp' then 1 end as whatsapp "
+			+ "from eg_pgr_service eps ";
+	public static final String PGR_WHATSAPP_COMPLAINT_MONTHWISE_COUNT = PGR_MONTH_YEAR +" , "+PGR_WHATSAPP_COUNT+PGR_TOTAL_COMPLAINTS_BY_SOURCE;
+	public static final String PGR_IVR_COMPLAINT_MONTHWISE_COUNT = PGR_MONTH_YEAR +" , "+PGR_IVR_COUNT+PGR_TOTAL_COMPLAINTS_BY_SOURCE;
+	public static final String PGR_WEB_COMPLAINT_MONTHWISE_COUNT = PGR_MONTH_YEAR +" , "+PGR_WEB_COUNT+PGR_TOTAL_COMPLAINTS_BY_SOURCE;
+	public static final String PGR_MOBILEAPP_COMPLAINT_MONTHWISE_COUNT = PGR_MONTH_YEAR +" , "+PGR_MOBILEAPP_COUNT+PGR_TOTAL_COMPLAINTS_BY_SOURCE;
+	
+	
+	
 	public static String getTotalApplication(PgrSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(PGR_TOTAL_APPLICATION);
 		return addWhereClause(selectQuery, preparedStatementValues, criteria);
@@ -138,6 +179,114 @@ public class PgrQueryBuilder {
 		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') ");
 		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') ", "asc");
 		selectQuery.append(" ) tlTmp ");
+		return selectQuery.toString();
+	}
+	
+	public String getComplaintsByStatusCriteriaQuery(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_COMPLAINTS_BY_STATUS);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		addGroupByClause(selectQuery," status ");
+		return selectQuery.toString();
+
+	}
+
+	public String getComplaintsByChannelCriteriaQuery(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_COMPLAINTS_BY_CHANNEL);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		addGroupByClause(selectQuery," source ");
+		return selectQuery.toString();
+	}
+
+	public String getComplaintsByDepartmentCriteriaQuery(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_COMPLAINTS_BY_DEPARTMENT);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		addGroupByClause(selectQuery," servicecode ");
+		return selectQuery.toString();
+	}
+
+    private static void addOrderByClause(StringBuilder demandQueryBuilder,String columnName) {
+        demandQueryBuilder.append(" ORDER BY " + columnName);
+    }
+
+	public String getEventDurationGraphQuery(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_EVENT_DURATION_GRAPH);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		selectQuery.append(" ) tmpPgr ");
+		addGroupByClause(selectQuery," tmpPgr.monthYear ");
+		addOrderByClause(selectQuery," tmpPgr.monthYear asc ");
+		return selectQuery.toString();
+	}
+
+	public String getUniqueCitizensQuery(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_UNIQUE_CITIZENS);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(eps.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(eps.lastmodifiedtime/1000))),'DD-MM-YYYY') ");
+		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(eps.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(eps.lastmodifiedtime/1000))),'DD-MM-YYYY') ");
+		return selectQuery.toString();
+	}
+
+	public String getTotalClosedComplaintsMonthWise(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_CLOSED_STATUS_MONTHWISE_COUNT);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		selectQuery.append(" ) tmpPgr ");
+		addGroupByClause(selectQuery," tmpPgr.monthYear ");
+		addOrderByClause(selectQuery," tmpPgr.monthYear asc ");
+		return selectQuery.toString();
+	}
+
+	public String getTotalOpenedComplaintsMonthWise(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_OPEN_STATUS_MONTHWISE_COUNT);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		selectQuery.append(" ) tmpPgr ");
+		addGroupByClause(selectQuery," tmpPgr.monthYear ");
+		addOrderByClause(selectQuery," tmpPgr.monthYear asc ");
+		return selectQuery.toString();
+	}
+
+	public String getTotalComplaintsByWhatsapp(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_WHATSAPP_COMPLAINT_MONTHWISE_COUNT);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		selectQuery.append(" ) tmpPgr ");
+		addGroupByClause(selectQuery," tmpPgr.monthYear ");
+		addOrderByClause(selectQuery," tmpPgr.monthYear asc ");
+		return selectQuery.toString();
+	}
+
+	public String getTotalComplaintsByIvr(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_IVR_COMPLAINT_MONTHWISE_COUNT);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		selectQuery.append(" ) tmpPgr ");
+		addGroupByClause(selectQuery," tmpPgr.monthYear ");
+		addOrderByClause(selectQuery," tmpPgr.monthYear asc ");
+		return selectQuery.toString();
+	}
+
+	public String getTotalComplaintsByWeb(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_WEB_COMPLAINT_MONTHWISE_COUNT);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		selectQuery.append(" ) tmpPgr ");
+		addGroupByClause(selectQuery," tmpPgr.monthYear ");
+		addOrderByClause(selectQuery," tmpPgr.monthYear asc ");
+		return selectQuery.toString();
+	}
+
+	public String getTotalComplaintsByMobileApp(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_MOBILEAPP_COMPLAINT_MONTHWISE_COUNT);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+		selectQuery.append(" ) tmpPgr ");
+		addGroupByClause(selectQuery," tmpPgr.monthYear ");
+		addOrderByClause(selectQuery," tmpPgr.monthYear asc ");
 		return selectQuery.toString();
 	}
 

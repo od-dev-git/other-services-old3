@@ -177,6 +177,13 @@ public class Constants {
 		final static String SERVICE_PGR_CUMULATIVE_CLOSED_COMPLAINTS = "cumulativeClosedComplaints";
 		final static String SERVICE_PGR_TOP_COMPLAINTS = "topFiveComplaints";
 		final static String SERVICE_PGR_STATUS_BY_DDR = "xpgrStatusByDDR";
+		final static String SERVICE_PGR_COMPLAINTS_BY_STATUS = "complaintsByStatus";
+		final static String SERVICE_PGR_COMPLAINTS_BY_DEPARTMENT = "complaintsByDepartment";
+		final static String SERVICE_PGR_COMPLAINTS_BY_CHANNEL = "complaintsByChannel";
+		final static String SERVICE_PGR_EVENT_DURATION_GRAPH = "eventDurationGraph";
+		final static String SERVICE_PGR_UNIQUE_CITIZENS = "pgrCitizenOnDateRange";
+		final static String SERVICE_PGR_TOTAL_COMPLAINTS_BY_STATUS = "totalComplaintsbyStatus";
+		final static String SERVICE_PGR_TOTAL_COMPLAINTS_BY_SOURCE = "totalComplaintsbySource";
 	}
 
 }

@@ -87,6 +87,94 @@ public class PGRRepository {
         log.info("query for Month Year Query : "+query);
         return namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
 	}
+	
+	public List<Chart> getComplaintsByChannelCriteria(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getComplaintsByChannelCriteriaQuery(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get PGR  Complaints By Criteria : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> getComplaintsByDepartmentCriteria(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getComplaintsByDepartmentCriteriaQuery(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get PGR  Complaints By Criteria : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> getComplaintsByStatusCriteria(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getComplaintsByStatusCriteriaQuery(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get PGR  Complaints By Criteria : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> getEventDurationGraph(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getEventDurationGraphQuery(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get Event Durtaion Graph Query : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> getUniqueCitizens(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getUniqueCitizensQuery(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get Unique Citizens Query : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> getTotalClosedComplaintsMonthWise(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getTotalClosedComplaintsMonthWise(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get Total Closed Complaints Month Wise Query : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> getTotalOpenedComplaintsMonthWise(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getTotalOpenedComplaintsMonthWise(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get Total Opened Complaints Month Wise Query : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> totalComplaintsByWhatsapp(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getTotalComplaintsByWhatsapp(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get Total Complaints By Whatsapp Query : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> totalComplaintsByIvr(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getTotalComplaintsByIvr(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get Total Complaints By Ivr Query : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> totalComplaintsByWeb(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getTotalComplaintsByWeb(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get Total Complaints By Web Query : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> totalComplaintsByMobileApp(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = pgrQueryBuilder.getTotalComplaintsByMobileApp(pgrSearchCriteria, preparedStatementValues);
+        log.info("query get Total Complaints By MobileApp Query : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
 
 
 }

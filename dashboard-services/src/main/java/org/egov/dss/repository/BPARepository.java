@@ -13,6 +13,7 @@ import org.egov.dss.model.Chart;
 import org.egov.dss.repository.builder.BpaQueryBuilder;
 import org.egov.dss.repository.rowmapper.BPAPerformanceRateRowMapper;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
+import org.egov.dss.repository.rowmapper.RateRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.egov.dss.repository.rowmapper.ULBPerformanceRateRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -180,6 +181,14 @@ public class BPARepository {
         HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
         return result;
     }
+    
+    public LinkedHashMap<String, BigDecimal> getMonthYearBigDecimalData(BpaSearchCriteria bpaSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = bpaQueryBuilder.getMonthYearDataQuery(bpaSearchCriteria, preparedStatementValues);
+        log.info("query for Month Year Query : "+query);
+        LinkedHashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new RateRowMapper());
+        return result;
+	}
 
 
 
