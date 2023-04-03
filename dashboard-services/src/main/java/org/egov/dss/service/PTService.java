@@ -25,6 +25,9 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class PTService {
 	
@@ -220,23 +223,43 @@ public class PTService {
 	private List<Chart> mapTenantsForPerformanceRate(HashMap<String, Long> numeratorMap,
 			HashMap<String, Long> denominatorMap) {
 		List<Chart> percentList = new ArrayList();
-		numeratorMap.entrySet().stream().forEach(item ->{
+		numeratorMap.entrySet().stream().forEach(item -> {
 			Long numerator = item.getValue();
-			Long denominator = denominatorMap.get(item.getKey());
-			BigDecimal percent =new BigDecimal(numerator * 100) .divide(new BigDecimal(denominator), 2, RoundingMode.HALF_EVEN);
-			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
+			Long denominator = item.getValue();
+			if (denominatorMap.containsKey(item.getKey())) {
+				denominator = denominatorMap.get(item.getKey());
+			}
+			log.info("Denominator :" + denominator + " Numerator :" + numerator);
+			if (denominator != 0) {
+				BigDecimal percent = new BigDecimal(numerator * 100).divide(new BigDecimal(denominator), 2,
+						RoundingMode.HALF_EVEN);
+				percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
+			} else {
+				percentList.add(Chart.builder().name(item.getKey()).value(BigDecimal.ZERO).build());
+			}
+
 		});
 		return percentList;
 	}
-	
+
 	private List<Chart> mapTenantsForSharePerformanceRate(HashMap<String, Long> numeratorMap,
 			HashMap<String, Long> denominatorMap) {
 		List<Chart> percentList = new ArrayList();
-		numeratorMap.entrySet().stream().forEach(item ->{
+		numeratorMap.entrySet().stream().forEach(item -> {
 			Long numerator = item.getValue();
-			Long denominator = denominatorMap.get(item.getKey());
-			BigDecimal percent = (new BigDecimal(denominator*100).subtract(new BigDecimal(numerator*100))).divide(new BigDecimal(denominator), 2, RoundingMode.HALF_EVEN);
-			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
+			Long denominator = item.getValue();
+			if (denominatorMap.containsKey(item.getKey())) {
+				denominator = denominatorMap.get(item.getKey());
+			}
+			log.info("Denominator :" + denominator + " Numerator :" + numerator);
+			if (denominator != 0) {
+				BigDecimal percent = (new BigDecimal(denominator * 100).subtract(new BigDecimal(numerator * 100)))
+						.divide(new BigDecimal(denominator), 2, RoundingMode.HALF_EVEN);
+				percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
+			} else {
+				percentList.add(Chart.builder().name(item.getKey()).value(BigDecimal.ZERO).build());
+			}
+
 		});
 		return percentList;
 	}
