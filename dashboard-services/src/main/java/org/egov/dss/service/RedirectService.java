@@ -532,8 +532,42 @@ public class RedirectService {
         if(Constants.VisualizationCodes.REVENUE_MR_KEY_FINANCIAL_INDICATORS.equalsIgnoreCase(visualizationCode)) {
             return revenueService.mrKeyFinancialIndicators(requestInfoWrapper.getPayloadDetails());
         }
-        
-        
+        if(Constants.VisualizationCodes.SERVICE_PGR_CLOSED_COMPLAINTS.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.closedApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        if(Constants.VisualizationCodes.SERVICE_PGR_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.pgrCompletionRate(requestInfoWrapper.getPayloadDetails());
+        }
+        if(Constants.VisualizationCodes.SERVICE_PGR_CUMULATIVE_CLOSED_COMPLAINTS.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.pgrCumulativeClosedComplaints(requestInfoWrapper.getPayloadDetails());
+        }
+        if(Constants.VisualizationCodes.SERVICE_PGR_TOP_COMPLAINTS.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.pgrTopComplaints(requestInfoWrapper.getPayloadDetails());
+        }
+        if(Constants.VisualizationCodes.SERVICE_PGR_STATUS_BY_DDR.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.pgrStatusByDDR(requestInfoWrapper.getPayloadDetails());
+        }
+        if(Constants.VisualizationCodes.SERVICE_PGR_COMPLAINTS_BY_STATUS.equalsIgnoreCase(visualizationCode)) {
+			return pgrService.complaintsByStatus(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_PGR_COMPLAINTS_BY_DEPARTMENT.equalsIgnoreCase(visualizationCode)) {
+			return pgrService.complaintsByDepartment(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_PGR_COMPLAINTS_BY_CHANNEL.equalsIgnoreCase(visualizationCode)) {
+			return pgrService.complaintsByChannel(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_PGR_EVENT_DURATION_GRAPH.equalsIgnoreCase(visualizationCode)) {
+			return pgrService.eventDurationGraph(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_PGR_UNIQUE_CITIZENS.equalsIgnoreCase(visualizationCode)) {
+			return pgrService.uniqueCitizens(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_PGR_TOTAL_COMPLAINTS_BY_STATUS.equalsIgnoreCase(visualizationCode)) {
+			return pgrService.totalComplaintsByStatus(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_PGR_TOTAL_COMPLAINTS_BY_SOURCE.equalsIgnoreCase(visualizationCode)) {
+			return pgrService.totalComplaintsBySource(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 
