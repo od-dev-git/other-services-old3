@@ -496,7 +496,21 @@ public class RedirectService {
         if(Constants.VisualizationCodes.REVENUE_MR_KEY_FINANCIAL_INDICATORS.equalsIgnoreCase(visualizationCode)) {
             return revenueService.mrKeyFinancialIndicators(requestInfoWrapper.getPayloadDetails());
         }
-        
+        if(Constants.VisualizationCodes.SERVICE_PGR_CLOSED_COMPLAINTS.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.closedApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        if(Constants.VisualizationCodes.SERVICE_PGR_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.pgrCompletionRate(requestInfoWrapper.getPayloadDetails());
+        }
+        if(Constants.VisualizationCodes.SERVICE_PGR_CUMULATIVE_CLOSED_COMPLAINTS.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.pgrCumulativeClosedComplaints(requestInfoWrapper.getPayloadDetails());
+        }
+        if(Constants.VisualizationCodes.SERVICE_PGR_TOP_COMPLAINTS.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.pgrTopComplaints(requestInfoWrapper.getPayloadDetails());
+        }
+        if(Constants.VisualizationCodes.SERVICE_PGR_STATUS_BY_DDR.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.pgrStatusByDDR(requestInfoWrapper.getPayloadDetails());
+        }
         
 		
 		return null;

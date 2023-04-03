@@ -171,6 +171,12 @@ public class Constants {
 		final static String REVENUE_MR_TOP_DIGITAL_BY_VOLUME = "mrTopDigitalCollectionByVolume";
 		final static String REVENUE_MR_BOTTOM_DIGITAL_BY_VOLUME = "mrBottomDigitalCollectionByVolume";
 		final static String REVENUE_MR_KEY_FINANCIAL_INDICATORS = "mrFinancialIndicatorDDR";
+		
+		final static String SERVICE_PGR_CLOSED_COMPLAINTS = "closedComplaints";
+		final static String SERVICE_PGR_COMPLETION_RATE = "completionRate";
+		final static String SERVICE_PGR_CUMULATIVE_CLOSED_COMPLAINTS = "cumulativeClosedComplaints";
+		final static String SERVICE_PGR_TOP_COMPLAINTS = "topFiveComplaints";
+		final static String SERVICE_PGR_STATUS_BY_DDR = "xpgrStatusByDDR";
 	}
 
 }
