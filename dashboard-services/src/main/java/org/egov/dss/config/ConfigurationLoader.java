@@ -74,6 +74,8 @@ public class ConfigurationLoader {
     @Value("${tl.collection.by.trade.limit}")
     private Long collectionByTradeLimit;
     
+    @Value("${pgr.top.complaints.limit}")
+    private Long pgrTopComplaintsLimit;
     
     // private static final String RESOURCE_LOCATION = "file://home/darshan/Tarento/DataPlatform/analytics2/analytics/src/main/resources/schema/*.json";
     public static final String ROLE_DASHBOARD_CONFIG = "RoleDashboardMappingsConf.json";
