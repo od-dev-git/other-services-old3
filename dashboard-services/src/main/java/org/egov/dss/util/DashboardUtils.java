@@ -126,5 +126,45 @@ public class DashboardUtils {
 
 	}
 	
+	public Long getStartDateOfQuarter() {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("IST"));
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) / 3 * 3);
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		cal.set(Calendar.AM_PM, Calendar.AM);
+		return cal.getTimeInMillis();
 
+	}
+
+	public Long getStartDateOfMonth() {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("IST"));
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH));
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		cal.set(Calendar.AM_PM, Calendar.AM);
+		return cal.getTimeInMillis();
+
+	}
+
+	public Long getStartDateOfWeek() {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("IST"));
+		cal.set(Calendar.DAY_OF_WEEK, 1);
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		cal.set(Calendar.AM_PM, Calendar.AM);
+		return cal.getTimeInMillis();
+
+	}
+	
 }
