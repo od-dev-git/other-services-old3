@@ -16,7 +16,7 @@ public class CommonQueryBuilder {
 			+ "edd.charttype , edd.tenantid, edd.districtid, edd.city, edd.headername, edd.valuetype"
 			+ " from eg_dss_response edd ";
 	
-    public static final String RESPONSE_DATA_UPDATE_QUERY = "Update eg_dss_response set responsedata = ?, lastmodifiedtime = ?, enddate = ? where id =? ";
+    public static final String RESPONSE_DATA_UPDATE_QUERY = "Update eg_dss_response set responsedata = ?, lastmodifiedtime = ?, startdate = ?, enddate = ? where id =? ";
     
     public static final String PROPERTY_QUERY = " select to_char(monthYear, 'Mon-YYYY') as name, sum(completionApplication) over (order by monthYear asc rows between unbounded preceding and current row) as value "
     		+ "from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') as monthYear, "
