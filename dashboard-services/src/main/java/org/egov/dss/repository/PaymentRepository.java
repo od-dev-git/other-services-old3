@@ -251,6 +251,14 @@ public class PaymentRepository {
 		log.info("query Tenant Wise MR Applications: " + query);
 		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new TenantWiseConnectionsRowMapper());
 	}
+
+	public List<Chart> getServiceWiseCollection(PaymentSearchCriteria criteria) {
+		
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getServiceWiseCollectionQuery(criteria, preparedStatementValues);
+		log.info("query for Service Type COllection : " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new ChartRowMapper());
+	}
 	
 
 }

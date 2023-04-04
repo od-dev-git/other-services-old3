@@ -148,6 +148,17 @@ public class PaymentQueryBuilder {
 	
 	public static final String MR_TENANT_WISE_APPLICATIONS = " select tenantid, count(applicationnumber) connections from eg_mr_application ";
 	
+	public static final String DEPT_WISE_COLLECTION = "select businessservice as name, sum(totalCollection) as value from "
+			+ "(select "
+			+ "case when pyd.businessservice in ('BPA.NC_SAN_FEE', 'BPA.NC_APP_FEE','BPA.NC_OC_APP_FEE','BPA.NC_OC_SAN_FEE') then 'OBPS' "
+			+ "when pyd.businessservice in ('WS','WS.ONE_TIME_FEE') then 'WS' "
+			+ "when pyd.businessservice in ('PT','PT.MUTATION') then 'PT' "
+			+ "when pyd.businessservice in ('TL') then 'TL' "
+			+ "when pyd.businessservice in ('MR') then 'MR' "
+			+ "when pyd.businessservice in ('FSM.TRIP_CHARGES') then 'FSM' end businessservice, "
+			+ "sum(py.totalamountpaid) as totalCollection from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id ";
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -412,6 +423,12 @@ public class PaymentQueryBuilder {
 			selectQuery.append(" edt.businessService IN (:businessService)  ");
 			preparedStatementValues.put("businessService", searchCriteria.getBusinessServices());
 		}
+		
+		if (!StringUtils.isEmpty(searchCriteria.getFinancialYear())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" edt.financialyear = :financialYear  ");
+			preparedStatementValues.put("financialYear", searchCriteria.getFinancialYear());
+		}
 
 		return selectQuery.toString();
 
@@ -627,6 +644,16 @@ public class PaymentQueryBuilder {
 			StringBuilder selectQuery = new StringBuilder(MR_TENANT_WISE_APPLICATIONS);
 			addWhereClauseForMR(selectQuery, preparedStatementValues, paymentSearchCriteria);
 			selectQuery.append(" group by tenantid  ");
+			return selectQuery.toString();
+		}
+
+		public String getServiceWiseCollectionQuery(PaymentSearchCriteria criteria,
+				Map<String, Object> preparedStatementValues) {
+			
+			StringBuilder selectQuery = new StringBuilder(DEPT_WISE_COLLECTION);
+			addWhereClause(selectQuery, preparedStatementValues, criteria);
+			selectQuery.append(" group by pyd.businessservice) tmpPay  ");
+			selectQuery.append(" group by businessservice ");
 			return selectQuery.toString();
 		}
 

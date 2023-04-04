@@ -210,7 +210,7 @@ public class MRService {
 	}
 	
 	
-	private MarriageSearchCriteria getMarriageSearchCriteria(PayloadDetails payloadDetails) {
+	public MarriageSearchCriteria getMarriageSearchCriteria(PayloadDetails payloadDetails) {
 		MarriageSearchCriteria criteria = new MarriageSearchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {

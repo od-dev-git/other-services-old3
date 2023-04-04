@@ -219,7 +219,7 @@ public class TLService {
 	}
 	
 	
-	private TLSearchCriteria getTlSearchCriteria(PayloadDetails payloadDetails) {
+	public TLSearchCriteria getTlSearchCriteria(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = new TLSearchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {

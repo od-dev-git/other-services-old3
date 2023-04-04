@@ -34,7 +34,7 @@ public class PGRService {
 	@Autowired
 	private BPARepository bpaRepository;
 	
-	private PgrSearchCriteria getPgrSearchCriteria(PayloadDetails payloadDetails) {
+	public PgrSearchCriteria getPgrSearchCriteria(PayloadDetails payloadDetails) {
 		PgrSearchCriteria criteria = new PgrSearchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {

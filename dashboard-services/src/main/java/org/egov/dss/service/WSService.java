@@ -44,7 +44,7 @@ public class WSService {
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).headerSymbol("percentage").build());
 	}
 	
-	private WaterSearchCriteria getWaterSearchCriteria(PayloadDetails payloadDetails) {
+	public WaterSearchCriteria getWaterSearchCriteria(PayloadDetails payloadDetails) {
 		WaterSearchCriteria criteria = new WaterSearchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
