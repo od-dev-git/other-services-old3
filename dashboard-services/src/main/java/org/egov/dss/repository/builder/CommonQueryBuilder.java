@@ -13,7 +13,7 @@ public class CommonQueryBuilder {
 			+ "edd.charttype , edd.tenantid, edd.districtid, edd.city, edd.headername, edd.valuetype"
 			+ " from eg_dss_response edd ";
 	
-    public static final String RESPONSE_DATA_UPDATE_QUERY = "Update eg_dss_response set responsedata = ?, lastmodifiedtime = ?, enddate = ? where id =? ";
+    public static final String RESPONSE_DATA_UPDATE_QUERY = "Update eg_dss_response set responsedata = ?, lastmodifiedtime = ?, startdate = ?, enddate = ? where id =? ";
     
     public static String fetchSchedulerPayloads(ChartCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(PAYLOAD_QUERY_SQL);

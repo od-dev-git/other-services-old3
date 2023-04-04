@@ -55,6 +55,7 @@ public class DashboardService {
 		List<PayloadDetails> payloadList = getPayloadForScheduler(requestInfoWrapper.getChartCriteria());
 		for (PayloadDetails payloadDetails : payloadList) {
 			try {
+				enrichPayload(payloadDetails);
 				payloadDetails.setEnddate(requestInfoWrapper.getChartCriteria().getEndDate());
 				requestInfoWrapper.setPayloadDetails(payloadDetails);
 				responseData = serveRequest(requestInfoWrapper);
@@ -130,17 +131,28 @@ public class DashboardService {
 	}
 	
 	public void requestEnrich(ChartCriteria criteria) {
-		if(criteria == null || !StringUtils.hasText(criteria.getFinancialYear())) {
-		// ChartCriteria.builder().financialYear(utils.getCurrentFinancialYear()).build();
+		if (criteria == null || !StringUtils.hasText(criteria.getFinancialYear())) {
 			criteria.setFinancialYear(utils.getCurrentFinancialYear());
 		}
 		criteria.setStartDate(utils.getStartDate(criteria.getFinancialYear()));
 		criteria.setEndDate(utils.getEndDate(criteria.getFinancialYear()));
-		
-	}
-	
 
 	}
+	
+	public void enrichPayload(PayloadDetails payloadDetails) {
+		if (payloadDetails != null) {
+			if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.QUARTER)) {
+				payloadDetails.setStartdate(utils.getStartDateOfQuarter());
+			} else if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.MONTH)) {
+			    payloadDetails.setStartdate(utils.getStartDateOfMonth());
+			}else if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.WEEK)) {
+			    payloadDetails.setStartdate(utils.getStartDateOfWeek());
+			}
+		}
+    }
+	
+
+}
 
 
 
