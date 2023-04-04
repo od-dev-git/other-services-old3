@@ -313,4 +313,13 @@ public class PTServiceQueryBuilder {
 		return selectQuery.toString();
 	}
 
+
+	public String getTotalApplicationCountListQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(APPLICATIONS_TENANT_WISE_SQL);
+		addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria ,true);
+		addGroupByClause(selectQuery," tenantid ");
+		return selectQuery.toString();
+	}
+
 }

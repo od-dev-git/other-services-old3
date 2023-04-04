@@ -574,6 +574,21 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_TOTAL_APPLICATION_AND_CLOSD_APPLICATION.equalsIgnoreCase(visualizationCode)) {
 			return commonService.totalApplicationAndClosed(requestInfoWrapper.getPayloadDetails());
 		}
+		if (Constants.VisualizationCodes.SERVICE_CITIZEN_REGISTERED.equalsIgnoreCase(visualizationCode)) {
+			  return commonService.citizenRegistered(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.SERVICE_DSS_CLOSED_APPLICATION_OVERVIEW.equalsIgnoreCase(visualizationCode)) {
+			  return commonService.totalClosedApplications(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.SERVICE_TOTAL_APPLICATION_DEPT_WISE.equalsIgnoreCase(visualizationCode)) {
+			  return commonService.totalApplcationsServiceWise(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.SERVICE_TOP_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
+			  return commonService.topPerformingULBsCompletionRate(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.SERVICE_BOTTOM_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
+			  return commonService.bottomPerformingULBsCompletionRate(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 

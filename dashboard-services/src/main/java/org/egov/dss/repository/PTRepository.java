@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.model.Chart;
+import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.builder.PTServiceQueryBuilder;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
@@ -182,4 +183,15 @@ public class PTRepository {
         List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
         return result;
 	}
+
+
+	public HashMap<String, Long> totalApplicationsTenantWise(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getTotalApplicationCountListQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query getTotalApplicationCountList : "+query);
+        HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
+        return result;
+	}
+
+
 }

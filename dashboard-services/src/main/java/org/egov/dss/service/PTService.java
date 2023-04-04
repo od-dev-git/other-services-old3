@@ -272,6 +272,16 @@ public class PTService {
 		return Arrays.asList(Data.builder()
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
+	
+	public Integer slaAchievedCount(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		if(ptRepository.getSlaAchievedAppCount(criteria) == null) {
+			return 0;
+		}
+		Integer slaAchievedAppCount = (Integer) ptRepository.getSlaAchievedAppCount(criteria);
+		return slaAchievedAppCount;
+	}
     
 	public PropertySerarchCriteria getPropertySearchCriteria(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = new PropertySerarchCriteria();
@@ -440,5 +450,20 @@ public class PTService {
 		}
 
 		return response;
+	}
+
+	public HashMap<String, Long> totalApplicationsTenantWise(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> totalApplicationCountTenentWise = ptRepository.totalApplicationsTenantWise(criteria);
+		return totalApplicationCountTenentWise;
+	}
+	
+	public HashMap<String, Long> totalCompletedApplicationsTenantWise(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(DashboardConstants.STATUS_ACTIVE);
+		HashMap<String, Long> totalApplicationCompletionCount = ptRepository.getTotalApplicationCompletionCountList(criteria);
+		return totalApplicationCompletionCount;
 	}
 }

@@ -32,6 +32,9 @@ public class WaterServiceQueryBuilder {
 			+ "case when lastmodifiedtime - createdtime > 1296000000 then 1 else 0 end as pending_from_more_than_15_days "
 			+ "from eg_ws_connection conn ";
 	
+	public static final String TOTAL_COMPLETED_APPLICATIONS_COUNT = " select tenantid as name , count(*) as value from eg_ws_connection  conn ";
+
+	
 	public static String getActiveConnectionCount(WaterSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(WATER_ACTIVE_CONNECTIONS_COUNT);
@@ -234,6 +237,14 @@ public class WaterServiceQueryBuilder {
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_APPLICATIONS_COUNT);
 		return addWhereClauseWithCreatedTime(selectQuery, preparedStatementValues, waterSearchCriteria);
+	}
+
+	public String getTenantWiseTotalApplication(WaterSearchCriteria waterSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_COMPLETED_APPLICATIONS_COUNT);
+		addWhereClauseWithCreatedTime(selectQuery, preparedStatementValues, waterSearchCriteria);
+	    addGroupByClause(selectQuery," conn.tenantid ");
+		return selectQuery.toString();
 	}
 
 }

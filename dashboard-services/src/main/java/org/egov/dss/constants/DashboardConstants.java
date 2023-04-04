@@ -206,6 +206,9 @@ public class DashboardConstants {
 	
 	public static final List<String> OBPS_OC_BUSINESS_SERVICES = Collections.unmodifiableList(Arrays.asList("BPA_OC1",
             "BPA_OC2", "BPA_OC3", "BPA_OC4", "BPA_OC5", "BPA_OC6", "BPA_OC7", "BPA_OC8", "BPA_OC9", "BPA_OC10"));
+	
+	public static final List<String> PGR_REQUEST_COMPLETED_STATUS = Collections
+			.unmodifiableList(Arrays.asList(STATUS_CLOSED,STATUS_RESOLVED,STATUS_REJECTED));
 
 
 

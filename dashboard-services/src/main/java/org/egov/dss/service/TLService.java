@@ -47,6 +47,18 @@ public class TLService {
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
 	
+	public Integer slaAchievedCount(PayloadDetails payloadDetails) {
+		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+		Object slaAchievedAppCountObject = tlRepository.getSlaAchievedAppCount(criteria);
+		if(slaAchievedAppCountObject == null) {
+			return 0;
+		}
+		Integer slaAchievedAppCount = (Integer) slaAchievedAppCountObject;
+		return slaAchievedAppCount;
+	}
+	
 	public List<Data> totalNewApplications(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
@@ -261,6 +273,13 @@ public class TLService {
 			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
 		});
 		return percentList;
+	}
+
+	public HashMap<String, Long> totalApplicationsTenantWise(PayloadDetails payloadDetails) {
+		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> totalApplication = tlRepository.getTenantWiseTotalApplication(criteria);
+		return totalApplication;
 	}
 
 }
