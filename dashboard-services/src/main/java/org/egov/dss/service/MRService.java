@@ -45,6 +45,17 @@ public class MRService {
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
 	
+	public Integer slaAchievedCounts(PayloadDetails payloadDetails) {
+		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Object slaAchievedAppCountObject = mrRepository.getSlaAchievedAppCount(criteria);
+		if(slaAchievedAppCountObject == null) {
+			return 0;
+		}
+		Integer slaAchievedAppCount = (Integer) slaAchievedAppCountObject;
+		return slaAchievedAppCount;
+	}
+	
 	public List<Data> totalNewApplications(PayloadDetails payloadDetails) {
 		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
@@ -249,6 +260,23 @@ public class MRService {
 			percentList.add(Chart.builder().name(item.getKey()).value(percent).build());
 		});
 		return percentList;
+	}
+
+	public HashMap<String, Long> totalApplicationsTenantWise(PayloadDetails payloadDetails) {
+		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsApplicationDate(Boolean.TRUE);
+		HashMap<String, Long> totalApplication = mrRepository.getTenantWiseTotalApplication(criteria);
+        return totalApplication;
+	}
+
+	public HashMap<String, Long> totalCompletedApplicationsTenantWise(PayloadDetails payloadDetails) {
+		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsApplicationDate(Boolean.TRUE);
+		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+		HashMap<String, Long> totalApplication = mrRepository.getTenantWiseTotalApplication(criteria);
+        return totalApplication;
 	}
 
 }

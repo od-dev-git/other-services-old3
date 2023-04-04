@@ -10,6 +10,7 @@ import org.egov.dss.model.WaterSearchCriteria;
 import org.egov.dss.repository.builder.WaterServiceQueryBuilder;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.TableChartRowMapper;
+import org.egov.dss.repository.rowmapper.ULBPerformanceRateRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -125,6 +126,14 @@ public class WSRepository {
         log.info("query FOR WS total  Connection Count : "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
+	}
+
+	public HashMap<String, Long> getTenantWiseTotalApplication(WaterSearchCriteria waterSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = wsQueryBuilder.getTenantWiseTotalApplication(waterSearchCriteria, preparedStatementValues);
+        log.info("WS Tenant Wise Total Application : "+query);
+        HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
+        return result;
 	}
 
 }

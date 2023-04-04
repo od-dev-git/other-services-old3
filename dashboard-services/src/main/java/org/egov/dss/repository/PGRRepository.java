@@ -13,6 +13,7 @@ import org.egov.dss.repository.builder.PgrQueryBuilder;
 import org.egov.dss.repository.rowmapper.BPAPerformanceRateRowMapper;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseConnectionsRowMapper;
+import org.egov.dss.repository.rowmapper.ULBPerformanceRateRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -173,6 +174,14 @@ public class PGRRepository {
         String query = pgrQueryBuilder.getTotalComplaintsByMobileApp(pgrSearchCriteria, preparedStatementValues);
         log.info("query get Total Complaints By MobileApp Query : "+query);
         List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+	public HashMap<String, Long> getTenantWiseTotalApplication(PgrSearchCriteria pgrSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = pgrQueryBuilder.getTenantWiseTotalApplication(pgrSearchCriteria, preparedStatementValues);
+        log.info("PGR Tenant Wise Total Application : "+query);
+        HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
         return result;
 	}
 

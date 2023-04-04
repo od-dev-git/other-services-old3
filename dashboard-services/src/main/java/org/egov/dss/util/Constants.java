@@ -50,7 +50,7 @@ public class Constants {
 		final static String SERVICE_DSS_TOTAL_APPLICATION_OVERVIEW = "dssTotalApplicationOverview";
 		final static String SERVICE_DSS_CLOSED_APPLICATION_OVERVIEW = "dssClosedApplicationOverview";
 		final static String SERVICE_DSS_SLA_ACHIEVED_OVERVIEW = "dssSlaAchievedOverview";
-		final static String SERVICE_COTOZN_REGISTERED = "citizenRegistered";
+		final static String SERVICE_CITIZEN_REGISTERED = "citizenRegistered";
 		final static String SERVICE_TOTAL_APPLICATION_AND_CLOSD_APPLICATION = "totalApplication&ClosedApplication";
 		final static String SERVICE_TOP_PERFORMING_ULBS_COMPLETION_RATE = "topPerformingUlbsCompletionRate";
 		final static String SERVICE_BOTTOM_PERFORMING_ULBS_COMPLETION_RATE = "bottomPerformingUlbsCompletionRate";
