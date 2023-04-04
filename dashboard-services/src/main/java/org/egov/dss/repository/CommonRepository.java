@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.dss.config.ConfigurationLoader;
+import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.builder.CommonQueryBuilder;
+import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.PayloadDetailsRowMapper;
 import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.ChartCriteria;
@@ -68,6 +71,14 @@ public class CommonRepository {
 			}
 
 		});
+	}
+
+	public List<Chart> getTotalProperties(PropertySerarchCriteria criteriaProperty) {
+		
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query  = commonQueryBuilder.getTotalPropertiesQuery(criteriaProperty , preparedStatementValues);
+        log.info("query for PT in common: "+query);
+        return namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
 	}
 	
 	

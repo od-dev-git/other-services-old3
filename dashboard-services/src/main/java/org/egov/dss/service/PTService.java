@@ -273,7 +273,7 @@ public class PTService {
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
     
-	private PropertySerarchCriteria getPropertySearchCriteria(PayloadDetails payloadDetails) {
+	public PropertySerarchCriteria getPropertySearchCriteria(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = new PropertySerarchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
