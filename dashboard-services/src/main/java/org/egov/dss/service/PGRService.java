@@ -15,6 +15,7 @@ import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PgrSearchCriteria;
+import org.egov.dss.model.WaterSearchCriteria;
 import org.egov.dss.repository.BPARepository;
 import org.egov.dss.repository.PGRRepository;
 import org.egov.dss.web.model.Data;
@@ -74,6 +75,18 @@ public class PGRService {
 		Integer slaAchievedAppCount = (Integer) pgrRepository.getSlaAchievedAppCount(criteria);
 		return Arrays.asList(Data.builder()
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
+	}
+	
+	public Integer slaAchievedCount(PayloadDetails payloadDetails) {
+		PgrSearchCriteria criteria = getPgrSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_REJECTED.toLowerCase(),
+				DashboardConstants.STATUS_RESOLVED.toLowerCase(), DashboardConstants.STATUS_CLOSED.toLowerCase()));	
+		if(pgrRepository.getSlaAchievedAppCount(criteria) == null) {
+			return 0;
+		}
+		Integer slaAchievedAppCount = (Integer) pgrRepository.getSlaAchievedAppCount(criteria);
+		return slaAchievedAppCount;
 	}
 
 	public List<Data> closedApplications(PayloadDetails payloadDetails) {
@@ -524,6 +537,13 @@ public class PGRService {
 
 
 		return response;
+	}
+
+	public HashMap<String, Long> totalApplicationsTenantWise(PayloadDetails payloadDetails) {
+		PgrSearchCriteria criteria = getPgrSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> totalApplication = pgrRepository.getTenantWiseTotalApplication(criteria);
+        return totalApplication;
 	}
 
 }

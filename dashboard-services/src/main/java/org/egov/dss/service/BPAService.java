@@ -61,6 +61,18 @@ public class BPAService {
 		return Arrays.asList(Data.builder()
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
+	
+	public Integer slaAchievedCount(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		Object slaAchievedAppCountObject = bpaRepository.getSlaAchievedAppCount(criteria);
+		if(slaAchievedAppCountObject == null) {
+			return 0;
+		}
+		Integer slaAchievedAppCount = (Integer) slaAchievedAppCountObject;
+		return slaAchievedAppCount;
+	}
 
 	public BpaSearchCriteria getBpaSearchCriteria(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = new BpaSearchCriteria();
@@ -550,5 +562,49 @@ public class BPAService {
         criteria.setSlaThreshold(config.getSlaOcPermitThreshold());
         return bpaRepository.getTenantWiseBpaTotalApplication(criteria);
     }
+
+	public HashMap<String, Long> totalApplicationsTenantWise(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		criteria.setStatus(null);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
+				.getTenantWiseApplicationsReceivedList(criteria);
+		return tenantWiseApplicationsReceivedList;
+	}
+
+	public HashMap<String, Long> totalBPAOcApplicationsTenantWise(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_OC_BUSINESS_SERVICES));
+		criteria.setStatus(null);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
+				.getTenantWiseApplicationsReceivedList(criteria);
+		return tenantWiseApplicationsReceivedList;
+	}
+
+	public HashMap<String, Long> bpaTotalApplicationsTenantWise(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
+				.getTenantWiseApplicationsReceivedList(criteria);
+		return tenantWiseApplicationsReceivedList;
+	}
+
+	public HashMap<String, Long> bpaOcTotalApplicationsTenantWise(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
+				.getTenantWiseApplicationsReceivedList(criteria);
+		return tenantWiseApplicationsReceivedList;
+	}
 
 }

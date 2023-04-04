@@ -3,7 +3,7 @@ package org.egov.dss.repository.builder;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.egov.dss.model.PropertySerarchCriteria;
+import org.egov.dss.model.PropertySerarchCriteria;import org.egov.dss.model.CommonSearchCriteria;
 import org.egov.dss.web.model.ChartCriteria;
 import org.springframework.stereotype.Component;
 

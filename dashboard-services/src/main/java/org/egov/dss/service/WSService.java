@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.Chart;
+import org.egov.dss.model.CommonSearchCriteria;
+import org.egov.dss.model.MarriageSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.WaterSearchCriteria;
 import org.egov.dss.repository.WSRepository;
@@ -42,6 +44,18 @@ public class WSService {
 		Integer slaAchievedAppCount = (Integer) wsRepository.getSlaAchievedAppCount(criteria);
 		return Arrays.asList(Data.builder()
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).headerSymbol("percentage").build());
+	}
+	
+	public Integer slaAchievedCount(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		Object slaAchievedAppCountObject = wsRepository.getSlaAchievedAppCount(criteria);
+		if(slaAchievedAppCountObject == null) {
+			return 0;
+		}
+		Integer slaAchievedAppCount = (Integer) slaAchievedAppCountObject;
+		return slaAchievedAppCount;
 	}
 	
 	public WaterSearchCriteria getWaterSearchCriteria(PayloadDetails payloadDetails) {
@@ -213,6 +227,21 @@ public class WSService {
 		criteria.setToDate(null);
 		Integer activeConnectionCount =  (Integer) wsRepository.getActiveWaterConnectionCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(activeConnectionCount).build());
+	}
+
+	public HashMap<String, Long> totalApplicationsTenantWise(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		HashMap<String, Long> totalApplication = wsRepository.getTenantWiseTotalApplication(criteria);
+        return totalApplication;
+	}
+
+	public HashMap<String, Long> wsTotalCompletedApplicationsTenantWise(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		HashMap<String, Long> totalApplication = wsRepository.getTenantWiseTotalApplication(criteria);
+        return totalApplication;
 	}
 
 }

@@ -67,7 +67,8 @@ public class PgrQueryBuilder {
 	public static final String PGR_IVR_COMPLAINT_MONTHWISE_COUNT = PGR_MONTH_YEAR +" , "+PGR_IVR_COUNT+PGR_TOTAL_COMPLAINTS_BY_SOURCE;
 	public static final String PGR_WEB_COMPLAINT_MONTHWISE_COUNT = PGR_MONTH_YEAR +" , "+PGR_WEB_COUNT+PGR_TOTAL_COMPLAINTS_BY_SOURCE;
 	public static final String PGR_MOBILEAPP_COMPLAINT_MONTHWISE_COUNT = PGR_MONTH_YEAR +" , "+PGR_MOBILEAPP_COUNT+PGR_TOTAL_COMPLAINTS_BY_SOURCE;
-	
+	public static final String PGR_COMPLAINTS_BY_TENANT = " select TENANTID as name, count(servicerequestid) as value from eg_pgr_service eps ";
+
 	
 	
 	public static String getTotalApplication(PgrSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
@@ -287,6 +288,14 @@ public class PgrQueryBuilder {
 		selectQuery.append(" ) tmpPgr ");
 		addGroupByClause(selectQuery," tmpPgr.monthYear ");
 		addOrderByClause(selectQuery," tmpPgr.monthYear asc ");
+		return selectQuery.toString();
+	}
+
+	public String getTenantWiseTotalApplication(PgrSearchCriteria pgrSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PGR_COMPLAINTS_BY_TENANT);
+		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
+	    addGroupByClause(selectQuery," eps.tenantid ");
 		return selectQuery.toString();
 	}
 
