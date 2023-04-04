@@ -408,10 +408,16 @@ public class PTService {
 			String tenantId = String.valueOf(entry.getKey());
 			String tenantIdStyled = tenantId.replace("od.", "");
 			tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
-			Long newAsmt = entry.getValue();
-			Long reAsmt = ptTotalAssessmentsTenantwiseCount.get(entry.getKey()) - newAsmt;
-			BigDecimal newAsmtShare = newAsmtShareList.get(entry.getKey());
-			BigDecimal reAsmtShare = reAsmtShareList.get(entry.getKey());
+			Long newAsmt = 0L;
+			Long reAsmt =  0L;
+			BigDecimal newAsmtShare =  BigDecimal.ZERO;
+			BigDecimal reAsmtShare =  BigDecimal.ZERO;
+			if(ptTotalAssessmentsTenantwiseCount.get(entry.getKey()) != null ){
+				newAsmt = entry.getValue();
+				reAsmt = ptTotalAssessmentsTenantwiseCount.get(entry.getKey()) - newAsmt;
+				newAsmtShare = newAsmtShareList.get(entry.getKey());
+				reAsmtShare = reAsmtShareList.get(entry.getKey());
+			}
 			List<Plot> row = new ArrayList<>();
 			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
 			row.add(Plot.builder().label(tenantIdStyled).name("DDRs").symbol("text").build());
