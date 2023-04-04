@@ -62,7 +62,7 @@ public class BPAService {
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).build());
 	}
 
-	private BpaSearchCriteria getBpaSearchCriteria(PayloadDetails payloadDetails) {
+	public BpaSearchCriteria getBpaSearchCriteria(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = new BpaSearchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {

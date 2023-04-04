@@ -133,6 +133,8 @@ public class RevenueService {
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
 		BigDecimal targetCollection = (BigDecimal) paymentRepository.getTtargetCollection(targerSearchCriteria);
 		//BigDecimal targetAchieved = totalCollection.multiply(new BigDecimal(100)).divide(targetCollection);
+		if(targetCollection.equals(BigDecimal.ZERO))
+			targetCollection = BigDecimal.ONE;			
 		BigDecimal targetAchieved = totalCollection.multiply(new BigDecimal(100)).divide(targetCollection, 2, RoundingMode.HALF_UP);
 		return Arrays.asList(Data.builder().headerValue(targetAchieved.setScale(2, RoundingMode.HALF_UP)).build());
 	}
@@ -490,6 +492,9 @@ public class RevenueService {
 			criteria.setToDate(payloadDetails.getEnddate());
 		}
 		
+		if(StringUtils.hasText(payloadDetails.getTimeinterval())) {
+			criteria.setFinancialYear(payloadDetails.getTimeinterval());
+		}
 		
 		return criteria;
 	}
@@ -555,8 +560,8 @@ public class RevenueService {
 	    LocalDate previousYearFromDate = fromDate.minusYears(1);
 	    LocalDate previousYearToDate = toDate.minusYears(1);
         Instant fromDateInstant =  previousYearFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant(); */
-        paymentSearchCriteria.setFromDate(Long.valueOf("1617215400000"));
-		paymentSearchCriteria.setToDate(Long.valueOf("1648665000000"));
+        paymentSearchCriteria.setFromDate(Long.valueOf("1648751400000"));
+		paymentSearchCriteria.setToDate(Long.valueOf("1680287399000"));
 		BigDecimal previousYearCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		return previousYearCollection;
 	}
@@ -790,10 +795,18 @@ public class RevenueService {
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 
 		BigDecimal previousYearCollection = getPreviousYearCollection(payloadDetails);
+		
+		TargetSearchCriteria targetCriteria = getTargetSearchCriteria(payloadDetails);
+		
+		BigDecimal previourYearTargetCollection = (BigDecimal) paymentRepository.getTtargetCollection(targetCriteria);
+	
+		if(previourYearTargetCollection.equals(null))
+			previourYearTargetCollection = BigDecimal.ONE;
+		
 		List<Chart> chart = new ArrayList<Chart>();
 		chart.add(Chart.builder().name(DashboardConstants.PREVIOUS_YEAR_TOTAL_COLLECTION).value(previousYearCollection)
 				.build());
-		chart.add(Chart.builder().name(DashboardConstants.PREVIOUS_YEAR_TARGET_COLLECTION).value(BigDecimal.ONE)
+		chart.add(Chart.builder().name(DashboardConstants.PREVIOUS_YEAR_TARGET_COLLECTION).value(previourYearTargetCollection)
 				.build());
 		List<Plot> plots = new ArrayList<Plot>();
 		extractDataForChart(chart, plots);
@@ -1332,6 +1345,23 @@ public class RevenueService {
 		}
 
 		return response;
+	}
+
+	public List<Data> totalCollectionDeptWise(PayloadDetails payloadDetails) {
+		
+		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		List<Chart> serviceWiseCollection = paymentRepository.getServiceWiseCollection(criteria);
+		
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(serviceWiseCollection, plots);
+		
+		BigDecimal total = serviceWiseCollection.stream().map(serviceType -> serviceType.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		
+		return Arrays.asList(
+				Data.builder().headerName("DSS_TOTAL_CUMULATIVE_COLLECTION").headerValue(total).plots(plots).build());
 	}
 	
 	

@@ -568,6 +568,12 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_PGR_TOTAL_COMPLAINTS_BY_SOURCE.equalsIgnoreCase(visualizationCode)) {
 			return pgrService.totalComplaintsBySource(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.REVENUE_TOTAL_COLLECTION_DEPT_WISE.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.totalCollectionDeptWise(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_TOTAL_APPLICATION_AND_CLOSD_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+			return commonService.totalApplicationAndClosed(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 
