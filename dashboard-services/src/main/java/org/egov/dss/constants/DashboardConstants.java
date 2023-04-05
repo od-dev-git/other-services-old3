@@ -209,6 +209,9 @@ public class DashboardConstants {
 	
 	public static final List<String> PGR_REQUEST_COMPLETED_STATUS = Collections
 			.unmodifiableList(Arrays.asList(STATUS_CLOSED,STATUS_RESOLVED,STATUS_REJECTED));
+	
+	public static final List<String> TIME_INTERVAL = Collections
+			.unmodifiableList(Arrays.asList(QUARTER,MONTH,WEEK));
 
 
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,8 +121,20 @@ public class RevenueService {
 	}
 
 	public List<Data> targetCollection(PayloadDetails payloadDetails) {
+		String temp = payloadDetails.getTimeinterval();
+		if(Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			payloadDetails.setTimeinterval(dashboardUtils.getCurrentFinancialYear());
+		}
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
 		BigDecimal targetCollection = (BigDecimal) paymentRepository.getTtargetCollection(targerSearchCriteria);
+		if(temp.equalsIgnoreCase(DashboardConstants.QUARTER)) {
+			targetCollection = targetCollection.divide(new BigDecimal(4), 2, RoundingMode.HALF_UP);
+		}else if(temp.equalsIgnoreCase(DashboardConstants.MONTH)) {
+			targetCollection = targetCollection.divide(new BigDecimal(12), 2, RoundingMode.HALF_UP);
+		}
+		else if(temp.equalsIgnoreCase(DashboardConstants.WEEK)) {
+			targetCollection = targetCollection.divide(new BigDecimal(48), 2, RoundingMode.HALF_UP);
+		}
 		return Arrays.asList(Data.builder().headerValue(targetCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
@@ -131,7 +144,8 @@ public class RevenueService {
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
-		BigDecimal targetCollection = (BigDecimal) paymentRepository.getTtargetCollection(targerSearchCriteria);
+		BigDecimal targetCollection = (BigDecimal) targetCollection(payloadDetails).get(0).getHeaderValue();
+		
 		//BigDecimal targetAchieved = totalCollection.multiply(new BigDecimal(100)).divide(targetCollection);
 		if(targetCollection.equals(BigDecimal.ZERO))
 			targetCollection = BigDecimal.ONE;			
