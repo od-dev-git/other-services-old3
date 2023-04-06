@@ -49,6 +49,8 @@ public class DashboardService {
 	private DashboardUtils utils;
 	
 	public void processRequest(RequestInfoWrapper requestInfoWrapper) {
+		int skipped = 0;
+		int processed = 0;
 		Long schedulerStartTime = System.currentTimeMillis();
 		ResponseData responseData = new ResponseData();
 		requestEnrich(requestInfoWrapper.getChartCriteria());
@@ -63,7 +65,11 @@ public class DashboardService {
 				payloadDetails.setLastModifiedTime(schedulerStartTime);
 				if (responseData.getData() != null) {
 					commonRepository.update(payloadDetails);
+					processed++;
+				} else {
+					skipped++;
 				}
+
 			} catch (Exception e) {
 				log.error("Unable to process for visualization code :" + payloadDetails.getVisualizationcode()
 						+ " Module :" + payloadDetails.getModulelevel());
@@ -72,6 +78,8 @@ public class DashboardService {
 			}
 
 		}
+		log.info("Record updated : " + processed + ", Skipped : " + skipped);
+		log.info("================= Scheduler completed successfully ===========================");
 
 	}
 	
