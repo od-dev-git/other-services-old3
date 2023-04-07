@@ -177,17 +177,13 @@ public class PaymentQueryBuilder {
 	private static void addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			PaymentSearchCriteria searchCriteria) {
 
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+		 if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" py.tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" py.tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
+			selectQuery.append(" py.tenantId in ( :tenantId )");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds() );
 			}
 
-		}
+
 
 //		if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
 //			if (searchCriteria.getBusinessServices() != null && searchCriteria.getBusinessServices().contains("TL")) {
@@ -335,10 +331,10 @@ public class PaymentQueryBuilder {
 		
 		StringBuilder query = new StringBuilder(USAGE_TYPE_QUERY);
 		
-		if(paymentSearchCriteria.getTenantId() != null) {
+		if(paymentSearchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(paymentSearchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, query);
-			query.append(" epp.tenantid = :tenantId ");
-			preparedStatementValues.put("tenantId", paymentSearchCriteria.getTenantId());
+			query.append(" epp.tenantid in (:tenantId )");
+			preparedStatementValues.put("tenantId", paymentSearchCriteria.getTenantIds());
 		}
 		
 		if(paymentSearchCriteria.getFromDate() != null) {
@@ -359,19 +355,13 @@ public class PaymentQueryBuilder {
 	private static void addWhereClauseForProperties(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			PaymentSearchCriteria searchCriteria) {
 
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			    addClauseIfRequired(preparedStatementValues, selectQuery);
+			    selectQuery.append(" tenantId in (:tenantId)");
+				preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 			}
-
-		}
-
-       if (searchCriteria.getFromDate() != null) {
+		
+        if (searchCriteria.getFromDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" createdtime >= :fromDate");
 			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
@@ -406,16 +396,10 @@ public class PaymentQueryBuilder {
 	private static String addWhereClauseForTaget(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			TargetSearchCriteria searchCriteria) {
 
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+        if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" edt.tenantidformunicipalcorporation =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" edt.tenantidformunicipalcorporation LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
-
+			selectQuery.append("  edt.tenantid IN ( :tenantId )");
+			preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
 		}
 
 		if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
@@ -491,16 +475,10 @@ public class PaymentQueryBuilder {
 	    private void addWhereClauseForTL(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 				PaymentSearchCriteria searchCriteria) {
 	    	
-	    	if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
-				addClauseIfRequired(preparedStatementValues, selectQuery);
-				if (searchCriteria.getTenantId().split("\\.").length > 1) {
-					selectQuery.append(" tenantId =:tenantId");
-					preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-				} else {
-					selectQuery.append(" tenantId LIKE :tenantId");
-					preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-				}
-
+	    	if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			    addClauseIfRequired(preparedStatementValues, selectQuery);
+			    selectQuery.append(" tenantId in (:tenantId)");
+				preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 			}
 
 	       if (searchCriteria.getFromDate() != null) {
@@ -526,16 +504,10 @@ public class PaymentQueryBuilder {
 	    private void addWhereClauseForMR(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 				PaymentSearchCriteria searchCriteria) {
 	    	
-	    	if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
-				addClauseIfRequired(preparedStatementValues, selectQuery);
-				if (searchCriteria.getTenantId().split("\\.").length > 1) {
-					selectQuery.append(" tenantId =:tenantId");
-					preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-				} else {
-					selectQuery.append(" tenantId LIKE :tenantId");
-					preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-				}
-
+	    	if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			    addClauseIfRequired(preparedStatementValues, selectQuery);
+			    selectQuery.append(" tenantId in (:tenantId)");
+				preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 			}
 
 	       if (searchCriteria.getFromDate() != null) {

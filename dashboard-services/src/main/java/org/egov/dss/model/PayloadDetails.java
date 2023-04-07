@@ -63,5 +63,8 @@ public class PayloadDetails {
 	
 	@JsonProperty("lastModifiedTime")
 	private Long lastModifiedTime;
+	
+	@JsonProperty("tableName")
+	private String tableName;
 
 }

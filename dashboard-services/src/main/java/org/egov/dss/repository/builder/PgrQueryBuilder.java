@@ -7,6 +7,7 @@ import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.model.PgrSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class PgrQueryBuilder {
@@ -87,16 +88,11 @@ public class PgrQueryBuilder {
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			PgrSearchCriteria searchCriteria) {
 
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" eps.tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" eps.tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
 
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" eps.tenantId IN ( :tenantId )");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 		}
 
 		if (searchCriteria.getFromDate() != null) {

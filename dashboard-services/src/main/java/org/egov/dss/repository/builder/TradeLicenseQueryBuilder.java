@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.model.TLSearchCriteria;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class TradeLicenseQueryBuilder {
@@ -98,19 +99,13 @@ public class TradeLicenseQueryBuilder {
 
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			TLSearchCriteria searchCriteria) {
-
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+        
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" ett.tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" ett.tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
-
+			selectQuery.append(" ett.tenantid in (:tenantId)");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 		}
-
+		
 		if (searchCriteria.getFromDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			if (searchCriteria.getIsApplicationDate() == Boolean.TRUE) {

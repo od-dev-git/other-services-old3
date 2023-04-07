@@ -31,5 +31,8 @@ public class ChartCriteria {
 	
 	@JsonProperty("endDate")
 	private Long endDate;
+	
+	@JsonProperty("tableName")
+	private String tableName;
 
 }
