@@ -390,15 +390,15 @@ public class PaymentQueryBuilder {
 	
 	public static String getTargetCollection(TargetSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TARGET_COLLECTION_QUERY);
-		return addWhereClauseForTaget(selectQuery, preparedStatementValues, criteria);
+		return addWhereClauseForTarget(selectQuery, preparedStatementValues, criteria);
 	}
 	
-	private static String addWhereClauseForTaget(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+	private static String addWhereClauseForTarget(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			TargetSearchCriteria searchCriteria) {
 
         if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append("  edt.tenantid IN ( :tenantId )");
+			selectQuery.append("  edt.tenantidformunicipalcorporation IN ( :tenantId )");
 			preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
 		}
 
@@ -442,7 +442,7 @@ public class PaymentQueryBuilder {
 	public String getTenantWiseTargetCollection(TargetSearchCriteria targerSearchCriteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TENANT_WISE_TARGET_COLLECTION_QUERY);
-		addWhereClauseForTaget(selectQuery, preparedStatementValues, targerSearchCriteria);
+		addWhereClauseForTarget(selectQuery, preparedStatementValues, targerSearchCriteria);
 		selectQuery.append(" group by tenantid  ");
 		return selectQuery.toString();
 	}
