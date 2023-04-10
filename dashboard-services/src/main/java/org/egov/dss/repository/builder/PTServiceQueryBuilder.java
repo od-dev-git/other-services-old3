@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class PTServiceQueryBuilder {
@@ -53,16 +54,10 @@ public class PTServiceQueryBuilder {
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			PropertySerarchCriteria searchCriteria,boolean isULBPerformance) {
 
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" epaa.tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-		} else {
-				selectQuery.append(" epaa.tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
-
+			selectQuery.append(" epaa.tenantId in ( :tenantIds )");
+			preparedStatementValues.put("tenantIds",searchCriteria.getTenantIds());
 		}
 
        if (searchCriteria.getFromDate() != null) {
@@ -144,16 +139,10 @@ public class PTServiceQueryBuilder {
 		selectQuery.append(" pay.paymentstatus != 'CANCELLED' ");
 		preparedStatementValues.put("paymentstatus", "CANCELLED");
 
-		if (StringUtils.isNotBlank(propertySearchCriteria.getTenantId())) {
+		if (propertySearchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(propertySearchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (propertySearchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" pay.tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", propertySearchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" pay.tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", propertySearchCriteria.getTenantId() + "%");
-			}
-
+			selectQuery.append(" pay.tenantId in ( :tenantId )");
+			preparedStatementValues.put("tenantId", propertySearchCriteria.getTenantIds());
 		}
 
 		if (propertySearchCriteria.getFromDate() != null) {
@@ -257,17 +246,11 @@ public class PTServiceQueryBuilder {
 	
 	private static String addWhereClauseWithLastModifiedTime(StringBuilder selectQuery,
 			Map<String, Object> preparedStatementValues, PropertySerarchCriteria searchCriteria) {
-
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" epaa.tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" epaa.tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
-
+		
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+		    addClauseIfRequired(preparedStatementValues, selectQuery);
+		    selectQuery.append(" epaa.tenantId in (:tenantId)");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 		}
 
 		if (searchCriteria.getFromDate() != null) {

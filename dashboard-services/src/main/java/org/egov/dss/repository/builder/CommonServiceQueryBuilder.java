@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.model.CommonSearchCriteria;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class CommonServiceQueryBuilder {
@@ -29,16 +30,11 @@ public class CommonServiceQueryBuilder {
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			CommonSearchCriteria searchCriteria) {
 
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append("  tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append("  tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
 
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append("  tenantid IN ( :tenantId )");
+			preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
 		}
 
 		if (searchCriteria.getFromDate() != null) {

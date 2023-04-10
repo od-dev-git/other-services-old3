@@ -2,25 +2,21 @@ package org.egov.dss.service;
 
 import java.util.Arrays;
 import java.util.Calendar;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoField;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.enums.ChartType;
 import org.egov.dss.repository.CommonRepository;
+import org.egov.dss.util.DashboardUtility;
 import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.ChartCriteria;
 import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Filter;
+import org.egov.dss.web.model.Plot;
 import org.egov.dss.web.model.RequestInfoWrapper;
 import org.egov.dss.web.model.ResponseData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,32 +49,46 @@ public class DashboardService {
 		int processed = 0;
 		Long schedulerStartTime = System.currentTimeMillis();
 		ResponseData responseData = new ResponseData();
-		requestEnrich(requestInfoWrapper.getChartCriteria());
-		List<PayloadDetails> payloadList = getPayloadForScheduler(requestInfoWrapper.getChartCriteria());
-		for (PayloadDetails payloadDetails : payloadList) {
+		HashMap<String, String> tenantsTableMap = DashboardUtility.getSystemProperties().getTenantstable();
+		for (Map.Entry<String, String> tenantTableMap : tenantsTableMap.entrySet()) {
 			try {
-				enrichPayload(payloadDetails);
-				payloadDetails.setEnddate(requestInfoWrapper.getChartCriteria().getEndDate());
-				requestInfoWrapper.setPayloadDetails(payloadDetails);
-				responseData = serveRequest(requestInfoWrapper);
-				payloadDetails.setResponsedata(responseData);
-				payloadDetails.setLastModifiedTime(schedulerStartTime);
-				if (responseData.getData() != null) {
-					commonRepository.update(payloadDetails);
-					processed++;
-				} else {
-					skipped++;
+				requestInfoWrapper.getChartCriteria().setTableName(tenantTableMap.getValue());
+				requestEnrich(requestInfoWrapper.getChartCriteria());
+				List<PayloadDetails> payloadList = getPayloadForScheduler(requestInfoWrapper.getChartCriteria());
+				for (PayloadDetails payloadDetails : payloadList) {
+					try {
+						enrichPayload(payloadDetails);
+						payloadDetails.setEnddate(requestInfoWrapper.getChartCriteria().getEndDate());
+						requestInfoWrapper.setPayloadDetails(payloadDetails);
+						responseData = serveRequest(requestInfoWrapper);
+						payloadDetails.setTableName(tenantTableMap.getValue());
+						payloadDetails.setResponsedata(responseData);
+						payloadDetails.setLastModifiedTime(schedulerStartTime);
+						if (responseData.getData() != null) {
+							commonRepository.update(payloadDetails);
+							processed++;
+						} else {
+							skipped++;
+						}
+
+					} catch (Exception e) {
+						log.error("Unable to process for visualization code :" + payloadDetails.getVisualizationcode()
+								+ " Module :" + payloadDetails.getModulelevel() + " Table Name : "
+								+ tenantTableMap.getValue());
+						e.printStackTrace();
+
+					}
+
 				}
-
+				log.info("Record updated : " + processed + ", Skipped : " + skipped + " Table Name : "
+						+ tenantTableMap.getValue());
+				processed = 0;
+				skipped = 0;
 			} catch (Exception e) {
-				log.error("Unable to process for visualization code :" + payloadDetails.getVisualizationcode()
-						+ " Module :" + payloadDetails.getModulelevel());
+				log.error("Unable to update table : " + tenantTableMap.getValue());
 				e.printStackTrace();
-
 			}
-
 		}
-		log.info("Record updated : " + processed + ", Skipped : " + skipped);
 		log.info("================= Scheduler completed successfully ===========================");
 
 	}
