@@ -1,3 +1,6 @@
+-- Create state schema for dashboard
+CREATE SCHEMA IF NOT EXISTS state;
+
 CREATE TABLE IF NOT EXISTS state.eg_dss_target (
 	id varchar NOT NULL,
 	snoForMunicipalCorporation varchar NULL,
