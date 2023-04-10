@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.model.WaterSearchCriteria;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class WaterServiceQueryBuilder {
@@ -51,17 +52,11 @@ public class WaterServiceQueryBuilder {
 
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			WaterSearchCriteria searchCriteria) {
-
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" conn.tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" conn.tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
-
+		
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+		    addClauseIfRequired(preparedStatementValues, selectQuery);
+		    selectQuery.append(" conn.tenantId in (:tenantId)");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 		}
 
 		if (searchCriteria.getFromDate() != null) {
@@ -148,17 +143,12 @@ public class WaterServiceQueryBuilder {
     private static String addWhereClauseWithCreatedTime(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			WaterSearchCriteria searchCriteria ) {
 
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" conn.tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" conn.tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
-
+    	if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+		    addClauseIfRequired(preparedStatementValues, selectQuery);
+		    selectQuery.append(" conn.tenantId in (:tenantId)");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 		}
+    	
 		if (searchCriteria.getFromDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" conn.createdtime >= :fromDate");

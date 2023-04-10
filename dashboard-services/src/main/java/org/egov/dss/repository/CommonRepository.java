@@ -58,7 +58,9 @@ public class CommonRepository {
     }
 
 	public void update(PayloadDetails payloadDetails) {
-		jdbcTemplate.update(commonQueryBuilder.RESPONSE_DATA_UPDATE_QUERY, new PreparedStatementSetter() {
+		String finalQuery = commonQueryBuilder.RESPONSE_DATA_UPDATE_QUERY.replace("{tableName}",
+				payloadDetails.getTableName());
+		jdbcTemplate.update(finalQuery, new PreparedStatementSetter() {
 
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.model.PropertySerarchCriteria;import org.egov.dss.model.CommonSearchCriteria;
 import org.egov.dss.web.model.ChartCriteria;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.jayway.jsonpath.Criteria;
 
@@ -14,16 +15,17 @@ public class CommonQueryBuilder {
 	
 	public static final String PAYLOAD_QUERY_SQL = " select edd.id, edd.visualizationcode, edd.modulelevel, edd.startdate, edd.enddate, edd.timeinterval,"
 			+ "edd.charttype , edd.tenantid, edd.districtid, edd.city, edd.headername, edd.valuetype"
-			+ " from eg_dss_response edd ";
+			+ " from {tableName} edd ";
 	
-    public static final String RESPONSE_DATA_UPDATE_QUERY = "Update eg_dss_response set responsedata = ?, lastmodifiedtime = ?, startdate = ?, enddate = ? where id =? ";
+    public static String RESPONSE_DATA_UPDATE_QUERY = "Update {tableName} set responsedata = ?, lastmodifiedtime = ?, startdate = ?, enddate = ? where id =? ";
     
     public static final String PROPERTY_QUERY = " select to_char(monthYear, 'Mon-YYYY') as name, sum(completionApplication) over (order by monthYear asc rows between unbounded preceding and current row) as value "
     		+ "from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') as monthYear, "
     		+ "count(*) completionApplication from eg_pt_property ";
     
     public static String fetchSchedulerPayloads(ChartCriteria criteria, Map<String, Object> preparedStatementValues) {
-		StringBuilder selectQuery = new StringBuilder(PAYLOAD_QUERY_SQL);
+    	String finalQuery = PAYLOAD_QUERY_SQL.replace("{tableName}", criteria.getTableName());
+		StringBuilder selectQuery = new StringBuilder(finalQuery);
 		return addWhereClause(selectQuery, preparedStatementValues, criteria);
 	}
     
@@ -58,17 +60,12 @@ public class CommonQueryBuilder {
 	
 	private String addWhereClauseForProperty(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			PropertySerarchCriteria searchCriteria) {
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+		
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-		} else {
-				selectQuery.append(" tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
-
-		}
+			selectQuery.append(" tenantId IN ( :tenantId)");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
+	    }
 
        if (searchCriteria.getFromDate() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);

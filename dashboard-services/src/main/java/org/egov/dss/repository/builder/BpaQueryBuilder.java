@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.model.BpaSearchCriteria;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class BpaQueryBuilder {
@@ -44,17 +45,12 @@ public static final String BPA_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED = " select bpa
 
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			BpaSearchCriteria searchCriteria) {
+        
 
-		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			if (searchCriteria.getTenantId().split("\\.").length > 1) {
-				selectQuery.append(" bpa.tenantId =:tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-			} else {
-				selectQuery.append(" bpa.tenantId LIKE :tenantId");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
-			}
-
+			selectQuery.append(" bpa.tenantid IN ( :tenantId )");
+			preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
 		}
 
 		if (searchCriteria.getFromDate() != null) {
