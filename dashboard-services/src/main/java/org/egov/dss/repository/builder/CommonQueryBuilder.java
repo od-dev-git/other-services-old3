@@ -15,9 +15,9 @@ public class CommonQueryBuilder {
 	
 	public static final String PAYLOAD_QUERY_SQL = " select edd.id, edd.visualizationcode, edd.modulelevel, edd.startdate, edd.enddate, edd.timeinterval,"
 			+ "edd.charttype , edd.tenantid, edd.districtid, edd.city, edd.headername, edd.valuetype"
-			+ " from {tableName} edd ";
+			+ " from state.{tableName} edd ";
 	
-    public static String RESPONSE_DATA_UPDATE_QUERY = "Update {tableName} set responsedata = ?, lastmodifiedtime = ?, startdate = ?, enddate = ? where id =? ";
+    public static String RESPONSE_DATA_UPDATE_QUERY = "Update state.{tableName} set responsedata = ?, lastmodifiedtime = ?, startdate = ?, enddate = ? where id =? ";
     
     public static final String PROPERTY_QUERY = " select to_char(monthYear, 'Mon-YYYY') as name, sum(completionApplication) over (order by monthYear asc rows between unbounded preceding and current row) as value "
     		+ "from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') as monthYear, "
