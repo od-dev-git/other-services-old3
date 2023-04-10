@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS eg_dss_target (
+CREATE TABLE IF NOT EXISTS state.eg_dss_target (
 	id varchar NOT NULL,
 	snoForMunicipalCorporation varchar NULL,
 	tenantIdForMunicipalCorporation varchar NULL,
@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS eg_dss_target (
 	CONSTRAINT pk_eg_dss_target PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_eg_dss_target_id ON eg_dss_target(id);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_target_ulbName ON eg_dss_target(ulbName);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_target_districtId ON eg_dss_target(districtId);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_target_tenantIdForMunicipalCorporation ON eg_dss_target(tenantIdForMunicipalCorporation);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_target_financialYear ON eg_dss_target(financialYear);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_target_businessService ON eg_dss_target(businessService);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_target_id ON state.eg_dss_target(id);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_target_ulbName ON state.eg_dss_target(ulbName);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_target_districtId ON state.eg_dss_target(districtId);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_target_tenantIdForMunicipalCorporation ON state.eg_dss_target(tenantIdForMunicipalCorporation);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_target_financialYear ON state.eg_dss_target(financialYear);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_target_businessService ON state.eg_dss_target(businessService);
