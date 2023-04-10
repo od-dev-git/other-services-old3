@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS eg_dss_response (
+CREATE TABLE IF NOT EXISTS state.eg_dss_response (
 	id varchar NOT NULL,
 	visualizationcode varchar NULL,
 	modulelevel varchar NULL,
@@ -15,15 +15,15 @@ CREATE TABLE IF NOT EXISTS eg_dss_response (
 	CONSTRAINT pk_eg_dss_response PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_id ON eg_dss_response(id);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_visualizationcode ON eg_dss_response(visualizationcode);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_modulelevel ON eg_dss_response(modulelevel);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_startdate ON eg_dss_response(startdate);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_enddate ON eg_dss_response(enddate);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_timeinterval ON eg_dss_response(timeinterval);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_charttype ON eg_dss_response(charttype);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_tenantid ON eg_dss_response(tenantid);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_districtid ON eg_dss_response(districtid);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_city ON eg_dss_response(city);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_headername ON eg_dss_response(headername);
-CREATE INDEX IF NOT EXISTS idx_eg_dss_response_valuetype ON eg_dss_response(valuetype);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_id ON state.eg_dss_response(id);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_visualizationcode ON state.eg_dss_response(visualizationcode);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_modulelevel ON state.eg_dss_response(modulelevel);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_startdate ON state.eg_dss_response(startdate);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_enddate ON state.eg_dss_response(enddate);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_timeinterval ON state.eg_dss_response(timeinterval);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_charttype ON state.eg_dss_response(charttype);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_tenantid ON state.eg_dss_response(tenantid);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_districtid ON state.eg_dss_response(districtid);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_city ON state.eg_dss_response(city);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_headername ON state.eg_dss_response(headername);
+CREATE INDEX IF NOT EXISTS idx_eg_dss_response_valuetype ON state.eg_dss_response(valuetype);
