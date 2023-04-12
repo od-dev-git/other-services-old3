@@ -21,6 +21,7 @@ import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -380,7 +381,18 @@ public class PTService {
 				}
 				 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
 			 }	
-			
+			 
+			 if(CollectionUtils.isEmpty(response)) {
+				 serailNumber++;
+				 List<Plot> row = new ArrayList<>();
+					row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+					row.add(Plot.builder().label(payloadDetails.getTenantid()).name("DDRs").symbol("text").build());
+					row.add(Plot.builder().name("2021-2022").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("2022-2023").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("2023-2024").value(BigDecimal.ZERO).symbol("number").build());
+					response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber).plots(row).insight(null).build());
+			 }
+			 
 		return response;
 	}
 
@@ -409,7 +421,7 @@ public class PTService {
 
 		List<Data> response = new ArrayList();
 		int serailNumber = 0;
-
+  
 		for (HashMap.Entry<String, Long> entry : ptTotalNewAssessmentsTenantwiseCount.entrySet()) {
 
 			System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
@@ -446,8 +458,30 @@ public class PTService {
 
 			response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null)
 					.build());
-
+            
 		}
+		
+	      if(CollectionUtils.isEmpty(response)) {
+	    	    serailNumber++;
+	        	List<Plot> row = new ArrayList<>();
+				row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+				row.add(Plot.builder().label(String.valueOf(payloadDetails.getTenantid())).name("DDRs").symbol("text").build());
+
+				row.add(Plot.builder().name(String.valueOf("New Assessments"))
+						.value(BigDecimal.ZERO).symbol("number").build());
+
+				row.add(Plot.builder().name(String.valueOf("New_Assesment_Share"))
+						.value(BigDecimal.ZERO).symbol("percentage").build());
+
+				row.add(Plot.builder().name(String.valueOf("Reassessed Properties"))
+						.value(BigDecimal.ZERO).symbol("number").build());
+
+				row.add(Plot.builder().name(String.valueOf("Reassessment_Share"))
+						.value(BigDecimal.ZERO).symbol("percentage").build());
+
+				response.add(Data.builder().headerValue(serailNumber).plots(row).insight(null)
+						.build());
+	        }
 
 		return response;
 	}
