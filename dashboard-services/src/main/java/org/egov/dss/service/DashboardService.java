@@ -1,10 +1,12 @@
 package org.egov.dss.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
@@ -21,7 +23,11 @@ import org.egov.dss.web.model.RequestInfoWrapper;
 import org.egov.dss.web.model.ResponseData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -100,8 +106,28 @@ public class DashboardService {
 		responseData.setData(data);
 		if(data != null && !data.isEmpty()) {
 		setConfiguration(requestInfoWrapper, responseData);
+		}else {
+			responseData = setConfigurationForEmptyObject(requestInfoWrapper, responseData);
 		}
 		return responseData;
+	}
+
+	private ResponseData setConfigurationForEmptyObject(RequestInfoWrapper requestInfoWrapper, ResponseData responseData) {
+		String internalChartId = requestInfoWrapper.getPayloadDetails().getVisualizationcode();
+		String chartType = requestInfoWrapper.getPayloadDetails().getCharttype();
+		String chartName = requestInfoWrapper.getPayloadDetails().getHeadername();
+		String valueType = requestInfoWrapper.getPayloadDetails().getValuetype();
+	    responseData = 	ResponseData.builder().chartType(chartType).visualizationCode(internalChartId).build();		
+	      if (chartType.equalsIgnoreCase(DashboardConstants.PERFORM)) {
+			List<Data> responseList = new ArrayList<>();
+			int rank = 0;
+				List<Plot> plots = Arrays
+						.asList(Plot.builder().symbol("percentage").label("DSS_TARGET_ACHIEVED").build());
+				responseList.add(Data.builder().plots(plots).headerName(DashboardConstants.RANK).headerValue(rank).build());
+				responseData.setData(responseList);
+			
+		} 
+	      return responseData;
 	}
 
 	private void setConfiguration(RequestInfoWrapper requestInfoWrapper, ResponseData responseData) {
@@ -120,10 +146,18 @@ public class DashboardService {
 		responseData.setChartType(chartType.toString());
 		responseData.setVisualizationCode(internalChartId);
 		//responseData.setDrillDownChartId(drillChart);
-		if(chartType.equalsIgnoreCase(DashboardConstants.PERFORM)) {
-			responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
-			responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
-		}else {
+		if (chartType.equalsIgnoreCase(DashboardConstants.PERFORM)) {
+			if (Objects.isNull(responseData) && ObjectUtils.isEmpty(responseData)) {
+				List<Data> responseList = new ArrayList<>();
+				List<Plot> plots = Arrays
+						.asList(Plot.builder().symbol("percentage").label("DSS_TARGET_ACHIEVED").build());
+				responseList.add(Data.builder().plots(plots).headerValue(0).build());
+				responseData.setData(responseList);
+			} else {
+				responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
+				responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
+			}
+		} else {
 			if(!(chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString()) || chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {
 				responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
 			}

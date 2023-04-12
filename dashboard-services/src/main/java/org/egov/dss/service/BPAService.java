@@ -29,6 +29,7 @@ import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -477,6 +478,42 @@ public class BPAService {
             serialNumber++;
 
         }
+        
+		if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Applications Submitted").value(BigDecimal.ZERO).symbol("number")
+					.build());
+
+			plots.add(Plot.builder().name("Total Permits Issued").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total BPA Application Pending").value(BigDecimal.ZERO).symbol("number")
+					.build());
+
+			plots.add(Plot.builder().name("Average days to issue Permit").value(BigDecimal.ZERO).symbol("number")
+					.build());
+
+			plots.add(Plot.builder().name("SLA Compliance Permit").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total OC Submitted").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total OC Application Pending").value(BigDecimal.ZERO).symbol("number")
+					.build());
+
+			plots.add(Plot.builder().name("Total OC Issued").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Average days to issue OC").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("SLA Compliance OC").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
+		}
 
         return response;
     }
