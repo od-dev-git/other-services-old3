@@ -17,6 +17,7 @@ import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -207,6 +208,25 @@ public class WSService {
 
 				 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
 			 }	
+
+				if (CollectionUtils.isEmpty(response)) {
+					serailNumber++;
+					List<Plot> row = new ArrayList<>();
+					row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+					row.add(Plot.builder().label(payloadDetails.getTenantid()).name("DDRs").symbol("text").build());
+					row.add(Plot.builder().name("Pending_from_0_to_3_days").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Pending_from_3_to_7_days").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Pending_from_7_to_15_days").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Pending_from_more_than_15_days").value(BigDecimal.ZERO)
+							.symbol("number").build());
+					row.add(Plot.builder().name("Total_Pending_Applications").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber)
+							.plots(row).insight(null).build());
+				}
 
 		return response;
 	}

@@ -19,6 +19,7 @@ import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -225,6 +226,26 @@ public class TLService {
 
 			response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null)
 					.build());
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serailNumber++;
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(payloadDetails.getTenantid()).name("ULBs").symbol("text").build());
+            row.add(Plot.builder().name("Approved").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Initiated").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Rejected").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending Approval").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Field Inspection").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Cancelled").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending Payment").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Citizen Action Pending").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Doc Verification Pending").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Expired").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber).plots(row)
+					.insight(null).build());
 		}
 
 		return response;
