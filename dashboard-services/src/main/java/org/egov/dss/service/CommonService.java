@@ -103,8 +103,10 @@ public class CommonService {
 		// change it
 		List<Data> totalApplicationsList = totalApplication(payloadDetails);
 		Double totalApplications = new Double(totalApplicationsList.get(0).getHeaderValue().toString());
-		Double slaAchieved = ((pgrSla + ptSla + bpaSla + wsSla + tlSla + mrSla) * 100) / totalApplications;
-
+		Double slaAchieved = ((ptSla + pgrSla  + bpaSla + wsSla + tlSla + mrSla) * 100) / totalApplications;
+        if(slaAchieved > 100) {
+        	slaAchieved =  100.0;
+        }
 		return Arrays.asList(Data.builder().headerValue(slaAchieved).build());
 	}
 
@@ -123,7 +125,7 @@ public class CommonService {
 		Integer tlCount = (Integer) tlService.totalApplications(payloadDetails).get(0).getHeaderValue();
 		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_MR);
 		Integer mrCount = (Integer) mrService.totalApplications(payloadDetails).get(0).getHeaderValue();
-		Integer totalApplications = (pgrCount + ptCount + bpaCount + bpaOcCount + wsCount + tlCount + mrCount);
+		Integer totalApplications = (ptCount + pgrCount  + bpaCount + bpaOcCount + wsCount + tlCount + mrCount);
 
 		return Arrays.asList(Data.builder().headerValue(totalApplications).build());
 	}

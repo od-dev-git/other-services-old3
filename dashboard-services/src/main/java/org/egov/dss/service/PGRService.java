@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -310,6 +312,21 @@ public class PGRService {
 			serialNumber++;
 
 		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+			plots.add(Plot.builder().name("Closed Complaints").value(BigDecimal.ZERO).symbol("number").build());
+			plots.add(Plot.builder().name("Reopened Complaints").value(BigDecimal.ZERO).symbol("number").build());
+			plots.add(Plot.builder().name("Open Complaints").value(BigDecimal.ZERO).symbol("number").build());
+			plots.add(Plot.builder().name("Total Complaints").value(BigDecimal.ZERO).symbol("amount").build());
+			plots.add(Plot.builder().name("Completion Rate").value(BigDecimal.ZERO).symbol("percentage").build());
+			plots.add(Plot.builder().name("SLA Achieved").value(BigDecimal.ZERO).symbol("percentage").build());
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+		}
+
 		return response;
 	}
 	
