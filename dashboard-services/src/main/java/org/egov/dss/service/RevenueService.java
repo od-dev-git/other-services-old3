@@ -51,6 +51,7 @@ import org.egov.dss.web.model.Plot;
 import org.egov.dss.web.model.PlotWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JacksonInject.Value;
@@ -569,6 +570,8 @@ public class RevenueService {
 
 	public BigDecimal getPreviousYearCollection(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 	/*	LocalDate fromDate = Instant.ofEpochMilli(payloadDetails.getStartdate()).atZone(ZoneId.systemDefault()).toLocalDate();
 		LocalDate toDate = Instant.ofEpochMilli(payloadDetails.getEnddate()).atZone(ZoneId.systemDefault()).toLocalDate();
 	    LocalDate previousYearFromDate = fromDate.minusYears(1);
@@ -799,6 +802,34 @@ public class RevenueService {
 
 				 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
 			 }	
+			 
+				if (CollectionUtils.isEmpty(response)) {
+
+					List<Plot> row = new ArrayList<>();
+					row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+					row.add(Plot.builder().label(payloadDetails.getTenantid()).name("DDRs").symbol("text").build());
+
+					row.add(Plot.builder().name("Holding Tax").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Light Tax").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Water Tax").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Service Tax").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Other Tax").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Drainage Tax").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Latrine Tax").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Penalty").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Rebate").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Interest").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Parking Tax").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Ownership Exemption").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Solid Waste User charges").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Usage Exemption").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Total Amount").value(BigDecimal.ZERO).symbol("number").build());
+
+					response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber)
+							.plots(row).insight(null).build());
+
+				}
 			
 		return response;
 	}
@@ -873,6 +904,23 @@ public class RevenueService {
 
 			serialNumber++;
 
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Collection").value(BigDecimal.ZERO).symbol("amount").build());
+
+			plots.add(Plot.builder().name("Transactions").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Assessed Properties").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
 		}
 
 		return response;
@@ -950,6 +998,25 @@ public class RevenueService {
 			
 			serialNumber++;
 
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Card Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Online Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cheque Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cash Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
 		}
 
 		return response;
@@ -1075,6 +1142,23 @@ public class RevenueService {
 			response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null)
 					.build());
 		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(payloadDetails.getTenantid()).name("DDRs").symbol("text").build());
+
+			row.add(Plot.builder().name("Water Charges").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Sewerage Charges").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Sewerage Adhoc Charges").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Penalty").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Rebate").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Interest").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber).plots(row)
+					.insight(null).build());
+		}
 
 		return response;
 	}
@@ -1122,6 +1206,24 @@ public class RevenueService {
 					.build());
 
 			serialNumber++;
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Collection").value(BigDecimal.ZERO).symbol("amount").build());
+
+			plots.add(Plot.builder().name("Transactions").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total_Connections").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().plots(plots).headerValue(serialNumber).headerName(payloadDetails.getTenantid())
+					.build());
+
 		}
 
 		return response;
@@ -1209,6 +1311,19 @@ public class RevenueService {
 					.build());
 
 			serialNumber++;
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Collection").value(BigDecimal.ZERO).symbol("amount").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
 		}
 
 		return response;
@@ -1305,6 +1420,25 @@ public class RevenueService {
 			serialNumber++;
 
 		}
+		if (CollectionUtils.isEmpty(response)) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Collection").value(BigDecimal.ZERO).symbol("amount").build());
+
+			plots.add(Plot.builder().name("Transactions").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Licenses Issued").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Target Collection").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Target Achieved").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+		}
 
 		return response;
 	}
@@ -1355,6 +1489,24 @@ public class RevenueService {
 					.headerName(tenantWiseCollection.getKey()).build());
 
 			serialNumber++;
+
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Collection").value(BigDecimal.ZERO).symbol("amount").build());
+
+			plots.add(Plot.builder().name("Transactions").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Applications").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
 
 		}
 
