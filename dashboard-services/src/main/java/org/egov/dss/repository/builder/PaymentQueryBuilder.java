@@ -79,7 +79,7 @@ public class PaymentQueryBuilder {
 	public static final String ALL_BUSINESS_SERVICE = " 'PT','WS','TL','MR','WS.ONE_TIME_FEE','SW','SW.ONE_TIME_FEE',"
 	        +" 'PT.MUTATION','BPA.NC_APP_FEE','BPA.NC_SAN_FEE','BPA.NC_OC_APP_FEE','BPA.NC_OC_SAN_FEE' "; 
 	
-	public static final String TARGET_COLLECTION_QUERY = " select COALESCE (sum(budgetproposedformunicipalcorporation),0) from eg_dss_target edt  ";
+	public static final String TARGET_COLLECTION_QUERY = " select COALESCE (sum(budgetproposedformunicipalcorporation),0) from state.eg_dss_target edt  ";
 	
 	public static final String TOTAL_COLLECTION_QUERY = " select COALESCE(sum(py.totalamountpaid),0) from egcl_payment py "
 			                                          + "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
@@ -90,7 +90,7 @@ public class PaymentQueryBuilder {
 	public static final String TENANT_WISE_COLLECTION_QUERY = " select py.tenantid, COALESCE(sum(py.totalamountpaid),0) as totalamt from egcl_payment py "
             + "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
 	
-	public static final String TENANT_WISE_TARGET_COLLECTION_QUERY = " select tenantidformunicipalcorporation as tenantid,COALESCE (sum(budgetproposedformunicipalcorporation),0) as totalamt from eg_dss_target edt  ";
+	public static final String TENANT_WISE_TARGET_COLLECTION_QUERY = " select tenantidformunicipalcorporation as tenantid,COALESCE (sum(budgetproposedformunicipalcorporation),0) as totalamt from state.eg_dss_target edt  ";
 	
 	public static final String TENANT_WISE_TRANSACTION_QUERY = " select py.tenantid, COALESCE(count(py.transactionnumber),0) as totalamt from egcl_payment py "
             + "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
