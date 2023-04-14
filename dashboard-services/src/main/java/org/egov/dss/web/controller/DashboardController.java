@@ -2,19 +2,25 @@ package org.egov.dss.web.controller;
 
 import javax.validation.Valid;
 
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.dss.service.DashboardService;
 import org.egov.dss.util.ResponseInfoFactory;
+import org.egov.dss.web.model.ChartCriteria;
 import org.egov.dss.web.model.DssResponse;
 import org.egov.dss.web.model.RequestInfoWrapper;
 import org.egov.dss.web.model.ResponseData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
+@Slf4j
 public class DashboardController {
 	
 	@Autowired
@@ -42,5 +48,14 @@ public class DashboardController {
 				.build();
 		return new ResponseEntity<DssResponse>(response, HttpStatus.OK);
 		
+	}
+	
+	@Scheduled(cron = "0 0 1 * * ?")
+	public void triggerScheduler() {
+		log.info("Data update scheduler started..");
+		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
+		requestInfoWrapper.setRequestInfo(RequestInfo.builder().build());
+		requestInfoWrapper.setChartCriteria(ChartCriteria.builder().build());
+		service.processRequest(requestInfoWrapper);
 	}
 }
