@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.Chart;
+import org.egov.dss.model.CommonSearchCriteria;
 import org.egov.dss.model.FinancialYearWiseProperty;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
@@ -20,6 +21,7 @@ import org.egov.dss.repository.PTRepository;
 import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -500,4 +502,13 @@ public class PTService {
 		HashMap<String, Long> totalApplicationCompletionCount = ptRepository.getTotalApplicationCompletionCountList(criteria);
 		return totalApplicationCompletionCount;
 	}
+	
+	public List<Data> ptClosedApplications(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(DashboardConstants.STATUS_ACTIVE);
+		Integer assessedPropertiesCount = (Integer) ptRepository.getTotalApplicationsCount(criteria);
+		return Arrays.asList(Data.builder().headerValue(assessedPropertiesCount).build());
+	}
+	
 }

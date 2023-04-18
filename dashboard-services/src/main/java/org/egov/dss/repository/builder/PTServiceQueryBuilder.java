@@ -28,12 +28,12 @@ public class PTServiceQueryBuilder {
 	public static final String TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + TENANTID_SQL +" as name , count(assessmentnumber) as value from eg_pt_asmt_assessment epaa ";
 	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + TENANTID_SQL + " as name ,  count(*) as value  from eg_pt_property epaa ";
 	public static final String PROPERTIES_BY_FINANCIAL_YEAR_SQL = "    select epaa.tenantid, "
-			+ "    case when extract(month from to_timestamp(epaa.lastmodifiedtime/1000))>3 then concat(extract(year from to_timestamp(epaa.lastmodifiedtime/1000)),'-',extract(year from to_timestamp(epaa.lastmodifiedtime/1000))+1) "
-			+ "    when extract(month from to_timestamp(epaa.lastmodifiedtime/1000))<=3 then concat(extract(year from to_timestamp(epaa.lastmodifiedtime/1000))-1,'-',extract(year from to_timestamp(epaa.lastmodifiedtime/1000))) "
+			+ "    case when extract(month from to_timestamp(epaa.createdtime/1000))>3 then concat(extract(year from to_timestamp(epaa.createdtime/1000)),'-',extract(year from to_timestamp(epaa.createdtime/1000))+1) "
+			+ "    when extract(month from to_timestamp(epaa.createdtime/1000))<=3 then concat(extract(year from to_timestamp(epaa.createdtime/1000))-1,'-',extract(year from to_timestamp(epaa.createdtime/1000))) "
 			+ "    end createdFinYear, count(epaa.propertyid) propertyCount "
 			+ "    from eg_pt_property epaa";
-	public static final String GROUP_BY_CLAUSE_FOR_PROPERTIES_BY_FINANCIAL_YEAR_SQL = " epaa.tenantid, case when extract(month from to_timestamp(epaa.lastmodifiedtime/1000))>3 then concat(extract(year from to_timestamp(epaa.lastmodifiedtime/1000)),'-',extract(year from to_timestamp(epaa.lastmodifiedtime/1000))+1) "
-			+ "    when extract(month from to_timestamp(epaa.lastmodifiedtime/1000))<=3 then concat(extract(year from to_timestamp(epaa.lastmodifiedtime/1000))-1,'-',extract(year from to_timestamp(epaa.lastmodifiedtime/1000))) "
+	public static final String GROUP_BY_CLAUSE_FOR_PROPERTIES_BY_FINANCIAL_YEAR_SQL = " epaa.tenantid, case when extract(month from to_timestamp(epaa.createdtime/1000))>3 then concat(extract(year from to_timestamp(epaa.createdtime/1000)),'-',extract(year from to_timestamp(epaa.createdtime/1000))+1) "
+			+ "    when extract(month from to_timestamp(epaa.createdtime/1000))<=3 then concat(extract(year from to_timestamp(epaa.createdtime/1000))-1,'-',extract(year from to_timestamp(epaa.createdtime/1000))) "
 			+ "    end ";
 	
 	public static String getAccessedPropertiesCountQuery(PropertySerarchCriteria criteria,
@@ -80,6 +80,12 @@ public class PTServiceQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" epaa.lastmodifiedtime - epaa.createdtime < " + searchCriteria.getSlaThreshold());
 		}
+		
+		if (searchCriteria.getStatus() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.status = :status");
+			preparedStatementValues.put("status", searchCriteria.getStatus());
+	    }
 		
 		if (searchCriteria.getExcludedTenantId() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -288,8 +294,8 @@ public class PTServiceQueryBuilder {
 		StringBuilder selectQuery = new StringBuilder(PROPERTIES_BY_FINANCIAL_YEAR_SQL);
 		selectQuery.append(" where epaa.status = :status ");
 		preparedStatementValues.put("status","ACTIVE");
-		selectQuery.append(" and epaa.creationreason = :reason ");
-		preparedStatementValues.put("reason", "CREATE");
+		selectQuery.append(" and epaa.creationreason not in ('UPDATE','MUTATION') ");
+		preparedStatementValues.put("creationReason", "UPDATE");
 		selectQuery.append(" and epaa.tenantid != :tenant ");
 		preparedStatementValues.put("tenant", "od.testing");
 		addGroupByClause(selectQuery,GROUP_BY_CLAUSE_FOR_PROPERTIES_BY_FINANCIAL_YEAR_SQL);

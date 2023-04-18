@@ -90,7 +90,8 @@ public class CommonService {
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PGR);
 		Integer pgrSla = pgrService.slaAchievedCount(payloadDetails);
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
-		Integer ptSla = ptService.slaAchievedCount(payloadDetails);
+	//	Integer ptSla = ptService.slaAchievedCount(payloadDetails);
+		Integer ptSla = (Integer) ptService.ptClosedApplications(payloadDetails).get(0).getHeaderValue();
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_OBPS);
 		Integer bpaSla = bpaService.slaAchievedCount(payloadDetails);
 		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
@@ -156,10 +157,11 @@ public class CommonService {
 
 	public List<Data> totalClosedApplications(PayloadDetails payloadDetails) {
 		CommonSearchCriteria criteria = getCommonSearchCriteria(payloadDetails);
-
+		
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_ACTIVE));
-		Integer ptTotal = (Integer) csRepository.ptTotalCompletionCount(criteria);
+		// Integer ptTotal = (Integer) csRepository.ptTotalCompletionCount(criteria);
+		Integer ptTotal = (Integer) ptService.ptClosedApplications(payloadDetails).get(0).getHeaderValue();		
 
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.WS_CONNECTION_ACTIVATED));
 		Integer wsTotal = (Integer) csRepository.wsTotalCompletionCount(criteria);
