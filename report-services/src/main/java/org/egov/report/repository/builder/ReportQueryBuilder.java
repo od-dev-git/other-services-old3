@@ -176,6 +176,14 @@ public class ReportQueryBuilder {
 			+ INNER_JOIN + " eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid "
 			+ WHERE + " ewc.isoldapplication = false " + AND_QUERY + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' ";
 	
+	private static final String WS_CONNECTIONS_QUERY = SELECT 
+			+ connectionSelectValues 
+			+ " ews.connectiontype, ewc2.userid, ews.usagecategory "
+			+ FROM + " eg_ws_connection ewc "
+			+ INNER_JOIN + " eg_ws_service ews on ewc.id = ews.connection_id "
+			+ INNER_JOIN + " eg_ws_connectionholder ewc2 on ewc.id = ewc2.connectionid "
+			+ WHERE + " ewc.isoldapplication = false " + AND_QUERY + " ewc.applicationstatus = 'CONNECTION_ACTIVATED' ";
+	
 	private static final String QUERY_FOR_EMPLOYEE_WISE_WS = SELECT 
 			+ connectionSelectValues
 			+ paymentSelectValues 
@@ -967,7 +975,7 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
     
     public String getWaterConnectionDetailsQuery(WSReportSearchCriteria criteria, List<Object> preparedStmtList) {
 
-        StringBuilder query = new StringBuilder(QUERY_FOR_WS_CONNECTION);
+        StringBuilder query = new StringBuilder(WS_CONNECTIONS_QUERY);
 
         if (criteria.getConsumerNumbers() != null && !criteria.getConsumerNumbers().isEmpty()) {
             addAndClause(query);
