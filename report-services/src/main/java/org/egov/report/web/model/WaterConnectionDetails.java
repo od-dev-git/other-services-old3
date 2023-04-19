@@ -43,5 +43,8 @@ public class WaterConnectionDetails {
 
 	@JsonProperty("mobile")
 	private String mobile;
+	
+	@JsonProperty("usagecategory")
+	private String usageCategory;
 
 }

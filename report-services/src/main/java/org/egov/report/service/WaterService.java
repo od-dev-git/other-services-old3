@@ -522,6 +522,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                                 responsePerConnection.setWard(connectionDetails.getWard());
                                 responsePerConnection.setConnectionNo(connectionNo); 
                                 responsePerConnection.setOldconnectionno(connectionDetails.getOldconnectionno());
+                                responsePerConnection.setUsageCategory(connectionDetails.getUsageCategory());
                             }
 
                             // set User details here

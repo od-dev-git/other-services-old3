@@ -27,6 +27,7 @@ public class WaterConnectionRowMapper implements ResultSetExtractor<Map<String, 
 			        .ward(rs.getString("ward"))
 			        .connectiontype(rs.getString("connectiontype"))
 			        .oldconnectionno(rs.getString("oldconnectionno"))
+			        .usageCategory(rs.getString("usagecategory"))
 			        .build();			
 
 			if(!responseMap.containsKey(consumerCode)) {

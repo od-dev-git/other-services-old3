@@ -50,6 +50,9 @@ public class WaterMonthlyDemandResponse {
 	@JsonProperty("demandPriodTo")
 	private String taxPeriodTo; 
 	
+	@JsonProperty("usagecategory")
+	private String usageCategory;
+	
 	@JsonProperty("currentDemandAmount")
 	@Default
 	private BigDecimal currentDemandAmt = BigDecimal.ZERO;
