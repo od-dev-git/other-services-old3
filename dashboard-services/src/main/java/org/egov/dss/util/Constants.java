@@ -70,6 +70,7 @@ public class Constants {
 		final static String SERVICE_PT_SHARE_OF_NEW_ASSESSMENT = "ptShareOfNewAssessments";
 		final static String SERVICE_PT_SHARE_OF_RE_ASSESSMENT = "ptShareOfReAssessments";
 		final static String SERVICE_PT_ASMT_STATUS_DDR = "ptAssessmentStatusDDR";
+		final static String SERVICE_PT_STATUS_BY_BOUNDARY = "ptStatusByBoundary";
 		
 		final static String SERVICE_MR_TOTAL_APPLICATION = "mrtotalApplications";
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS = "totalComplaints";
