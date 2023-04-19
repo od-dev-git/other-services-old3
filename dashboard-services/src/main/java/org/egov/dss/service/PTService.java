@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -364,6 +365,10 @@ public class PTService {
 				financialYearWiseTenantProperty.put(String.valueOf(tenantForFYMapping.get("tenantid")), lists);
 				
 			}
+			
+//			HashMap<String,List<FinancialYearWiseProperty>> financialYearSorted = financialYearWiseTenantProperty.entrySet().parallelStream()
+//					.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
+//							Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
 		}
 		 
@@ -510,5 +515,51 @@ public class PTService {
 		Integer assessedPropertiesCount = (Integer) ptRepository.getTotalApplicationsCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(assessedPropertiesCount).build());
 	}
+	
+	public List<Data> ptStatusByBoundary(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<HashMap<String, Object>> ptStatusByBoundary = ptRepository.getPtStatusByBoundary(criteria);
+
+		List<Data> response = new ArrayList();
+		int serailNumber = 0;
+		for (HashMap<String, Object> ptStatus : ptStatusByBoundary) {
+			serailNumber++;
+			String tenantId = String.valueOf(ptStatus.get("tenantid"));
+			String tenantIdStyled = tenantId.replace("od.", "");
+			tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(tenantIdStyled).name("ULBs").symbol("text").build());
+
+			row.add(Plot.builder().name("Active").value(new BigDecimal(String.valueOf(ptStatus.get("activecnt"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Inactive").value(new BigDecimal(String.valueOf(ptStatus.get("inactivecnt"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Deactivated").value(new BigDecimal(String.valueOf(ptStatus.get("deactivatedcnt"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("In Workflow")
+					.value(new BigDecimal(String.valueOf(ptStatus.get("inworkflowcnt")))).symbol("number")
+					.build());
+			
+			response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null)
+					.build());
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serailNumber++;
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(payloadDetails.getTenantid()).name("ULBs").symbol("text").build());
+            row.add(Plot.builder().name("Active").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Inactive").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Deactivated").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("In Workflow").value(BigDecimal.ZERO).symbol("number").build());
+		response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber).plots(row)
+					.insight(null).build());
+		}
+	   
+		return response;
+     }
 	
 }

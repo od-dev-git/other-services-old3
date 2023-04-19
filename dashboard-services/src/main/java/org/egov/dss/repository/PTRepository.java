@@ -192,6 +192,14 @@ public class PTRepository {
         HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
         return result;
 	}
+	
+	public List<HashMap<String, Object>> getPtStatusByBoundary(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getPtStatusByBoundary(propertySearchCriteria, preparedStatementValues);
+        log.info("PT status by boundary table  : "+query);
+        List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
+        return result;
+	}
 
 
 }
