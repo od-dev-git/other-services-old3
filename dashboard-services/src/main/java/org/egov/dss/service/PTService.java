@@ -326,13 +326,13 @@ public class PTService {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		List<HashMap<String, Object>> PropertiesByFinancialYear = ptRepository.getPropertiesByFinancialYear(criteria);
 
-		
-		HashMap<String,Boolean> financialYearsMap = new HashMap<>();
-		
-			 for( HashMap<String, Object> tenant : PropertiesByFinancialYear) {
-		 if(!financialYearsMap.containsKey(tenant.get("createdfinyear"))) 
-			 financialYearsMap.put(String.valueOf(tenant.get("createdfinyear")), true); 
-		 }
+
+			LinkedHashMap<String,Boolean> financialYearsMap = new LinkedHashMap<>();
+				
+				 for( HashMap<String, Object> tenant : PropertiesByFinancialYear) {
+			 if(!financialYearsMap.containsKey(tenant.get("createdfinyear"))) 
+				 financialYearsMap.put(String.valueOf(tenant.get("createdfinyear")), true); 
+			 }
 		
 			int financialYearCount = financialYearsMap.size();
 
@@ -366,9 +366,6 @@ public class PTService {
 				
 			}
 			
-//			HashMap<String,List<FinancialYearWiseProperty>> financialYearSorted = financialYearWiseTenantProperty.entrySet().parallelStream()
-//					.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
-//							Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
 		}
 		 
@@ -394,9 +391,9 @@ public class PTService {
 				 List<Plot> row = new ArrayList<>();
 					row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
 					row.add(Plot.builder().label(payloadDetails.getTenantid()).name("DDRs").symbol("text").build());
-					row.add(Plot.builder().name("2021-2022").value(BigDecimal.ZERO).symbol("number").build());
-					row.add(Plot.builder().name("2022-2023").value(BigDecimal.ZERO).symbol("number").build());
-					row.add(Plot.builder().name("2023-2024").value(BigDecimal.ZERO).symbol("number").build());
+                    financialYearsMap.entrySet().stream().forEach(item  -> {
+						row.add(Plot.builder().name(item.getKey()).value(BigDecimal.ZERO).symbol("number").build());
+					});
 					response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber).plots(row).insight(null).build());
 			 }
 			 
