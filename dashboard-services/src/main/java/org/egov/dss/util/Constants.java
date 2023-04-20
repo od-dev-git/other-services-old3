@@ -148,6 +148,7 @@ public class Constants {
         final static String SERVICE_OBPS_OC_SLA_COMPLIANCE = "bpaSLAComplianceOC";
         final static String SERVICE_OBPS_SERVICE_REPORT = "obpsServiceReport";
 		final static String SERVICE_OBPS_PERMITS_AND_OC_ISSUED_AND_OC_SUBMITTED = "permitsandOCissued";
+		final static String SERVICE_OBPS_SERVICE_SUMMARY = "obpsServiceSummary";
 		
 		final static String REVENUE_TL_TOP_ULBS_BY_VALUE = "tlTopDigitalCollectionByValue";
 		final static String REVENUE_TL_BOTTOM_ULBS_BY_VALUE = "tlBottomDigitalCollectionByValue";

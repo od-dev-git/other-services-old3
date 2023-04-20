@@ -189,7 +189,14 @@ public class BPARepository {
         LinkedHashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new RateRowMapper());
         return result;
 	}
-
-
-
+    
+    public HashMap<String, BigDecimal> getTotalApplicationByServiceType(BpaSearchCriteria bpaSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = bpaQueryBuilder.getTotalApplicationByServiceType(bpaSearchCriteria, preparedStatementValues);
+        log.info("query for BPA Total Application by Service Type : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
+    
+   
 }
