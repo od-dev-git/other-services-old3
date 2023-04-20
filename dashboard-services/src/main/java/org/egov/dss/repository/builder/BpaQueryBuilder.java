@@ -29,6 +29,8 @@ public static final String BPA_TENANT_WISE_TOTAL_APPLICATIONS = " select bpa.ten
 
 public static final String BPA_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED = " select bpa.tenantid as tenantid , avg((bpa.lastmodifiedtime-bpa.createdtime)/86400000) as totalamt from eg_bpa_buildingplan bpa  ";
 
+public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " select ebe.servicetype as tenantid, count(bpa.applicationno) as totalamt from eg_bpa_buildingplan bpa "
+		                                                                  + " inner join eg_bpa_edcrdata ebe on ebe.applicationno = bpa.applicationno  ";
 
 	public static String getTotalPermitIssued(BpaSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATIONS);
@@ -204,7 +206,13 @@ public static final String BPA_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED = " select bpa
 	        return selectQuery.toString();
 	    }
 
-
+	    public String getTotalApplicationByServiceType(BpaSearchCriteria bpaSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE);
+	        addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
+	        addGroupByClause(selectQuery," ebe.servicetype ");
+	        return selectQuery.toString();
+	    }
 
 
 }
