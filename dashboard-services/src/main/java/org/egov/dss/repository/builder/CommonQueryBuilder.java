@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.model.PropertySerarchCriteria;import org.egov.dss.model.CommonSearchCriteria;
+import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.web.model.ChartCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -22,6 +23,9 @@ public class CommonQueryBuilder {
     public static final String PROPERTY_QUERY = " select to_char(monthYear, 'Mon-YYYY') as name, sum(completionApplication) over (order by monthYear asc rows between unbounded preceding and current row) as value "
     		+ "from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') as monthYear, "
     		+ "count(*) completionApplication from eg_pt_property ";
+    
+    public static final String PAYLOAD_DATA_INSERT_QUERY = " insert into state.{tableName} (id,visualizationcode,modulelevel,startdate,enddate,timeinterval,charttype, tenantid, "
+    		                                             + " headername, valuetype) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
     
     public static String fetchSchedulerPayloads(ChartCriteria criteria, Map<String, Object> preparedStatementValues) {
     	String finalQuery = PAYLOAD_QUERY_SQL.replace("{tableName}", criteria.getTableName());

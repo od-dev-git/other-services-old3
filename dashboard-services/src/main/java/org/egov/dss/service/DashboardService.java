@@ -203,6 +203,27 @@ public class DashboardService {
 		}
     }
 	
+	public void process(RequestInfoWrapper requestInfoWrapper) {
+		int processed = 0;
+		int skipped = 0;
+		PayloadDetails payloadCriteria = requestInfoWrapper.getPayloadDetails();
+		HashMap<String, String> tenantsTableMap = DashboardUtility.getSystemProperties().getTenantstable();
+		for (Map.Entry<String, String> tenantTableMap : tenantsTableMap.entrySet()) {
+			try {
+				commonRepository.insertPayloadData(payloadCriteria, tenantTableMap.getKey(), tenantTableMap.getValue());
+				processed++;
+			} catch (Exception e) {
+				log.error("Unable to insert payload data for :" + tenantTableMap.getValue() + " visualization Code :"
+						+ payloadCriteria.getVisualizationcode() + " Time Interval : "
+						+ payloadCriteria.getTimeinterval());
+				e.printStackTrace();
+				skipped++;
+			}
+
+		}
+		log.info("No of Table updated : " + processed + ", Skipped : " + skipped);
+		log.info("=============== PAYLOAD DATA INSERTED SUCCESSFULLY================");
+	}
 
 }
 
