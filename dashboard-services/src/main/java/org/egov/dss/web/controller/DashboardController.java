@@ -58,4 +58,14 @@ public class DashboardController {
 		requestInfoWrapper.setChartCriteria(ChartCriteria.builder().build());
 		service.processRequest(requestInfoWrapper);
 	}
+	
+	@PostMapping("/_updatePayloadData")
+	public ResponseEntity<DssResponse> updatePayloadData(@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		service.process(requestInfoWrapper);
+		DssResponse response = DssResponse.builder()
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<DssResponse>(response, HttpStatus.OK);
+		
+	}
 }

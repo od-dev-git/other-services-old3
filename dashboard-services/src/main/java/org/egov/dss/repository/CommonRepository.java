@@ -8,8 +8,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.egov.dss.config.ConfigurationLoader;
+import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
@@ -83,5 +85,33 @@ public class CommonRepository {
         return namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
 	}
 	
+	public void insertPayloadData(PayloadDetails payloadDetails,String tenantId, String tableName) {
+		String finalQuery = commonQueryBuilder.PAYLOAD_DATA_INSERT_QUERY.replace("{tableName}",
+				tableName);
+		
+		
+		jdbcTemplate.update(finalQuery, new PreparedStatementSetter() {
+         
+			@Override
+			public void setValues(PreparedStatement ps) throws SQLException {
+				ps.setString(1, UUID.randomUUID().toString());
+				ps.setString(2, payloadDetails.getVisualizationcode());
+				ps.setString(3, payloadDetails.getModulelevel());
+				ps.setLong(4, payloadDetails.getStartdate());
+				ps.setLong(5, payloadDetails.getEnddate());
+				ps.setString(6, payloadDetails.getTimeinterval());
+				ps.setString(7, payloadDetails.getCharttype());
+				if(tenantId.equalsIgnoreCase(DashboardConstants.STATE_TENANT)) {
+					ps.setString(8, null);
+				}else {
+					ps.setString(8, tenantId);
+				}
+				ps.setString(9, payloadDetails.getHeadername());
+				ps.setString(10, payloadDetails.getValuetype());
+
+			}
+
+		});
+	}
 	
 }
