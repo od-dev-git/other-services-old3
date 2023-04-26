@@ -19,6 +19,8 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -173,16 +175,27 @@ public class DashboardUtils {
 	}
 	
 	public Long startOfDay(Long timeInstance) {
-		LocalDate date = Instant.ofEpochMilli(timeInstance).atZone(ZoneId.systemDefault()).toLocalDate();
-		Instant instant = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
-		return instant.toEpochMilli();
+		Date date = new Date(timeInstance);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.setTimeZone(TimeZone.getTimeZone("IST"));
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTimeInMillis();
 	}
 
 	public Long endOfDay(Long timeInstance) {
-		LocalDate date = Instant.ofEpochMilli(timeInstance).atZone(ZoneId.systemDefault()).toLocalDate();
-		LocalDateTime endOfDate = LocalTime.MAX.atDate(date);
-		return endOfDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+		Date date = new Date(timeInstance);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.setTimeZone(TimeZone.getTimeZone("IST"));
+		calendar.set(Calendar.HOUR_OF_DAY, 23);
+		calendar.set(Calendar.MINUTE, 59);
+		calendar.set(Calendar.SECOND, 59);
+		calendar.set(Calendar.MILLISECOND, 000);
+		return calendar.getTimeInMillis();
 	}
-	
 	
 }
