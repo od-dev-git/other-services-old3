@@ -156,6 +156,8 @@ public class DashboardConstants {
 	
 	public static final String WEEK = "week";
 	
+	public static final String DAY = "day";
+	
 	public static final String STATE_TENANT = "od";
 	
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
