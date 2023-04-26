@@ -1,7 +1,14 @@
 package org.egov.dss.util;
 
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.tracer.model.CustomException;
@@ -12,8 +19,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.jaegertracing.thriftjava.BaggageRestrictionManager.AsyncProcessor.getBaggageRestrictions;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -166,5 +171,18 @@ public class DashboardUtils {
 		return cal.getTimeInMillis();
 
 	}
+	
+	public Long startOfDay(Long timeInstance) {
+		LocalDate date = Instant.ofEpochMilli(timeInstance).atZone(ZoneId.systemDefault()).toLocalDate();
+		Instant instant = date.atStartOfDay(ZoneId.systemDefault()).toInstant();
+		return instant.toEpochMilli();
+	}
+
+	public Long endOfDay(Long timeInstance) {
+		LocalDate date = Instant.ofEpochMilli(timeInstance).atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDateTime endOfDate = LocalTime.MAX.atDate(date);
+		return endOfDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+	}
+	
 	
 }
