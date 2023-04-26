@@ -63,8 +63,10 @@ public class DashboardService {
 				List<PayloadDetails> payloadList = getPayloadForScheduler(requestInfoWrapper.getChartCriteria());
 				for (PayloadDetails payloadDetails : payloadList) {
 					try {
-						enrichPayload(payloadDetails);
-						payloadDetails.setEnddate(requestInfoWrapper.getChartCriteria().getEndDate());
+						enrichPayload(payloadDetails, schedulerStartTime);
+						if (!payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.DAY)) {
+							payloadDetails.setEnddate(requestInfoWrapper.getChartCriteria().getEndDate());
+						}
 						requestInfoWrapper.setPayloadDetails(payloadDetails);
 						responseData = serveRequest(requestInfoWrapper);
 						payloadDetails.setTableName(tenantTableMap.getValue());
@@ -191,7 +193,7 @@ public class DashboardService {
 
 	}
 	
-	public void enrichPayload(PayloadDetails payloadDetails) {
+	public void enrichPayload(PayloadDetails payloadDetails, Long schedulerStartTime) {
 		if (payloadDetails != null) {
 			if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.QUARTER)) {
 				payloadDetails.setStartdate(utils.getStartDateOfQuarter());
@@ -199,6 +201,10 @@ public class DashboardService {
 			    payloadDetails.setStartdate(utils.getStartDateOfMonth());
 			}else if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.WEEK)) {
 			    payloadDetails.setStartdate(utils.getStartDateOfWeek());
+			}
+			else if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.DAY)) {
+			    payloadDetails.setStartdate(utils.startOfDay(schedulerStartTime));
+			    payloadDetails.setEnddate(utils.endOfDay(schedulerStartTime));
 			}
 		}
     }
