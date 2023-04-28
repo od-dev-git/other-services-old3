@@ -1530,6 +1530,13 @@ public class RevenueService {
 				Data.builder().headerName("DSS_TOTAL_CUMULATIVE_COLLECTION").headerValue(total).plots(plots).build());
 	}
 	
-	
+	public List<Data> totalDemand(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		paymentSearchCriteria.setFromDate(dashboardUtils.getStartDate(payloadDetails.getTimeinterval()));
+		paymentSearchCriteria.setToDate(dashboardUtils.getEndDate(payloadDetails.getTimeinterval()));
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalDemand(paymentSearchCriteria);
+        return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+	}
 
 }
