@@ -34,6 +34,7 @@ import org.egov.mrcalculator.web.models.BillAndCalculations;
 import org.egov.mrcalculator.web.models.BillingSlabIds;
 import org.egov.mrcalculator.web.models.Calculation;
 import org.egov.mrcalculator.web.models.CalculationSearchCriteria;
+import org.egov.mrcalculator.web.models.CalulationCriteria;
 import org.egov.mrcalculator.web.models.RequestInfoWrapper;
 import org.egov.mrcalculator.web.models.demand.BillResponse;
 import org.egov.mrcalculator.web.models.demand.Demand;
@@ -333,7 +334,7 @@ public class DemandService {
      * @return The list of new DemandDetails
      */
     private List<DemandDetail> getUpdatedDemandDetails(Calculation calculation, List<DemandDetail> demandDetails){
-
+        final String tatkalTaxHead = MRConstants.MR_TATKAL_TAX_HEAD; 
         List<DemandDetail> newDemandDetails = new ArrayList<>();
         Map<String, List<DemandDetail>> taxHeadToDemandDetail = new HashMap<>();
 
@@ -375,6 +376,26 @@ public class DemandService {
                  }
             }
         }
+		Map<String, BigDecimal> tempCalculation = new HashMap<>();
+		for (TaxHeadEstimate cal : calculation.getTaxHeadEstimates()) {
+			tempCalculation.put(cal.getTaxHeadCode(), cal.getEstimateAmount());
+		}
+
+		if (!tempCalculation.containsKey(tatkalTaxHead)) {
+			for (DemandDetail demand : demandDetails) {
+				if (demand.getTaxHeadMasterCode().equals(tatkalTaxHead)) {
+					demand.setTaxAmount(BigDecimal.ZERO);
+				}
+			}
+		}
+
+		if (tempCalculation.containsKey(tatkalTaxHead)) {
+			for (DemandDetail demand : demandDetails) {
+				if (demand.getTaxHeadMasterCode().equals(tatkalTaxHead)) {
+					demand.setTaxAmount(tempCalculation.get(tatkalTaxHead));
+				}
+			}
+		}
         List<DemandDetail> combinedBillDetials = new LinkedList<>(demandDetails);
         combinedBillDetials.addAll(newDemandDetails);
         addRoundOffTaxHead(calculation.getTenantId(),combinedBillDetials);
