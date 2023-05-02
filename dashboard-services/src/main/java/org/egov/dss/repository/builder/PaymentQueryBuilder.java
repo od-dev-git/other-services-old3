@@ -159,6 +159,9 @@ public class PaymentQueryBuilder {
 			+ "sum(py.totalamountpaid) as totalCollection from egcl_payment py "
 			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id ";
 	
+	public static final String TOTAL_DEMAND_QUERY = " select COALESCE(sum(edv2.taxamount),0) as amount  from egbs_demand_v1 edv "
+			                                        + "inner join egbs_demanddetail_v1 edv2 on edv.id = edv2.demandid  ";
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -423,6 +426,12 @@ public class PaymentQueryBuilder {
 		 addWhereClause(selectQuery, preparedStatementValues, criteria);
 		 return selectQuery.toString();
 	}
+	
+	public static String getTotalDemand(PaymentSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_DEMAND_QUERY);
+		addWhereClauseForDemand(selectQuery, preparedStatementValues, criteria);
+		return selectQuery.toString();
+	}
 
 	public String getTransactionsCount(PaymentSearchCriteria paymentSearchCriteria,
 			Map<String, Object> preparedStatementValues) {
@@ -629,7 +638,41 @@ public class PaymentQueryBuilder {
 			return selectQuery.toString();
 		}
 
-		
+		private static void addWhereClauseForDemand(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+				PaymentSearchCriteria searchCriteria) {
+
+			 if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" edv.tenantId in ( :tenantId )");
+				preparedStatementValues.put("tenantId", searchCriteria.getTenantIds() );
+				}
+
+
+			if (searchCriteria.getFromDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append("  edv.taxperiodfrom >= :fromDate");
+				preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+			}
+
+			if (searchCriteria.getToDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" edv.taxperiodto <= :toDate");
+				preparedStatementValues.put("toDate", searchCriteria.getToDate());
+			}
+
+			if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" edv.businessservice IN (:businessService)  ");
+				preparedStatementValues.put("businessService", searchCriteria.getBusinessServices());
+			}
+
+			if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" edv.tenantid != :excludedTenant");
+				preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenant());
+			}
+
+		}
 
 	
 }
