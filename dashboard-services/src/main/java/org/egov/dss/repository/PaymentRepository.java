@@ -133,6 +133,16 @@ public class PaymentRepository {
 		return result.get(0);
 
 	}
+	
+	public Object getTotalDemand(PaymentSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getTotalDemand(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
+	}
 
 	public Long getTotalTransactionCount(PaymentSearchCriteria paymentSearchCriteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
