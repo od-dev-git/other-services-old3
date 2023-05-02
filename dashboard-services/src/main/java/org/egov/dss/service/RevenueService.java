@@ -1535,8 +1535,8 @@ public class RevenueService {
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		paymentSearchCriteria.setFromDate(dashboardUtils.getStartDate(payloadDetails.getTimeinterval()));
 		paymentSearchCriteria.setToDate(dashboardUtils.getEndDate(payloadDetails.getTimeinterval()));
-		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalDemand(paymentSearchCriteria);
-        return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+		BigDecimal totalDemand = (BigDecimal) paymentRepository.getTotalDemand(paymentSearchCriteria);
+        return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
 }

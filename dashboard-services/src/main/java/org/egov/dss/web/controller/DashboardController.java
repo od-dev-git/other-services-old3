@@ -50,7 +50,7 @@ public class DashboardController {
 		
 	}
 	
-	@Scheduled(cron = "0 0 23 * * ?")
+	@Scheduled(cron = "0 0 17 * * ?")
 	public void triggerScheduler() {
 		log.info("Data update scheduler started..");
 		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
