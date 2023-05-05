@@ -136,6 +136,9 @@ public class RevenueService {
 		else if(temp.equalsIgnoreCase(DashboardConstants.WEEK)) {
 			targetCollection = targetCollection.divide(new BigDecimal(48), 2, RoundingMode.HALF_UP);
 		}
+		else if(temp.equalsIgnoreCase(DashboardConstants.DAY)) {
+			targetCollection = targetCollection.divide(new BigDecimal(365), 2, RoundingMode.HALF_UP);
+		}
 		return Arrays.asList(Data.builder().headerValue(targetCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
