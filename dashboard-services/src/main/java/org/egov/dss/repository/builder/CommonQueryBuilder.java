@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.model.PropertySerarchCriteria;import org.egov.dss.model.CommonSearchCriteria;
+import org.egov.dss.model.DemandPayload;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.web.model.ChartCriteria;
 import org.springframework.stereotype.Component;
@@ -27,10 +28,23 @@ public class CommonQueryBuilder {
     public static final String PAYLOAD_DATA_INSERT_QUERY = " insert into state.{tableName} (id,visualizationcode,modulelevel,startdate,enddate,timeinterval,charttype, tenantid, "
     		                                             + " headername, valuetype) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
     
+	public static final String GET_DEMAND_PAYLOAD_QUERY = " select edv.tenantid as tenantid,coalesce(sum(edv2.taxamount), 0) as totalamt "
+                                                         + "from egbs_demand_v1 edv inner join egbs_demanddetail_v1 edv2 on "
+			                                             + "edv.id = edv2.demandid ";
+	
+	public static final String DEMAND_UPDATE_QUERY = " update state.eg_dss_demand set amount = ? , lastmodifiedtime = ? where tenantid = ? and businessservice = ? and financialyear = ? ";
+			
     public static String fetchSchedulerPayloads(ChartCriteria criteria, Map<String, Object> preparedStatementValues) {
     	String finalQuery = PAYLOAD_QUERY_SQL.replace("{tableName}", criteria.getTableName());
 		StringBuilder selectQuery = new StringBuilder(finalQuery);
 		return addWhereClause(selectQuery, preparedStatementValues, criteria);
+	}
+    
+	public static String fetchDemandData(DemandPayload criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(GET_DEMAND_PAYLOAD_QUERY);
+		addWhereClauseForDemand(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "edv.tenantid");
+		return selectQuery.toString();
 	}
     
     private static void addClauseIfRequired(Map<String, Object> values, StringBuilder queryString) {
@@ -40,6 +54,11 @@ public class CommonQueryBuilder {
 			queryString.append(" AND");
 		}
 	}
+    
+    private static void addGroupByClause(StringBuilder demandQueryBuilder,String columnName) {
+        demandQueryBuilder.append(" GROUP BY " + columnName);
+    }
+
 
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			ChartCriteria criteria) {
@@ -112,7 +131,44 @@ public class CommonQueryBuilder {
 		selectQuery.append(" order by to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY')) tmp ");
 		return selectQuery.toString();
 	}
+    
+	private static String addWhereClauseForDemand(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			DemandPayload criteria) {
 
+	    if (criteria.getTaxPeriodFrom() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" edv.taxperiodfrom >= :startDate");
+			preparedStatementValues.put("startDate", criteria.getTaxPeriodFrom());
+		}
+
+	    if (criteria.getTaxPeriodTo() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" edv.taxperiodto <= :endDate");
+			preparedStatementValues.put("endDate", criteria.getTaxPeriodTo());
+		}
+	    
+	    if (criteria.getBusinessService() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" edv.businessservice = :businessService");
+			preparedStatementValues.put("businessService", criteria.getBusinessService());
+		}
+	    
+	    if (criteria.getTaxHeadCode() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" edv2.taxheadcode not in (:taxHeadCode)");
+			preparedStatementValues.put("taxHeadCode", criteria.getTaxHeadCode());
+		}
+	    
+	    if (criteria.getExcludedTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" edv.tenantid != :excludedTenantId");
+			preparedStatementValues.put("excludedTenantId", criteria.getExcludedTenantId());
+		}
+		
+		return selectQuery.toString();
+
+	}
+	
 	
 
 }

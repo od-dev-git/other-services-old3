@@ -68,4 +68,14 @@ public class DashboardController {
 		return new ResponseEntity<DssResponse>(response, HttpStatus.OK);
 		
 	}
+	
+	@PostMapping("/_jobUpdateDemand")
+	public ResponseEntity<DssResponse> updateDemand(@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		service.updateDemand(requestInfoWrapper);
+		DssResponse response = DssResponse.builder()
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<DssResponse>(response, HttpStatus.OK);
+		
+	}
 }

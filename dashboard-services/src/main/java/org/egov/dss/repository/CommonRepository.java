@@ -1,5 +1,6 @@
 package org.egov.dss.repository;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -13,11 +14,13 @@ import java.util.UUID;
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.Chart;
+import org.egov.dss.model.DemandPayload;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.builder.CommonQueryBuilder;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.PayloadDetailsRowMapper;
+import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.ChartCriteria;
 import org.egov.dss.web.model.ResponseData;
@@ -27,6 +30,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -109,6 +113,34 @@ public class CommonRepository {
 				ps.setString(9, payloadDetails.getHeadername());
 				ps.setString(10, payloadDetails.getValuetype());
 
+			}
+
+		});
+	}
+	
+	public HashMap<String, BigDecimal> fetchDemandData(DemandPayload criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = commonQueryBuilder.fetchDemandData(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		log.info("Module : " + criteria.getBusinessService() + " taxPeriodFrom: " + criteria.getTaxPeriodFrom()
+				+ " taxPeriodTo: " + criteria.getTaxPeriodTo());
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+
+	}
+	
+	@Transactional
+	public void updateDemand(DemandPayload demandPayload) {
+		String finalQuery = commonQueryBuilder.DEMAND_UPDATE_QUERY;
+		jdbcTemplate.update(finalQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) throws SQLException {
+				ps.setBigDecimal(1, demandPayload.getAmount());
+				ps.setLong(2, demandPayload.getLastModifiedTime());
+				ps.setString(3, demandPayload.getTenantId());
+				ps.setString(4, demandPayload.getBusinessService());
+				ps.setString(5, demandPayload.getFinancialYear());
+				
 			}
 
 		});

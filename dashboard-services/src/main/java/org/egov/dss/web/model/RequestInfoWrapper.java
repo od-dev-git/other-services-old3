@@ -1,6 +1,7 @@
 package org.egov.dss.web.model;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.dss.model.DemandPayload;
 import org.egov.dss.model.PayloadDetails;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,7 +22,7 @@ public class RequestInfoWrapper {
 	@JsonProperty(value = "payloadDetails")
 	private PayloadDetails payloadDetails;
 	
-	
-	
+	@JsonProperty(value = "demandPayload")
+	private DemandPayload demandPayload;
 	
 }
