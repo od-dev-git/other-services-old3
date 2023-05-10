@@ -598,7 +598,7 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.SERVICE_BOTTOM_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
 			  return commonService.bottomPerformingULBsCompletionRate(requestInfoWrapper.getPayloadDetails());
 		}
-		if (Constants.VisualizationCodes.REVENUE_PT_TOTAL_DEMAND.equalsIgnoreCase(visualizationCode)) {
+		if (Constants.VisualizationCodes.REVENUE_TOTAL_DEMAND.equalsIgnoreCase(visualizationCode)) {
 			  return revenueService.totalDemand(requestInfoWrapper.getPayloadDetails());
 		}
 		

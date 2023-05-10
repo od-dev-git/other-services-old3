@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.egov.dss.model.Bill;
 import org.egov.dss.model.Chart;
+import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
@@ -134,9 +135,9 @@ public class PaymentRepository {
 
 	}
 	
-	public Object getTotalDemand(PaymentSearchCriteria criteria) {
+	public BigDecimal getTotalDemand(DemandSearchCriteria criteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
-		String query = paymentQueryBuilder.getTotalDemand(criteria, preparedStatementValues);
+	    String query = paymentQueryBuilder.getTotalDemand(criteria, preparedStatementValues);
 		log.info("query: " + query);
 		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(BigDecimal.class));

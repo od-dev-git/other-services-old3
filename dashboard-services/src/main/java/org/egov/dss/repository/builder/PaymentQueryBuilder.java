@@ -7,15 +7,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
+import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 
 
@@ -159,8 +160,7 @@ public class PaymentQueryBuilder {
 			+ "sum(py.totalamountpaid) as totalCollection from egcl_payment py "
 			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id ";
 	
-	public static final String TOTAL_DEMAND_QUERY = " select COALESCE(sum(edv2.taxamount),0) as amount  from egbs_demand_v1 edv "
-			                                        + "inner join egbs_demanddetail_v1 edv2 on edv.id = edv2.demandid  ";
+	public static final String TOTAL_DEMAND_QUERY = " select coalesce(sum(amount), 0) as amount from state.eg_dss_demand ";
 	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
@@ -230,13 +230,13 @@ public class PaymentQueryBuilder {
 					searchCriteria.getPaymentModes().stream().map(String::toUpperCase).collect(toSet()));
 		}
 
-		if (StringUtils.isNotBlank(searchCriteria.getMobileNumber())) {
+		if (StringUtils.isEmpty(searchCriteria.getMobileNumber())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.mobileNumber = :mobileNumber");
 			preparedStatementValues.put("mobileNumber", searchCriteria.getMobileNumber());
 		}
 
-		if (StringUtils.isNotBlank(searchCriteria.getTransactionNumber())) {
+		if (StringUtils.isEmpty(searchCriteria.getTransactionNumber())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.transactionNumber = :transactionNumber");
 			preparedStatementValues.put("transactionNumber", searchCriteria.getTransactionNumber());
@@ -427,7 +427,7 @@ public class PaymentQueryBuilder {
 		 return selectQuery.toString();
 	}
 	
-	public static String getTotalDemand(PaymentSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+	public static String getTotalDemand(DemandSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_DEMAND_QUERY);
 		addWhereClauseForDemand(selectQuery, preparedStatementValues, criteria);
 		return selectQuery.toString();
@@ -639,37 +639,30 @@ public class PaymentQueryBuilder {
 		}
 
 		private static void addWhereClauseForDemand(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
-				PaymentSearchCriteria searchCriteria) {
+				DemandSearchCriteria searchCriteria) {
 
-			 if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			if (!StringUtils.isEmpty(searchCriteria.getTenantId())) {
 				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append(" edv.tenantId in ( :tenantId )");
-				preparedStatementValues.put("tenantId", searchCriteria.getTenantIds() );
-				}
-
-
-			if (searchCriteria.getFromDate() != null) {
-				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append("  edv.taxperiodfrom >= :fromDate");
-				preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+				selectQuery.append(" tenantId = :tenantId ");
+				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
 			}
 
-			if (searchCriteria.getToDate() != null) {
+            if (!StringUtils.isEmpty(searchCriteria.getBusinessService())) {
 				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append(" edv.taxperiodto <= :toDate");
-				preparedStatementValues.put("toDate", searchCriteria.getToDate());
+				selectQuery.append(" businessservice = :businessService ");
+				preparedStatementValues.put("businessService", searchCriteria.getBusinessService());
+			}
+            
+            if (!StringUtils.isEmpty(searchCriteria.getFinancialYear())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" financialyear = :financialYear ");
+				preparedStatementValues.put("financialYear", searchCriteria.getFinancialYear());
 			}
 
-			if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
+			if (!StringUtils.isEmpty(searchCriteria.getExcludedTenantId())) {
 				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append(" edv.businessservice IN (:businessService)  ");
-				preparedStatementValues.put("businessService", searchCriteria.getBusinessServices());
-			}
-
-			if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
-				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append(" edv.tenantid != :excludedTenant");
-				preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenant());
+				selectQuery.append(" tenantid != :excludedTenant");
+				preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenantId());
 			}
 
 		}
