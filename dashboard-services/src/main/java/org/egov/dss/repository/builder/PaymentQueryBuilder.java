@@ -230,13 +230,13 @@ public class PaymentQueryBuilder {
 					searchCriteria.getPaymentModes().stream().map(String::toUpperCase).collect(toSet()));
 		}
 
-		if (StringUtils.isEmpty(searchCriteria.getMobileNumber())) {
+		if (!StringUtils.isEmpty(searchCriteria.getMobileNumber())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.mobileNumber = :mobileNumber");
 			preparedStatementValues.put("mobileNumber", searchCriteria.getMobileNumber());
 		}
 
-		if (StringUtils.isEmpty(searchCriteria.getTransactionNumber())) {
+		if (!StringUtils.isEmpty(searchCriteria.getTransactionNumber())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" py.transactionNumber = :transactionNumber");
 			preparedStatementValues.put("transactionNumber", searchCriteria.getTransactionNumber());
