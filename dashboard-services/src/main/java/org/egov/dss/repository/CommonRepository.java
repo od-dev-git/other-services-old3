@@ -89,6 +89,7 @@ public class CommonRepository {
         return namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
 	}
 	
+	
 	public void insertPayloadData(PayloadDetails payloadDetails,String tenantId, String tableName) {
 		String finalQuery = commonQueryBuilder.PAYLOAD_DATA_INSERT_QUERY.replace("{tableName}",
 				tableName);
@@ -128,9 +129,11 @@ public class CommonRepository {
 
 	}
 	
-	@Transactional
+	
 	public void updateDemand(DemandPayload demandPayload) {
 		String finalQuery = commonQueryBuilder.DEMAND_UPDATE_QUERY;
+		log.info(finalQuery);
+		log.info(demandPayload.getTenantId()+","+demandPayload.getAmount()+" , "+demandPayload.getBusinessService()+" , "+demandPayload.getFinancialYear());
 		jdbcTemplate.update(finalQuery, new PreparedStatementSetter() {
 
 			@Override
