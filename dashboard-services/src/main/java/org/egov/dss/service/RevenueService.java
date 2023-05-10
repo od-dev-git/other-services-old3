@@ -34,6 +34,7 @@ import java.time.ZonedDateTime;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.BillAccountDetail;
 import org.egov.dss.model.Chart;
+import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.FinancialYearWiseProperty;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.Payment;
@@ -94,6 +95,24 @@ public class RevenueService {
 		
 		if(payloadDetails.getEnddate() != null && payloadDetails.getEnddate() != 0) {
 			criteria.setToDate(payloadDetails.getEnddate());
+		}
+		
+		return criteria;
+	}
+	
+	private DemandSearchCriteria getDemandSearchCriteria(PayloadDetails payloadDetails) {
+		DemandSearchCriteria criteria = new DemandSearchCriteria();
+
+		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
+			criteria.setBusinessService(payloadDetails.getModulelevel());
+		}
+		
+		if(StringUtils.hasText(payloadDetails.getTenantid())) {
+			criteria.setTenantId(payloadDetails.getTenantid());
+		}
+		
+		if(StringUtils.hasText(payloadDetails.getTimeinterval())) {
+			criteria.setFinancialYear(payloadDetails.getTimeinterval());
 		}
 		
 		return criteria;
@@ -1534,11 +1553,9 @@ public class RevenueService {
 	}
 	
 	public List<Data> totalDemand(PayloadDetails payloadDetails) {
-		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
-		paymentSearchCriteria.setFromDate(dashboardUtils.getStartDate(payloadDetails.getTimeinterval()));
-		paymentSearchCriteria.setToDate(dashboardUtils.getEndDate(payloadDetails.getTimeinterval()));
-		BigDecimal totalDemand = (BigDecimal) paymentRepository.getTotalDemand(paymentSearchCriteria);
+		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
+		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalDemand = paymentRepository.getTotalDemand(demandSearchCriteria);
         return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 

@@ -33,6 +33,7 @@ public class Constants {
 		final static String REVENUE_TOTAL_COLLECTION = "totalCollection";
 		final static String REVENUE_TARGET_COLLECTION = "targetCollection";
 		final static String REVENUE_TARGET_ACHIEVED = "targetAchieved";
+		final static String REVENUE_TOTAL_DEMAND = "totalDemand";
 		final static String REVENUE_CUMULATIVE_COLLECTION = "cumulativeCollection";
 		final static String REVENUE_TOP_PERFORMING_ULBS = "topPerformingUlbs";
 		final static String REVENUE_BOTTOM_PERFORMING_ULBS = "bottomPerformingUlbs";
@@ -87,7 +88,6 @@ public class Constants {
 		final static String REVENUE_PT_PREVIOUS_YEAR_TARGET_ACHIEVED = "previousTargetAchieved";
 		final static String REVENUE_PT_FINANCIAL_INDICATORS = "ptFinancialIndicatorTable";
 		final static String REVENUE_PT_PAYMENT_MODE_DDR = "ptPaymentModeDDR";
-		final static String REVENUE_PT_TOTAL_DEMAND = "ptTotalDemand";
 		
 		final static String REVENUE_WS_APP_FEE_COLLECTION = "wstotalApplicationFeesCollection";
 		final static String REVENUE_WS_DEMAND_FEE_COLLECTION = "wstotalDemandFeesCollection";
