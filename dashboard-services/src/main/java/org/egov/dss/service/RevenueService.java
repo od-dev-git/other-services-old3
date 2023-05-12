@@ -1555,8 +1555,36 @@ public class RevenueService {
 	public List<Data> totalDemand(PayloadDetails payloadDetails) {
 		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
 		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		BigDecimal totalDemand = paymentRepository.getTotalDemand(demandSearchCriteria);
-        return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
+		BigDecimal totalDemand = BigDecimal.ZERO;
+		BigDecimal currentDemand = BigDecimal.ZERO;
+		BigDecimal arrearDemand = BigDecimal.ZERO;
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			currentDemand = (BigDecimal) currentDemand(payloadDetails).get(0).getHeaderValue();
+			arrearDemand = (BigDecimal) arrearDemand(payloadDetails).get(0).getHeaderValue();
+		}
+		totalDemand = currentDemand.add(arrearDemand);
+		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+
+	public List<Data> currentDemand(PayloadDetails payloadDetails) {
+		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
+		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalDemand = BigDecimal.ZERO;
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			totalDemand = paymentRepository.getTotalDemand(demandSearchCriteria);
+		}
+		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+
+	public List<Data> arrearDemand(PayloadDetails payloadDetails) {
+		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
+		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		demandSearchCriteria.setIsArrearDemand(Boolean.TRUE);
+		BigDecimal totalDemand = BigDecimal.ZERO;
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			totalDemand = paymentRepository.getTotalDemand(demandSearchCriteria);
+		}
+		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
 	}
 
 }

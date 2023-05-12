@@ -601,6 +601,12 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.REVENUE_TOTAL_DEMAND.equalsIgnoreCase(visualizationCode)) {
 			  return revenueService.totalDemand(requestInfoWrapper.getPayloadDetails());
 		}
+		if (Constants.VisualizationCodes.REVENUE_ARREAR_DEMAND.equalsIgnoreCase(visualizationCode)) {
+			  return revenueService.arrearDemand(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.REVENUE_CURRENT_DEMAND.equalsIgnoreCase(visualizationCode)) {
+			  return revenueService.currentDemand(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 

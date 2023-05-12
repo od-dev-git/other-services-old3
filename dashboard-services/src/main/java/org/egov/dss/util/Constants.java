@@ -34,6 +34,8 @@ public class Constants {
 		final static String REVENUE_TARGET_COLLECTION = "targetCollection";
 		final static String REVENUE_TARGET_ACHIEVED = "targetAchieved";
 		final static String REVENUE_TOTAL_DEMAND = "totalDemand";
+		final static String REVENUE_ARREAR_DEMAND = "arrearDemand";
+		final static String REVENUE_CURRENT_DEMAND = "currentDemand";
 		final static String REVENUE_CUMULATIVE_COLLECTION = "cumulativeCollection";
 		final static String REVENUE_TOP_PERFORMING_ULBS = "topPerformingUlbs";
 		final static String REVENUE_BOTTOM_PERFORMING_ULBS = "bottomPerformingUlbs";
