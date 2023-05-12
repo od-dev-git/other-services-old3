@@ -241,10 +241,11 @@ public class DashboardService {
 		for (String businessService : DashboardConstants.DEMAND_BUSINESS_SERVICES) {
 			try {
 				enrichDemandRequest(demandPayload, businessService);
-				HashMap<String, BigDecimal> demandData = fetchDemandData(demandPayload);
-				for (Map.Entry<String, BigDecimal> demand : demandData.entrySet()) {
-					demandPayload.setTenantId(demand.getKey());
-					demandPayload.setAmount(demand.getValue());
+				List<HashMap<String, Object>> demandData = fetchDemandData(demandPayload);
+				for (HashMap<String, Object> demand: demandData) {
+					demandPayload.setTenantId(String.valueOf(demand.get("tenantid")));
+					demandPayload.setTaxAmount((BigDecimal)demand.get("taxamount"));
+					demandPayload.setCollectionAmount((BigDecimal)demand.get("collectionamount"));
 					demandPayload.setLastModifiedTime(schedulerStartTime);
 					commonRepository.updateDemand(demandPayload);
 				}
@@ -260,8 +261,8 @@ public class DashboardService {
 
 	}
 	
-	public HashMap<String, BigDecimal> fetchDemandData(DemandPayload criteria) {
-		HashMap<String, BigDecimal> demandData = commonRepository.fetchDemandData(criteria);
+	public List<HashMap<String, Object>> fetchDemandData(DemandPayload criteria) {
+		List<HashMap<String, Object>> demandData = commonRepository.fetchDemandData(criteria);
 		return demandData;
 	}
 	

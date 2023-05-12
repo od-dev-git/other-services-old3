@@ -33,8 +33,11 @@ public class DemandPayload {
 	@JsonProperty("financialYear")
 	private String financialYear;
 	
-	@JsonProperty("amount")
-	private BigDecimal amount;
+	@JsonProperty("taxAmount")
+	private BigDecimal taxAmount;
+	
+	@JsonProperty("collectionAmount")
+	private BigDecimal collectionAmount;
 	
 	@JsonProperty("taxPeriodFrom")
 	private Long taxPeriodFrom;
