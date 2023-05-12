@@ -20,6 +20,7 @@ import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.builder.CommonQueryBuilder;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.PayloadDetailsRowMapper;
+import org.egov.dss.repository.rowmapper.TableChartRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.ChartCriteria;
@@ -119,13 +120,13 @@ public class CommonRepository {
 		});
 	}
 	
-	public HashMap<String, BigDecimal> fetchDemandData(DemandPayload criteria) {
+	public List<HashMap<String, Object>> fetchDemandData(DemandPayload criteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = commonQueryBuilder.fetchDemandData(criteria, preparedStatementValues);
 		log.info("query: " + query);
 		log.info("Module : " + criteria.getBusinessService() + " taxPeriodFrom: " + criteria.getTaxPeriodFrom()
 				+ " taxPeriodTo: " + criteria.getTaxPeriodTo());
-		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
 
 	}
 	
@@ -133,16 +134,17 @@ public class CommonRepository {
 	public void updateDemand(DemandPayload demandPayload) {
 		String finalQuery = commonQueryBuilder.DEMAND_UPDATE_QUERY;
 		log.info(finalQuery);
-		log.info(demandPayload.getTenantId()+","+demandPayload.getAmount()+" , "+demandPayload.getBusinessService()+" , "+demandPayload.getFinancialYear());
+		log.info(demandPayload.getTenantId()+","+demandPayload.getTaxAmount()+" , "+demandPayload.getBusinessService()+" , "+demandPayload.getFinancialYear());
 		jdbcTemplate.update(finalQuery, new PreparedStatementSetter() {
 
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
-				ps.setBigDecimal(1, demandPayload.getAmount());
-				ps.setLong(2, demandPayload.getLastModifiedTime());
-				ps.setString(3, demandPayload.getTenantId());
-				ps.setString(4, demandPayload.getBusinessService());
-				ps.setString(5, demandPayload.getFinancialYear());
+				ps.setBigDecimal(1, demandPayload.getTaxAmount());
+				ps.setBigDecimal(2, demandPayload.getCollectionAmount());
+				ps.setLong(3, demandPayload.getLastModifiedTime());
+				ps.setString(4, demandPayload.getTenantId());
+				ps.setString(5, demandPayload.getBusinessService());
+				ps.setString(6, demandPayload.getFinancialYear());
 				
 			}
 

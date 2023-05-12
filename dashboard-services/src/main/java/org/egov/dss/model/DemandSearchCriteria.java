@@ -31,5 +31,7 @@ public class DemandSearchCriteria {
     
     private String excludedTenantId;
     
+    private Boolean isArrearDemand;
+    
 
 }

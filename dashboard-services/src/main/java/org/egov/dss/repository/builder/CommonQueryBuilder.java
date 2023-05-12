@@ -28,11 +28,11 @@ public class CommonQueryBuilder {
     public static final String PAYLOAD_DATA_INSERT_QUERY = " insert into state.{tableName} (id,visualizationcode,modulelevel,startdate,enddate,timeinterval,charttype, tenantid, "
     		                                             + " headername, valuetype) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
     
-	public static final String GET_DEMAND_PAYLOAD_QUERY = " select edv.tenantid as tenantid,coalesce(sum(edv2.taxamount), 0) as totalamt "
+	public static final String GET_DEMAND_PAYLOAD_QUERY = " select edv.tenantid as tenantid,coalesce(sum(edv2.taxamount), 0) as taxamount, coalesce(sum(edv2.collectionamount), 0) as collectionamount "
                                                          + "from egbs_demand_v1 edv inner join egbs_demanddetail_v1 edv2 on "
 			                                             + "edv.id = edv2.demandid ";
 	
-	public static final String DEMAND_UPDATE_QUERY = " update state.eg_dss_demand set amount = ? , lastmodifiedtime = ? where tenantid = ? and businessservice = ? and financialyear = ? ";
+	public static final String DEMAND_UPDATE_QUERY = " update state.eg_dss_demand set amount = ? , collectionamount = ? , lastmodifiedtime = ? where tenantid = ? and businessservice = ? and financialyear = ? ";
 			
     public static String fetchSchedulerPayloads(ChartCriteria criteria, Map<String, Object> preparedStatementValues) {
     	String finalQuery = PAYLOAD_QUERY_SQL.replace("{tableName}", criteria.getTableName());

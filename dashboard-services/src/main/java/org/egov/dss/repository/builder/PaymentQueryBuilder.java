@@ -653,9 +653,13 @@ public class PaymentQueryBuilder {
 				preparedStatementValues.put("businessService", searchCriteria.getBusinessService());
 			}
             
-            if (!StringUtils.isEmpty(searchCriteria.getFinancialYear())) {
+			if (!StringUtils.isEmpty(searchCriteria.getFinancialYear())) {
 				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append(" financialyear = :financialYear ");
+				if (searchCriteria.getIsArrearDemand() == Boolean.TRUE) {
+					selectQuery.append(" financialyear < :financialYear ");
+				} else {
+					selectQuery.append(" financialyear = :financialYear ");
+				}
 				preparedStatementValues.put("financialYear", searchCriteria.getFinancialYear());
 			}
 
