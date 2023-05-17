@@ -263,5 +263,37 @@ public class WSService {
 		HashMap<String, Long> totalApplication = wsRepository.getTenantWiseTotalApplication(criteria);
         return totalApplication;
 	}
+	
+	public List<Data> wsCumulativeConnectionByUsage(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
+		List<Chart> wsConnectionsByUsageType = wsRepository.getwsConnectionsByUsageType(criteria);
+
+		List<Plot> plots = new ArrayList();
+		Long total = 0L;
+		total = extractDataForChart(wsConnectionsByUsageType, plots ,total);		 
+
+		return Arrays.asList(Data.builder().headerName("DSS_WS_CUMULATIVE_CONNECTION_BY_USAGE").headerValue(total).plots(plots).build());
+	}
+	
+	public List<Data> wsCumulativeConnectionByType(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsOldApplication(Boolean.FALSE);
+		criteria.setFromDate(null);
+		criteria.setToDate(null);
+		List<Chart> wsConnectionsByType = wsRepository.getwsConnectionsByType(criteria);
+
+		List<Plot> plots = new ArrayList();
+		Long total = 0L;
+		total = extractDataForChart(wsConnectionsByType, plots ,total);	 
+
+		return Arrays.asList(Data.builder().headerName("DSS_WS_CUMULATIVE_CONNECTION_BY_TYPE").headerValue(total).plots(plots).build());
+	}
 
 }
