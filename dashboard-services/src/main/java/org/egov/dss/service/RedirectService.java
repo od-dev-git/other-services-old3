@@ -607,6 +607,12 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.REVENUE_CURRENT_DEMAND.equalsIgnoreCase(visualizationCode)) {
 			  return revenueService.currentDemand(requestInfoWrapper.getPayloadDetails());
 		}
+		if (Constants.VisualizationCodes.SERVICE_WS_CUMULATIVE_CONNECTIONS_BY_USAGE.equalsIgnoreCase(visualizationCode)) {
+			  return wsService.wsCumulativeConnectionByUsage(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.SERVICE_WS_CUMULATIVE_CONNECTIONS_BY_TYPE.equalsIgnoreCase(visualizationCode)) {
+			  return wsService.wsCumulativeConnectionByType(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 
