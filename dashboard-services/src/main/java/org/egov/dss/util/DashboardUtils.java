@@ -1,7 +1,14 @@
 package org.egov.dss.util;
 
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.tracer.model.CustomException;
@@ -13,7 +20,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jaegertracing.thriftjava.BaggageRestrictionManager.AsyncProcessor.getBaggageRestrictions;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -165,6 +172,57 @@ public class DashboardUtils {
 		cal.set(Calendar.AM_PM, Calendar.AM);
 		return cal.getTimeInMillis();
 
+	}
+	
+	public Long startOfDay(Long timeInstance) {
+		Date date = new Date(timeInstance);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.setTimeZone(TimeZone.getTimeZone("IST"));
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTimeInMillis();
+	}
+
+	public Long endOfDay(Long timeInstance) {
+		Date date = new Date(timeInstance);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.setTimeZone(TimeZone.getTimeZone("IST"));
+		calendar.set(Calendar.HOUR_OF_DAY, 23);
+		calendar.set(Calendar.MINUTE, 59);
+		calendar.set(Calendar.SECOND, 59);
+		calendar.set(Calendar.MILLISECOND, 000);
+		return calendar.getTimeInMillis();
+	}
+	
+	public Long getStartDateGmt(String financialYear) {
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.MONTH, Calendar.APRIL);
+		cal.set(Calendar.YEAR, Integer.parseInt(financialYear.split("-")[0]));
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		cal.set(Calendar.AM_PM, Calendar.AM);
+		return cal.getTimeInMillis();
+
+	}
+
+	public Long getEndDateGmt(String financialYear) {
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.DAY_OF_MONTH, 31);
+		cal.set(Calendar.MONTH, Calendar.MARCH);
+		cal.set(Calendar.YEAR, Integer.parseInt(financialYear.split("-")[0]) + 1);
+		cal.set(Calendar.HOUR, 11);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+		cal.set(Calendar.MILLISECOND, 0);
+		cal.set(Calendar.AM_PM, Calendar.PM);
+		return cal.getTimeInMillis();
 	}
 	
 }

@@ -643,5 +643,71 @@ public class BPAService {
 				.getTenantWiseApplicationsReceivedList(criteria);
 		return tenantWiseApplicationsReceivedList;
 	}
+	
+	public List<Data> obpsServiceSummary(PayloadDetails payloadDetails) {
+        BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+        criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        HashMap<String, BigDecimal> totalAppicationReceived = getTotalApplicationReceivedByService(payloadDetails);
+        HashMap<String, BigDecimal> totalAppicationApproved = getTotalApplicationApprovedByService(payloadDetails);
+        
+        
+        List<Data> response = new ArrayList<>();
+        int serialNumber = 1;
+
+        for (HashMap.Entry<String, BigDecimal> totalApplication : totalAppicationReceived.entrySet()) {
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+            plots.add(Plot.builder().name("Service").label(totalApplication.getKey().toString()).symbol("text")
+                    .build());
+
+            plots.add(Plot.builder().name("Application Received").value(totalApplication.getValue() == null ? BigDecimal.ZERO : totalApplication.getValue())
+                    .symbol("number").build());
+
+            plots.add(Plot.builder().name("Application Approved")
+                    .value(totalAppicationApproved.get(totalApplication.getKey()) == null ? BigDecimal.ZERO : totalAppicationApproved.get(totalApplication.getKey())).symbol("number").build());
+
+            response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber).build());
+
+            serialNumber++;
+
+        }
+        
+        if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Service").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Application Received").value(BigDecimal.ZERO).symbol("number")
+					.build());
+
+			plots.add(Plot.builder().name("Application Received").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
+		}
+
+         return response;
+         
+	}
+	
+	public HashMap<String,BigDecimal> getTotalApplicationReceivedByService(PayloadDetails payloadDetails) {
+        BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+        criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
+        criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+        return bpaRepository.getTotalApplicationByServiceType(criteria);
+     }
+	
+	public HashMap<String,BigDecimal> getTotalApplicationApprovedByService(PayloadDetails payloadDetails) {
+        BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+        criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+        criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+        return bpaRepository.getTotalApplicationByServiceType(criteria);
+     }
 
 }

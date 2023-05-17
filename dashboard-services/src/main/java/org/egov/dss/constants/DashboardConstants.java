@@ -156,6 +156,16 @@ public class DashboardConstants {
 	
 	public static final String WEEK = "week";
 	
+	public static final String DAY = "day";
+	
+	public static final String STATE_TENANT = "od"; 
+	
+	public static final String PT_TIME_REBATE = "PT_TIME_REBATE";
+	
+	public static final String PT_ADVANCE_CARRYFORWARD = "PT_ADVANCE_CARRYFORWARD";
+	
+	public static final String PT_ROUNDOFF = "PT_ROUNDOFF";
+	
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
 					BUSINESS_SERVICE_OC_APP_FEE, BUSINESS_SERVICE_OC_SAN_FEE));
@@ -211,10 +221,17 @@ public class DashboardConstants {
 			.unmodifiableList(Arrays.asList(STATUS_CLOSED,STATUS_RESOLVED,STATUS_REJECTED));
 	
 	public static final List<String> TIME_INTERVAL = Collections
-			.unmodifiableList(Arrays.asList(QUARTER,MONTH,WEEK));
+			.unmodifiableList(Arrays.asList(QUARTER,MONTH,WEEK,DAY));
 
-
-
+	public static final List<String> DEMAND_BUSINESS_SERVICES = Collections
+			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_PT,BUSINESS_SERVICE_WS));
+	
+	public static final List<String> PT_DEMAND_TAX_HEAD_CODE = Collections
+			.unmodifiableList(Arrays.asList(PT_TIME_REBATE,PT_ADVANCE_CARRYFORWARD,PT_ROUNDOFF));
+	
+	public static final List<String> WS_DEMAND_TAX_HEAD_CODE = Collections
+			.unmodifiableList(Arrays.asList("WS_TIME_REBATE", "WS_ADVANCE_CARRYFORWARD", "WS_Round_Off",
+					"WS_SPECIAL_REBATE", "SW_ADVANCE_CARRYFORWARD", "SW_SPECIAL_REBATE"));
 
 
 }

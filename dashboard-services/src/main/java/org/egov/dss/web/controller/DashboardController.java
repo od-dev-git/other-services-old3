@@ -50,12 +50,32 @@ public class DashboardController {
 		
 	}
 	
-	@Scheduled(cron = "0 0 23 * * ?")
+	@Scheduled(cron = "0 0 17 * * ?")
 	public void triggerScheduler() {
 		log.info("Data update scheduler started..");
 		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
 		requestInfoWrapper.setRequestInfo(RequestInfo.builder().build());
 		requestInfoWrapper.setChartCriteria(ChartCriteria.builder().build());
 		service.processRequest(requestInfoWrapper);
+	}
+	
+	@PostMapping("/_updatePayloadData")
+	public ResponseEntity<DssResponse> updatePayloadData(@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		service.process(requestInfoWrapper);
+		DssResponse response = DssResponse.builder()
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<DssResponse>(response, HttpStatus.OK);
+		
+	}
+	
+	@PostMapping("/_jobUpdateDemand")
+	public ResponseEntity<DssResponse> updateDemand(@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		service.updateDemand(requestInfoWrapper);
+		DssResponse response = DssResponse.builder()
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<DssResponse>(response, HttpStatus.OK);
+		
 	}
 }

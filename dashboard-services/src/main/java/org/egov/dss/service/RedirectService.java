@@ -421,6 +421,10 @@ public class RedirectService {
             return bpaService.serviceReport(requestInfoWrapper.getPayloadDetails());
         }
         
+        if(Constants.VisualizationCodes.SERVICE_OBPS_SERVICE_SUMMARY.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.obpsServiceSummary(requestInfoWrapper.getPayloadDetails());
+        }
+        
         if(Constants.VisualizationCodes.SERVICE_TL_TOTAL_APPLICATION.equalsIgnoreCase(visualizationCode)) {
         	return tlService.totalApplications(requestInfoWrapper.getPayloadDetails());
         }
@@ -593,6 +597,21 @@ public class RedirectService {
 		}
 		if (Constants.VisualizationCodes.SERVICE_BOTTOM_PERFORMING_ULBS_COMPLETION_RATE.equalsIgnoreCase(visualizationCode)) {
 			  return commonService.bottomPerformingULBsCompletionRate(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.REVENUE_TOTAL_DEMAND.equalsIgnoreCase(visualizationCode)) {
+			  return revenueService.totalDemand(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.REVENUE_ARREAR_DEMAND.equalsIgnoreCase(visualizationCode)) {
+			  return revenueService.arrearDemand(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.REVENUE_CURRENT_DEMAND.equalsIgnoreCase(visualizationCode)) {
+			  return revenueService.currentDemand(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.SERVICE_WS_CUMULATIVE_CONNECTIONS_BY_USAGE.equalsIgnoreCase(visualizationCode)) {
+			  return wsService.wsCumulativeConnectionByUsage(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.SERVICE_WS_CUMULATIVE_CONNECTIONS_BY_TYPE.equalsIgnoreCase(visualizationCode)) {
+			  return wsService.wsCumulativeConnectionByType(requestInfoWrapper.getPayloadDetails());
 		}
 		
 		return null;

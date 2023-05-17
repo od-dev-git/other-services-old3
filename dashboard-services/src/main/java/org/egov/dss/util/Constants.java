@@ -33,6 +33,9 @@ public class Constants {
 		final static String REVENUE_TOTAL_COLLECTION = "totalCollection";
 		final static String REVENUE_TARGET_COLLECTION = "targetCollection";
 		final static String REVENUE_TARGET_ACHIEVED = "targetAchieved";
+		final static String REVENUE_TOTAL_DEMAND = "totalDemand";
+		final static String REVENUE_ARREAR_DEMAND = "arrearDemand";
+		final static String REVENUE_CURRENT_DEMAND = "currentDemand";
 		final static String REVENUE_CUMULATIVE_COLLECTION = "cumulativeCollection";
 		final static String REVENUE_TOP_PERFORMING_ULBS = "topPerformingUlbs";
 		final static String REVENUE_BOTTOM_PERFORMING_ULBS = "bottomPerformingUlbs";
@@ -113,6 +116,8 @@ public class Constants {
 		final static String SERVICE_WS_CONNECTION_AGEING = "wsConnectionAgeingDDR";
 		final static String SERVICE_WS_SLA_ACHIEVED = "wsSlaAchieved";
 		final static String SERVICE_WS_TOTAL_APPLICATIONS = "wstotalApplications";
+		final static String SERVICE_WS_CUMULATIVE_CONNECTIONS_BY_USAGE = "wsCumulativeConnectionByUsage";
+		final static String SERVICE_WS_CUMULATIVE_CONNECTIONS_BY_TYPE = "wsCumulativeConnectionByType";
 		
 		final static String SERVICE_OBPS_TOTAL_APPLICATIONS_RECEIVED = "bpaTotalApplicationsSubmitted";
 		final static String SERVICE_OBPS_TOTAL_APPLICATIONS_REJECTED = "bpaTotalRejectedApplications";
@@ -148,6 +153,7 @@ public class Constants {
         final static String SERVICE_OBPS_OC_SLA_COMPLIANCE = "bpaSLAComplianceOC";
         final static String SERVICE_OBPS_SERVICE_REPORT = "obpsServiceReport";
 		final static String SERVICE_OBPS_PERMITS_AND_OC_ISSUED_AND_OC_SUBMITTED = "permitsandOCissued";
+		final static String SERVICE_OBPS_SERVICE_SUMMARY = "obpsServiceSummary";
 		
 		final static String REVENUE_TL_TOP_ULBS_BY_VALUE = "tlTopDigitalCollectionByValue";
 		final static String REVENUE_TL_BOTTOM_ULBS_BY_VALUE = "tlBottomDigitalCollectionByValue";

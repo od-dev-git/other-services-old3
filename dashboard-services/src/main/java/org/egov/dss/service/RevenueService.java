@@ -34,6 +34,7 @@ import java.time.ZonedDateTime;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.BillAccountDetail;
 import org.egov.dss.model.Chart;
+import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.FinancialYearWiseProperty;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.Payment;
@@ -98,6 +99,24 @@ public class RevenueService {
 		
 		return criteria;
 	}
+	
+	private DemandSearchCriteria getDemandSearchCriteria(PayloadDetails payloadDetails) {
+		DemandSearchCriteria criteria = new DemandSearchCriteria();
+
+		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
+			criteria.setBusinessService(payloadDetails.getModulelevel());
+		}
+		
+		if(StringUtils.hasText(payloadDetails.getTenantid())) {
+			criteria.setTenantId(payloadDetails.getTenantid());
+		}
+		
+		if(StringUtils.hasText(payloadDetails.getTimeinterval())) {
+			criteria.setFinancialYear(payloadDetails.getTimeinterval());
+		}
+		
+		return criteria;
+	}
 
 	public List<Data> totalCollection(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
@@ -135,6 +154,9 @@ public class RevenueService {
 		}
 		else if(temp.equalsIgnoreCase(DashboardConstants.WEEK)) {
 			targetCollection = targetCollection.divide(new BigDecimal(48), 2, RoundingMode.HALF_UP);
+		}
+		else if(temp.equalsIgnoreCase(DashboardConstants.DAY)) {
+			targetCollection = targetCollection.divide(new BigDecimal(365), 2, RoundingMode.HALF_UP);
 		}
 		return Arrays.asList(Data.builder().headerValue(targetCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
@@ -1530,6 +1552,39 @@ public class RevenueService {
 				Data.builder().headerName("DSS_TOTAL_CUMULATIVE_COLLECTION").headerValue(total).plots(plots).build());
 	}
 	
-	
+	public List<Data> totalDemand(PayloadDetails payloadDetails) {
+		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
+		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalDemand = BigDecimal.ZERO;
+		BigDecimal currentDemand = BigDecimal.ZERO;
+		BigDecimal arrearDemand = BigDecimal.ZERO;
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			currentDemand = (BigDecimal) currentDemand(payloadDetails).get(0).getHeaderValue();
+			arrearDemand = (BigDecimal) arrearDemand(payloadDetails).get(0).getHeaderValue();
+		}
+		totalDemand = currentDemand.add(arrearDemand);
+		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+
+	public List<Data> currentDemand(PayloadDetails payloadDetails) {
+		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
+		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalDemand = BigDecimal.ZERO;
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			totalDemand = paymentRepository.getTotalDemand(demandSearchCriteria);
+		}
+		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+
+	public List<Data> arrearDemand(PayloadDetails payloadDetails) {
+		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
+		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		demandSearchCriteria.setIsArrearDemand(Boolean.TRUE);
+		BigDecimal totalDemand = BigDecimal.ZERO;
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			totalDemand = paymentRepository.getTotalDemand(demandSearchCriteria);
+		}
+		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
+	}
 
 }
