@@ -21,7 +21,8 @@ select
 	end as approvaldate
 from
 	eg_bpa_buildingplan
-where tenantid != 'od.testing'	;
+where tenantid != 'od.testing'	
+and status != 'DELETED';
 
 
 
