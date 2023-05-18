@@ -285,7 +285,7 @@ public class MRConstants {
 	            NOTIFICATION_FORWARD_CITIZEN,NOTIFICATION_FORWARD_PENDINGAPPROVAL,CORRECTION_NOTIFICATION_FORWARD_PENDINGAPPROVAL));
 	    
 	    public static final List<String> NOTIFICATION_DISABLE_STATUSES = Collections.unmodifiableList(Arrays.asList(
-	    		STATUS_INITIATED));
+	    		));
 	    
 	    public MRConstants() {}
 	    
