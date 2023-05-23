@@ -78,4 +78,15 @@ public class DashboardController {
 		return new ResponseEntity<DssResponse>(response, HttpStatus.OK);
 		
 	}
+	
+	@Scheduled(cron = "0 0 * * SAT")
+	public void triggerDemandScheduler() {
+		log.info("Demand data update scheduler started..");
+		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
+		requestInfoWrapper.setRequestInfo(RequestInfo.builder().build());
+		requestInfoWrapper.setChartCriteria(ChartCriteria.builder().build());
+		service.updateDemand(requestInfoWrapper);
+	}
+	
+	
 }
