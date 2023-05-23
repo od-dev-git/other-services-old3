@@ -20,7 +20,7 @@ public class SujogDbaRepo {
 			jdbcTemplate.execute(QUERY);
 			log.info("Connetion has been close sucessfully");
 		} catch (Exception e) {
-			log.error("Problem occure in query execution. Error: "+e.getLocalizedMessage());
+			log.info("Problem occure in query execution. Error: "+e.getLocalizedMessage());
 		}
 	}
 
