@@ -46,4 +46,10 @@ public class Configurations {
 	
 	@Value("${egov.mdms.search.endpoint}")
 	private String mdmsEndpoint;
+	
+	@Value("${mr.service.host}")
+	private String mrHost;
+	
+	@Value("${mr.service.search.endpoint}")
+	private String mrSearchEndpoint;
 }
