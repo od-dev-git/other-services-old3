@@ -73,11 +73,14 @@ public class PaymentService {
 				
 	}
 
-	public Object getFilestore(String fileStoreId) throws IOException {
+	public Object getFilestore(String fileStoreId, String tenantId) throws IOException {
 		log.info("fetching document from filestore id::::");
-		StringBuilder host=new StringBuilder().append(configurations.getFilestoreHost()).append(configurations.getFilstoreSearchEndpoint())
+		StringBuilder host=new StringBuilder().append(configurations.getFilestoreHost())
+				.append(configurations.getFilstoreSearchEndpoint())
+				.append(tenantId)
+				.append("&fileStoreIds=")
 				.append(fileStoreId);
-
+		
 		return restTemplate.getForObject(host.toString(),Object.class);
 
 	}

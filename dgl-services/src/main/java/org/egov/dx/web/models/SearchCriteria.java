@@ -13,6 +13,8 @@ public class SearchCriteria {
 
 
     private String propertyId;
+    
+    private String mrNumber;
 
     private String city;
 

@@ -30,6 +30,10 @@ public class DocDetailsRequest {
     @Size(max=64)
     @XStreamAlias("PropertyID")
     private String propertyId;
+    
+    @Size(max=64)
+    @XStreamAlias("MrNumber")
+    private String mrNumber;
 
     @XStreamAlias("City")
     private String city;
@@ -88,6 +92,14 @@ public class DocDetailsRequest {
 
 	public void setPropertyId(String propertyId) {
 		this.propertyId = propertyId;
+	}
+	
+	public String getMrNumber() {
+		return mrNumber;
+	}
+
+	public void setMrNumber(String mrNumber) {
+		this.mrNumber = mrNumber;
 	}
 
 	public String getCity() {
