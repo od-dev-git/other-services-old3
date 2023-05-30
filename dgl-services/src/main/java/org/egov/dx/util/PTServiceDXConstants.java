@@ -34,7 +34,7 @@ public class PTServiceDXConstants {
 	
 	public static final String PDF_KEY_PT = "property-receipt";
 	
-	public static final String STATE_TENANT = "pg";
+	public static final String STATE_TENANT = "od";
 
 
 
@@ -44,9 +44,11 @@ public class PTServiceDXConstants {
 	//public static final String ORIGIN="https://apisetu.gov.in";
 	public static final String ORIGIN="https://partners.digitallocker.gov.in";
 	
-	public static final String DIGILOCKER_ISSUER_ID = "in.niua";
+	public static final String DIGILOCKER_ISSUER_ID = "gov.odisha";
 	
 	public static final String DIGILOCKER_DOCTYPE = "PRTAX";
+	
+	public static final String DIGILOCKER_DOCTYPE_MR_CERT = "RMCER";
 
 	public static final String DIGILOCKER_NO_DATA_FOUND = "NO_DATA_FOUND";
 	

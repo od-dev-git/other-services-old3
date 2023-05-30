@@ -106,6 +106,7 @@ public class DataExchangeController {
 			pojo=om.convertValue(obj, PullURIRequest.class);
 			pojo.setTxn((requestBody.split("txn=\"")[1]).split("\"")[0]);
 			searchCriteria.setPropertyId(pojo.getDocDetails().getPropertyId());
+			searchCriteria.setMrNumber(pojo.getDocDetails().getMrNumber());
 			searchCriteria.setCity(pojo.getDocDetails().getCity());
 			//searchCriteria.setOrigin(httpServetRequest.getRequestURL().toString());
 			searchCriteria.setOrigin("https://partners.digitallocker.gov.in");
