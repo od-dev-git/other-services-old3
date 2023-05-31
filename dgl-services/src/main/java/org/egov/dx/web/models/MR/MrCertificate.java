@@ -1,7 +1,10 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.MR;
 
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAttribute;
+
+import org.egov.dx.web.models.IssuedBy;
+import org.egov.dx.web.models.IssuedTo;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 

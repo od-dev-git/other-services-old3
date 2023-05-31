@@ -1,4 +1,6 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.MR;
+
+import org.egov.dx.web.models.CertificateForData;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 

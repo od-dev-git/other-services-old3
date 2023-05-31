@@ -31,11 +31,6 @@ import org.egov.dx.web.models.CertificateForData;
 import org.egov.dx.web.models.DocDetailsResponse;
 import org.egov.dx.web.models.IssuedBy;
 import org.egov.dx.web.models.IssuedTo;
-import org.egov.dx.web.models.MRSearchCriteria;
-import org.egov.dx.web.models.MarriageCertificate;
-import org.egov.dx.web.models.MarriageRegistration;
-import org.egov.dx.web.models.MrCertificate;
-import org.egov.dx.web.models.MrCertificateData;
 import org.egov.dx.web.models.Organization;
 import org.egov.dx.web.models.Payment;
 import org.egov.dx.web.models.PaymentForReceipt;
@@ -48,6 +43,12 @@ import org.egov.dx.web.models.PullURIResponse;
 import org.egov.dx.web.models.RequestInfoWrapper;
 import org.egov.dx.web.models.ResponseStatus;
 import org.egov.dx.web.models.SearchCriteria;
+import org.egov.dx.web.models.MR.MRSearchCriteria;
+import org.egov.dx.web.models.MR.MarriageCertificate;
+import org.egov.dx.web.models.MR.MarriageRegistration;
+import org.egov.dx.web.models.MR.MrCertificate;
+import org.egov.dx.web.models.MR.MrCertificateData;
+import org.egov.dx.web.models.TL.TradeLicenseSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -74,6 +75,9 @@ public class DataExchangeService {
 	
 	@Autowired
 	private MrService mrService;
+	
+	@Autowired
+	private TLService tlService;
 	
 	public String searchPullURIRequest(SearchCriteria  searchCriteria) throws IOException {
 		
@@ -106,7 +110,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("0a0da590-f9e7-48b5-8e9f-c5ec6ad2120e");
+		request.setAuthToken("0a0da590-f9e7-48b5-8e9f-c5ec6ad2120e");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -120,7 +124,9 @@ public class DataExchangeService {
 			processPTPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
 		} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_MR_CERT.equals(searchCriteria.getDocType())) {
 			processMRPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
-		} else {
+		} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT.equals(searchCriteria.getDocType())) {
+			processTLPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
+		}else {
 			return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
 		}
 
@@ -129,6 +135,14 @@ public class DataExchangeService {
 
 		return xstream.toXML(model);
 
+	}
+
+	private void processTLPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
+			PullURIResponse model, XStream xstream) throws MalformedURLException, IOException {
+		TradeLicenseSearchCriteria criteria = new TradeLicenseSearchCriteria();
+		criteria.setTenantId("od"+searchCriteria.getCity());
+		criteria.setLicenseNumbers(Arrays.asList(searchCriteria.getLicenseNumber()));
+		generateTlLicense(searchCriteria, criteria, requestInfoWrapper, model, xstream);
 	}
 
 	private void processMRPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
@@ -375,7 +389,7 @@ public class DataExchangeService {
 			docDetailsResponse.setIssuedTo(issuedTo);
 			// docDetailsResponse.setDataContent("");
 			docDetailsResponse.setDocContent("");
-			log.info(EXCEPTION_TEXT_VALIDATION);
+			log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_MR);
 			model.setDocDetails(docDetailsResponse);
 
 		}
@@ -618,5 +632,14 @@ public class DataExchangeService {
 		certificateData.setPropertyTaxReceipt(propertyTaxReceipt);
 		certificate.setCertificateData(certificateData);
 		return certificate;
+	}
+	
+	private void generateTlLicense(SearchCriteria searchCriteria, TradeLicenseSearchCriteria criteria,
+			RequestInfoWrapper requestInfoWrapper, PullURIResponse model, XStream xstream)
+			throws IOException, MalformedURLException {
+		
+		List<MarriageRegistration> registrations = tlService.getTradeLicenses(criteria, requestInfoWrapper);
+
+		
 	}
 }

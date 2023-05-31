@@ -52,4 +52,10 @@ public class Configurations {
 	
 	@Value("${mr.service.search.endpoint}")
 	private String mrSearchEndpoint;
+	
+	@Value("${tl.service.host}")
+	private String TlHost;
+	
+	@Value("${tl.service.search.endpoint}")
+	private String TlSearchEndpoint;
 }
