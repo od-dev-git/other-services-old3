@@ -1,11 +1,14 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.BPA;
+
+import org.egov.dx.web.models.CertificateForData;
+import org.egov.dx.web.models.MR.MarriageCertificate;
+import org.egov.dx.web.models.MR.MrCertificateData;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
@@ -13,12 +16,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @XStreamAlias("CertificateData")
-public class MrCertificateData {
+public class BPACertificateData {
 	
 	@XStreamAlias("Certificate")
     private CertificateForData certificate;
     
-    @XStreamAlias("MarriageCertificate")
-    private MarriageCertificate marriageCertificate;
+    @XStreamAlias("BuildingPlanCertificate")
+    private BuildingPlanCertificate buildingPlanCertificate;
 
 }

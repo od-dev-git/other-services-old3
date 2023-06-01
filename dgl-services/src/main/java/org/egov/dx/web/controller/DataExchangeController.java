@@ -107,6 +107,8 @@ public class DataExchangeController {
 			pojo.setTxn((requestBody.split("txn=\"")[1]).split("\"")[0]);
 			searchCriteria.setPropertyId(pojo.getDocDetails().getPropertyId());
 			searchCriteria.setMrNumber(pojo.getDocDetails().getMrNumber());
+			searchCriteria.setLicenseNumber(pojo.getDocDetails().getLicenseNumber());
+			searchCriteria.setApprovalNumber(pojo.getDocDetails().getApprovalNumber());
 			searchCriteria.setCity(pojo.getDocDetails().getCity());
 			//searchCriteria.setOrigin(httpServetRequest.getRequestURL().toString());
 			searchCriteria.setOrigin("https://partners.digitallocker.gov.in");
