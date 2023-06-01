@@ -1,7 +1,5 @@
 package org.egov.dx.service;
 
-import static org.egov.dx.util.PTServiceDXConstants.BUSINESSSERVICES_FIELD_FOR_SEARCH_URL;
-import static org.egov.dx.util.PTServiceDXConstants.CONSUMER_CODE_SEARCH_FIELD_NAME_PAYMENT;
 import static org.egov.dx.util.PTServiceDXConstants.SEPARATER;
 import static org.egov.dx.util.PTServiceDXConstants.TENANT_ID_FIELD_FOR_SEARCH_URL;
 import static org.egov.dx.util.PTServiceDXConstants.URL_PARAMS_SEPARATER;
@@ -11,13 +9,13 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.dx.repository.Repository;
 import org.egov.dx.util.Configurations;
-import org.egov.dx.web.models.Payment;
-import org.egov.dx.web.models.PaymentResponse;
-import org.egov.dx.web.models.PaymentSearchCriteria;
 import org.egov.dx.web.models.RequestInfoWrapper;
 import org.egov.dx.web.models.MR.MRSearchCriteria;
 import org.egov.dx.web.models.MR.MarriageRegistration;
 import org.egov.dx.web.models.MR.MarriageResponse;
+import org.egov.dx.web.models.TL.TradeLicense;
+import org.egov.dx.web.models.TL.TradeLicenseResponse;
+import org.egov.dx.web.models.TL.TradeLicenseSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -28,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class MrService {
+public class TLService {
 	
 	@Autowired
 	private Repository repository;
@@ -41,26 +39,24 @@ public class MrService {
 
 	@Autowired
 	private Configurations configurations;
-
-	public List<MarriageRegistration> getMarriageRegistrations(MRSearchCriteria criteria,
+	
+	public List<TradeLicense> getTradeLicenses(TradeLicenseSearchCriteria criteria,
 			RequestInfoWrapper requestInfoWrapper) {
 		
-		StringBuilder url = getMRSearchUrl(criteria);
-		log.info("Marriage Searched with MRNumber : "+criteria.getMrNumbers());
+		StringBuilder url = getTlSearchUrl(criteria);
+		log.info("Search with these License Numbers: "+criteria.getLicenseNumbers());
 		Object responseObject = repository.fetchResult(url, requestInfoWrapper);
-		MarriageResponse response = mapper.convertValue(responseObject, MarriageResponse.class);
-		return response.getMarriageRegistrations();
+		TradeLicenseResponse response = mapper.convertValue(responseObject, TradeLicenseResponse.class);
+		return response.getLicenses();
 	}
 
-	private StringBuilder getMRSearchUrl(MRSearchCriteria criteria) {
+	private StringBuilder getTlSearchUrl(TradeLicenseSearchCriteria criteria) {
 		
-		return new StringBuilder().append(configurations.getMrHost())
-				.append(configurations.getMrSearchEndpoint()).append(URL_PARAMS_SEPARATER)
+		return new StringBuilder().append(configurations.getTlHost())
+				.append(configurations.getTlSearchEndpoint()).append(URL_PARAMS_SEPARATER)
 				.append(TENANT_ID_FIELD_FOR_SEARCH_URL).append(criteria.getTenantId())
-				.append(SEPARATER).append("mrNumbers=")
-				.append(StringUtils.join(criteria.getMrNumbers(),","));
+				.append(SEPARATER).append("licenseNumbers=")
+				.append(StringUtils.join(criteria.getLicenseNumbers(),","));
 	}
-	
-	
 
 }

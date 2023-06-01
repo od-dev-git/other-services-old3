@@ -15,6 +15,8 @@ public class SearchCriteria {
     private String propertyId;
     
     private String mrNumber;
+    
+    private String licenseNumber;
 
     private String city;
 

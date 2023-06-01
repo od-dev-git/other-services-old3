@@ -1,6 +1,6 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.MR;
 
-import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.springframework.validation.annotation.Validated;
@@ -19,52 +19,49 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CoupleDetails {
-
+public class Witness {
+	
 	@Size(max=64)
     @JsonProperty("id")
     private String id;
 
-    @JsonProperty("isDivyang")
-    private Boolean isDivyang;
 
     @Size(max=64)
     @JsonProperty("tenantId")
     private String tenantId = null;
     
-    @JsonProperty("isGroom")
-    private Boolean isGroom;
-    
     @Size(max=64)
     @JsonProperty("title")
     private String title;
     
+    @Size(max=256)
+    @JsonProperty("address")
+    private String address;
+	
     @Size(max=64)
     @JsonProperty("firstName")
     private String firstName;
-       
-    @JsonProperty("dateOfBirth")
-    private Long dateOfBirth;
-    
-    
+        
     @Size(max=64)
-    @JsonProperty("fatherName")
-    private String fatherName;
-    @Size(max=64)
+    @JsonProperty("country")
+    private String country = null;
 
+    @Size(max=64)
+    @JsonProperty("state")
+    private String state = null;
     
     @Size(max=64)
-    @JsonProperty("motherName")
-    private String motherName;
+    @JsonProperty("district")
+    private String district = null;
+
+    @Size(max=64)
+    @JsonProperty("pinCode")
+    @Pattern(regexp="(^$|[0-9]{6})", message = "Pincode should be 6 digit number")
+    private String pinCode = null;
     
-    @JsonProperty("isPrimaryOwner")
-    private Boolean isPrimaryOwner ;
     
-    @JsonProperty("address")
-    private AddressMR address;
-    
-	@JsonProperty("witness")
-	@Valid
-	private Witness witness = null;
-	
+    @Pattern(regexp = "^[6-9][0-9]{9}$", message = "Invalid mobile number")
+    @JsonProperty("contact")
+    private String contact;
+
 }
