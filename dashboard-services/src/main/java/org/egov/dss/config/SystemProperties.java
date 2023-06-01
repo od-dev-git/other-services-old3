@@ -1,6 +1,7 @@
 package org.egov.dss.config;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Profile;
@@ -16,5 +17,7 @@ import lombok.Setter;
 public class SystemProperties {
 	
 	private HashMap<String, String> tenantstable;
+	
+	private List<String> sparitulbs;
 
 }
