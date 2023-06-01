@@ -48,6 +48,10 @@ import org.egov.dx.web.models.MR.MarriageCertificate;
 import org.egov.dx.web.models.MR.MarriageRegistration;
 import org.egov.dx.web.models.MR.MrCertificate;
 import org.egov.dx.web.models.MR.MrCertificateData;
+import org.egov.dx.web.models.TL.TLCertificate;
+import org.egov.dx.web.models.TL.TLCertificateData;
+import org.egov.dx.web.models.TL.TradeLicense;
+import org.egov.dx.web.models.TL.TradeLicenseCertificate;
 import org.egov.dx.web.models.TL.TradeLicenseSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -110,7 +114,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		request.setAuthToken("0a0da590-f9e7-48b5-8e9f-c5ec6ad2120e");
+		request.setAuthToken("c6625c13-c236-4ef1-a517-1b515140bc70");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -140,7 +144,7 @@ public class DataExchangeService {
 	private void processTLPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
 			PullURIResponse model, XStream xstream) throws MalformedURLException, IOException {
 		TradeLicenseSearchCriteria criteria = new TradeLicenseSearchCriteria();
-		criteria.setTenantId("od"+searchCriteria.getCity());
+		criteria.setTenantId("od."+searchCriteria.getCity());
 		criteria.setLicenseNumbers(Arrays.asList(searchCriteria.getLicenseNumber()));
 		generateTlLicense(searchCriteria, criteria, requestInfoWrapper, model, xstream);
 	}
@@ -173,11 +177,18 @@ public class DataExchangeService {
 			log.info("Marriage Registrations Found and Validation Passed ! "+ String.valueOf(registrations));
 			String filestoreid=null;
 			String filestore=null;
-			if(registrations.get(0).getDscDetails().get(0).getDocumentId() != null) {
-				String tenantId = criteria.getTenantId();
-				filestore=registrations.get(0).getDscDetails().get(0).getDocumentId() ;
-				filestoreid = paymentService
-						.getFilestore(registrations.get(0).getDscDetails().get(0).getDocumentId(), tenantId).toString();
+			for (MarriageRegistration registration : registrations) {
+
+				if (registration.getStatus().equalsIgnoreCase("APPROVED")) {
+					if (registration.getDscDetails().get(0).getDocumentId() != null) {
+						String tenantId = criteria.getTenantId();
+						filestore = registration.getDscDetails().get(0).getDocumentId();
+						filestoreid = paymentService
+								.getFilestore(registration.getDscDetails().get(0).getDocumentId(), tenantId).toString();
+						break;
+					}
+				}
+
 			}
 			if (filestoreid != null) {
 
@@ -211,7 +222,7 @@ public class DataExchangeService {
 		     docDetailsResponse.setIssuedTo(issuedTo);
 		     //docDetailsResponse.setDataContent("");
 		     docDetailsResponse.setDocContent("");
-		     log.info(EXCEPTION_TEXT_VALIDATION);
+		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_MR);
 		     model.setDocDetails(docDetailsResponse);
 
 		}
@@ -638,8 +649,170 @@ public class DataExchangeService {
 			RequestInfoWrapper requestInfoWrapper, PullURIResponse model, XStream xstream)
 			throws IOException, MalformedURLException {
 		
-		List<MarriageRegistration> registrations = tlService.getTradeLicenses(criteria, requestInfoWrapper);
+		List<TradeLicense> licenses = tlService.getTradeLicenses(criteria, requestInfoWrapper);
 
+		if((!licenses.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateTLResponse(searchCriteria, licenses)
+				|| !licenses.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
+			
+			log.info("Trade Licenses Found and Validation Passed ! " + String.valueOf(licenses));
+			String filestoreid = null;
+			String filestore = null;
+			for (TradeLicense license : licenses) {
+				if (license.getStatus().equalsIgnoreCase("APPROVED")) {
+					if (license.getTradeLicenseDetail().getDscDetails().get(0).getDocumentId() != null) {
+						String tenantId = criteria.getTenantId();
+						filestore = license.getTradeLicenseDetail().getDscDetails().get(0).getDocumentId();
+						filestoreid = paymentService
+								.getFilestore(license.getTradeLicenseDetail().getDscDetails().get(0).getDocumentId(),
+										tenantId)
+								.toString();
+						break;
+					}
+				}
+			}
+			
+			if (filestoreid != null) {
+
+				TLCertificate certificate = new TLCertificate();
+
+				if (searchCriteria.getDocType().equals("TDLCS")) {
+
+					certificate = populateCertificateForTL(licenses.get(0));
+					xstream.processAnnotations(TLCertificate.class);
+
+				}
+				
+				createCeritificateFromFilestoreIdForTL(searchCriteria, model, xstream, certificate, filestoreid, filestore);
+			}
+		}	
+		else
+		{
+			ResponseStatus responseStatus=new ResponseStatus();
+		     responseStatus.setStatus("0");
+		     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");  
+		     LocalDateTime now = LocalDateTime.now();  
+		     responseStatus.setTs(dtf.format(now));
+		     responseStatus.setTxn(searchCriteria.getTxn());
+		     model.setResponseStatus(responseStatus);
+		 
+		     DocDetailsResponse docDetailsResponse=new DocDetailsResponse();
+		     IssuedTo issuedTo=new IssuedTo();
+		     List<Person> persons= new ArrayList<Person>();
+		     issuedTo.setPersons(persons);
+		     docDetailsResponse.setURI(null);
+		     docDetailsResponse.setIssuedTo(issuedTo);
+		     //docDetailsResponse.setDataContent("");
+		     docDetailsResponse.setDocContent("");
+		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_TL);
+		     model.setDocDetails(docDetailsResponse);
+
+		}
+	}
+
+	private boolean validateTLResponse(SearchCriteria searchCriteria, List<TradeLicense> licenses) {
+		// Add Validations for Trade License if needed
+		return true;
+	}
+
+	private void createCeritificateFromFilestoreIdForTL(SearchCriteria searchCriteria, PullURIResponse model,
+			XStream xstream, TLCertificate certificate, String filestoreid, String filestore)
+			throws IOException, MalformedURLException {
+
+		String tenantId = ("od." + searchCriteria.getCity());
+		String path = filestoreid.split("url=")[1];
+		String pdfPath = path.substring(0, path.length() - 3);
+		URL url1 = new URL(pdfPath);
+		try {
+
+			// Read the PDF from the URL and save to a local file
+			InputStream is1 = url1.openStream();
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+			int nRead;
+			byte[] data = new byte[1024];
+
+			while ((nRead = is1.read(data, 0, data.length)) != -1) {
+				buffer.write(data, 0, nRead);
+			}
+
+			buffer.flush();
+			byte[] targetArray = buffer.toByteArray();
+			String encodedString = Base64.getEncoder().encodeToString(targetArray);
+
+			ResponseStatus responseStatus = new ResponseStatus();
+			responseStatus.setStatus("1");
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			LocalDateTime now = LocalDateTime.now();
+			responseStatus.setTs(dtf.format(now));
+			responseStatus.setTxn(searchCriteria.getTxn());
+			model.setResponseStatus(responseStatus);
+
+			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
+			IssuedTo issuedTo = new IssuedTo();
+			List<Person> persons = new ArrayList<Person>();
+			issuedTo.setPersons(persons);
+			docDetailsResponse.setURI(tenantId.concat("-").concat(DIGILOCKER_ISSUER_ID).concat("-")
+					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT).concat("-").concat(filestore));
+			docDetailsResponse.setIssuedTo(issuedTo);
+
+			docDetailsResponse
+					.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
+
+			docDetailsResponse.setDocContent(encodedString);
+
+			model.setDocDetails(docDetailsResponse);
+		} catch (NullPointerException npe) {
+			log.error(npe.getMessage());
+			log.info("Error Occured", npe.getMessage());
+		}
+
+	}
+
+	private TLCertificate populateCertificateForTL(TradeLicense tradeLicense) {
 		
+		TLCertificate certificate = new TLCertificate();
+		certificate.setLanguage("99");
+		certificate.setName("Trade License");
+		certificate.setType("TDLCS");
+		certificate.setNumber("");
+		certificate.setPrevNumber("");
+		certificate.setExpiryDate("");
+		certificate.setValidFromDate("");
+		certificate.setIssuedAt("");
+		certificate.setIssueDate("");
+		certificate.setStatus("A");
+
+		IssuedBy issuedBy = new IssuedBy();
+		Organization organization = new Organization();
+		organization.setName("");
+		organization.setType("SG");
+		Address address = new Address();
+		address.setCountry("IN");
+		organization.setAddress(address);
+		issuedBy.setOrganisation(organization);
+		certificate.setIssuedBy(issuedBy);
+
+		IssuedTo issuedTo = new IssuedTo();
+		Person person = new Person();
+		person.setAddress(address);
+		person.setPhoto("");
+		certificate.setIssuedTo(issuedTo);
+
+		TLCertificateData certificateData = new TLCertificateData();
+		CertificateForData certificateForData = new CertificateForData();
+		certificateData.setCertificate(certificateForData);
+		
+		TradeLicenseCertificate tradeLicenseCertificate = new TradeLicenseCertificate();
+		tradeLicenseCertificate.builder().applicationNumber(tradeLicense.getApplicationNumber())
+				.licenseNumber(tradeLicense.getLicenseNumber()).licenseIssueDate(tradeLicense.getIssuedDate())
+				.validFrom(tradeLicense.getValidFrom()).validTo(tradeLicense.getValidTo())
+				.tradeName(tradeLicense.getTradeName())
+				.tradeOwner(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getName())
+				.tradeAddress(tradeLicense.getTradeLicenseDetail().getAddress())
+				.build();
+		
+		certificateData.setCertificate(certificateForData);
+		certificateData.setTlCertificate(tradeLicenseCertificate);
+		return certificate;
 	}
 }

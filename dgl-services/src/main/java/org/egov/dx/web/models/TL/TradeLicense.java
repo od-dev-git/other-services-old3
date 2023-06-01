@@ -6,10 +6,23 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class TradeLicense {
-	
+
 	@Size(max = 64)
 	@JsonProperty("id")
 	private String id = null;
@@ -18,6 +31,64 @@ public class TradeLicense {
 	@Size(max = 64)
 	@JsonProperty("tenantId")
 	private String tenantId = null;
+
+	public enum LicenseTypeEnum {
+		TEMPORARY("TEMPORARY"),
+
+		PERMANENT("PERMANENT");
+
+		private String value;
+
+		LicenseTypeEnum(String value) {
+			this.value = value;
+		}
+
+		@Override
+		@JsonValue
+		public String toString() {
+			return String.valueOf(value);
+		}
+
+		@JsonCreator
+		public static LicenseTypeEnum fromValue(String text) {
+			for (LicenseTypeEnum b : LicenseTypeEnum.values()) {
+				if (String.valueOf(b.value).equals(text)) {
+					return b;
+				}
+			}
+			return null;
+		}
+	}
+
+	public enum ApplicationTypeEnum {
+		NEW("NEW"),
+
+		RENEWAL("CORRECTION"),
+
+		CORRECTION("RENEWAL");
+
+		private String value;
+
+		ApplicationTypeEnum(String value) {
+			this.value = value;
+		}
+
+		@Override
+		@JsonValue
+		public String toString() {
+			return String.valueOf(value);
+		}
+
+		@JsonCreator
+		public static ApplicationTypeEnum fromValue(String text) {
+			for (ApplicationTypeEnum b : ApplicationTypeEnum.values()) {
+				if (String.valueOf(b.value).equals(text)) {
+					return b;
+				}
+			}
+			return null;
+		}
+	}
 
 	@JsonProperty("businessService")
 	private String businessService = "TL";

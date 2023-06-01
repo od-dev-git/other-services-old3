@@ -62,6 +62,8 @@ public class PTServiceDXConstants {
 
 	public static final String EXCEPTION_TEXT_VALIDATION_MR = "No MR Certificates found with this MrNumber !";
 	
+	public static final String EXCEPTION_TEXT_VALIDATION_TL = "No TL Certificates found with this TLNumber !";
+	
 	/*
 	 * exceptions
 	 */

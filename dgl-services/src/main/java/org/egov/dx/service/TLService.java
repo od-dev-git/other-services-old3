@@ -13,6 +13,8 @@ import org.egov.dx.web.models.RequestInfoWrapper;
 import org.egov.dx.web.models.MR.MRSearchCriteria;
 import org.egov.dx.web.models.MR.MarriageRegistration;
 import org.egov.dx.web.models.MR.MarriageResponse;
+import org.egov.dx.web.models.TL.TradeLicense;
+import org.egov.dx.web.models.TL.TradeLicenseResponse;
 import org.egov.dx.web.models.TL.TradeLicenseSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,14 +40,14 @@ public class TLService {
 	@Autowired
 	private Configurations configurations;
 	
-	public List<MarriageRegistration> getTradeLicenses(TradeLicenseSearchCriteria criteria,
+	public List<TradeLicense> getTradeLicenses(TradeLicenseSearchCriteria criteria,
 			RequestInfoWrapper requestInfoWrapper) {
 		
 		StringBuilder url = getTlSearchUrl(criteria);
 		log.info("Search with these License Numbers: "+criteria.getLicenseNumbers());
 		Object responseObject = repository.fetchResult(url, requestInfoWrapper);
-		MarriageResponse response = mapper.convertValue(responseObject, MarriageResponse.class);
-		return response.getMarriageRegistrations();
+		TradeLicenseResponse response = mapper.convertValue(responseObject, TradeLicenseResponse.class);
+		return response.getLicenses();
 	}
 
 	private StringBuilder getTlSearchUrl(TradeLicenseSearchCriteria criteria) {
