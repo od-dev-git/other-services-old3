@@ -101,12 +101,69 @@ public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " sel
 		return selectQuery.toString();
 
 	}
+	
+	private static String addWhereClauseForApplicationReceived(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			BpaSearchCriteria searchCriteria) {
+        
+
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.tenantid IN ( :tenantId )");
+			preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
+		}
+
+		if (searchCriteria.getFromDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.applicationdate >= :fromDate");
+			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+		}
+
+		if (searchCriteria.getToDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.applicationdate <= :toDate");
+			preparedStatementValues.put("toDate", searchCriteria.getToDate());
+		}
+		
+		if (searchCriteria.getStatus() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.status IN (:status) ");
+			preparedStatementValues.put("status", searchCriteria.getStatus());
+		}
+		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.lastmodifiedtime - bpa.createdtime < " + searchCriteria.getSlaThreshold());
+		}
+
+		if (searchCriteria.getExcludedTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.tenantId != :excludedTenantId");
+			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
+		}
+		
+
+		if (searchCriteria.getStatusNotIn() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.status NOT IN (:status) ");
+			preparedStatementValues.put("status", searchCriteria.getStatusNotIn());
+		}
+		
+		if (searchCriteria.getBusinessServices() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.businessservice IN (:businessservice) ");
+			preparedStatementValues.put("businessservice", searchCriteria.getBusinessServices());
+		}
+		
+
+		return selectQuery.toString();
+
+	}
     
 	public String getGeneralQuery(BpaSearchCriteria bpaSearchCriteria,
 			Map<String, Object> preparedStatementValues) {
 		
 		StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATIONS);
-		addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
+		addWhereClauseForApplicationReceived(selectQuery, preparedStatementValues, bpaSearchCriteria);
 
 		return selectQuery.toString();
 	}
