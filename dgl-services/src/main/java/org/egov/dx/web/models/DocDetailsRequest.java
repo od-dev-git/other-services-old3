@@ -34,8 +34,16 @@ public class DocDetailsRequest {
     @Size(max=64)
     @XStreamAlias("MrNumber")
     private String mrNumber;
+    
+    @Size(max=64)
+    @XStreamAlias("LicenseNumber")
+    private String licenseNumber;
+    
+    @Size(max=64)
+    @XStreamAlias("ApprovalNumber")
+    private String approvalNumber;
 
-    @XStreamAlias("City")
+	@XStreamAlias("City")
     private String city;
 
 	public String getDocType() {
@@ -108,6 +116,22 @@ public class DocDetailsRequest {
 
 	public void setCity(String city) {
 		this.city = city;
+	}
+	
+	public String getLicenseNumber() {
+		return licenseNumber;
+	}
+
+	public void setLicenseNumber(String licenseNumber) {
+		this.licenseNumber = licenseNumber;
+	}
+	
+	public String getApprovalNumber() {
+		return approvalNumber;
+	}
+
+	public void setApprovalNumber(String approvalNumber) {
+		this.approvalNumber = approvalNumber;
 	}
      
 }

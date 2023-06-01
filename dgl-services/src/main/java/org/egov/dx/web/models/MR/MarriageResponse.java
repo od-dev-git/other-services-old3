@@ -1,11 +1,11 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.MR;
 
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import org.egov.common.contract.response.ResponseInfo;
-import org.egov.dx.web.models.MarriageRegistration.ApplicationTypeEnum;
+import org.egov.dx.web.models.MR.MarriageRegistration.ApplicationTypeEnum;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
