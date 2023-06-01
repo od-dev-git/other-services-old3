@@ -38,6 +38,10 @@ public class DocDetailsRequest {
     @Size(max=64)
     @XStreamAlias("LicenseNumber")
     private String licenseNumber;
+    
+    @Size(max=64)
+    @XStreamAlias("ApprovalNumber")
+    private String approvalNumber;
 
 	@XStreamAlias("City")
     private String city;
@@ -120,6 +124,14 @@ public class DocDetailsRequest {
 
 	public void setLicenseNumber(String licenseNumber) {
 		this.licenseNumber = licenseNumber;
+	}
+	
+	public String getApprovalNumber() {
+		return approvalNumber;
+	}
+
+	public void setApprovalNumber(String approvalNumber) {
+		this.approvalNumber = approvalNumber;
 	}
      
 }

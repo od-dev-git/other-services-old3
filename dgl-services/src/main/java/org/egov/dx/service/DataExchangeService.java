@@ -43,6 +43,11 @@ import org.egov.dx.web.models.PullURIResponse;
 import org.egov.dx.web.models.RequestInfoWrapper;
 import org.egov.dx.web.models.ResponseStatus;
 import org.egov.dx.web.models.SearchCriteria;
+import org.egov.dx.web.models.BPA.BPA;
+import org.egov.dx.web.models.BPA.BPACertificate;
+import org.egov.dx.web.models.BPA.BPACertificateData;
+import org.egov.dx.web.models.BPA.BPASearchCriteria;
+import org.egov.dx.web.models.BPA.BuildingPlanCertificate;
 import org.egov.dx.web.models.MR.MRSearchCriteria;
 import org.egov.dx.web.models.MR.MarriageCertificate;
 import org.egov.dx.web.models.MR.MarriageRegistration;
@@ -83,6 +88,9 @@ public class DataExchangeService {
 	@Autowired
 	private TLService tlService;
 	
+	@Autowired
+	private BPAService bpaService;
+	
 	public String searchPullURIRequest(SearchCriteria  searchCriteria) throws IOException {
 		
 		if(searchCriteria.getOrigin().equals(ORIGIN))
@@ -114,7 +122,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("c6625c13-c236-4ef1-a517-1b515140bc70");
+		//request.setAuthToken("996c8153-352c-4769-b1de-3b70730dbd53");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -130,7 +138,9 @@ public class DataExchangeService {
 			processMRPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
 		} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT.equals(searchCriteria.getDocType())) {
 			processTLPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
-		}else {
+		} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT.equals(searchCriteria.getDocType())) {
+			processBPAPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
+		} else {
 			return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
 		}
 
@@ -139,6 +149,14 @@ public class DataExchangeService {
 
 		return xstream.toXML(model);
 
+	}
+	
+	private void processBPAPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
+			PullURIResponse model, XStream xstream) throws IOException {
+		BPASearchCriteria criteria = new BPASearchCriteria();
+		criteria.setTenantId("od."+searchCriteria.getCity());
+		criteria.setApprovalNo(searchCriteria.getApprovalNumber());
+		generateBPALetter(searchCriteria, criteria, requestInfoWrapper, model, xstream);	
 	}
 
 	private void processTLPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
@@ -815,4 +833,170 @@ public class DataExchangeService {
 		certificateData.setTlCertificate(tradeLicenseCertificate);
 		return certificate;
 	}
+	
+	private void generateBPALetter(SearchCriteria searchCriteria, BPASearchCriteria criteria,
+			RequestInfoWrapper requestInfoWrapper, PullURIResponse model, XStream xstream) throws IOException {
+		
+		List<BPA> applications = bpaService.getBPAPermitLetter(criteria, requestInfoWrapper);
+		
+		if((!applications.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateBPAResponse(searchCriteria, applications)
+				|| !applications.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
+			
+			log.info("BPA Applications Found and Validation Passed ! " + String.valueOf(applications));
+			String filestoreid = null;
+			String filestore = null;
+			for (BPA application : applications) {
+				if (application.getStatus().equalsIgnoreCase("APPROVED")) {
+					if (application.getDscDetails().get(0).getDocumentId() != null) {
+						String tenantId = criteria.getTenantId();
+						filestore = application.getDscDetails().get(0).getDocumentId();
+						filestoreid = paymentService
+								.getFilestore(application.getDscDetails().get(0).getDocumentId(), tenantId).toString();
+						break;
+					}
+				}
+			}
+			
+			if (filestoreid != null) {
+
+				BPACertificate certificate = new BPACertificate();
+
+				if (searchCriteria.getDocType().equals("BPCER")) {
+
+					certificate = populateCertificateForBPA(applications.get(0));
+					xstream.processAnnotations(BPACertificate.class);
+
+				}
+				
+				createCeritificateFromFilestoreIdForBPA(searchCriteria, model, xstream, certificate, filestoreid, filestore);
+			}
+		}	
+		else
+		{
+			ResponseStatus responseStatus=new ResponseStatus();
+		     responseStatus.setStatus("0");
+		     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");  
+		     LocalDateTime now = LocalDateTime.now();  
+		     responseStatus.setTs(dtf.format(now));
+		     responseStatus.setTxn(searchCriteria.getTxn());
+		     model.setResponseStatus(responseStatus);
+		 
+		     DocDetailsResponse docDetailsResponse=new DocDetailsResponse();
+		     IssuedTo issuedTo=new IssuedTo();
+		     List<Person> persons= new ArrayList<Person>();
+		     issuedTo.setPersons(persons);
+		     docDetailsResponse.setURI(null);
+		     docDetailsResponse.setIssuedTo(issuedTo);
+		     //docDetailsResponse.setDataContent("");
+		     docDetailsResponse.setDocContent("");
+		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_BPA);
+		     model.setDocDetails(docDetailsResponse);
+
+		}
+		
+	}
+
+	private boolean validateBPAResponse(SearchCriteria searchCriteria, List<BPA> applications) {
+		// Implement BPA Validations here if any
+		return true;
+	}
+	
+	private BPACertificate populateCertificateForBPA(BPA bpa) {
+		
+		BPACertificate certificate = new BPACertificate();
+		certificate.setLanguage("99");
+		certificate.setName("Building Plan Permit Letter");
+		certificate.setType("BPCER");
+		certificate.setNumber("");
+		certificate.setPrevNumber("");
+		certificate.setExpiryDate("");
+		certificate.setValidFromDate("");
+		certificate.setIssuedAt("");
+		certificate.setIssueDate("");
+		certificate.setStatus("A");
+
+		IssuedBy issuedBy = new IssuedBy();
+		Organization organization = new Organization();
+		organization.setName("");
+		organization.setType("SG");
+		Address address = new Address();
+		address.setCountry("IN");
+		organization.setAddress(address);
+		issuedBy.setOrganisation(organization);
+		certificate.setIssuedBy(issuedBy);
+
+		IssuedTo issuedTo = new IssuedTo();
+		Person person = new Person();
+		person.setAddress(address);
+		person.setPhoto("");
+		certificate.setIssuedTo(issuedTo);
+
+		BPACertificateData certificateData = new BPACertificateData();
+		CertificateForData certificateForData = new CertificateForData();
+		certificateData.setCertificate(certificateForData);
+		
+		BuildingPlanCertificate buildingPlanCertificate = new BuildingPlanCertificate();
+		buildingPlanCertificate.builder().applicationNumber(bpa.getApplicationNo()).approvalDate(bpa.getApprovalDate())
+				.approvalNumber(bpa.getApprovalNo()).ownerName(bpa.getLandInfo().getOwners().get(0).getName())
+				.ownerAddress(bpa.getLandInfo().getAddress()).build();
+		
+		certificateData.setCertificate(certificateForData);
+		certificateData.setBuildingPlanCertificate(buildingPlanCertificate);
+		return certificate;
+	}
+	
+	private void createCeritificateFromFilestoreIdForBPA(SearchCriteria searchCriteria, PullURIResponse model,
+			XStream xstream, BPACertificate certificate, String filestoreid, String filestore)
+			throws MalformedURLException, IOException {
+
+		String tenantId = ("od." + searchCriteria.getCity());
+		String path = filestoreid.split("url=")[1];
+		String pdfPath = path.substring(0, path.length() - 3);
+		URL url1 = new URL(pdfPath);
+		try {
+
+			// Read the PDF from the URL and save to a local file
+			InputStream is1 = url1.openStream();
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+			int nRead;
+			byte[] data = new byte[1024];
+
+			while ((nRead = is1.read(data, 0, data.length)) != -1) {
+				buffer.write(data, 0, nRead);
+			}
+
+			buffer.flush();
+			byte[] targetArray = buffer.toByteArray();
+			String encodedString = Base64.getEncoder().encodeToString(targetArray);
+
+			ResponseStatus responseStatus = new ResponseStatus();
+			responseStatus.setStatus("1");
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			LocalDateTime now = LocalDateTime.now();
+			responseStatus.setTs(dtf.format(now));
+			responseStatus.setTxn(searchCriteria.getTxn());
+			model.setResponseStatus(responseStatus);
+
+			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
+			IssuedTo issuedTo = new IssuedTo();
+			List<Person> persons = new ArrayList<Person>();
+			issuedTo.setPersons(persons);
+			docDetailsResponse.setURI(tenantId.concat("-").concat(DIGILOCKER_ISSUER_ID).concat("-")
+					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT).concat("-").concat(filestore));
+			docDetailsResponse.setIssuedTo(issuedTo);
+
+			docDetailsResponse
+					.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
+
+			docDetailsResponse.setDocContent(encodedString);
+
+			model.setDocDetails(docDetailsResponse);
+		} catch (NullPointerException npe) {
+			log.error(npe.getMessage());
+			log.info("Error Occured", npe.getMessage());
+		}
+
+	}
+
 }
