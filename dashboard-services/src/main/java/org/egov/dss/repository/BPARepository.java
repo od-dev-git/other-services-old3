@@ -72,7 +72,7 @@ public class BPARepository {
 
 	public Integer totalApplicationsPending(BpaSearchCriteria bpaSearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
-        String query = bpaQueryBuilder.getGeneralQuery(bpaSearchCriteria, preparedStatementValues);
+        String query = bpaQueryBuilder.getPendingApplicationQuery(bpaSearchCriteria, preparedStatementValues);
         log.info("query for totalApplicationsPending: "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
@@ -173,6 +173,22 @@ public class BPARepository {
         HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
         return result;
     }
+	
+	public HashMap<String, BigDecimal> getTenantWiseBpaPermitIssued(BpaSearchCriteria bpaSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = bpaQueryBuilder.getTenantWisePermitIssuedQuery(bpaSearchCriteria, preparedStatementValues);
+        log.info("query for BPA Tenant Wise Application List : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
+	
+	public HashMap<String, BigDecimal> getTenantWiseBpaPendingApplication(BpaSearchCriteria bpaSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = bpaQueryBuilder.getTenantWiseBpaPendingApplication(bpaSearchCriteria, preparedStatementValues);
+        log.info("query for BPA Tenant Wise Pending Application List : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
     
     public HashMap<String, BigDecimal> getTenantWiseAvgDaysPermitIssued(BpaSearchCriteria bpaSearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
@@ -194,6 +210,14 @@ public class BPARepository {
         Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = bpaQueryBuilder.getTotalApplicationByServiceType(bpaSearchCriteria, preparedStatementValues);
         log.info("query for BPA Total Application by Service Type : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
+    
+    public HashMap<String, BigDecimal> getApprovedApplicationByServiceType(BpaSearchCriteria bpaSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = bpaQueryBuilder.getApprovedApplicationByServiceType(bpaSearchCriteria, preparedStatementValues);
+        log.info("query for BPA Total Approved Application by Service Type : "+query);
         HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
         return result;
     }
