@@ -51,6 +51,8 @@ public class PTServiceDXConstants {
 	public static final String DIGILOCKER_DOCTYPE_MR_CERT = "RMCER";
 	
 	public static final String DIGILOCKER_DOCTYPE_TL_CERT = "TDLCS";
+	
+	public static final String DIGILOCKER_DOCTYPE_BPA_CERT = "BPCER";
 
 	public static final String DIGILOCKER_NO_DATA_FOUND = "NO_DATA_FOUND";
 	
@@ -63,6 +65,8 @@ public class PTServiceDXConstants {
 	public static final String EXCEPTION_TEXT_VALIDATION_MR = "No MR Certificates found with this MrNumber !";
 	
 	public static final String EXCEPTION_TEXT_VALIDATION_TL = "No TL Certificates found with this TLNumber !";
+	
+	public static final String EXCEPTION_TEXT_VALIDATION_BPA = "No BPA Permit Letters found with this ApprovalNumber !";
 	
 	/*
 	 * exceptions

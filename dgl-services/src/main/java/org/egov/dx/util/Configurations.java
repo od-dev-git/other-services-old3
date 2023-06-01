@@ -54,8 +54,14 @@ public class Configurations {
 	private String mrSearchEndpoint;
 	
 	@Value("${tl.service.host}")
-	private String TlHost;
+	private String tlHost;
 	
 	@Value("${tl.service.search.endpoint}")
-	private String TlSearchEndpoint;
+	private String tlSearchEndpoint;
+	
+	@Value("${bpa.service.host}")
+	private String bpaHost;
+	
+	@Value("${bpa.service.search.endpoint}")
+	private String bpaSearchEndpoint;
 }

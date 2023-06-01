@@ -9,9 +9,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
 import org.egov.common.contract.request.Role;
-import org.egov.tl.web.models.Document;
-import org.egov.tl.web.models.User;
-import org.egov.tl.web.models.OwnerInfo.RelationshipEnum;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,10 +39,6 @@ public class OwnerInfo extends User{
 	@Size(max = 64)
 	@JsonProperty("institutionId")
 	private String institutionId;
-
-	@JsonProperty("documents")
-	@Valid
-	private List<Document> documents;
 
 	@JsonProperty("userActive")
 	private Boolean userActive;
@@ -89,8 +82,7 @@ public class OwnerInfo extends User{
 			Long dob, Long pwdExpiryDate, String locale, String type, String signature, Boolean accountLocked,
 			List<Role> roles, String fatherOrHusbandName, String bloodGroup, String identificationMark, String photo,
 			String createdBy, Long createdDate, String lastModifiedBy, Long lastModifiedDate, String otpReference,
-			String tenantId, Boolean isPrimaryOwner, Double ownerShipPercentage, String ownerType, String institutionId,
-			List<Document> documents, RelationshipEnum relationship, Boolean userActive) {
+			String tenantId, Boolean isPrimaryOwner, Double ownerShipPercentage, String ownerType, String institutionId, RelationshipEnum relationship, Boolean userActive) {
 		super(id, uuid, userName, password, salutation, name, gender, mobileNumber, emailId, altContactNumber, pan,
 				aadhaarNumber, permanentAddress, permanentCity, permanentPincode, correspondenceCity,
 				correspondencePincode, correspondenceAddress, active, dob, pwdExpiryDate, locale, type, signature,
@@ -102,16 +94,6 @@ public class OwnerInfo extends User{
 		this.userActive = userActive;
 		this.relationship = relationship;
 		this.institutionId = institutionId;
-		this.documents = documents;
-	}
-
-	public OwnerInfo addDocumentsItem(Document documentsItem) {
-		if (this.documents == null) {
-			this.documents = new ArrayList<>();
-		}
-		if (!this.documents.contains(documentsItem))
-			this.documents.add(documentsItem);
-		return this;
 	}
 
 	/**
