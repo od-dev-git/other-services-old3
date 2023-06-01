@@ -1,4 +1,4 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.MR;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;

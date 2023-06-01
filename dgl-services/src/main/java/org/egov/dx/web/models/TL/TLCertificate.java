@@ -1,7 +1,12 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.TL;
 
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAttribute;
+
+import org.egov.dx.web.models.IssuedBy;
+import org.egov.dx.web.models.IssuedTo;
+import org.egov.dx.web.models.MR.MrCertificate;
+import org.egov.dx.web.models.MR.MrCertificateData;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -17,8 +22,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @EqualsAndHashCode
 @XStreamAlias("Certificate")
-public class MrCertificate {
-
+public class TLCertificate {
+	
 	@XStreamAlias("IssuedBy")
     private IssuedBy issuedBy;
 	
@@ -26,7 +31,7 @@ public class MrCertificate {
     private IssuedTo issuedTo;
 	
 	@XStreamAlias("CertificateData")
-    private MrCertificateData certificateData;
+    private TLCertificateData certificateData;
 	
     @Size(max=64)
     @XStreamAlias("Signature")
@@ -71,5 +76,5 @@ public class MrCertificate {
     @XmlAttribute
     @XStreamAlias("status")
     private String status;
-	
+
 }

@@ -1,4 +1,4 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.MR;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -11,6 +11,8 @@ import javax.validation.constraints.Size;
 import org.egov.dx.model.enums.InstrumentStatusEnum;
 import org.egov.dx.model.enums.PaymentModeEnum;
 import org.egov.dx.model.enums.PaymentStatusEnum;
+import org.egov.dx.web.models.AuditDetails;
+import org.egov.dx.web.models.DscDetails;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
