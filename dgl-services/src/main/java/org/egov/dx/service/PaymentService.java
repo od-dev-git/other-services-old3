@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.egov.dx.repository.Repository;
 import org.egov.dx.util.Configurations;
 import org.egov.dx.web.models.FileStoreResponse;
+import org.egov.dx.web.models.FileStoreUrlResponse;
 import org.egov.dx.web.models.Payment;
 import org.egov.dx.web.models.PaymentRequest;
 import org.egov.dx.web.models.PaymentResponse;
@@ -73,7 +74,7 @@ public class PaymentService {
 				
 	}
 
-	public Object getFilestore(String fileStoreId, String tenantId) throws IOException {
+	public FileStoreUrlResponse getFilestore(String fileStoreId, String tenantId) throws IOException {
 		log.info("fetching document from filestore id::::");
 		StringBuilder host=new StringBuilder().append(configurations.getFilestoreHost())
 				.append(configurations.getFilstoreSearchEndpoint())
@@ -81,7 +82,7 @@ public class PaymentService {
 				.append("&fileStoreIds=")
 				.append(fileStoreId);
 		
-		return restTemplate.getForObject(host.toString(),Object.class);
+		return restTemplate.getForObject(host.toString(),FileStoreUrlResponse.class);
 
 	}
 
