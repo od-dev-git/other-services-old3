@@ -29,6 +29,7 @@ import org.egov.dx.web.models.Certificate;
 import org.egov.dx.web.models.CertificateData;
 import org.egov.dx.web.models.CertificateForData;
 import org.egov.dx.web.models.DocDetailsResponse;
+import org.egov.dx.web.models.FileStoreUrlResponse;
 import org.egov.dx.web.models.IssuedBy;
 import org.egov.dx.web.models.IssuedTo;
 import org.egov.dx.web.models.Organization;
@@ -122,7 +123,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("996c8153-352c-4769-b1de-3b70730dbd53");
+		//request.setAuthToken("f0427f13-96f9-49b5-8e3a-78152d3926fc");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -133,7 +134,8 @@ public class DataExchangeService {
 		xstream.addPermission(AnyTypePermission.ANY);
 
 		if (PTServiceDXConstants.DIGILOCKER_DOCTYPE.equals(searchCriteria.getDocType())) {
-			processPTPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
+			return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
+			//processPTPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
 		} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_MR_CERT.equals(searchCriteria.getDocType())) {
 			processMRPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
 		} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT.equals(searchCriteria.getDocType())) {
@@ -193,7 +195,7 @@ public class DataExchangeService {
 				|| !registrations.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
 			
 			log.info("Marriage Registrations Found and Validation Passed ! "+ String.valueOf(registrations));
-			String filestoreid=null;
+			FileStoreUrlResponse filestoreid=null;
 			String filestore=null;
 			for (MarriageRegistration registration : registrations) {
 
@@ -202,13 +204,13 @@ public class DataExchangeService {
 						String tenantId = criteria.getTenantId();
 						filestore = registration.getDscDetails().get(0).getDocumentId();
 						filestoreid = paymentService
-								.getFilestore(registration.getDscDetails().get(0).getDocumentId(), tenantId).toString();
+								.getFilestore(registration.getDscDetails().get(0).getDocumentId(), tenantId);
 						break;
 					}
 				}
 
 			}
-			if (filestoreid != null) {
+			if (filestoreid != null && !filestoreid.getFilestoreIds().isEmpty()) {
 
 				MrCertificate certificate = new MrCertificate();
 
@@ -248,11 +250,10 @@ public class DataExchangeService {
 	}
 
 	private void createCeritificateFromFilestoreIdForMR(SearchCriteria searchCriteria, PullURIResponse model,
-			XStream xstream, MrCertificate certificate, String filestoreid, String filestore)
+			XStream xstream, MrCertificate certificate, FileStoreUrlResponse filestoreid, String filestore)
 			throws MalformedURLException, IOException {
 		String tenantId = ("od."+searchCriteria.getCity());
-		String path = filestoreid.split("url=")[1];
-		String pdfPath = path.substring(0, path.length() - 3);
+		String pdfPath = filestoreid.getFilestoreIds().get(0).get("url");
 		URL url1 = new URL(pdfPath);
 		try {
 
@@ -506,11 +507,10 @@ public class DataExchangeService {
 				filestoreId = filestoreId.concat(urlArray[i]).concat("-");
 
 		}
-		String o = paymentService.getFilestore(filestoreId, tenantId).toString();
+		FileStoreUrlResponse o = paymentService.getFilestore(filestoreId, tenantId);
 
-		if (o != null) {
-			String path = o.split("url=")[1];
-			String pdfPath = path.substring(0, path.length() - 3);
+		if (o != null && !o.getFilestoreIds().isEmpty()) {
+			String pdfPath = o.getFilestoreIds().get(0).get("url");
 			URL url1 = new URL(pdfPath);
 			try {
 
@@ -673,7 +673,7 @@ public class DataExchangeService {
 				|| !licenses.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
 			
 			log.info("Trade Licenses Found and Validation Passed ! " + String.valueOf(licenses));
-			String filestoreid = null;
+			FileStoreUrlResponse filestoreid = null;
 			String filestore = null;
 			for (TradeLicense license : licenses) {
 				if (license.getStatus().equalsIgnoreCase("APPROVED")) {
@@ -682,14 +682,13 @@ public class DataExchangeService {
 						filestore = license.getTradeLicenseDetail().getDscDetails().get(0).getDocumentId();
 						filestoreid = paymentService
 								.getFilestore(license.getTradeLicenseDetail().getDscDetails().get(0).getDocumentId(),
-										tenantId)
-								.toString();
+										tenantId);
 						break;
 					}
 				}
 			}
 			
-			if (filestoreid != null) {
+			if (filestoreid != null && !filestoreid.getFilestoreIds().isEmpty()) {
 
 				TLCertificate certificate = new TLCertificate();
 
@@ -733,12 +732,11 @@ public class DataExchangeService {
 	}
 
 	private void createCeritificateFromFilestoreIdForTL(SearchCriteria searchCriteria, PullURIResponse model,
-			XStream xstream, TLCertificate certificate, String filestoreid, String filestore)
+			XStream xstream, TLCertificate certificate, FileStoreUrlResponse filestoreid, String filestore)
 			throws IOException, MalformedURLException {
 
 		String tenantId = ("od." + searchCriteria.getCity());
-		String path = filestoreid.split("url=")[1];
-		String pdfPath = path.substring(0, path.length() - 3);
+		String pdfPath = filestoreid.getFilestoreIds().get(0).get("url");
 		URL url1 = new URL(pdfPath);
 		try {
 
@@ -843,7 +841,7 @@ public class DataExchangeService {
 				|| !applications.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
 			
 			log.info("BPA Applications Found and Validation Passed ! " + String.valueOf(applications));
-			String filestoreid = null;
+			FileStoreUrlResponse filestoreid = null;
 			String filestore = null;
 			for (BPA application : applications) {
 				if (application.getStatus().equalsIgnoreCase("APPROVED")) {
@@ -851,13 +849,13 @@ public class DataExchangeService {
 						String tenantId = criteria.getTenantId();
 						filestore = application.getDscDetails().get(0).getDocumentId();
 						filestoreid = paymentService
-								.getFilestore(application.getDscDetails().get(0).getDocumentId(), tenantId).toString();
+								.getFilestore(application.getDscDetails().get(0).getDocumentId(), tenantId);
 						break;
 					}
 				}
 			}
 			
-			if (filestoreid != null) {
+			if (filestoreid != null && !filestoreid.getFilestoreIds().isEmpty()) {
 
 				BPACertificate certificate = new BPACertificate();
 
@@ -946,12 +944,11 @@ public class DataExchangeService {
 	}
 	
 	private void createCeritificateFromFilestoreIdForBPA(SearchCriteria searchCriteria, PullURIResponse model,
-			XStream xstream, BPACertificate certificate, String filestoreid, String filestore)
+			XStream xstream, BPACertificate certificate, FileStoreUrlResponse filestoreid, String filestore)
 			throws MalformedURLException, IOException {
 
 		String tenantId = ("od." + searchCriteria.getCity());
-		String path = filestoreid.split("url=")[1];
-		String pdfPath = path.substring(0, path.length() - 3);
+		String pdfPath = filestoreid.getFilestoreIds().get(0).get("url");
 		URL url1 = new URL(pdfPath);
 		try {
 
