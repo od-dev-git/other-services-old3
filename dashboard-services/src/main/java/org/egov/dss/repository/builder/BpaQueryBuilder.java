@@ -91,6 +91,12 @@ public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " sel
 			preparedStatementValues.put("status", searchCriteria.getStatusNotIn());
 		}
 		
+		if (searchCriteria.getDeleteStatus() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bpa.status != :deletedStatus");
+			preparedStatementValues.put("deletedStatus", searchCriteria.getDeleteStatus());
+		}
+		
 		if (searchCriteria.getBusinessServices() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" bpa.businessservice IN (:businessservice) ");

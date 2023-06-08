@@ -1067,19 +1067,23 @@ public class RevenueService {
 	}
 	
 	public List<Data> getWSCumulativeCollection(PayloadDetails payloadDetails) {
-		
+
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			criteria.setFromDate(dashboardUtils.getStartDateGmt(String.valueOf(payloadDetails.getTimeinterval())));
+		}
 		List<Chart> cumulativeCollection = paymentRepository.getCumulativeCollection(criteria);
 		List<Plot> plots = new ArrayList<Plot>();
 		extractDataForChart(cumulativeCollection, plots);
-        
-		BigDecimal total = cumulativeCollection.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
-				BigDecimal::add);		 
 
-		return Arrays.asList(Data.builder().headerName("Water & Sewerage Collections").headerSymbol("amount").headerValue(total).plots(plots).build());
-		
+		BigDecimal total = cumulativeCollection.stream().map(usageCategory -> usageCategory.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return Arrays.asList(Data.builder().headerName("Water & Sewerage Collections").headerSymbol("amount")
+				.headerValue(total).plots(plots).build());
+
 	}
 	
 	public List<Data> wsCollectionByUsageType(PayloadDetails payloadDetails) {
@@ -1119,7 +1123,6 @@ public class RevenueService {
 
 	public List<Data> getWSTaxHeadsBreakup(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_WS));
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		List<HashMap<String, Object>> wsTaxHeadsBreakup = paymentRepository.getWSTaxHeadsBreakup(criteria);
@@ -1140,7 +1143,12 @@ public class RevenueService {
 					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("sewerageadhocchargecollection")))))
 					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("penaltycollection")))))
 					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("rebatecollection")))))
-					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("interestcollection")))));
+					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("interestcollection")))))
+					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("scrutinycollection")))))
+					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("securitycollection")))))
+					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("ownershipchangecollection")))))
+					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("labourcollection")))))
+					.add((new BigDecimal(String.valueOf(wsTaxHeadRow.get("advancecollection")))));
 
 			row.add(Plot.builder().name("Water Charges")
 					.value(new BigDecimal(String.valueOf(wsTaxHeadRow.get("waterchargecollection")))).symbol("number")
@@ -1159,6 +1167,21 @@ public class RevenueService {
 					.build());
 			row.add(Plot.builder().name("Interest")
 					.value(new BigDecimal(String.valueOf(wsTaxHeadRow.get("interestcollection")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Scrutiny")
+					.value(new BigDecimal(String.valueOf(wsTaxHeadRow.get("scrutinycollection")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Security")
+					.value(new BigDecimal(String.valueOf(wsTaxHeadRow.get("securitycollection")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Ownership Change")
+					.value(new BigDecimal(String.valueOf(wsTaxHeadRow.get("ownershipchangecollection")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Labour Fee")
+					.value(new BigDecimal(String.valueOf(wsTaxHeadRow.get("labourcollection")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Advance")
+					.value(new BigDecimal(String.valueOf(wsTaxHeadRow.get("advancecollection")))).symbol("number")
 					.build());
 
 			response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null)

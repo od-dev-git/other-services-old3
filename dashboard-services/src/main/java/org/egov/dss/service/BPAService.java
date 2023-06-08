@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collector;
@@ -123,6 +124,7 @@ public class BPAService {
 		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUS_TOTAL_APPLICATIONS_PENDING));
 		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		criteria.setFromDate(null);
+		criteria.setDeleteStatus(DashboardConstants.STATUS_DELETED);
 		Integer totalApplication = (Integer) bpaRepository.totalApplicationsPending(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
@@ -227,30 +229,38 @@ public class BPAService {
 	public List<Data> topUlbByPerformance(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
-		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
-		HashMap<String, Long> tenantWisePermitsIssuedList = bpaRepository.getTenantWisePermitsIssuedList(criteria);
-		criteria.setStatus(null);
-		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
-		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
-				.getTenantWiseApplicationsReceivedList(criteria);
-		List<Chart> percentList = mapTenantsForPerformanceRate(tenantWisePermitsIssuedList,
-				tenantWiseApplicationsReceivedList);
-		Collections.sort(percentList, Comparator.comparing(e -> e.getValue(), (s1, s2) -> {
-			return s2.compareTo(s1);
-		}));
-
 		List<Data> response = new ArrayList();
-		int Rank = 0;
-		for (Chart obj : percentList) {
-			Rank++;
+		HashMap<String, BigDecimal> tenantWiseBpaAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
+		// Sort the HashMap in descending order
+		if (!CollectionUtils.isEmpty(tenantWiseBpaAvgDaysPermitIssue)) {
+			List<Map.Entry<String, BigDecimal>> sortedList = new ArrayList<>(
+					tenantWiseBpaAvgDaysPermitIssue.entrySet());
+			sortedList.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+			// Create a new LinkedHashMap to preserve the insertion order
+			LinkedHashMap<String, BigDecimal> sortedMap = new LinkedHashMap<>();
+			for (Map.Entry<String, BigDecimal> entry : sortedList) {
+				sortedMap.put(entry.getKey(), entry.getValue());
+			}
+
+			int Rank = 0;
+			for (Entry<String, BigDecimal> obj : sortedMap.entrySet()) {
+				Rank++;
+				response.add(
+						Data.builder().headerName("Rank").headerValue(Rank)
+								.plots(Arrays.asList(Plot.builder().label("AVERAGE_DAYS").name(obj.getKey())
+										.value(obj.getValue()).symbol("number").build()))
+								.headerSymbol("number").build());
+			}
+			;
+		} else {
 			response.add(
-					Data.builder().headerName("Rank").headerValue(Rank)
-							.plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName())
-									.value(obj.getValue()).symbol("percentage").build()))
-							.headerSymbol("percentage").build());
+					Data.builder().headerName("Rank").headerValue(BigDecimal.ZERO)
+							.plots(Arrays.asList(Plot.builder().label("AVERAGE_DAYS")
+									.name(String.valueOf(payloadDetails.getTenantid())).value(BigDecimal.ZERO)
+									.symbol("number").build()))
+							.headerSymbol("number").build());
 		}
-		;
 
 		return response;
 	}
@@ -258,30 +268,38 @@ public class BPAService {
 	public List<Data> bottomUlbByPerformance(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
-		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
-		HashMap<String, Long> tenantWisePermitsIssuedList = bpaRepository.getTenantWisePermitsIssuedList(criteria);
-		criteria.setStatus(null);
-		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUSES));
-		HashMap<String, Long> tenantWiseApplicationsReceivedList = bpaRepository
-				.getTenantWiseApplicationsReceivedList(criteria);
-		List<Chart> percentList = mapTenantsForPerformanceRate(tenantWisePermitsIssuedList,
-				tenantWiseApplicationsReceivedList);
-		Collections.sort(percentList, Comparator.comparing(e -> e.getValue(), (s1, s2) -> {
-			return s1.compareTo(s2);
-		}));
-
 		List<Data> response = new ArrayList();
-		int Rank = percentList.size();
-		for (Chart obj : percentList) {
+		HashMap<String, BigDecimal> tenantWiseBpaAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
+		if (!CollectionUtils.isEmpty(tenantWiseBpaAvgDaysPermitIssue)) {
+			// Sort the HashMap in descending order
+			List<Map.Entry<String, BigDecimal>> sortedList = new ArrayList<>(
+					tenantWiseBpaAvgDaysPermitIssue.entrySet());
+			sortedList.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+			// Create a new LinkedHashMap to preserve the insertion order
+			LinkedHashMap<String, BigDecimal> sortedMap = new LinkedHashMap<>();
+			for (Map.Entry<String, BigDecimal> entry : sortedList) {
+				sortedMap.put(entry.getKey(), entry.getValue());
+			}
+
+			int Rank = sortedList.size();
+			for (Entry<String, BigDecimal> obj : sortedMap.entrySet()) {
+				response.add(
+						Data.builder().headerName("Rank").headerValue(Rank)
+								.plots(Arrays.asList(Plot.builder().label("AVERAGE_DAYS").name(obj.getKey())
+										.value(obj.getValue()).symbol("number").build()))
+								.headerSymbol("number").build());
+				Rank--;
+			}
+			;
+		} else {
 			response.add(
-					Data.builder().headerName("Rank").headerValue(Rank)
-							.plots(Arrays.asList(Plot.builder().label("DSS_COMPLETION_RATE").name(obj.getName())
-									.value(obj.getValue()).symbol("percentage").build()))
-							.headerSymbol("percentage").build());
-			Rank--;
+					Data.builder().headerName("Rank").headerValue(BigDecimal.ZERO)
+							.plots(Arrays.asList(Plot.builder().label("AVERAGE_DAYS")
+									.name(String.valueOf(payloadDetails.getTenantid())).value(BigDecimal.ZERO)
+									.symbol("number").build()))
+							.headerSymbol("number").build());
 		}
-		;
 
 		return response;
 	}
@@ -558,6 +576,7 @@ public class BPAService {
         criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.OBPS_REJECTED_STATUS_TOTAL_APPLICATIONS_PENDING));
         criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
         criteria.setFromDate(null);
+        criteria.setDeleteStatus(DashboardConstants.STATUS_DELETED);
         return bpaRepository.getTenantWiseBpaPendingApplication(criteria);
      }
     
