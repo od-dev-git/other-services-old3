@@ -40,5 +40,7 @@ public class BpaSearchCriteria {
 	private Long slaThreshold;
 	
 	private Set<String> statusNotIn;
+	
+	private String deleteStatus;
 
 }

@@ -180,6 +180,10 @@ public class DashboardConstants {
 	
 	public static final String STATUS_TOPFLR_VERIFICATION_COMPLETED = "TOPFLR_VERIFICATION_COMPLETED";
 	
+	public static final String WS_NEW_CONNECTION = "NEW_CONNECTION";
+	
+	public static final String WS_NEW_WATER_CONNECTION = "NEW_WATER_CONNECTION";
+	
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
 					BUSINESS_SERVICE_OC_APP_FEE, BUSINESS_SERVICE_OC_SAN_FEE));
@@ -249,6 +253,9 @@ public class DashboardConstants {
 	public static final List<String> WS_DEMAND_TAX_HEAD_CODE = Collections
 			.unmodifiableList(Arrays.asList("WS_TIME_REBATE", "WS_ADVANCE_CARRYFORWARD", "WS_Round_Off",
 					"WS_SPECIAL_REBATE", "SW_ADVANCE_CARRYFORWARD", "SW_SPECIAL_REBATE"));
+	
+	public static final List<String> WS_NEW_CONNECTIONS = Collections
+			.unmodifiableList(Arrays.asList(WS_NEW_CONNECTION,WS_NEW_WATER_CONNECTION));
 
 
 }

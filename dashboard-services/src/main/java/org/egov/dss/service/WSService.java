@@ -234,6 +234,7 @@ public class WSService {
 	public List<Data> wsTotalApplications(PayloadDetails payloadDetails) {
 		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setApplicationType(Sets.newHashSet(DashboardConstants.WS_NEW_CONNECTIONS));
 		Integer wsTotalApplications =  (Integer) wsRepository.getWsTotalApplicationsCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(wsTotalApplications).build());
 	}

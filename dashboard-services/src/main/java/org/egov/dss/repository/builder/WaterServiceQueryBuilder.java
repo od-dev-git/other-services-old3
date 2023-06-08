@@ -17,7 +17,7 @@ public class WaterServiceQueryBuilder {
 
 	public static final String CUMULATIVE_CONNECTIONS_SQL = " select to_char(monthYear, 'Mon-YYYY') as name, sum(conCount) over (order by monthYear asc rows between unbounded preceding and current row) as value "
 			+ "from "
-			+ "(select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(conn.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(conn.lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear , "
+			+ "(select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(ws.connectionExecutionDate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(ws.connectionExecutionDate/1000))),'DD-MM-YYYY') monthYear , "
 			+ "count(conn.connectionno) conCount "
 			+ "from eg_ws_connection conn inner join eg_ws_service ws on ws.connection_id = conn.id  ";
 
@@ -127,8 +127,8 @@ public class WaterServiceQueryBuilder {
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(CUMULATIVE_CONNECTIONS_SQL);
 		addWhereClause(selectQuery, preparedStatementValues, waterSearchCriteria);
-		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(conn.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(conn.lastmodifiedtime/1000))),'DD-MM-YYYY') ");
-		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(conn.lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(conn.lastmodifiedtime/1000))),'DD-MM-YYYY') asc) wsconn ");
+		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(ws.connectionExecutionDate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(ws.connectionExecutionDate/1000))),'DD-MM-YYYY') ");
+		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(ws.connectionExecutionDate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(ws.connectionExecutionDate/1000))),'DD-MM-YYYY') asc) wsconn ");
 		return selectQuery.toString();
 	}
 
@@ -177,6 +177,12 @@ public class WaterServiceQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" conn.lastmodifiedtime - conn.createdtime < " + searchCriteria.getSlaThreshold());
 			
+		}
+		
+		if (searchCriteria.getApplicationType() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" conn.applicationtype = :applicationtype");
+			preparedStatementValues.put("applicationtype", searchCriteria.getApplicationType());
 		}
 		
 		if (searchCriteria.getExcludedTenantId() != null) {
