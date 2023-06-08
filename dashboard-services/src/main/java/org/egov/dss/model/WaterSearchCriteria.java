@@ -45,5 +45,7 @@ public class WaterSearchCriteria {
 
     private String connectionFacility;
     
+    private Set<String> applicationType;
+    
 
 }
