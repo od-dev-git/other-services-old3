@@ -79,7 +79,7 @@ public class DashboardController {
 		
 	}
 	
-	@Scheduled(cron = "0 0 * * SAT")
+	@Scheduled(cron = "0 0 * * SUN")
 	public void triggerDemandScheduler() {
 		log.info("Demand data update scheduler started..");
 		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
