@@ -231,20 +231,14 @@ public class BPAService {
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		List<Data> response = new ArrayList();
 		HashMap<String, BigDecimal> tenantWiseBpaAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
-		// Sort the HashMap in descending order
+		// Sort the HashMap in ascending order
 		if (!CollectionUtils.isEmpty(tenantWiseBpaAvgDaysPermitIssue)) {
-			List<Map.Entry<String, BigDecimal>> sortedList = new ArrayList<>(
-					tenantWiseBpaAvgDaysPermitIssue.entrySet());
-			sortedList.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-
-			// Create a new LinkedHashMap to preserve the insertion order
-			LinkedHashMap<String, BigDecimal> sortedMap = new LinkedHashMap<>();
-			for (Map.Entry<String, BigDecimal> entry : sortedList) {
-				sortedMap.put(entry.getKey(), entry.getValue());
-			}
-
+			Map<String, BigDecimal> tenantWiseSorted = tenantWiseBpaAvgDaysPermitIssue.entrySet().parallelStream()
+					.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
+							Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+			
 			int Rank = 0;
-			for (Entry<String, BigDecimal> obj : sortedMap.entrySet()) {
+			for (Entry<String, BigDecimal> obj : tenantWiseSorted.entrySet()) {
 				Rank++;
 				response.add(
 						Data.builder().headerName("Rank").headerValue(Rank)
@@ -271,19 +265,11 @@ public class BPAService {
 		List<Data> response = new ArrayList();
 		HashMap<String, BigDecimal> tenantWiseBpaAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
 		if (!CollectionUtils.isEmpty(tenantWiseBpaAvgDaysPermitIssue)) {
-			// Sort the HashMap in descending order
-			List<Map.Entry<String, BigDecimal>> sortedList = new ArrayList<>(
-					tenantWiseBpaAvgDaysPermitIssue.entrySet());
-			sortedList.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-
-			// Create a new LinkedHashMap to preserve the insertion order
-			LinkedHashMap<String, BigDecimal> sortedMap = new LinkedHashMap<>();
-			for (Map.Entry<String, BigDecimal> entry : sortedList) {
-				sortedMap.put(entry.getKey(), entry.getValue());
-			}
-
-			int Rank = sortedList.size();
-			for (Entry<String, BigDecimal> obj : sortedMap.entrySet()) {
+			Map<String, BigDecimal> tenantWiseSorted = tenantWiseBpaAvgDaysPermitIssue.entrySet().parallelStream()
+					.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
+							Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+			int Rank = tenantWiseSorted.size();
+			for (Entry<String, BigDecimal> obj : tenantWiseSorted.entrySet()) {
 				response.add(
 						Data.builder().headerName("Rank").headerValue(Rank)
 								.plots(Arrays.asList(Plot.builder().label("AVERAGE_DAYS").name(obj.getKey())
