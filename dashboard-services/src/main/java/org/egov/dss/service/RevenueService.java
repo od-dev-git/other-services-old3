@@ -549,6 +549,8 @@ public class RevenueService {
 				DashboardConstants.NEFT_PAYMENT, DashboardConstants.RTGS_PAYMENT, DashboardConstants.CARD_PAYMENT));
 		BigDecimal digitalTotalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		
+		if(totalCollection == BigDecimal.ZERO)
+			totalCollection = BigDecimal.ONE;
 		//Get Digital Collections by value using formula -> digitalCollectionAmount *100/totalCollectionAmount
 		BigDecimal digitalCollectionByValue = digitalTotalCollection.multiply(new BigDecimal(100)).divide(totalCollection, 2, RoundingMode.HALF_UP);
 		
@@ -567,7 +569,8 @@ public class RevenueService {
 						DashboardConstants.NEFT_PAYMENT, DashboardConstants.RTGS_PAYMENT, DashboardConstants.CARD_PAYMENT));
 		
 		Long digitalTransactionCount = (Long) paymentRepository.getTotalTransactionCount(paymentSearchCriteria);
-		
+		if(totalTransactionCount == 0L)
+			totalTransactionCount = 1L;
 		//Get Digital Transaction by volume using formula -> digitalCollectioncount *100/totalCollectionCount 
 		Long digitalCollectionByVolume = (digitalTransactionCount * 100)/totalTransactionCount;
 		return Arrays.asList(Data.builder().headerValue(digitalCollectionByVolume).build());
@@ -582,7 +585,7 @@ public class RevenueService {
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
 		BigDecimal previousYearCollection = getPreviousYearCollection(payloadDetails);
 		if (previousYearCollection.intValue() != 0) {
-			growthRate = (totalCollection.divide(previousYearCollection, 2, RoundingMode.HALF_UP).subtract(BigDecimal.ONE))
+			growthRate = (totalCollection.divide(previousYearCollection, 2, RoundingMode.HALF_UP))
 					.multiply(new BigDecimal(100));
 		
 		}
