@@ -42,7 +42,7 @@ public class PTRepository {
 	
 	public Object getAssessedPropertiesCount(PropertySerarchCriteria propertySearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
-        String query = ptServiceQueryBuilder.getAccessedPropertiesCountQuery(propertySearchCriteria, preparedStatementValues);
+        String query = ptServiceQueryBuilder.getAssessedPropertiesCountQuery(propertySearchCriteria, preparedStatementValues);
         log.info("query: "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
@@ -68,7 +68,7 @@ public class PTRepository {
 	public Object getSlaAchievedAppCount(PropertySerarchCriteria propertySearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
         propertySearchCriteria.setSlaThreshold(config.getSlaPtThreshold());
-        String query = ptServiceQueryBuilder.getAccessedPropertiesCountQuery(propertySearchCriteria, preparedStatementValues);
+        String query = ptServiceQueryBuilder.getAssessedPropertiesCountQuery(propertySearchCriteria, preparedStatementValues);
         log.info("query: "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
@@ -125,6 +125,14 @@ public class PTRepository {
         return result.get(0);
 	}
 	
+	public Integer getPtTotalReAssessmentsCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getPtTotalReAssessmentsCountQuery(propertySearchCriteria, preparedStatementValues);
+        log.info("query for PT New Assessment Count : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+	}
+	
 	public HashMap<String, Long> getPtTotalAssessmentsTenantwiseCount(PropertySerarchCriteria propertySearchCriteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = ptServiceQueryBuilder.getPtTotalAssessmentsTenantwiseCountQuery(propertySearchCriteria, preparedStatementValues);
@@ -137,6 +145,14 @@ public class PTRepository {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = ptServiceQueryBuilder.getPtTotalNewAssessmentsTenantwiseCount(propertySearchCriteria, preparedStatementValues);
         log.info("query for PT Total New Assessment Tenantwise Count : "+query);
+        HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
+        return result;
+	}
+	
+	public HashMap<String, Long> getPtTotalReAssessmentsTenantwiseCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getPtTotalReAssessmentsTenantwiseCount(propertySearchCriteria, preparedStatementValues);
+        log.info("query for PT Total Re-Assessment Tenantwise Count : "+query);
         HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());
         return result;
 	}
