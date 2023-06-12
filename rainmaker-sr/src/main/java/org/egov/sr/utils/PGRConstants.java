@@ -144,7 +144,7 @@ public class PGRConstants {
 	public static final String  USREVENTS_EVENT_POSTEDBY = "SYSTEM-PGR";
 	
 	
-	public static final String  SERVICE_REQID_REGEX = "(^[0-9/]*$)";
+	public static final String  SERVICE_REQID_REGEX = "(^[0-9a-zA-Z/-]*$)";
 
 
 	
@@ -166,6 +166,9 @@ public class PGRConstants {
 	public static final String ROLE_ESCALATION_OFFICER4 = "ESCALATION_OFFICER4";
 	public static final String ROLE_ESCALATION_OFFICER_BUILDING_PLAN_ASSIGNEE = "PGR_BP_ESCALATION_OFFICER1";
 	public static final String ROLE_SYSTEM = "SYSTEM";
+	public static final String ROLE_L1 = "SR_L1";
+	public static final String ROLE_L2 = "SR_L2";
+	public static final String ROLE_L3 = "SR_L3";
 	
 	public static final String ROLE_NAME_CITIZEN = "Citizen";
 	public static final String ROLE_NAME_EMPLOYEE = "Employee";
