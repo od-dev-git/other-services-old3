@@ -40,4 +40,8 @@ public class PropertySerarchCriteria {
     
     private Long slaThreshold;
     
+    private Boolean isPropertyAssessed;
+    
+    private Set<String> statusNotIn;
+    
 }

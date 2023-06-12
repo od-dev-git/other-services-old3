@@ -19,7 +19,7 @@ public class PTServiceQueryBuilder {
 	public static final String TOTAL_PROPERTY_ID_SQL = " select count(id) from eg_pt_property epaa";
 	public static final String SELECT_SQL = "  select ";
 	public static final String TENANTID_SQL = " tenantid ";
-	public static final String TOTAL_PROPERTY_ASSESSMENTS_SQL = SELECT_SQL + " count(assessmentnumber) as totalAsmt from eg_pt_asmt_assessment epaa ";
+	public static final String TOTAL_PROPERTY_ASSESSMENTS_SQL = SELECT_SQL + " count(distinct propertyid) as totalAsmt from eg_pt_asmt_assessment epaa ";
 	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_SQL = SELECT_SQL + " count(*) as newAsmt  from eg_pt_property epaa ";
 	public static final String CUMULATIVE_PROPERTIES_ASSESSED_SQL = " select to_char(monthYear, 'Mon-YYYY') as name, sum(assessedProperties) over (order by monthYear asc rows between unbounded preceding and current row) as value from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear ,count(distinct propertyid) assessedProperties from eg_pt_asmt_assessment epaa ";
 	public static final String PROPERTIES_BY_USAGETYPE_SQL = " select usagecategory as name , count(distinct epaa.propertyid) as value from eg_pt_property ep "
@@ -49,7 +49,7 @@ public class PTServiceQueryBuilder {
 			+ "case when status='INWORKFLOW' then 1 end as inworkflow "
 			+ "from eg_pt_property epaa ";
 	
-	public static String getAccessedPropertiesCountQuery(PropertySerarchCriteria criteria,
+	public static String getAssessedPropertiesCountQuery(PropertySerarchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(ASSESSED_PROPERTIES_SQL);
 		return addWhereClause(selectQuery, preparedStatementValues, criteria,false);
@@ -100,6 +100,17 @@ public class PTServiceQueryBuilder {
 			preparedStatementValues.put("status", searchCriteria.getStatus());
 	    }
 		
+		if (searchCriteria.getIsPropertyAssessed() == Boolean.TRUE) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.lastmodifiedtime != epaa.createdtime ");			
+	    }
+		
+		if (searchCriteria.getStatusNotIn() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.status not in ( :statusNotIn) ");
+			preparedStatementValues.put("statusNotIn", searchCriteria.getStatusNotIn());
+	    }
+		
 		if (searchCriteria.getExcludedTenantId() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" epaa.tenantId != :excludedTenantId");
@@ -137,7 +148,7 @@ public class PTServiceQueryBuilder {
 		addClauseIfRequired(preparedStatementValues, selectQuery);
 		selectQuery.append(" creationreason not in ('UPDATE','MUTATION') ");
 		preparedStatementValues.put("creationReason", "UPDATE");
-		return addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,false);
+		return addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
 	}
 
 
@@ -199,8 +210,15 @@ public class PTServiceQueryBuilder {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_NEW_ASSESSMENTS_SQL);
 		selectQuery.append(" where epaa.status = :active ");
 		preparedStatementValues.put("active","ACTIVE");
-		selectQuery.append(" and epaa.creationreason ='CREATE' ");
-		preparedStatementValues.put("creationReason", "CREATE");
+		selectQuery.append(" and epaa.creationreason not in ('UPDATE','MUTATION') ");
+		preparedStatementValues.put("creationReason", "UPDATE");
+		return addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
+	}
+	
+	public String getPtTotalReAssessmentsCountQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(ASSESSED_PROPERTIES_SQL);
+		propertySearchCriteria.setIsPropertyAssessed(Boolean.TRUE);
 		return addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
 	}
 	
@@ -236,7 +254,7 @@ public class PTServiceQueryBuilder {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL);
 		selectQuery.append(" where epaa.status = :active ");
 		preparedStatementValues.put("active","ACTIVE");
-		addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,true);
+		addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
 		addGroupByClause(selectQuery," tenantid ");
 		return selectQuery.toString();
 	}
@@ -246,9 +264,20 @@ public class PTServiceQueryBuilder {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL);
 		selectQuery.append(" where epaa.status = :active ");
 		preparedStatementValues.put("active","ACTIVE");
-		addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,true);
+		addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
 		selectQuery.append(" and epaa.creationreason = :reason ");
 		preparedStatementValues.put("reason", "CREATE");
+		addGroupByClause(selectQuery," tenantid ");
+		return selectQuery.toString();
+	}
+	
+	public String getPtTotalReAssessmentsTenantwiseCount(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL);
+		propertySearchCriteria.setIsPropertyAssessed(Boolean.TRUE);
+		selectQuery.append(" where epaa.status = :active ");
+		preparedStatementValues.put("active","ACTIVE");
+		addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
 		addGroupByClause(selectQuery," tenantid ");
 		return selectQuery.toString();
 	}
@@ -283,6 +312,28 @@ public class PTServiceQueryBuilder {
 			selectQuery.append(" epaa.lastmodifiedtime <= :toDate");
 			preparedStatementValues.put("toDate", searchCriteria.getToDate());
 		}
+		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.lastmodifiedtime - epaa.createdtime < " + searchCriteria.getSlaThreshold());
+		}
+		
+		if (searchCriteria.getStatus() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.status = :status");
+			preparedStatementValues.put("status", searchCriteria.getStatus());
+	    }
+		
+		if (searchCriteria.getIsPropertyAssessed() == Boolean.TRUE) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.lastmodifiedtime != epaa.createdtime ");			
+	    }
+		
+		if (searchCriteria.getStatusNotIn() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.status not in ( :statusNotIn) ");
+			preparedStatementValues.put("statusNotIn", searchCriteria.getStatusNotIn());
+	    }
 
 		if (searchCriteria.getExcludedTenantId() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);

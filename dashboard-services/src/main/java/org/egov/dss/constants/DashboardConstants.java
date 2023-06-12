@@ -184,6 +184,10 @@ public class DashboardConstants {
 	
 	public static final String WS_NEW_WATER_CONNECTION = "NEW_WATER_CONNECTION";
 	
+	public static final String STATUS_INWORKFLOW = "INWORKFLOW";
+	
+	public static final String STATUS_INACTIVE = "INACTIVE";
+	
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
 					BUSINESS_SERVICE_OC_APP_FEE, BUSINESS_SERVICE_OC_SAN_FEE));
@@ -256,6 +260,9 @@ public class DashboardConstants {
 	
 	public static final List<String> WS_NEW_CONNECTIONS = Collections
 			.unmodifiableList(Arrays.asList(WS_NEW_CONNECTION,WS_NEW_WATER_CONNECTION));
+	
+	public static final List<String> PT_INWORKFLOW_STATUS = Collections
+			.unmodifiableList(Arrays.asList(STATUS_INWORKFLOW,STATUS_INACTIVE));
 
 
 }
