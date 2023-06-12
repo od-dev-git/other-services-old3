@@ -41,6 +41,7 @@ public class PTService {
 	public List<Data> totalProprties(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.PT_INWORKFLOW_STATUS));
 		Integer totalProperties = (Integer) ptRepository.getTotalProperties(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalProperties).build());
 	}
@@ -55,6 +56,7 @@ public class PTService {
 	public List<Data> propertiesAssessed(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsPropertyAssessed(Boolean.TRUE);
 		Integer assessedPropertiesCount = (Integer) ptRepository.getAssessedPropertiesCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(assessedPropertiesCount).build());
 	}
@@ -92,8 +94,10 @@ public class PTService {
 	public List<Data> ptNewAssessmentShare(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		Integer ptTotalAssessmentsCount = (Integer) ptRepository.getPtTotalAssessmentsCount(criteria);
+		//Integer ptTotalAssessmentsCount = (Integer) ptRepository.getPtTotalAssessmentsCount(criteria);
 		Integer ptTotalNewAssessmentsCount = (Integer) ptRepository.getPtTotalNewAssessmentsCount(criteria);
+		Integer ptTotalReAssessmentsCount = (Integer) ptRepository.getPtTotalReAssessmentsCount(criteria);
+		Integer ptTotalAssessmentsCount = Integer.sum(ptTotalNewAssessmentsCount, ptTotalReAssessmentsCount);
 		return Arrays.asList(Data.builder()
 				.headerValue(Math.round((ptTotalNewAssessmentsCount.doubleValue() / ptTotalAssessmentsCount.doubleValue()) * 100)).build());
 	}
@@ -101,16 +105,20 @@ public class PTService {
 	public List<Data> ptReAssessmentShare(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		Integer ptTotalAssessmentsCount = (Integer) ptRepository.getPtTotalAssessmentsCount(criteria);
+	//	Integer ptTotalAssessmentsCount = (Integer) ptRepository.getPtTotalAssessmentsCount(criteria);
 		Integer ptTotalNewAssessmentsCount = (Integer) ptRepository.getPtTotalNewAssessmentsCount(criteria);
+		Integer ptTotalReAssessmentsCount = (Integer) ptRepository.getPtTotalReAssessmentsCount(criteria);
+		Integer ptTotalAssessmentsCount = Integer.sum(ptTotalNewAssessmentsCount, ptTotalReAssessmentsCount);
 		return Arrays.asList(Data.builder()
-				.headerValue(Math.round((1 -(ptTotalNewAssessmentsCount.doubleValue() / ptTotalAssessmentsCount.doubleValue())) * 100)).build());
+				.headerValue(Math.round((ptTotalReAssessmentsCount.doubleValue() / ptTotalAssessmentsCount.doubleValue()) * 100)).build());
 	}
 	
 	public List<Data> cumulativePropertiesAssessed(PayloadDetails payloadDetails) {
 		getPropertySearchCriteria(payloadDetails);
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(DashboardConstants.STATUS_ACTIVE);
+		criteria.setIsPropertyAssessed(Boolean.TRUE);
 		List<Chart> cumulativePropertiesAssessed = ptRepository.getCumulativePropertiesAssessed(criteria);
 
 		List<Plot> plots = new ArrayList();
@@ -183,10 +191,11 @@ public class PTService {
 	public List<Data> ptShareOfNewAssessment(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		HashMap<String, Long> ptTotalAssessmentsTenantwiseCount = ptRepository.getPtTotalAssessmentsTenantwiseCount(criteria);
+		//HashMap<String, Long> ptTotalAssessmentsTenantwiseCount = ptRepository.getPtTotalAssessmentsTenantwiseCount(criteria);
 		HashMap<String, Long> ptTotalNewAssessmentsTenantwiseCount = ptRepository.getPtTotalNewAssessmentsTenantwiseCount(criteria);
+		HashMap<String, Long> ptTotalReAssessmentsTenantwiseCount = ptRepository.getPtTotalNewAssessmentsTenantwiseCount(criteria);
 
-		List<Chart> percentList = mapTenantsForPerformanceRate(ptTotalNewAssessmentsTenantwiseCount, ptTotalAssessmentsTenantwiseCount);
+		List<Chart> percentList = mapTenantsForPerformanceRate(ptTotalNewAssessmentsTenantwiseCount, ptTotalReAssessmentsTenantwiseCount);
 
 		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
              return s2.compareTo(s1);
@@ -205,10 +214,10 @@ public class PTService {
 	public List<Data> ptShareOfReAssessment(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		HashMap<String, Long> ptTotalAssessmentsTenantwiseCount = ptRepository.getPtTotalAssessmentsTenantwiseCount(criteria);
+		//HashMap<String, Long> ptTotalAssessmentsTenantwiseCount = ptRepository.getPtTotalAssessmentsTenantwiseCount(criteria);
 		HashMap<String, Long> ptTotalNewAssessmentsTenantwiseCount = ptRepository.getPtTotalNewAssessmentsTenantwiseCount(criteria);
-
-		List<Chart> percentList = mapTenantsForSharePerformanceRate(ptTotalNewAssessmentsTenantwiseCount, ptTotalAssessmentsTenantwiseCount);
+		HashMap<String, Long> ptTotalReAssessmentsTenantwiseCount = ptRepository.getPtTotalNewAssessmentsTenantwiseCount(criteria);
+		List<Chart> percentList = mapTenantsForSharePerformanceRate(ptTotalNewAssessmentsTenantwiseCount, ptTotalReAssessmentsTenantwiseCount);
 
 		 Collections.sort(percentList,Comparator.comparing(e -> e.getValue(),(s1,s2)->{
              return s2.compareTo(s1);
