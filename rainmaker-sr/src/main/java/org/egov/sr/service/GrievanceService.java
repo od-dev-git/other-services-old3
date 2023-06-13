@@ -126,7 +126,7 @@ public class GrievanceService {
 		log.info("Service layer for createss");
 		enrichserviceRequestForcreate(request);
 		pGRProducer.push(saveTopic, request);
-		pGRProducer.push(saveIndexTopic, dataTranformationForIndexer(request, true));
+		//pGRProducer.push(saveIndexTopic, dataTranformationForIndexer(request, true));
 		return getServiceResponse(request);
 	}
 
@@ -141,7 +141,7 @@ public class GrievanceService {
 		if (null == request.getActionInfo())
 			request.setActionInfo(new ArrayList<ActionInfo>());
 		pGRProducer.push(updateTopic, request);
-		pGRProducer.push(updateIndexTopic, dataTranformationForIndexer(request, false));
+		//pGRProducer.push(updateIndexTopic, dataTranformationForIndexer(request, false));
 		return getServiceResponse(request);
 	}
 	
@@ -316,7 +316,7 @@ public class GrievanceService {
 				serviceRequestIds.add(request.getServices().get(i).getServiceRequestId());
 				ServiceReqSearchCriteria serviceReqSearchCriteria = ServiceReqSearchCriteria.builder()
 						.tenantId(request.getServices().get(i).getTenantId()).serviceRequestId(serviceRequestIds).build();
-				ServiceResponse serviceResponse = mapper.convertValue(getServiceRequestDetails(request.getRequestInfo(), serviceReqSearchCriteria), ServiceResponse.class);
+				ServiceResponse serviceResponse = searchFromDB(request.getRequestInfo(), serviceReqSearchCriteria);
 				actionHistory = serviceResponse.getActionHistory().get(0);
 				actions.add(request.getActionInfo().get(i));
 				actions.addAll(actionHistory.getActions());
@@ -371,41 +371,70 @@ public class GrievanceService {
 			
 			ActionHistory history = historyMap.get(service.getServiceRequestId());
 						
-			if(!StringUtils.isEmpty(actionInfo.getAction())) {
-				String escalationStatus = pGRUtils.checkReopenForEscalation(requestInfo,history, actionInfo.getAction() , service.getTenantId()) ;
-				if(escalationStatus != null) {
-					service.setStatus(StatusEnum.fromValue(escalationStatus));
-					actionInfo.setStatus(escalationStatus);	
-				}else {
-					service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));
-				}
-			}
+//			if(!StringUtils.isEmpty(actionInfo.getAction())) {
+//				String escalationStatus = pGRUtils.checkReopenForEscalation(requestInfo,history, actionInfo.getAction() , service.getTenantId()) ;
+//				if(escalationStatus != null) {
+//					service.setStatus(StatusEnum.fromValue(escalationStatus));
+//					actionInfo.setStatus(escalationStatus);	
+//				}else {
+//					service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));
+//				}
+//			}
 			String role = pGRUtils.getPrecedentRole(requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
 					.collect(Collectors.toList()));
 			actionInfo.setUuid(UUID.randomUUID().toString()); actionInfo.setBusinessKey(service.getServiceRequestId()); 
 			actionInfo.setBy(auditDetails.getLastModifiedBy() + ":" + role); actionInfo.setWhen(auditDetails.getLastModifiedTime());
 			actionInfo.setTenantId(service.getTenantId()); 
 			
+			if (actionInfo.getAction() != null) {
+				switch (actionInfo.getAction()) {
+
+				case WorkFlowConfigs.ACTION_FORWARD_TO_L2:
+					service.setStatus(StatusEnum.STATUS_RECEIVED_L2);
+					break;
+
+				case WorkFlowConfigs.ACTION_FORWARD_TO_L3:
+					service.setStatus(StatusEnum.STATUS_RECEIVED_L3);
+					break;
+
+				case WorkFlowConfigs.ACTION_SEND_BACK_TO_L2:
+					service.setStatus(StatusEnum.STATUS_RECEIVED_L2);
+					break;
+
+				case WorkFlowConfigs.ACTION_RESOLVE:
+					service.setStatus(StatusEnum.RESOLVED);
+					break;
+
+				case WorkFlowConfigs.ACTION_CLOSE:
+					service.setStatus(StatusEnum.CLOSED);
+					break;
+
+				default:
+					break;
+				}
+			}			
+			
+			
 			//If GRO resolves/reject any complaint (LME assigned complaint/ Escalated complaint) then we set the assignee.
 			
-			if(PGRConstants.ROLE_GRO.equalsIgnoreCase(role) 
-					&& (WorkFlowConfigs.ACTION_RESOLVE.equalsIgnoreCase(actionInfo.getAction())
-							|| WorkFlowConfigs.ACTION_REJECT.equalsIgnoreCase(actionInfo.getAction()))) {
-				actionInfo.setAssignee(auditDetails.getLastModifiedBy());
-			}
-			//If escalated complaint is resolved or reject by escalation officer then set the assignee value of escalation officer
-			else if(pGRUtils.checkComplaintAlreadyEscalated(history, actionInfo.getAction())) {
-				actionInfo.setAssignee(auditDetails.getLastModifiedBy());
-			}
-
-			//Setting the escalated complaints assigne to last assigned/resolved employee .
-			if(WorkFlowConfigs.ACTION_REOPEN.equalsIgnoreCase(actionInfo.getAction()) )
-			{
-				List<ActionInfo> actions = history.getActions().stream()
-						.filter(obj -> !StringUtils.isEmpty(obj.getAssignee())).collect(Collectors.toList());
-				if(!CollectionUtils.isEmpty(actions))
-					actionInfo.setAssignee(actions.get(0).getAssignee());
-			}
+//			if(PGRConstants.ROLE_GRO.equalsIgnoreCase(role) 
+//					&& (WorkFlowConfigs.ACTION_RESOLVE.equalsIgnoreCase(actionInfo.getAction())
+//							|| WorkFlowConfigs.ACTION_REJECT.equalsIgnoreCase(actionInfo.getAction()))) {
+//				actionInfo.setAssignee(auditDetails.getLastModifiedBy());
+//			}
+//			//If escalated complaint is resolved or reject by escalation officer then set the assignee value of escalation officer
+//			else if(pGRUtils.checkComplaintAlreadyEscalated(history, actionInfo.getAction())) {
+//				actionInfo.setAssignee(auditDetails.getLastModifiedBy());
+//			}
+//
+//			//Setting the escalated complaints assigne to last assigned/resolved employee .
+//			if(WorkFlowConfigs.ACTION_REOPEN.equalsIgnoreCase(actionInfo.getAction()) )
+//			{
+//				List<ActionInfo> actions = history.getActions().stream()
+//						.filter(obj -> !StringUtils.isEmpty(obj.getAssignee())).collect(Collectors.toList());
+//				if(!CollectionUtils.isEmpty(actions))
+//					actionInfo.setAssignee(actions.get(0).getAssignee());
+//			}
 
 			
 		}

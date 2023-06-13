@@ -489,10 +489,9 @@ public class PGRUtils {
 
 		Map<Integer, String> map = new TreeMap<>();
 
-		map.put(3, PGRConstants.ROLE_EMPLOYEE);
-		map.put(2, PGRConstants.ROLE_DGRO);
-		map.put(1, PGRConstants.ROLE_GRO);
-		map.put(0, PGRConstants.ROLE_CSR);
+		map.put(2, PGRConstants.ROLE_L3);
+		map.put(1, PGRConstants.ROLE_L2);
+		map.put(0, PGRConstants.ROLE_L1);
 
 		return map;
 	}
@@ -605,6 +604,7 @@ public class PGRUtils {
 				return status;
 			}
 		}
+		
 		return null;
 	}
 	

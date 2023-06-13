@@ -11,8 +11,8 @@ import org.springframework.util.StringUtils;
 public class SRQueryBuilder {
 	
 	public static final String INNER_JOIN = " inner join ";
-	public static final String SR_APPLICATIONS_QUERY = "select * from eg_pgr_service pgr " + INNER_JOIN
-			+ " eg_pgr_address add on add.uuid = pgr.addressid ";
+	public static final String SR_APPLICATIONS_QUERY = "select * from eg_sr_service sr " + INNER_JOIN
+			+ " eg_sr_address add on add.uuid = sr.addressid ";
 	
 	public static String getSRApplications(ServiceReqSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SR_APPLICATIONS_QUERY);
@@ -24,25 +24,25 @@ public class SRQueryBuilder {
 			ServiceReqSearchCriteria searchCriteria) {
 		if (!StringUtils.isEmpty(searchCriteria.getTenantId())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" pgr.tenantid IN ( :tenantId )");
+			selectQuery.append(" sr.tenantid IN ( :tenantId )");
 			preparedStatementValues.put("tenantId",searchCriteria.getTenantId());
 		}
 
 		if (!StringUtils.isEmpty(searchCriteria.getServiceRequestId())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" pgr.servicerequestid in (:serviceRequestId)");
+			selectQuery.append(" sr.servicerequestid in (:serviceRequestId)");
 			preparedStatementValues.put("serviceRequestId", searchCriteria.getServiceRequestId());
 		}
 
 		if (!StringUtils.isEmpty(searchCriteria.getPhone())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" pgr.phone = :phone");
+			selectQuery.append(" sr.phone = :phone");
 			preparedStatementValues.put("phone", searchCriteria.getPhone());
 		}
 		
 		if (searchCriteria.getStatus() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" pgr.status IN (:status) ");
+			selectQuery.append(" sr.status IN (:status) ");
 			preparedStatementValues.put("status", searchCriteria.getStatus());
 		}
 		selectQuery.append(" order by servicerequestid ");
