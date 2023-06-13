@@ -135,9 +135,19 @@ public class PaymentRepository {
 
 	}
 	
-	public BigDecimal getTotalDemand(DemandSearchCriteria criteria) {
+	public BigDecimal getCurrentDemand(DemandSearchCriteria criteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
-	    String query = paymentQueryBuilder.getTotalDemand(criteria, preparedStatementValues);
+	    String query = paymentQueryBuilder.getCurrentDemand(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
+	}
+	
+	public BigDecimal getArrearDemand(DemandSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+	    String query = paymentQueryBuilder.getArrearDemand(criteria, preparedStatementValues);
 		log.info("query: " + query);
 		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(BigDecimal.class));
@@ -199,9 +209,9 @@ public class PaymentRepository {
         return result;
 	}
 	
-	public HashMap<String, BigDecimal> getTenantWiseAssedProperties(PaymentSearchCriteria paymentSearchCriteria) {
+	public HashMap<String, BigDecimal> getTenantPropertiesPaid(PaymentSearchCriteria paymentSearchCriteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
-		String query = paymentQueryBuilder.getTenantWiseAssedProperties(paymentSearchCriteria, preparedStatementValues);
+		String query = paymentQueryBuilder.getTenantPropertiesPaid(paymentSearchCriteria, preparedStatementValues);
 		log.info("query: " + query);
 		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new TenantWiseCollectionRowMapper());
 	}
