@@ -781,6 +781,8 @@ public class RevenueService {
 
 	public List<Data> revenuePTTaxHeadsBreakup(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		List<HashMap<String, Object>> ptTaxHeadsBreakup = paymentRepository.getptTaxHeadsBreakup(criteria);
 		
 			 List<Data> response = new ArrayList();
@@ -807,7 +809,8 @@ public class RevenueService {
 						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("parkingtaxcollection")))))
 						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("ownershipexcemptioncollection")))))
 						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("solidwasteuserchargecollection")))))
-						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("usageexcemptioncollection")))));
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("usageexcemptioncollection")))))
+						.add((new BigDecimal(String.valueOf(ptTaxHeadRow.get("advancecollection"))).abs()));
 				
 				row.add(Plot.builder().name("Holding Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("holdingtaxcollection")))).symbol("number").build());				
 				row.add(Plot.builder().name("Light Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("lighttaxcollection")))).symbol("number").build());				
@@ -822,7 +825,8 @@ public class RevenueService {
 				row.add(Plot.builder().name("Parking Tax").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("parkingtaxcollection")))).symbol("number").build());				
 				row.add(Plot.builder().name("Ownership Exemption").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("ownershipexcemptioncollection")))).symbol("number").build());				
 				row.add(Plot.builder().name("Solid Waste User charges").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("solidwasteuserchargecollection")))).symbol("number").build());				
-				row.add(Plot.builder().name("Usage Exemption").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("usageexcemptioncollection")))).symbol("number").build());				
+				row.add(Plot.builder().name("Usage Exemption").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("usageexcemptioncollection")))).symbol("number").build());	
+				row.add(Plot.builder().name("Advance").value(new BigDecimal(String.valueOf(ptTaxHeadRow.get("advancecollection")))).symbol("number").build());
 				row.add(Plot.builder().name("Total Amount").value(total).symbol("number").build());				
 
 				 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
@@ -849,6 +853,7 @@ public class RevenueService {
 					row.add(Plot.builder().name("Solid Waste User charges").value(BigDecimal.ZERO).symbol("number")
 							.build());
 					row.add(Plot.builder().name("Usage Exemption").value(BigDecimal.ZERO).symbol("number").build());
+					row.add(Plot.builder().name("Advance").value(BigDecimal.ZERO).symbol("number").build());
 					row.add(Plot.builder().name("Total Amount").value(BigDecimal.ZERO).symbol("number").build());
 
 					response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber)
@@ -899,7 +904,7 @@ public class RevenueService {
 		HashMap<String, BigDecimal> tenantWiseTransactions = paymentRepository
 				.getTenantWiseTransaction(paymentSearchCriteria);
 		HashMap<String, BigDecimal> tenantWiseAssessedProperties = paymentRepository
-				.getTenantWiseAssedProperties(paymentSearchCriteria);
+				.getTenantPropertiesPaid(paymentSearchCriteria);
 		List<Data> response = new ArrayList<>();
 		int serialNumber = 1;
 
@@ -1597,7 +1602,7 @@ public class RevenueService {
 		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		BigDecimal totalDemand = BigDecimal.ZERO;
 		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
-			totalDemand = paymentRepository.getTotalDemand(demandSearchCriteria);
+			totalDemand = paymentRepository.getCurrentDemand(demandSearchCriteria);
 		}
 		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
 	}
@@ -1608,9 +1613,10 @@ public class RevenueService {
 		demandSearchCriteria.setIsArrearDemand(Boolean.TRUE);
 		BigDecimal totalDemand = BigDecimal.ZERO;
 		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
-			totalDemand = paymentRepository.getTotalDemand(demandSearchCriteria);
+			totalDemand = paymentRepository.getArrearDemand(demandSearchCriteria);
 		}
 		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
 	}
+	
 
 }
