@@ -34,7 +34,7 @@ public class ErrorConstants {
 	public static final String CREATE_ADDRESS_COMBO_ERROR_KEY = "EG_PGR_CREATE_ADDRESS_ERROR";
 	public static final String CREATE_ADDRESS_COMBO_ERROR_MSG = "Any one of the combinations of (address or addressId or lat/long) must be provided in the Grievance";
 	
-	public static final String ASSIGNEE_MISSING_FOR_ACTION_ASSIGN_REASSIGN_KEY = "EG_PGR_UPDATE_ASSIGN_REASSIGN";
+	public static final String ASSIGNEE_MISSING_FOR_ACTION_ASSIGN_REASSIGN_KEY = "SR_ASSIGN_ERROR";
 	public static final String ASSIGNEE_MISSING_FOR_ACTION_ASSIGN_REASSIGN_MSG = "The assignees are missing or are invalid for the services with ids : ";
 	
 	public static final String UNAUTHORIZED_USER_MSG = "This User is not authorized to access this information";
@@ -98,7 +98,7 @@ public class ErrorConstants {
 	public static final String INVALID_EG_PGR_SERVICE_REQ_ID_CODE = "SR_INVALID_SERVICE_REQ_ID";
 	public static final String INVALID_EG_PGR_SERVICE_REQ_ID_MSG = "Invalid Service request id: ";
 	
-	public static final String INVALID_STATUS_COMMENT_CODE = "EG_PGR_INVALID_STATUS" ; 
+	public static final String INVALID_STATUS_COMMENT_CODE = "EG_SR_INVALID_STATUS" ; 
 	public static final String INVALID_STATUS_COMMENT_MESSAGE = "The status of the complaint has been changed , please refresh the complaint" ;
 	
 }

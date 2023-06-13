@@ -386,12 +386,23 @@ public class GrievanceService {
 			actionInfo.setBy(auditDetails.getLastModifiedBy() + ":" + role); actionInfo.setWhen(auditDetails.getLastModifiedTime());
 			actionInfo.setTenantId(service.getTenantId()); 
 			
-			if(role.equalsIgnoreCase(PGRConstants.ROLE_L1) || role.equalsIgnoreCase(PGRConstants.ROLE_L2)) {
-				
+			if (actionInfo.getAction() != null) {
 				switch (actionInfo.getAction()) {
 
 				case WorkFlowConfigs.ACTION_FORWARD_TO_L2:
 					service.setStatus(StatusEnum.STATUS_RECEIVED_L2);
+					break;
+
+				case WorkFlowConfigs.ACTION_FORWARD_TO_L3:
+					service.setStatus(StatusEnum.STATUS_RECEIVED_L3);
+					break;
+
+				case WorkFlowConfigs.ACTION_SEND_BACK_TO_L2:
+					service.setStatus(StatusEnum.STATUS_RECEIVED_L2);
+					break;
+
+				case WorkFlowConfigs.ACTION_RESOLVE:
+					service.setStatus(StatusEnum.RESOLVED);
 					break;
 
 				case WorkFlowConfigs.ACTION_CLOSE:
@@ -400,10 +411,8 @@ public class GrievanceService {
 
 				default:
 					break;
-
 				}
-				
-			}
+			}			
 			
 			
 			//If GRO resolves/reject any complaint (LME assigned complaint/ Escalated complaint) then we set the assignee.

@@ -213,30 +213,30 @@ public class PGRRequestValidator {
 		if (null != infos)
 			for (int i = 0; i <= infos.size() - 1; i++) {
 				ActionInfo info = infos.get(i);
-				if (null != info && null != info.getAction())
-					if ((WorkFlowConfigs.ACTION_ASSIGN.equalsIgnoreCase(info.getAction())
-							|| WorkFlowConfigs.ACTION_REASSIGN.equalsIgnoreCase(info.getAction()))) {
-						if(StringUtils.isEmpty(info.getAssignee())) {
+				if (null != info && null != info.getAction()) {
+					if (!info.getAction().equalsIgnoreCase(WorkFlowConfigs.ACTION_CLOSE)) {
+						if (StringUtils.isEmpty(info.getAssignee())) {
 							errorMsgForActionAssign.add(services.get(i).getServiceRequestId());
-						}else {
+						} else {
 							ReportRequest request = ReportRequest.builder().requestInfo(serviceRequest.getRequestInfo())
 									.tenantId(serviceRequest.getServices().get(0).getTenantId()).build();
 							List<Long> employeeIds = new ArrayList<>();
 							try {
 								employeeIds.add(Long.valueOf(info.getAssignee()));
-							}catch(Exception e) {
+							} catch (Exception e) {
 								errorMsgForActionAssign.add(services.get(i).getServiceRequestId());
 							}
 							Map<Long, String> result = reportService.getEmployeeDetails(request, employeeIds);
-							if(CollectionUtils.isEmpty(result.keySet())) {
+							if (CollectionUtils.isEmpty(result.keySet())) {
 								errorMsgForActionAssign.add(services.get(i).getServiceRequestId());
 							}
 						}
 					}
-					else if (!WorkFlowConfigs.ACTION_ASSIGN.equalsIgnoreCase(info.getAction())
-							&& !WorkFlowConfigs.ACTION_REASSIGN.equalsIgnoreCase(info.getAction())
-							&& null != info.getAssignee())
-						info.setAssignee(null);
+				}
+//					else if (!WorkFlowConfigs.ACTION_ASSIGN.equalsIgnoreCase(info.getAction())
+//							&& !WorkFlowConfigs.ACTION_REASSIGN.equalsIgnoreCase(info.getAction())
+//							&& null != info.getAssignee())
+//						info.setAssignee(null);
 			}
 
 		if (!errorMsgForActionAssign.isEmpty())
