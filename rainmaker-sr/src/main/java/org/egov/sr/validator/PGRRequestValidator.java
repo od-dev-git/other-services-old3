@@ -213,30 +213,30 @@ public class PGRRequestValidator {
 		if (null != infos)
 			for (int i = 0; i <= infos.size() - 1; i++) {
 				ActionInfo info = infos.get(i);
-				if (null != info && null != info.getAction())
-					if ((WorkFlowConfigs.ACTION_ASSIGN.equalsIgnoreCase(info.getAction())
-							|| WorkFlowConfigs.ACTION_REASSIGN.equalsIgnoreCase(info.getAction()))) {
-						if(StringUtils.isEmpty(info.getAssignee())) {
+				if (null != info && null != info.getAction()) {
+					if (!info.getAction().equalsIgnoreCase(WorkFlowConfigs.ACTION_CLOSE)) {
+						if (StringUtils.isEmpty(info.getAssignee())) {
 							errorMsgForActionAssign.add(services.get(i).getServiceRequestId());
-						}else {
+						} else {
 							ReportRequest request = ReportRequest.builder().requestInfo(serviceRequest.getRequestInfo())
 									.tenantId(serviceRequest.getServices().get(0).getTenantId()).build();
 							List<Long> employeeIds = new ArrayList<>();
 							try {
 								employeeIds.add(Long.valueOf(info.getAssignee()));
-							}catch(Exception e) {
+							} catch (Exception e) {
 								errorMsgForActionAssign.add(services.get(i).getServiceRequestId());
 							}
 							Map<Long, String> result = reportService.getEmployeeDetails(request, employeeIds);
-							if(CollectionUtils.isEmpty(result.keySet())) {
+							if (CollectionUtils.isEmpty(result.keySet())) {
 								errorMsgForActionAssign.add(services.get(i).getServiceRequestId());
 							}
 						}
 					}
-					else if (!WorkFlowConfigs.ACTION_ASSIGN.equalsIgnoreCase(info.getAction())
-							&& !WorkFlowConfigs.ACTION_REASSIGN.equalsIgnoreCase(info.getAction())
-							&& null != info.getAssignee())
-						info.setAssignee(null);
+				}
+//					else if (!WorkFlowConfigs.ACTION_ASSIGN.equalsIgnoreCase(info.getAction())
+//							&& !WorkFlowConfigs.ACTION_REASSIGN.equalsIgnoreCase(info.getAction())
+//							&& null != info.getAssignee())
+//						info.setAssignee(null);
 			}
 
 		if (!errorMsgForActionAssign.isEmpty())
@@ -341,49 +341,53 @@ public class PGRRequestValidator {
 				.getRoles().stream().map(Role::getCode).collect(Collectors.toList());
 		String precedentRole = pgrUtils.getPrecedentRole(roleCodes);
 		
-		if(PGRConstants.ROLE_EMPLOYEE.equalsIgnoreCase(precedentRole)) {
-			if(roleCodes.contains(PGRConstants.ROLE_ESCALATION_OFFICER1))
-				precedentRole = PGRConstants.ROLE_ESCALATION_OFFICER1;
-			else if(roleCodes.contains(PGRConstants.ROLE_ESCALATION_OFFICER2))
-				precedentRole = PGRConstants.ROLE_ESCALATION_OFFICER2;
-			else if(roleCodes.contains(PGRConstants.ROLE_ESCALATION_OFFICER3))
-				precedentRole = PGRConstants.ROLE_ESCALATION_OFFICER3;
-			else if(roleCodes.contains(PGRConstants.ROLE_ESCALATION_OFFICER4))
-				precedentRole = PGRConstants.ROLE_ESCALATION_OFFICER4;
-		}
+//		if(PGRConstants.ROLE_EMPLOYEE.equalsIgnoreCase(precedentRole)) {
+//			if(roleCodes.contains(PGRConstants.ROLE_ESCALATION_OFFICER1))
+//				precedentRole = PGRConstants.ROLE_ESCALATION_OFFICER1;
+//			else if(roleCodes.contains(PGRConstants.ROLE_ESCALATION_OFFICER2))
+//				precedentRole = PGRConstants.ROLE_ESCALATION_OFFICER2;
+//			else if(roleCodes.contains(PGRConstants.ROLE_ESCALATION_OFFICER3))
+//				precedentRole = PGRConstants.ROLE_ESCALATION_OFFICER3;
+//			else if(roleCodes.contains(PGRConstants.ROLE_ESCALATION_OFFICER4))
+//				precedentRole = PGRConstants.ROLE_ESCALATION_OFFICER4;
+//		}
+		
+		
+		
 		actions = roleActionMap.get(pgrUtils.getPrecedentRole(serviceRequest.getRequestInfo().getUserInfo()
 				.getRoles().stream().map(Role::getCode).collect(Collectors.toList())));
+		
 		final List<String> actionsAllowedForTheRole = actions;
 		String role = pgrUtils.getPrecedentRole(roles);
 		List<String> serviceCodes = new ArrayList<>();
-		if(role.equals(PGRConstants.ROLE_DGRO)) {
-			if(!serviceRequest.getServices().get(0).getTenantId().equals(serviceRequest.getRequestInfo().getUserInfo().getTenantId())) {
-				errorMap.put(ErrorConstants.INVALID_ACTION_FOR_GRO_CODE, ErrorConstants.INVALID_ACTION_FOR_GRO_MSG);
-			}
-			if (!errorMap.isEmpty())
-				throw new CustomException(errorMap);
-			ServiceReqSearchCriteria serviceReqSearchCriteria = ServiceReqSearchCriteria.builder()
-					.tenantId(serviceRequest.getServices().get(0).getTenantId()).build();
-			List<String> departmentCodes = requestService.getDepartmentCode(serviceReqSearchCriteria, serviceRequest.getRequestInfo());
-			Object response = requestService.fetchServiceDefs(serviceRequest.getRequestInfo(), serviceRequest.getServices().get(0).getTenantId(), departmentCodes);
-			try {
-				serviceCodes = JsonPath.read(response, PGRConstants.JSONPATH_SERVICE_CODES);
-				log.info("serviceCodes: "+serviceCodes);
-				if(CollectionUtils.isEmpty(serviceCodes))
-					errorMap.put(ErrorConstants.INVALID_ACTION_FOR_DGRO_CODE, ErrorConstants.INVALID_ACTION_FOR_DGRO_MSG);
-			}catch(Exception e) {
-				errorMap.put(ErrorConstants.INVALID_ACTION_FOR_DGRO_CODE, ErrorConstants.INVALID_ACTION_FOR_DGRO_MSG);
-			}
-			for(Service service: serviceRequest.getServices()) {
-				if(!serviceCodes.contains(service.getServiceCode())) {
-					errorMap.put(ErrorConstants.INVALID_ACTION_FOR_DGRO_CODE, ErrorConstants.INVALID_ACTION_FOR_DGRO_MSG+ " for serviceRequest: "+service.getServiceRequestId());
-				}
-			}
-		}else if(role.equals(PGRConstants.ROLE_GRO)) {
-			if(!serviceRequest.getServices().get(0).getTenantId().equals(serviceRequest.getRequestInfo().getUserInfo().getTenantId())) {
-				errorMap.put(ErrorConstants.INVALID_ACTION_FOR_GRO_CODE, ErrorConstants.INVALID_ACTION_FOR_GRO_MSG);
-			}
-		}
+//		if(role.equals(PGRConstants.ROLE_DGRO)) {
+//			if(!serviceRequest.getServices().get(0).getTenantId().equals(serviceRequest.getRequestInfo().getUserInfo().getTenantId())) {
+//				errorMap.put(ErrorConstants.INVALID_ACTION_FOR_GRO_CODE, ErrorConstants.INVALID_ACTION_FOR_GRO_MSG);
+//			}
+//			if (!errorMap.isEmpty())
+//				throw new CustomException(errorMap);
+//			ServiceReqSearchCriteria serviceReqSearchCriteria = ServiceReqSearchCriteria.builder()
+//					.tenantId(serviceRequest.getServices().get(0).getTenantId()).build();
+//			List<String> departmentCodes = requestService.getDepartmentCode(serviceReqSearchCriteria, serviceRequest.getRequestInfo());
+//			Object response = requestService.fetchServiceDefs(serviceRequest.getRequestInfo(), serviceRequest.getServices().get(0).getTenantId(), departmentCodes);
+//			try {
+//				serviceCodes = JsonPath.read(response, PGRConstants.JSONPATH_SERVICE_CODES);
+//				log.info("serviceCodes: "+serviceCodes);
+//				if(CollectionUtils.isEmpty(serviceCodes))
+//					errorMap.put(ErrorConstants.INVALID_ACTION_FOR_DGRO_CODE, ErrorConstants.INVALID_ACTION_FOR_DGRO_MSG);
+//			}catch(Exception e) {
+//				errorMap.put(ErrorConstants.INVALID_ACTION_FOR_DGRO_CODE, ErrorConstants.INVALID_ACTION_FOR_DGRO_MSG);
+//			}
+//			for(Service service: serviceRequest.getServices()) {
+//				if(!serviceCodes.contains(service.getServiceCode())) {
+//					errorMap.put(ErrorConstants.INVALID_ACTION_FOR_DGRO_CODE, ErrorConstants.INVALID_ACTION_FOR_DGRO_MSG+ " for serviceRequest: "+service.getServiceRequestId());
+//				}
+//			}
+//		}else if(role.equals(PGRConstants.ROLE_GRO)) {
+//			if(!serviceRequest.getServices().get(0).getTenantId().equals(serviceRequest.getRequestInfo().getUserInfo().getTenantId())) {
+//				errorMap.put(ErrorConstants.INVALID_ACTION_FOR_GRO_CODE, ErrorConstants.INVALID_ACTION_FOR_GRO_MSG);
+//			}
+//		}
 
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
@@ -477,8 +481,7 @@ public class PGRRequestValidator {
 				.tenantId(serviceRequest.getServices().get(0).getTenantId()).serviceRequestId(serviceRequest
 						.getServices().stream().map(Service::getServiceRequestId).collect(Collectors.toList()))
 				.build();
-		ServiceResponse serviceResponse = mapper.convertValue(requestService
-				.getServiceRequestDetails(serviceRequest.getRequestInfo(), serviceReqSearchCriteria), ServiceResponse.class);
+		ServiceResponse serviceResponse = requestService.searchFromDB(serviceRequest.getRequestInfo(), serviceReqSearchCriteria);
 		Map<String, Service> map = serviceResponse.getServices().stream().collect(Collectors.toMap(Service::getServiceRequestId, Function.identity()));
 		List<String> errorList = new ArrayList<>();
 		serviceRequest.getServices().forEach(a -> {
@@ -540,7 +543,10 @@ public class PGRRequestValidator {
 			serviceReqSearchCriteria.setServiceRequestId(serviceIDList);
 		}
 
-		ServiceResponse serviceReqResponse = (ServiceResponse) requestService.getServiceRequestDetails(serviceRequest.getRequestInfo(),
+//		ServiceResponse serviceReqResponse = (ServiceResponse) requestService.getServiceRequestDetails(serviceRequest.getRequestInfo(),
+//				serviceReqSearchCriteria);
+		
+		ServiceResponse serviceReqResponse = (ServiceResponse) requestService.searchFromDB(serviceRequest.getRequestInfo(),
 				serviceReqSearchCriteria);
 
 		if(serviceReqResponse!=null && serviceReqResponse.getServices()!= null && serviceReqResponse.getServices().get(0)!=null)

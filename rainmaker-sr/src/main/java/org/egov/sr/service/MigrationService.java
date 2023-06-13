@@ -156,7 +156,7 @@ public class MigrationService {
             return idToAddressMap;
         }
 
-        StringBuilder fetchAddress = new StringBuilder(" SELECT * FROM eg_pgr_address"+
+        StringBuilder fetchAddress = new StringBuilder(" SELECT * FROM eg_sr_address"+
                 " WHERE uuid IN (");
 
         fetchAddress.append(createQuery(ids)).append(")");
@@ -182,10 +182,10 @@ public class MigrationService {
             return idToActionHistoryMap;
         }
 
-        StringBuilder fetchActions = new StringBuilder(" SELECT * FROM eg_pgr_action"+
+        StringBuilder fetchActions = new StringBuilder(" SELECT * FROM eg_sr_action"+
                 " WHERE businesskey IN (");
 
-        fetchActions.append(createQuery(ids)).append(")");
+        fetchActions.append(createQuery(ids)).append(") order by \"when\" desc");
 
         Map<String, List<ActionInfo> > idToActionListMap = new HashMap<>();
 

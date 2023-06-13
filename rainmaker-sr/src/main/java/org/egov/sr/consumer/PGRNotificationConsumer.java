@@ -159,7 +159,7 @@ public class PGRNotificationConsumer {
                             .get(serviceReqRequest.getActionInfo().indexOf(actionInfo));
                     if (isNotificationEnabled(actionInfo.getStatus(), serviceReqRequest.getRequestInfo().getUserInfo().getType(), actionInfo.getComment(), actionInfo.getAction())) {
                         if (isSMSNotificationEnabled) {
-                            List<SMSRequest> smsRequests = prepareSMSRequest(service, actionInfo, serviceReqRequest.getRequestInfo());
+                            List<SMSRequest> smsRequests = prepareSMSRequestForSR(service, actionInfo, serviceReqRequest.getRequestInfo());
                             if (CollectionUtils.isEmpty(smsRequests)) {
                                 log.info("Messages from localization couldn't be fetched!");
                             }
@@ -169,7 +169,7 @@ public class PGRNotificationConsumer {
                         }
                         if (isEmailNotificationEnabled)
                         {
-                        	List<EmailRequest> emailRequests = prepareEmailRequest(service, actionInfo, serviceReqRequest.getRequestInfo());
+                        	List<EmailRequest> emailRequests = prepareEmailRequestForSR(service, actionInfo, serviceReqRequest.getRequestInfo());
                         	 if (CollectionUtils.isEmpty(emailRequests)) {
                                  log.info("Messages from localization couldn't be fetched!");
                              }
@@ -197,7 +197,71 @@ public class PGRNotificationConsumer {
     }
 
 
-    /**
+	private List<EmailRequest> prepareEmailRequestForSR(Service serviceReq, ActionInfo actionInfo,
+			RequestInfo requestInfo) {
+		List<EmailRequest> emailRequestsTobeSent = new ArrayList<>();
+		String emailSubjectForEmail = emailSubject;
+		try {
+
+			String emailId = serviceReq.getEmail();
+			if (StringUtils.isEmpty(emailId) || "null".equalsIgnoreCase(emailId.trim())) {
+				log.info(" No emailId found for the Service Request Id " + serviceReq.getEmail());
+			}
+
+			String message = getMessageFromLocalization(serviceReq, actionInfo, requestInfo);
+			if (StringUtils.isEmpty(message))
+				log.info("No Message Fetched from Localization for EMAIL");;
+
+			Set<String> emailTo = new LinkedHashSet<String>();
+			emailTo.add(emailId);
+
+			emailSubjectForEmail = emailSubjectForEmail.replaceAll(PGRConstants.EMAIL_SUBJECT_ID_KEY,
+					serviceReq.getServiceRequestId());
+
+			emailRequestsTobeSent.add(EmailRequest.builder().requestInfo(requestInfo)
+					.email(new Email(emailTo, emailSubjectForEmail, message, true)).build());
+		} catch (Exception e) {
+			log.info("  Unable to sent email for service id   ", serviceReq.getServiceRequestId());
+			e.printStackTrace();
+		}
+
+		return emailRequestsTobeSent;
+
+	}
+
+
+	private List<SMSRequest> prepareSMSRequestForSR(Service serviceReq, ActionInfo actionInfo, RequestInfo requestInfo) {
+    	List<SMSRequest> smsRequestsTobeSent = new ArrayList<>();
+		try {
+
+			String phone = serviceReq.getPhone();
+			if (StringUtils.isEmpty(phone) || "null".equalsIgnoreCase(phone.trim())) {
+				log.info(" No phone number found for service Request " + serviceReq.getServiceRequestId());
+			}
+			String message = getMessageFromLocalization(serviceReq, actionInfo, requestInfo);
+			if (StringUtils.isEmpty(message))
+				log.info("SMS Not fetched from Localization");
+			smsRequestsTobeSent.add(SMSRequest.builder().mobileNumber(phone).message(message).build());
+
+			return smsRequestsTobeSent;
+		} catch (Exception e) {
+			if(actionInfo.getStatus()==null)
+			{
+				log.error(" Status is empty , so unable get the Receptors of Notification.");
+			}
+			e.printStackTrace();
+			return smsRequestsTobeSent;
+		}
+	}
+
+
+	private String getMessageFromLocalization(Service serviceReq, ActionInfo actionInfo, RequestInfo requestInfo) {
+		
+		return "Dear User, This is a Test Message. Thank you ! Govt of Odisha ";
+	}
+
+
+	/**
      * Prepares event to be registered in user-event service.
      * Currently, only the notifications addressed to CITIZEN are considered.
      *
@@ -698,21 +762,9 @@ public class PGRNotificationConsumer {
     }
 
     public boolean isNotificationEnabled(String status, String userType, String comment, String action) {
-        boolean isNotifEnabled = false;
-        List<String> notificationEnabledStatusList = Arrays.asList(notificationEnabledStatuses.split(","));
-        if (notificationEnabledStatusList.contains(status)) {
-            if ((status.equalsIgnoreCase(WorkFlowConfigs.STATUS_ESCALATED_LEVEL1_PENDING) || status.equalsIgnoreCase(WorkFlowConfigs.STATUS_ESCALATED_LEVEL2_PENDING)
-            		 || status.equalsIgnoreCase(WorkFlowConfigs.STATUS_ESCALATED_LEVEL3_PENDING) || status.equalsIgnoreCase(WorkFlowConfigs.STATUS_ESCALATED_LEVEL4_PENDING))
-            		&& action.equals(WorkFlowConfigs.ACTION_REOPEN) && isReopenNotifEnaled) {
-                isNotifEnabled = true;
-            }
-            if (status.equalsIgnoreCase(WorkFlowConfigs.STATUS_ASSIGNED) && action.equals(WorkFlowConfigs.ACTION_REASSIGN) && isReassignNotifEnaled) {
-                isNotifEnabled = true;
-            }
-            isNotifEnabled = true;
-        }
-        if ((null != comment && !comment.isEmpty()) && isCommentByEmpNotifEnaled && userType.equalsIgnoreCase("EMPLOYEE")) {
-            isNotifEnabled = true;
+        boolean isNotifEnabled = true;
+        if ((null != comment && !comment.isEmpty()) && !isCommentByEmpNotifEnaled && userType.equalsIgnoreCase("EMPLOYEE")) {
+            isNotifEnabled = false;
         }
         return isNotifEnabled;
     }

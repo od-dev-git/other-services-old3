@@ -132,7 +132,11 @@ public class Service   {
 	
 	ESCALATEDLEVEL3PENDING("escalatedlevel3pending"),
 	
-	ESCALATEDLEVEL4PENDING("escalatedlevel4pending")
+	ESCALATEDLEVEL4PENDING("escalatedlevel4pending"),
+	
+	STATUS_RECEIVED_L2("received_l2"),
+	
+	STATUS_RECEIVED_L3("received_l3")
 	
 	;
 
