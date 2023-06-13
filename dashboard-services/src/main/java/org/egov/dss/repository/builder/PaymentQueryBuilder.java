@@ -59,7 +59,8 @@ public class PaymentQueryBuilder {
 			+ "coalesce(sum(waterTax), 0) as waterTaxCollection,coalesce(sum(serviceTax), 0) as serviceTaxCollection,coalesce(sum(latrineTax), 0) as latrineTaxCollection, "
 			+ "coalesce(sum(solidWasteUserCharge), 0) as solidWasteUserChargeCollection,coalesce(sum(parkingTax), 0) as parkingTaxCollection, coalesce(sum(usageExcemption), 0) as usageExcemptionCollection, "
 			+ "coalesce(sum(lightTax), 0) as lightTaxCollection,coalesce(sum(ownershipExcemption), 0) as ownershipExcemptionCollection,coalesce(sum(penalty), 0) as penaltyCollection, "
-			+ "coalesce(sum(rebate), 0) as rebateCollection,coalesce(sum(interest), 0) as interestCollection "
+			+ "coalesce(sum(rebate), 0) as rebateCollection,coalesce(sum(interest), 0) as interestCollection, "
+			+ "coalesce(sum(advance), 0) as advanceCollection "
 			+ "from  "
 			+ "(select py.tenantid, "
 			+ "case when bad.taxheadcode='PT_HOLDING_TAX' then bad.adjustedamount end as holdingTax,case when bad.taxheadcode='PT_OTHER_DUES' then bad.adjustedamount end as otherDues, "
@@ -68,7 +69,8 @@ public class PaymentQueryBuilder {
 			+ "case when bad.taxheadcode='PT_SOLID_WASTE_USER_CHARGES' then bad.adjustedamount end as solidWasteUserCharge,case when bad.taxheadcode='PT_PARKING_TAX' then bad.adjustedamount end as parkingTax, "
 			+ "case when bad.taxheadcode='PT_USAGE_EXCEMPTION' then bad.adjustedamount end as usageExcemption,case when bad.taxheadcode='PT_LIGHT_TAX' then bad.adjustedamount end as lightTax, "
 			+ "case when bad.taxheadcode='PT_OWNERSHIP_EXCEMPTION' then bad.adjustedamount end as ownershipExcemption,case when bad.taxheadcode in ('PT_PENALTY', 'PT_TIME_PENALTY') then bad.adjustedamount end as penalty, "
-			+ "case when bad.taxheadcode='PT_TIME_REBATE' then bad.adjustedamount end as rebate, case when bad.taxheadcode='PT_INTEREST' then bad.adjustedamount end as interest "
+			+ "case when bad.taxheadcode='PT_TIME_REBATE' then bad.adjustedamount end as rebate, case when bad.taxheadcode='PT_INTEREST' then bad.adjustedamount end as interest, "
+			+ "case when bad.taxheadcode='PT_ADVANCE_CARRYFORWARD' then bad.amount end as advance "
 			+ "from egcl_payment py "
 			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id  "
 			+ "inner join egcl_billdetial bdtl on bdtl.billid = pyd.billid  "
@@ -113,6 +115,8 @@ public class PaymentQueryBuilder {
 	
 	public static final String TENANT_WISE_ASSESSED_PROPERTIES = " select tenantid as tenantid, coalesce(count(distinct propertyid),0) as totalamt from eg_pt_asmt_assessment ";
 	
+	public static final String TENANT_WISE_PROPERTIES_PAID = " select py.tenantid as tenantid , count(distinct bill.consumercode) as totalamt from egcl_payment py inner join egcl_paymentdetail pyd on pyd.paymentid = py.id inner join egcl_bill bill on bill.id = pyd.billid ";
+	
 	public static final String COLLECTION_CHANNEL_QUERY = " select py.paymentmode as name, COALESCE(sum(py.totalamountpaid),0) as value from egcl_payment py "
 			+ " inner join egcl_paymentdetail pyd on pyd.paymentid = py.id ";
 	
@@ -140,7 +144,7 @@ public class PaymentQueryBuilder {
 	        + "case when bad.taxheadcode in ('WS_SECURITY_CHARGE','SW_SECURITY_CHARGE') then bad.adjustedamount end as securityCharge, "
 	        + "case when bad.taxheadcode in ('WS_OWNERSHIP_CHANGE_FEE') then bad.adjustedamount end as ownershipChange, " 
 	        + "case when bad.taxheadcode in ('WS_LABOUR_FEE','WS_LABOUR_FEE_INSTALLMENT') then bad.adjustedamount end as labourfee, "
-	        + "case when bad.taxheadcode in ('WS_ADVANCE_CARRYFORWARD','SW_ADVANCE_CARRYFORWARD') then bad.adjustedamount end as advance "
+	        + "case when bad.taxheadcode in ('WS_ADVANCE_CARRYFORWARD','SW_ADVANCE_CARRYFORWARD') then bad.amount end as advance "
 			+ "from egcl_payment py "
 			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
 			+ "inner join egcl_billdetial bdtl on bdtl.billid = pyd.billid "
@@ -170,7 +174,9 @@ public class PaymentQueryBuilder {
 			+ "sum(py.totalamountpaid) as totalCollection from egcl_payment py "
 			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id ";
 	
-	public static final String TOTAL_DEMAND_QUERY = " select coalesce(sum(amount), 0) as amount from state.eg_dss_demand ";
+	public static final String CURRENT_DEMAND_QUERY = " select coalesce(sum(amount), 0) as amount from state.eg_dss_demand ";
+	
+	public static final String ARREAR_DEMAND_QUERY = " select coalesce(sum(amount), 0) - coalesce(sum(collectionamount), 0) as amount from state.eg_dss_demand ";
 	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
@@ -437,8 +443,14 @@ public class PaymentQueryBuilder {
 		 return selectQuery.toString();
 	}
 	
-	public static String getTotalDemand(DemandSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
-		StringBuilder selectQuery = new StringBuilder(TOTAL_DEMAND_QUERY);
+	public static String getCurrentDemand(DemandSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(CURRENT_DEMAND_QUERY);
+		addWhereClauseForDemand(selectQuery, preparedStatementValues, criteria);
+		return selectQuery.toString();
+	}
+	
+	public static String getArrearDemand(DemandSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(ARREAR_DEMAND_QUERY);
 		addWhereClauseForDemand(selectQuery, preparedStatementValues, criteria);
 		return selectQuery.toString();
 	}
@@ -567,11 +579,11 @@ public class PaymentQueryBuilder {
 			return selectQuery.toString();
 		}
 	    
-	    public String getTenantWiseAssedProperties(PaymentSearchCriteria paymentSearchCriteria,
+	    public String getTenantPropertiesPaid(PaymentSearchCriteria paymentSearchCriteria,
 				Map<String, Object> preparedStatementValues) {
-			StringBuilder selectQuery = new StringBuilder(TENANT_WISE_ASSESSED_PROPERTIES);
-			addWhereClauseForProperties(selectQuery, preparedStatementValues, paymentSearchCriteria);
-			selectQuery.append(" group by tenantid  ");
+			StringBuilder selectQuery = new StringBuilder(TENANT_WISE_PROPERTIES_PAID);
+			addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+			selectQuery.append(" group by py.tenantid  ");
 			return selectQuery.toString();
 		}
 	    
