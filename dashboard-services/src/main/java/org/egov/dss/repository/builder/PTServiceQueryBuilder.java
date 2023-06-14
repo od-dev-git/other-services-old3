@@ -16,15 +16,14 @@ public class PTServiceQueryBuilder {
     public static final String TOTAL_APPLICATIONS_SQL = " select count(id) from eg_pt_property epaa ";
 	public static final String ACTIVE_ULBS_SQL = " select count(distinct tenantid) from eg_pt_property epaa  ";
 	public static final String TOTAL_PROPERTIES_NEW_SQL = " select count(*) noOfNewProperties  from eg_pt_property epaa ";
-	public static final String TOTAL_PROPERTIES_PAID_SQL = " select py.tenantid as tenantid , count(distinct bill.consumercode) as totalamt from egcl_payment py inner join egcl_paymentdetail pyd on pyd.paymentid = py.id inner join egcl_bill bill on bill.id = pyd.billid  ";
+	public static final String TOTAL_PROPERTIES_PAID_SQL = " select count(distinct bill.consumercode) as totalamt from egcl_payment py inner join egcl_paymentdetail pyd on pyd.paymentid = py.id inner join egcl_bill bill on bill.id = pyd.billid  ";
 	public static final String TOTAL_PROPERTY_ID_SQL = " select count(id) from eg_pt_property epaa";
 	public static final String SELECT_SQL = "  select ";
 	public static final String TENANTID_SQL = " tenantid ";
 	public static final String TOTAL_PROPERTY_ASSESSMENTS_SQL = SELECT_SQL + " count(distinct propertyid) as totalAsmt from eg_pt_asmt_assessment epaa ";
 	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_SQL = SELECT_SQL + " count(*) as newAsmt  from eg_pt_property epaa ";
-	public static final String CUMULATIVE_PROPERTIES_ASSESSED_SQL = " select to_char(monthYear, 'Mon-YYYY') as name, sum(assessedProperties) over (order by monthYear asc rows between unbounded preceding and current row) as value from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(createdtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(createdtime/1000))),'DD-MM-YYYY') monthYear ,count(distinct propertyid) assessedProperties from eg_pt_asmt_assessment epaa ";
-	public static final String PROPERTIES_BY_USAGETYPE_SQL = " select usagecategory as name , count(distinct epaa.propertyid) as value from eg_pt_property ep "
-			                                                 + " inner join eg_pt_asmt_assessment epaa on epaa.propertyid  = ep.propertyid ";
+	public static final String CUMULATIVE_PROPERTIES_ASSESSED_SQL = " select to_char(monthYear, 'Mon-YYYY') as name, sum(assessedProperties) over (order by monthYear asc rows between unbounded preceding and current row) as value from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear ,count(distinct propertyid) assessedProperties from eg_pt_asmt_assessment epaa ";
+	public static final String PROPERTIES_BY_USAGETYPE_SQL = " select usagecategory as name , count(distinct epaa.propertyid) as value from eg_pt_property epaa ";			                                                 
 	public static final String APPLICATIONS_TENANT_WISE_SQL = " select tenantid as name , count(*) as value from eg_pt_property epaa";
 	public static final String TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + TENANTID_SQL +" as name , count(distinct propertyid) as value from eg_pt_asmt_assessment epaa ";
 	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + TENANTID_SQL + " as name ,  count(distinct propertyid) as value  from eg_pt_property epaa ";
@@ -167,7 +166,7 @@ public class PTServiceQueryBuilder {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTIES_PAID_SQL);
 
 		addClauseIfRequired(preparedStatementValues, selectQuery);
-		selectQuery.append(" py.paymentstatus != 'CANCELLED' ");
+		selectQuery.append(" py.paymentstatus not in ('CANCELLED','DISHONOURED') ");
 		preparedStatementValues.put("paymentstatus", "CANCELLED");
 
 		if (propertySearchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(propertySearchCriteria.getTenantIds())) {
@@ -232,9 +231,9 @@ public class PTServiceQueryBuilder {
 	public String getCumulativePropertiesAssessedQuery(PropertySerarchCriteria propertySearchCriteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(CUMULATIVE_PROPERTIES_ASSESSED_SQL);
-		addWhereClauseWithLastModifiedTime(selectQuery, preparedStatementValues, propertySearchCriteria);
-		addGroupByClause(selectQuery,"to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(createdtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(createdtime/1000))),'DD-MM-YYYY')");
-		addOrderByClause(selectQuery,"to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(createdtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(createdtime/1000))),'DD-MM-YYYY') ASC) asmt ");
+		addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,false);
+		addGroupByClause(selectQuery,"to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY')");
+		addOrderByClause(selectQuery,"to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') ASC) asmt ");
 		return selectQuery.toString();
 	}
 	
@@ -293,7 +292,6 @@ public class PTServiceQueryBuilder {
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(APPLICATIONS_TENANT_WISE_SQL);
 		addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria ,true);
-		selectQuery.append(" and status='ACTIVE' ");
 		addGroupByClause(selectQuery," tenantid ");
 		addOrderByClause(selectQuery," count(*) ASC ");
 		return selectQuery.toString();

@@ -181,8 +181,14 @@ public class WaterServiceQueryBuilder {
 		
 		if (searchCriteria.getApplicationType() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" conn.applicationtype = :applicationtype");
+			selectQuery.append(" conn.applicationtype in ( :applicationtype) ");
 			preparedStatementValues.put("applicationtype", searchCriteria.getApplicationType());
+		}
+		
+		if (searchCriteria.getApplicationStatusExclude() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" conn.applicationstatus not in ( :applicationStatusNotIn) ");
+			preparedStatementValues.put("applicationStatusNotIn", searchCriteria.getApplicationStatusExclude());
 		}
 		
 		if (searchCriteria.getExcludedTenantId() != null) {
@@ -223,7 +229,7 @@ public class WaterServiceQueryBuilder {
 		
 		selectQuery.append(" and conn.lastmodifiedtime <= :todate");
 		preparedStatementValues.put("todate", waterSearchCriteria.getToDate());
-		selectQuery.append(" and conn.applicationstatus not in ('CONNECTION_ACTIVATED', 'REJECTED', 'CONNECTION_DISCONNECTED','CONNECTION_CLOSED')  ");
+		selectQuery.append(" and conn.applicationstatus not in ('CONNECTION_ACTIVATED', 'REJECTED', 'CONNECTION_DISCONNECTED','CONNECTION_CLOSED','INITIATED')  ");
 		selectQuery.append( " ) tmp ");
 		addGroupByClause(selectQuery," tenantid ");
 		return selectQuery.toString();
