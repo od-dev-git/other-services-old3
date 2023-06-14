@@ -336,10 +336,15 @@ public class PGRRequestValidator {
 		Map<String, List<String>> roleActionMap = WorkFlowConfigs.getRoleActionMap();
 		List<String> roles = serviceRequest.getRequestInfo().getUserInfo().getRoles().stream()
 				.map(Role::getCode).collect(Collectors.toList());
+		
+		log.info("Roles : "+roles);;
 		List<String> actions = null;
 		List<String> roleCodes = serviceRequest.getRequestInfo().getUserInfo()
 				.getRoles().stream().map(Role::getCode).collect(Collectors.toList());
+		log.info("Role Codes : "+roleCodes);
 		String precedentRole = pgrUtils.getPrecedentRole(roleCodes);
+		
+		log.info("Precedent Role : "+precedentRole);
 		
 //		if(PGRConstants.ROLE_EMPLOYEE.equalsIgnoreCase(precedentRole)) {
 //			if(roleCodes.contains(PGRConstants.ROLE_ESCALATION_OFFICER1))
@@ -356,6 +361,8 @@ public class PGRRequestValidator {
 		
 		actions = roleActionMap.get(pgrUtils.getPrecedentRole(serviceRequest.getRequestInfo().getUserInfo()
 				.getRoles().stream().map(Role::getCode).collect(Collectors.toList())));
+		
+		log.info("Actions Applicable : "+actions);
 		
 		final List<String> actionsAllowedForTheRole = actions;
 		String role = pgrUtils.getPrecedentRole(roles);
@@ -392,6 +399,7 @@ public class PGRRequestValidator {
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
 		
+		log.info("Actions Applicable before If condition : "+actions);
 		if (!CollectionUtils.isEmpty(actions)) {
 			List<ActionInfo> infos = serviceRequest.getActionInfo();
 			if (!CollectionUtils.isEmpty(infos)) {
@@ -408,6 +416,7 @@ public class PGRRequestValidator {
 				});
 			}
 		} else {
+			log.info("Exception thrown is else");
 			errorMap.put(ErrorConstants.INVALID_ROLE_CODE, ErrorConstants.INVALID_ROLE_MSG
 					+ serviceRequest.getRequestInfo().getUserInfo().getRoles().get(0).getName().toUpperCase());
 		}
