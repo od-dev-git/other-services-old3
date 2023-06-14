@@ -47,5 +47,7 @@ public class WaterSearchCriteria {
     
     private Set<String> applicationType;
     
+    private Set<String> applicationStatusExclude;
+    
 
 }

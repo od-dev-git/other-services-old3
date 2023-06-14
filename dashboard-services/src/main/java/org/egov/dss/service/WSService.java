@@ -39,10 +39,13 @@ public class WSService {
 	
 	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
 		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		Integer slaAchievedAppCount = Integer.valueOf(1);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
-		Integer totalApplication =  (Integer) wsRepository.getWsTotalApplicationsCount(criteria);
-		Integer slaAchievedAppCount = (Integer) wsRepository.getSlaAchievedAppCount(criteria);
+		criteria.setApplicationType(Sets.newHashSet(DashboardConstants.WS_NEW_CONNECTIONS));
+		criteria.setApplicationStatusExclude(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
+		Integer totalApplication =  (Integer) wsTotalApplications(payloadDetails).get(0).getHeaderValue();
+		slaAchievedAppCount = (Integer) wsRepository.getSlaAchievedAppCount(criteria);
 		return Arrays.asList(Data.builder()
 				.headerValue((slaAchievedAppCount.doubleValue() / totalApplication.doubleValue()) * 100).headerSymbol("percentage").build());
 	}
@@ -235,6 +238,7 @@ public class WSService {
 		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setApplicationType(Sets.newHashSet(DashboardConstants.WS_NEW_CONNECTIONS));
+		criteria.setApplicationStatusExclude(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		Integer wsTotalApplications =  (Integer) wsRepository.getWsTotalApplicationsCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(wsTotalApplications).build());
 	}

@@ -160,8 +160,13 @@ public class DashboardService {
 				responseList.add(Data.builder().plots(plots).headerValue(0).build());
 				responseData.setData(responseList);
 			} else {
+				if(DashboardConstants.OBPS_PERFORM_VISULAIZATIONCODE.contains(responseData.getVisualizationCode())) {
+					responseData.getData().stream().forEach(data -> data.setHeaderSymbol("number"));
+					responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
+				}else {
 				responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
 				responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
+				}
 			}
 		} else {
 			if(!(chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString()) || chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {

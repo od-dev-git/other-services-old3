@@ -56,11 +56,12 @@ public class PTService {
 
 	public List<Data> propertiesAssessed(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
-		Integer newAssessments = (Integer) totalProprties(payloadDetails).get(0).getHeaderValue();
+		//Integer newAssessments = (Integer) totalProprties(payloadDetails).get(0).getHeaderValue();
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setIsPropertyAssessed(Boolean.TRUE);
-		Integer reassessments = (Integer) ptRepository.getAssessedPropertiesCount(criteria);
-		Integer assessedPropertiesCount = Integer.sum(newAssessments, reassessments);
+		criteria.setStatus(DashboardConstants.STATUS_ACTIVE);
+		Integer assessedPropertiesCount = (Integer) ptRepository.getAssessedPropertiesCount(criteria);
+		//Integer totalAssessed = Integer.sum(newAssessments, reassessments);
 		return Arrays.asList(Data.builder().headerValue(assessedPropertiesCount).build());
 	}
 
@@ -88,8 +89,7 @@ public class PTService {
 	public List<Data> totalnoOfProperties(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		//criteria.setFromDate(null);
-		criteria.setToDate(null);
+		criteria.setFromDate(null);
 		Integer totalPropertiesCount = ptRepository.getTotalPropertiesCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalPropertiesCount).build());
 	}
@@ -141,7 +141,7 @@ public class PTService {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(DashboardConstants.STATUS_ACTIVE);
-		criteria.setToDate(null);
+		criteria.setFromDate(null);
 		List<Chart> propertiesByUsageType = ptRepository.getpropertiesByUsageType(criteria);
 
 		List<Plot> plots = new ArrayList();
