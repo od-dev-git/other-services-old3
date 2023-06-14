@@ -213,6 +213,20 @@ public class RevenueService {
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
 		HashMap<String, BigDecimal> tenantWiseTarget = paymentRepository
 				.getTenantWiseTargetCollection(targerSearchCriteria);
+		if (DashboardConstants.TIME_INTERVAL.contains(payloadDetails.getTimeinterval())) {
+			for (Map.Entry<String, BigDecimal> tenantTarget : tenantWiseTarget.entrySet()) {
+				BigDecimal targetCollection = null;
+				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.QUARTER))
+					targetCollection = tenantTarget.getValue().divide(new BigDecimal(4), 2, RoundingMode.HALF_UP);
+				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.MONTH))
+					targetCollection = tenantTarget.getValue().divide(new BigDecimal(12), 2, RoundingMode.HALF_UP);
+				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.WEEK))
+					targetCollection = tenantTarget.getValue().divide(new BigDecimal(48), 2, RoundingMode.HALF_UP);
+				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.DAY))
+					targetCollection = tenantTarget.getValue().divide(new BigDecimal(365), 2, RoundingMode.HALF_UP);
+				tenantWiseTarget.put(tenantTarget.getKey(), targetCollection);
+			}
+		}
 
 		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
 
@@ -255,6 +269,21 @@ public class RevenueService {
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
 		HashMap<String, BigDecimal> tenantWiseTarget = paymentRepository
 				.getTenantWiseTargetCollection(targerSearchCriteria);
+		
+		if (DashboardConstants.TIME_INTERVAL.contains(payloadDetails.getTimeinterval())) {
+			for (Map.Entry<String, BigDecimal> tenantTarget : tenantWiseTarget.entrySet()) {
+				BigDecimal targetCollection = null;
+				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.QUARTER))
+					targetCollection = tenantTarget.getValue().divide(new BigDecimal(4), 2, RoundingMode.HALF_UP);
+				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.MONTH))
+					targetCollection = tenantTarget.getValue().divide(new BigDecimal(12), 2, RoundingMode.HALF_UP);
+				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.WEEK))
+					targetCollection = tenantTarget.getValue().divide(new BigDecimal(48), 2, RoundingMode.HALF_UP);
+				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.DAY))
+					targetCollection = tenantTarget.getValue().divide(new BigDecimal(365), 2, RoundingMode.HALF_UP);
+				tenantWiseTarget.put(tenantTarget.getKey(), targetCollection);
+			}
+		}
 
 		HashMap<String, BigDecimal> tenantWisePercentage = new HashMap<>();
 
@@ -1228,7 +1257,7 @@ public class RevenueService {
 		HashMap<String, BigDecimal> tenantWiseTransactions = paymentRepository
 				.getTenantWiseTransaction(paymentSearchCriteria);
 		HashMap<String, BigDecimal> tenantWiseConnections = paymentRepository
-				.getTenantWiseWSConnections(paymentSearchCriteria);
+				.getTenantPropertiesPaid(paymentSearchCriteria);
 		
 		List<Data> response = new ArrayList<>();
 		int serialNumber = 1;
