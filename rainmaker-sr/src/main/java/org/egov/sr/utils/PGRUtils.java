@@ -516,12 +516,7 @@ public class PGRUtils {
 	 * the method will return null
 	 */
 	public String getPrecedentRole(List<String> roles) {
-		if(roles.contains(PGRConstants.ROLE_CITIZEN)) {
-			return PGRConstants.ROLE_CITIZEN;
-		}
-		if(roles.contains(PGRConstants.ROLE_SYSTEM)) {
-			return PGRConstants.ROLE_SYSTEM;
-		}
+		
 		for (Entry<Integer, String> entry : PGRUtils.getEmployeeRolesPrecedenceMap().entrySet()) {
 			String currentValue = entry.getValue();
 			if (roles.contains(currentValue))
