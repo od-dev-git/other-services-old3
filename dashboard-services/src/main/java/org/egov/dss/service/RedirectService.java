@@ -437,6 +437,14 @@ public class RedirectService {
         	return tlService.totalRenewalApplications(requestInfoWrapper.getPayloadDetails());
         }
         
+        if(Constants.VisualizationCodes.SERVICE_TL_TOTAL_CORRECTION_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.totalCorrectionApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.SERVICE_TL_TOTAL_TEMPORARY_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+        	return tlService.totalTemporaryApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
         if(Constants.VisualizationCodes.SERVICE_TL_LICENSE_ISSUED.equalsIgnoreCase(visualizationCode)) {
         	return tlService.licenseIssued(requestInfoWrapper.getPayloadDetails());
         }
