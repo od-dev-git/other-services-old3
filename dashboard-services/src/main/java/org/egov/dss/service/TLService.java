@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
@@ -30,10 +31,14 @@ public class TLService {
 	@Autowired
 	private TLRepository tlRepository;
 	
+	@Autowired
+	ConfigurationLoader config;
+	
 	public List<Data> totalApplications(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 	    criteria.setIsApplicationDate(Boolean.TRUE);
+	    criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		Integer totalApplication =  (Integer) tlRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
@@ -64,6 +69,7 @@ public class TLService {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 	    criteria.setApplicationType(DashboardConstants.APPLICATION_STATUS_NEW);
+	    criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 	    criteria.setIsApplicationDate(Boolean.TRUE);
 		Integer totalApplication =  (Integer) tlRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
@@ -73,6 +79,27 @@ public class TLService {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 	    criteria.setApplicationType(DashboardConstants.APPLICATION_STATUS_RENEWAL);
+	    criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
+	    criteria.setIsApplicationDate(Boolean.TRUE);
+		Integer totalApplication =  (Integer) tlRepository.getTotalApplications(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+	
+	public List<Data> totalCorrectionApplications(PayloadDetails payloadDetails) {
+		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
+	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+	    criteria.setApplicationType(DashboardConstants.APPLICATION_STATUS_CORRECTION);
+	    criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
+	    criteria.setIsApplicationDate(Boolean.TRUE);
+		Integer totalApplication =  (Integer) tlRepository.getTotalApplications(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+	
+	public List<Data> totalTemporaryApplications(PayloadDetails payloadDetails) {
+		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
+	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+	    criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
+	    criteria.setLicenseType(DashboardConstants.TEMPORARY);
 	    criteria.setIsApplicationDate(Boolean.TRUE);
 		Integer totalApplication =  (Integer) tlRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
@@ -81,7 +108,9 @@ public class TLService {
 	public List<Data> licenseIssued(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+	    criteria.setIsApplicationDate(Boolean.TRUE);
 	    criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+	    criteria.setApplicationTypeNotIn(Sets.newHashSet(DashboardConstants.APPLICATION_STATUS_CORRECTION));
 	    Integer totalApplication =  (Integer) tlRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
@@ -96,7 +125,9 @@ public class TLService {
 	public List<Data> tlSlaComplience(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        criteria.setIsApplicationDate(Boolean.TRUE);
 	    criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+	    criteria.setSlaThreshold(config.getSlaTlThreshold());
 	    Integer slaAchievedApplication =  (Integer) tlRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(slaAchievedApplication).build());
 	}
@@ -104,7 +135,9 @@ public class TLService {
 	public List<Data> cumulativeLicenseIssued(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsApplicationDate(Boolean.TRUE);
 		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+		criteria.setApplicationTypeNotIn(Sets.newHashSet(DashboardConstants.APPLICATION_STATUS_CORRECTION));
 		List<Chart> cumulativeLicenseIssued = tlRepository.getCumulativeLicenseIssued(criteria);
 		List<Plot> plots = new ArrayList();
 		extractDataForChart(cumulativeLicenseIssued, plots);
@@ -120,6 +153,7 @@ public class TLService {
 	public List<Data> topPerformingUlbsCompletionRate(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		HashMap<String, Long> totalApplication = tlRepository.getTenantWiseTotalApplication(criteria);
 		HashMap<String, Long> licenseIssued = tlRepository.getTenantWiseLicenseIssued(criteria);
 		List<Chart> percentList = mapTenantsForPerformanceRate(licenseIssued, totalApplication);
@@ -173,6 +207,8 @@ public class TLService {
 	public List<Data> tlApplicationByStatus(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsApplicationDate(Boolean.TRUE);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		List<Chart> propertiesByUsageType = tlRepository.getLicenseByStatus(criteria);
         List<Plot> plots = new ArrayList();
 		extractDataForChart(propertiesByUsageType, plots);	
@@ -186,6 +222,8 @@ public class TLService {
 	public List<Data> tlStatusByBoundary(PayloadDetails payloadDetails) {
 		TLSearchCriteria criteria = getTlSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsApplicationDate(Boolean.TRUE);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		List<HashMap<String, Object>> tlStatusByBoundary = tlRepository.getTlStatusByBoundary(criteria);
 
 		List<Data> response = new ArrayList();
@@ -201,7 +239,7 @@ public class TLService {
 
 			row.add(Plot.builder().name("Approved").value(new BigDecimal(String.valueOf(tlStatus.get("approvedcnt"))))
 					.symbol("number").build());
-			row.add(Plot.builder().name("Initiated").value(new BigDecimal(String.valueOf(tlStatus.get("initiatedcnt"))))
+			row.add(Plot.builder().name("Inactive").value(new BigDecimal(String.valueOf(tlStatus.get("inactivecnt"))))
 					.symbol("number").build());
 			row.add(Plot.builder().name("Rejected").value(new BigDecimal(String.valueOf(tlStatus.get("rejectedcnt"))))
 					.symbol("number").build());
@@ -234,7 +272,7 @@ public class TLService {
 			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
 			row.add(Plot.builder().label(payloadDetails.getTenantid()).name("ULBs").symbol("text").build());
             row.add(Plot.builder().name("Approved").value(BigDecimal.ZERO).symbol("number").build());
-			row.add(Plot.builder().name("Initiated").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Inactive").value(BigDecimal.ZERO).symbol("number").build());
 			row.add(Plot.builder().name("Rejected").value(BigDecimal.ZERO).symbol("number").build());
 			row.add(Plot.builder().name("Pending Approval").value(BigDecimal.ZERO).symbol("number").build());
 			row.add(Plot.builder().name("Field Inspection").value(BigDecimal.ZERO).symbol("number").build());

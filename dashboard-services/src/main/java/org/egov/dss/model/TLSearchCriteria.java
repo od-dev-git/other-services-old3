@@ -43,5 +43,11 @@ public class TLSearchCriteria {
 	    
 	    private Boolean isApplicationDate;
 	    
+	    private Set<String> statusNotIn;
+	    
+	    private Set<String> applicationTypeNotIn;
+	    
+	    private String licenseType;
+	    
 	    
 }

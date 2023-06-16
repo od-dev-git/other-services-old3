@@ -165,6 +165,8 @@ public class Constants {
 		final static String SERVICE_TL_TOTAL_APPLICATION = "totalApplication";
 		final static String SERVICE_TL_TOTAL_NEW_APPLICATION = "tlTotalNewApplication";
 		final static String SERVICE_TL_TOTAL_RENEWAL_APPLICATION = "tlTotalRenewalApplication";
+		final static String SERVICE_TL_TOTAL_CORRECTION_APPLICATION = "tlTotalCorrectionApplication";
+		final static String SERVICE_TL_TOTAL_TEMPORARY_APPLICATION = "tlTotalTemporaryApplication";
 		final static String SERVICE_TL_LICENSE_ISSUED = "licenseIssued";
 		final static String SERVICE_TL_ACTIVE_ULBS = "activeUlbs";
 		final static String SERVICE_TL_SLA_ACHIEVED = "tlSlaAchieved";
