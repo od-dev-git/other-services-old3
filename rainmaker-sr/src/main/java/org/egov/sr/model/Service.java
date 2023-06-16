@@ -247,5 +247,8 @@ public class Service   {
   @JsonProperty("impact")
   private String impact;
   
+  @JsonProperty("applicationno")
+  private String applicationNo;
+  
   }
 
