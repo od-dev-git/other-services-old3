@@ -17,6 +17,8 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.google.common.collect.Sets;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -78,7 +80,7 @@ public class TLRepository {
 	
 	public HashMap<String, Long> getTenantWiseLicenseIssued(TLSearchCriteria tlSearchCriteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
-		tlSearchCriteria.setStatus(DashboardConstants.STATUS_APPROVED);
+		tlSearchCriteria.setStatus(DashboardConstants.STATUS_APPROVED);		
         String query = tlQueryBuilder.getTenantWiseTotalApplication(tlSearchCriteria, preparedStatementValues);
         log.info("TL Tenant Wise License Issued : "+query);
         HashMap<String, Long> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ULBPerformanceRateRowMapper());

@@ -190,6 +190,9 @@ public class RevenueService {
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			criteria.setFromDate(dashboardUtils.getStartDateGmt(String.valueOf(payloadDetails.getTimeinterval())));
+		}
 		List<Chart> cumulativeCollection = paymentRepository.getCumulativeCollection(criteria);
 		List<Plot> plots = new ArrayList<Plot>();
 		extractDataForChart(cumulativeCollection, plots);
@@ -203,26 +206,29 @@ public class RevenueService {
 	public List<Data> topPerformingUlbs(PayloadDetails payloadDetails) {
 
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		String tempTimeInterval = payloadDetails.getTimeinterval();
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 
 		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
 				.getTenantWiseCollection(paymentSearchCriteria);
-
+		if(Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			payloadDetails.setTimeinterval(dashboardUtils.getCurrentFinancialYear());
+		}
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
 		HashMap<String, BigDecimal> tenantWiseTarget = paymentRepository
 				.getTenantWiseTargetCollection(targerSearchCriteria);
-		if (DashboardConstants.TIME_INTERVAL.contains(payloadDetails.getTimeinterval())) {
+		if (DashboardConstants.TIME_INTERVAL.contains(tempTimeInterval)) {
 			for (Map.Entry<String, BigDecimal> tenantTarget : tenantWiseTarget.entrySet()) {
-				BigDecimal targetCollection = null;
-				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.QUARTER))
+				BigDecimal targetCollection = BigDecimal.ZERO;
+				if (tempTimeInterval.equalsIgnoreCase(DashboardConstants.QUARTER))
 					targetCollection = tenantTarget.getValue().divide(new BigDecimal(4), 2, RoundingMode.HALF_UP);
-				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.MONTH))
+				if (tempTimeInterval.equalsIgnoreCase(DashboardConstants.MONTH))
 					targetCollection = tenantTarget.getValue().divide(new BigDecimal(12), 2, RoundingMode.HALF_UP);
-				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.WEEK))
+				if (tempTimeInterval.equalsIgnoreCase(DashboardConstants.WEEK))
 					targetCollection = tenantTarget.getValue().divide(new BigDecimal(48), 2, RoundingMode.HALF_UP);
-				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.DAY))
+				if (tempTimeInterval.equalsIgnoreCase(DashboardConstants.DAY))
 					targetCollection = tenantTarget.getValue().divide(new BigDecimal(365), 2, RoundingMode.HALF_UP);
 				tenantWiseTarget.put(tenantTarget.getKey(), targetCollection);
 			}
@@ -259,27 +265,32 @@ public class RevenueService {
 	public List<Data> bottomPerformingUlbs(PayloadDetails payloadDetails) {
 		
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		String tempTimeInterval = payloadDetails.getTimeinterval();
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 
 		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
 				.getTenantWiseCollection(paymentSearchCriteria);
+		
+		if(Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			payloadDetails.setTimeinterval(dashboardUtils.getCurrentFinancialYear());
+		}
 
 		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
 		HashMap<String, BigDecimal> tenantWiseTarget = paymentRepository
 				.getTenantWiseTargetCollection(targerSearchCriteria);
 		
-		if (DashboardConstants.TIME_INTERVAL.contains(payloadDetails.getTimeinterval())) {
+		if (DashboardConstants.TIME_INTERVAL.contains(tempTimeInterval)) {
 			for (Map.Entry<String, BigDecimal> tenantTarget : tenantWiseTarget.entrySet()) {
-				BigDecimal targetCollection = null;
-				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.QUARTER))
+				BigDecimal targetCollection = BigDecimal.ZERO;
+				if (tempTimeInterval.equalsIgnoreCase(DashboardConstants.QUARTER))
 					targetCollection = tenantTarget.getValue().divide(new BigDecimal(4), 2, RoundingMode.HALF_UP);
-				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.MONTH))
+				if (tempTimeInterval.equalsIgnoreCase(DashboardConstants.MONTH))
 					targetCollection = tenantTarget.getValue().divide(new BigDecimal(12), 2, RoundingMode.HALF_UP);
-				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.WEEK))
+				if (tempTimeInterval.equalsIgnoreCase(DashboardConstants.WEEK))
 					targetCollection = tenantTarget.getValue().divide(new BigDecimal(48), 2, RoundingMode.HALF_UP);
-				if (payloadDetails.getTimeinterval().equalsIgnoreCase(DashboardConstants.DAY))
+				if (tempTimeInterval.equalsIgnoreCase(DashboardConstants.DAY))
 					targetCollection = tenantTarget.getValue().divide(new BigDecimal(365), 2, RoundingMode.HALF_UP);
 				tenantWiseTarget.put(tenantTarget.getKey(), targetCollection);
 			}

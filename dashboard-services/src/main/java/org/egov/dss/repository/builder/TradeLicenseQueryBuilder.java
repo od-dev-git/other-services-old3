@@ -29,7 +29,7 @@ public class TradeLicenseQueryBuilder {
 			+ "coalesce(sum(docVerificationPending),0) as docVerificationPendingCnt, "
 			+ "coalesce(sum(expired),0) as expiredCnt, "
 			+ "coalesce(sum(fieldInspectionPending),0) as fieldInspectionPendingCnt, "
-			+ "coalesce(sum(initiated),0) as initiatedCnt, "
+			+ "coalesce(sum(inactive),0) as inactiveCnt, "
 			+ "coalesce(sum(approvalPending),0) as approvalPendingCnt, "
 			+ "coalesce(sum(PaymentPending),0) as PaymentPendingCnt, "
 			+ "coalesce(sum(rejected),0) as rejectedCnt "
@@ -41,7 +41,7 @@ public class TradeLicenseQueryBuilder {
 			+ "case when status='DOCVERIFICATION' then 1 end as docVerificationPending, "
 			+ "case when status='EXPIRED' then 1 end as expired, "
 			+ "case when status='FIELDINSPECTION' then 1 end as fieldInspectionPending, "
-			+ "case when status='INITIATED' then 1 end as initiated, "
+			+ "case when status='INACTIVE' then 1 end as inactive, "
 			+ "case when status='PENDINGAPPROVAL' then 1 end as approvalPending, "
 			+ "case when status='PENDINGPAYMENT' then 1 end as PaymentPending, "
 			+ "case when status='REJECTED' then 1 end as rejected "
@@ -147,6 +147,24 @@ public class TradeLicenseQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" ett.businessservice in (:businessService)");
 			preparedStatementValues.put("businessService", searchCriteria.getBusinessServices());
+		}
+		
+		if (searchCriteria.getStatusNotIn() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ett.status not in (:statusNotIn)");
+			preparedStatementValues.put("statusNotIn", searchCriteria.getStatusNotIn());
+		}
+		
+		if (searchCriteria.getApplicationTypeNotIn() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ett.applicationtype not in (:applicationTypeNotIn) ");
+			preparedStatementValues.put("applicationTypeNotIn", searchCriteria.getApplicationTypeNotIn());
+		}
+		
+		if (searchCriteria.getLicenseType() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ett.licensetype = :licenseType ");
+			preparedStatementValues.put("licenseType", searchCriteria.getLicenseType());
 		}
 
 		if (searchCriteria.getExcludedTenantId() != null) {
