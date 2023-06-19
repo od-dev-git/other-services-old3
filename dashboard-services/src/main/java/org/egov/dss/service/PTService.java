@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.Chart;
 import org.egov.dss.model.CommonSearchCriteria;
@@ -37,6 +38,9 @@ public class PTService {
 	
 	@Autowired
 	private PTRepository ptRepository;
+	
+	@Autowired
+	private ConfigurationLoader config;
 
 	public List<Data> totalProprties(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
@@ -324,11 +328,11 @@ public class PTService {
 	public Integer slaAchievedCount(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		if(ptRepository.getSlaAchievedAppCount(criteria) == null) {
-			return 0;
-		}
-		Integer slaAchievedAppCount = (Integer) ptRepository.getSlaAchievedAppCount(criteria);
-		return slaAchievedAppCount;
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.PT_INWORKFLOW_STATUS));
+		criteria.setSlaThreshold(config.getSlaPtThreshold());
+		Integer slaAchievedAppCount = (Integer) ptRepository.getTotalProperties(criteria);
+		//Integer slaAchievedAppCount = (Integer) ptRepository.getSlaAchievedAppCount(criteria);
+		return slaAchievedAppCount;		
 	}
     
 	public PropertySerarchCriteria getPropertySearchCriteria(PayloadDetails payloadDetails) {
