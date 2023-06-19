@@ -707,7 +707,7 @@ public class BPAService {
 			plots.add(Plot.builder().name("Application Received").value(BigDecimal.ZERO).symbol("number")
 					.build());
 
-			plots.add(Plot.builder().name("Application Received").value(BigDecimal.ZERO).symbol("number").build());
+			plots.add(Plot.builder().name("Application Approved").value(BigDecimal.ZERO).symbol("number").build());
 
 			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
 					.build());

@@ -52,5 +52,7 @@ public class PaymentSearchCriteria {
     private String excludedTenant;
     
     private String propertyStatus;
+    
+    private Set<String> statusNotIn;
 
 }

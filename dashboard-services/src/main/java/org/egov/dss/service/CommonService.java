@@ -86,25 +86,28 @@ public class CommonService {
 	private CommonServiceRepository csRepository;
 
 	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
-
+		Double totalApplications = Double.valueOf(1);
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PGR);
 		Integer pgrSla = pgrService.slaAchievedCount(payloadDetails);
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
-	//	Integer ptSla = ptService.slaAchievedCount(payloadDetails);
-		Integer ptSla = (Integer) ptService.ptClosedApplications(payloadDetails).get(0).getHeaderValue();
+	    Integer ptSla = ptService.slaAchievedCount(payloadDetails);
+		//Integer ptSla = (Integer) ptService.totalProprties(payloadDetails).get(0).getHeaderValue();
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_OBPS);
-		Integer bpaSla = bpaService.slaAchievedCount(payloadDetails);
+		Integer bpaBuildingPermitSla = (Integer) bpaService.slaCompliancePermit(payloadDetails).get(0).getHeaderValue();
+		Integer bpaOtherThanLowRiskSla = (Integer) bpaService.slaComplianceOtherThanLowRisk(payloadDetails).get(0).getHeaderValue();
+		Integer bpaPreApprovedPlanSla = (Integer) bpaService.slaCompliancePreApprovedPlan(payloadDetails).get(0).getHeaderValue();
 		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
 		Integer wsSla = wsService.slaAchievedCount(payloadDetails);
 		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_TL);
-		Integer tlSla = tlService.slaAchievedCount(payloadDetails);
+		Integer tlSla = (Integer) tlService.tlSlaComplience(payloadDetails).get(0).getHeaderValue();
 		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_MR);
-		Integer mrSla = mrService.slaAchievedCounts(payloadDetails);
+		Integer mrSla = (Integer) mrService.slaAchievedCount(payloadDetails).get(0).getHeaderSymbol();
 
 		// change it
 		List<Data> totalApplicationsList = totalApplication(payloadDetails);
-		Double totalApplications = new Double(totalApplicationsList.get(0).getHeaderValue().toString());
-		Double slaAchieved = ((ptSla + pgrSla  + bpaSla + wsSla + tlSla + mrSla) * 100) / totalApplications;
+		totalApplications = new Double(totalApplicationsList.get(0).getHeaderValue().toString());
+		Double slaAchieved = ((ptSla + pgrSla + bpaBuildingPermitSla + bpaOtherThanLowRiskSla + bpaPreApprovedPlanSla
+				+ wsSla + tlSla + mrSla) * 100) / totalApplications;
         if(slaAchieved > 100) {
         	slaAchieved =  100.0;
         }

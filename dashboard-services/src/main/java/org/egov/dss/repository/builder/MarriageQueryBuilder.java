@@ -140,6 +140,17 @@ public class MarriageQueryBuilder {
 			selectQuery.append(" ema.status = :status");
 			preparedStatementValues.put("status", searchCriteria.getStatus());
 		}
+		
+		if (!CollectionUtils.isEmpty(searchCriteria.getStatusNotIn())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ema.status not in (:statusNotIn) ");
+			preparedStatementValues.put("statusNotIn", searchCriteria.getStatusNotIn());
+		}
+		
+		if (searchCriteria.getIsTatkalApplication() == Boolean.TRUE) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ema.istatkalapplication = true ");			
+		}
 
 		if (searchCriteria.getExcludedTenantId() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);

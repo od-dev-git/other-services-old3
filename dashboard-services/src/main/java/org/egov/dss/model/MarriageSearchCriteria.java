@@ -42,5 +42,9 @@ public class MarriageSearchCriteria {
 	private Boolean isApplicationDate;
 	
 	private String applicationType;
+	
+	private Boolean isTatkalApplication;
+	
+	private Set<String> statusNotIn;
 
 }

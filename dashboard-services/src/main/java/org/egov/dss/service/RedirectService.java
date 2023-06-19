@@ -503,6 +503,10 @@ public class RedirectService {
             return mrService.totalCorrectionApplications(requestInfoWrapper.getPayloadDetails());
         }
         
+        if(Constants.VisualizationCodes.SERVICE_MR_TATKAL_APPLICATION.equalsIgnoreCase(visualizationCode)) {
+            return mrService.totalTatkalApplications(requestInfoWrapper.getPayloadDetails());
+        }
+        
         if(Constants.VisualizationCodes.SERVICE_MR_APPROVED_APPLICATION.equalsIgnoreCase(visualizationCode)) {
             return mrService.totalApprovedApplications(requestInfoWrapper.getPayloadDetails());
         }
