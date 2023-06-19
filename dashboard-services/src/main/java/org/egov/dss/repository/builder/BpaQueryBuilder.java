@@ -195,7 +195,7 @@ public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " sel
 		
 		if (searchCriteria.getSlaThreshold() != null) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" bpa.approvaldate - bpa.applicationdate < " + searchCriteria.getSlaThreshold());
+			selectQuery.append(" bpa.approvaldate - bpa.applicationdate <= " + searchCriteria.getSlaThreshold());
 		}
 
 		if (searchCriteria.getExcludedTenantId() != null) {

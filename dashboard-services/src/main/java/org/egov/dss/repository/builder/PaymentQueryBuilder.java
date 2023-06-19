@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.Sets;
+
 
 
 @Component
@@ -537,25 +539,31 @@ public class PaymentQueryBuilder {
 	    	
 	    	if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
 			    addClauseIfRequired(preparedStatementValues, selectQuery);
-			    selectQuery.append(" tenantId in (:tenantId)");
+			    selectQuery.append(" tenantId in (:tenantId) ");
 				preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 			}
 
 	       if (searchCriteria.getFromDate() != null) {
 				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append(" applicationdate >= :fromDate");
+				selectQuery.append(" applicationdate >= :fromDate ");
 				preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
 			}
 
 			if (searchCriteria.getToDate() != null) {
 				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append(" applicationdate <= :toDate");
+				selectQuery.append(" applicationdate <= :toDate ");
 			    preparedStatementValues.put("toDate", searchCriteria.getToDate());
+			}
+			
+			if (!CollectionUtils.isEmpty(searchCriteria.getStatusNotIn())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" status not in (:statusNotIn) ");
+				preparedStatementValues.put("statusNotIn", searchCriteria.getStatusNotIn());
 			}
 			
 			if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
 				addClauseIfRequired(preparedStatementValues, selectQuery);
-				selectQuery.append(" tenantid != :excludedTenant");
+				selectQuery.append(" tenantid != :excludedTenant ");
 				preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenant());
 			}
 	
@@ -643,7 +651,7 @@ public class PaymentQueryBuilder {
 
 		public String getTenantWiseMrApplications(PaymentSearchCriteria paymentSearchCriteria,
 				Map<String, Object> preparedStatementValues) {
-	
+			paymentSearchCriteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 			StringBuilder selectQuery = new StringBuilder(MR_TENANT_WISE_APPLICATIONS);
 			addWhereClauseForMR(selectQuery, preparedStatementValues, paymentSearchCriteria);
 			selectQuery.append(" group by tenantid  ");

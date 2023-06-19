@@ -3,6 +3,7 @@ package org.egov.dss.web.controller;
 import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.dss.model.DemandPayload;
 import org.egov.dss.service.DashboardService;
 import org.egov.dss.util.ResponseInfoFactory;
 import org.egov.dss.web.model.ChartCriteria;
@@ -79,12 +80,12 @@ public class DashboardController {
 		
 	}
 	
-	@Scheduled(cron = "0 0 23 * * ?")
+	@Scheduled(cron = "0 0 1 * * SUN")
 	public void triggerDemandScheduler() {
 		log.info("Demand data update scheduler started..");
 		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
 		requestInfoWrapper.setRequestInfo(RequestInfo.builder().build());
-		requestInfoWrapper.setChartCriteria(ChartCriteria.builder().build());
+		requestInfoWrapper.setDemandPayload(DemandPayload.builder().build());
 		service.updateDemand(requestInfoWrapper);
 	}
 	

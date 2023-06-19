@@ -33,6 +33,7 @@ public class MRService {
 		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 	    criteria.setIsApplicationDate(Boolean.TRUE);
+	    criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		Integer totalApplication =  (Integer) mrRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
@@ -62,6 +63,7 @@ public class MRService {
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 	    criteria.setIsApplicationDate(Boolean.TRUE);
 	    criteria.setApplicationType(DashboardConstants.APPLICATION_STATUS_NEW);
+	    criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		Integer totalApplication =  (Integer) mrRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
@@ -71,6 +73,7 @@ public class MRService {
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 	    criteria.setIsApplicationDate(Boolean.TRUE);
 	    criteria.setApplicationType(DashboardConstants.APPLICATION_STATUS_CORRECTION);
+	    criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		Integer totalApplication =  (Integer) mrRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
@@ -79,6 +82,17 @@ public class MRService {
 		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
 	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 	    criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+	    criteria.setIsApplicationDate(Boolean.TRUE);
+	    Integer totalApplication =  (Integer) mrRepository.getTotalApplications(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
+	}
+	
+	public List<Data> totalTatkalApplications(PayloadDetails payloadDetails) {
+		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
+	    criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);	   
+	    criteria.setIsTatkalApplication(Boolean.TRUE);
+	    criteria.setIsApplicationDate(Boolean.TRUE);
+	    criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 	    Integer totalApplication =  (Integer) mrRepository.getTotalApplications(criteria);
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
@@ -86,6 +100,7 @@ public class MRService {
 	public List<Data> slaAchievedCount(PayloadDetails payloadDetails) {
 		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setIsApplicationDate(Boolean.TRUE);
 		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
 		Integer slaAchievedAppCount = (Integer) mrRepository.getSlaAchievedAppCount(criteria);
 		return Arrays.asList(Data.builder().headerValue(slaAchievedAppCount).build());
@@ -95,6 +110,7 @@ public class MRService {
 		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
+		criteria.setIsApplicationDate(Boolean.TRUE);
 		List<Chart> cumulativeApplications = mrRepository.getCumulativeApplications(criteria);
 		List<Plot> plots = new ArrayList();
 		extractDataForChart(cumulativeApplications, plots);
@@ -110,6 +126,7 @@ public class MRService {
 		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setIsApplicationDate(Boolean.TRUE);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		HashMap<String, Long> totalApplication = mrRepository.getTenantWiseTotalApplication(criteria);
 		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
 		HashMap<String, Long> approvedApplication = mrRepository.getTenantWiseTotalApplication(criteria);
@@ -137,6 +154,7 @@ public class MRService {
 		MarriageSearchCriteria criteria = getMarriageSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setIsApplicationDate(Boolean.TRUE);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		HashMap<String, Long> totalApplication = mrRepository.getTenantWiseTotalApplication(criteria);
 		criteria.setStatus(DashboardConstants.STATUS_APPROVED);
 		HashMap<String, Long> approvedApplication = mrRepository.getTenantWiseTotalApplication(criteria);

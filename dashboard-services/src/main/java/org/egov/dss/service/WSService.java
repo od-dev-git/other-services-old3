@@ -54,6 +54,8 @@ public class WSService {
 		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		criteria.setApplicationType(Sets.newHashSet(DashboardConstants.WS_NEW_CONNECTIONS));
+		criteria.setApplicationStatusExclude(Sets.newHashSet(DashboardConstants.STATUS_INITIATED));
 		Object slaAchievedAppCountObject = wsRepository.getSlaAchievedAppCount(criteria);
 		if(slaAchievedAppCountObject == null) {
 			return 0;

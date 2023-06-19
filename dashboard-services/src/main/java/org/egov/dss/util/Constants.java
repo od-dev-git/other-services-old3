@@ -183,6 +183,7 @@ public class Constants {
 		
 		final static String SERVICE_MR_NEW_APPLICATION = "mrtotalNewApplications";
 		final static String SERVICE_MR_CORRECTION_APPLICATION = "mrtotalCorrectionApplications";
+		final static String SERVICE_MR_TATKAL_APPLICATION = "mrtotalTatkalApplications";
 		final static String SERVICE_MR_APPROVED_APPLICATION = "mrtotalApprovedApplications";
 		final static String SERVICE_MR_SLA_ACHIEVED = "mrSlaAchieved";
 		final static String SERVICE_MR_CUMULATIVE_APPLICATION = "mrCumulativeApplications";
