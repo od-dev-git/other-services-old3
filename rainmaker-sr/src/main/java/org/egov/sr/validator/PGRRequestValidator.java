@@ -90,7 +90,7 @@ public class PGRRequestValidator {
 		validateUserRBACProxy(errorMap, serviceRequest.getRequestInfo());
 		validateIfArraysEqual(serviceRequest, errorMap);
 		validateAddressDetail(serviceRequest, errorMap);
-		vaidateServiceCodes(serviceRequest, errorMap);
+		//vaidateServiceCodes(serviceRequest, errorMap);
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
 	}
@@ -113,7 +113,7 @@ public class PGRRequestValidator {
 		validateDataSanity(serviceRequest, errorMap, false);
 		validateIfArraysEqual(serviceRequest, errorMap);
 		if(!isUpdateOnInactiveCategoriessEnabled) {
-			vaidateServiceCodes(serviceRequest, errorMap);
+			//vaidateServiceCodes(serviceRequest, errorMap);
 		}
 		validateAssignments(serviceRequest, errorMap);
 		validateStatus(serviceRequest, errorMap) ;
