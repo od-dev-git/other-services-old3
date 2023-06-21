@@ -30,7 +30,6 @@ public class Address {
 	@Size(max=160)
 	public String houseNoAndStreetName;
 
-	@NotNull
 	@JsonProperty("mohalla")
 	@Pattern(regexp="^[a-zA-Z0-9._-]*$")
 	@Size(max=30)
@@ -41,7 +40,6 @@ public class Address {
 	@Size(max=100)
 	public String locality;
 
-	@NotNull
 	@JsonProperty("city")
 	@Pattern(regexp="^[a-zA-Z0-9._]*$")
 	@Size(max=30)
