@@ -86,7 +86,6 @@ public class CommonService {
 	private CommonServiceRepository csRepository;
 
 	public List<Data> slaAchieved(PayloadDetails payloadDetails) {
-		Double totalApplications = Double.valueOf(1);
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PGR);
 		Integer pgrSla = pgrService.slaAchievedCount(payloadDetails);
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
@@ -101,11 +100,11 @@ public class CommonService {
 		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_TL);
 		Integer tlSla = (Integer) tlService.tlSlaComplience(payloadDetails).get(0).getHeaderValue();
 		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_MR);
-		Integer mrSla = (Integer) mrService.slaAchievedCount(payloadDetails).get(0).getHeaderSymbol();
+		Integer mrSla = (Integer) mrService.slaAchievedCount(payloadDetails).get(0).getHeaderValue();
 
 		// change it
 		List<Data> totalApplicationsList = totalApplication(payloadDetails);
-		totalApplications = new Double(totalApplicationsList.get(0).getHeaderValue().toString());
+		Double totalApplications = new Double(totalApplicationsList.get(0).getHeaderValue().toString());
 		Double slaAchieved = ((ptSla + pgrSla + bpaBuildingPermitSla + bpaOtherThanLowRiskSla + bpaPreApprovedPlanSla
 				+ wsSla + tlSla + mrSla) * 100) / totalApplications;
         if(slaAchieved > 100) {
