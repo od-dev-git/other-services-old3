@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,7 +126,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("f0427f13-96f9-49b5-8e3a-78152d3926fc");
+		request.setAuthToken("e5727b7a-9491-4b0c-976a-56cadfc55536");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -284,7 +287,7 @@ public class DataExchangeService {
 			IssuedTo issuedTo = new IssuedTo();
 			List<Person> persons = new ArrayList<Person>();
 			issuedTo.setPersons(persons);
-			docDetailsResponse.setURI(tenantId.concat("-").concat(DIGILOCKER_ISSUER_ID).concat("-")
+			docDetailsResponse.setURI(tenantId.concat("-")
 					.concat(DIGILOCKER_DOCTYPE_MR_CERT).concat("-").concat(filestore));
 			docDetailsResponse.setIssuedTo(issuedTo);
 
@@ -326,8 +329,15 @@ public class DataExchangeService {
 
 		IssuedTo issuedTo = new IssuedTo();
 		Person person = new Person();
-		person.setAddress(address);
-		person.setPhoto("");
+		//person.setAddress(address);
+		//person.setPhoto("");
+		person.setName(marriageRegistration.getCoupleDetails().get(0).getGroom().getFirstName());
+		person.setPhone("");
+		Long dob = marriageRegistration.getCoupleDetails().get(0).getGroom().getDateOfBirth();
+		LocalDate date = Instant.ofEpochSecond(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+		person.setDob(date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+		person.setGender("Male");
+		issuedTo.setPersons(Arrays.asList(person));
 		certificate.setIssuedTo(issuedTo);
 
 		MrCertificateData certificateData = new MrCertificateData();
@@ -767,7 +777,7 @@ public class DataExchangeService {
 			IssuedTo issuedTo = new IssuedTo();
 			List<Person> persons = new ArrayList<Person>();
 			issuedTo.setPersons(persons);
-			docDetailsResponse.setURI(tenantId.concat("-").concat(DIGILOCKER_ISSUER_ID).concat("-")
+			docDetailsResponse.setURI(tenantId.concat("-")
 					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT).concat("-").concat(filestore));
 			docDetailsResponse.setIssuedTo(issuedTo);
 
@@ -979,7 +989,7 @@ public class DataExchangeService {
 			IssuedTo issuedTo = new IssuedTo();
 			List<Person> persons = new ArrayList<Person>();
 			issuedTo.setPersons(persons);
-			docDetailsResponse.setURI(tenantId.concat("-").concat(DIGILOCKER_ISSUER_ID).concat("-")
+			docDetailsResponse.setURI(tenantId.concat("-")
 					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT).concat("-").concat(filestore));
 			docDetailsResponse.setIssuedTo(issuedTo);
 

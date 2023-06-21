@@ -81,7 +81,7 @@ public class DataExchangeController {
 	@Autowired
     private DataExchangeService dataExchangeService;
 	
-	@RequestMapping(path = {"/_searchReceipt"}, method = RequestMethod.POST ,consumes = {MediaType.APPLICATION_XML_VALUE},produces = {"application/xml","text/xml"})
+	@RequestMapping(path = {"/_exchange"}, method = RequestMethod.POST ,consumes = {MediaType.APPLICATION_XML_VALUE},produces = {"application/xml","text/xml"})
     @ResponseBody()
     public String search(@Valid @RequestBody String requestBody, HttpServletRequest httpServletRequest) throws IOException, JAXBException
     { 
