@@ -98,7 +98,6 @@ public class Service   {
   
   @JsonProperty("addressDetail")
   @Valid
-  @NotNull
   private Address addressDetail;
   
   @JsonProperty("active")
@@ -247,11 +246,8 @@ public class Service   {
   @JsonProperty("applicationno")
   private String applicationNo;
   
-  @JsonProperty("type")
-  private String type;
-  
-  @JsonProperty("subtype")
-  private String subType;
+  @JsonProperty("servicetype")
+  private String serviceType;
   
   }
 
