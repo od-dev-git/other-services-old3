@@ -70,8 +70,9 @@ public class PGRService {
 		PgrSearchCriteria criteria = getPgrSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		Integer totalApplication = (Integer) pgrRepository.getTotalApplications(criteria);
+		//avoiding divide by zero exception
 		if(totalApplication == 0)
-			return Arrays.asList(Data.builder().headerValue(0.0).build());
+			totalApplication = Integer.valueOf(1);
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_REJECTED.toLowerCase(),
 				DashboardConstants.STATUS_RESOLVED.toLowerCase(), DashboardConstants.STATUS_CLOSED.toLowerCase()));	
 		Integer slaAchievedAppCount = (Integer) pgrRepository.getSlaAchievedAppCount(criteria);
