@@ -231,8 +231,8 @@ public class Service   {
   @JsonProperty("userType")
   private String userType;
   
-  @JsonProperty("module")
-  private String module;
+  @JsonProperty("service")
+  private String service;
   
   @JsonProperty("priority")
   private String priority;

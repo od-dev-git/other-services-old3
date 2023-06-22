@@ -52,7 +52,7 @@ public class ServiceRowMapper implements ResultSetExtractor<List<Service>> {
                     .landmark(rs.getString("landmark"))
                     .active(rs.getBoolean("active"))
                     .userType(rs.getString("usertype"))
-                    .module(rs.getString("module"))
+                    .service(rs.getString("service"))
                     .priority(rs.getString("priority"))
                     .assignee(rs.getString("assignee"))
                     .impact(rs.getString("impact"))
