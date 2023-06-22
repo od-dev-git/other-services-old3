@@ -162,6 +162,7 @@ public class BPAService {
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
 		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		criteria.setSlaThreshold(config.getSlaBpaPermitsThreshold());
+		criteria.setRiskType(DashboardConstants.BPA_RISK_TYPE_LOW);
 		List<String> sparitUlbs = DashboardUtility.getSystemProperties().getSparitulbs();
 		Integer totalApplication = 0;
 		if (!sparitUlbs.contains(payloadDetails.getTenantid())) {
@@ -175,8 +176,9 @@ public class BPAService {
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
 		criteria.setBusinessServices(
-				Sets.newHashSet(DashboardConstants.OBPS_SLA_COMPLIANCE_OTHER_THAN_LOW_RISK_STATUS));
+				Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
 		criteria.setSlaThreshold(config.getSlaBpaOtherThanLowRiskThreshold());
+		criteria.setRiskType(DashboardConstants.BPA_RISK_TYPE_HIGH);
 		List<String> sparitUlbs = DashboardUtility.getSystemProperties().getSparitulbs();
 		Integer totalApplication = 0;
 		if (!sparitUlbs.contains(payloadDetails.getTenantid())) {

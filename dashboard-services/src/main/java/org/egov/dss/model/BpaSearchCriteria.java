@@ -42,5 +42,7 @@ public class BpaSearchCriteria {
 	private Set<String> statusNotIn;
 	
 	private String deleteStatus;
+	
+	private String riskType;
 
 }
