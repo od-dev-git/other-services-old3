@@ -51,6 +51,13 @@ public class ServiceRowMapper implements ResultSetExtractor<List<Service>> {
                     .rating(rs.getString("rating"))
                     .landmark(rs.getString("landmark"))
                     .active(rs.getBoolean("active"))
+                    .userType(rs.getString("usertype"))
+                    .module(rs.getString("module"))
+                    .priority(rs.getString("priority"))
+                    .assignee(rs.getString("assignee"))
+                    .impact(rs.getString("impact"))
+                    .applicationNo(rs.getString("applicationno"))
+                    .serviceType(rs.getString("servicetype"))
                     .auditDetails(auditDetails)
                     .build();
 
