@@ -43,10 +43,7 @@ public class Service   {
   @Pattern(regexp="^[a-zA-Z.]*$")
   private String tenantId;
 
-  @NotNull
   @JsonProperty("serviceCode")
-  @Size(min=2,max=128)
-  @Pattern(regexp="^[a-zA-Z0-9._]*$")
   private String serviceCode;
 
   @JsonProperty("serviceRequestId")
@@ -101,7 +98,6 @@ public class Service   {
   
   @JsonProperty("addressDetail")
   @Valid
-  @NotNull
   private Address addressDetail;
   
   @JsonProperty("active")
@@ -235,8 +231,8 @@ public class Service   {
   @JsonProperty("userType")
   private String userType;
   
-  @JsonProperty("module")
-  private String module;
+  @JsonProperty("service")
+  private String service;
   
   @JsonProperty("priority")
   private String priority;
@@ -249,6 +245,9 @@ public class Service   {
   
   @JsonProperty("applicationno")
   private String applicationNo;
+  
+  @JsonProperty("servicetype")
+  private String serviceType;
   
   }
 
