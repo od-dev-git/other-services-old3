@@ -17,51 +17,43 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@XStreamAlias("TradeLicenseCertificate")
+@XStreamAlias("TradeLicense")
 public class TradeLicenseCertificate {
 	
 	@XmlAttribute
-    @XStreamAlias("licenseNumber")
-	private String licenseNumber;
+    @XStreamAlias("municipalLicenceNo")
+	private String municipalLicenceNo;
 	
 	@XmlAttribute
-    @XStreamAlias("applicationNumber")
-	private String applicationNumber;
+    @XStreamAlias("newLicenceNo")
+	private String newLicenceNo;
 	
 	@XmlAttribute
-    @XStreamAlias("validFrom")
-	private Long validFrom;
+    @XStreamAlias("unitName")
+	private String unitName;
 	
 	@XmlAttribute
-    @XStreamAlias("validTo")
-	private Long validTo;
+    @XStreamAlias("validUpto")
+	private String validUpto;
 	
 	@XmlAttribute
-    @XStreamAlias("tradeName")
-	private String tradeName;
+    @XStreamAlias("Address")
+	private Address address;
 
 	@XmlAttribute
-    @XStreamAlias("tradeOwner")
-	private String tradeOwner;
+    @XStreamAlias("pan")
+	private Pan pan;
 	
 	@XmlAttribute
-    @XStreamAlias("tradeAddress")
-	private AddressTL tradeAddress;
+    @XStreamAlias("propertyDetails")
+	private PropertyDetails propertyDetails;
 	
 	@XmlAttribute
-    @XStreamAlias("tradeType")
-	private String tradeType;
+    @XStreamAlias("Licensee")
+	private Licensee licensee;
 	
 	@XmlAttribute
-    @XStreamAlias("tradePurpose")
-	private String tradePurpose;
-	
-	@XmlAttribute
-    @XStreamAlias("tradeFee")
-	private String tradeFee;
-	
-	@XmlAttribute
-    @XStreamAlias("licenseIssueDate")
-	private Long licenseIssueDate;
+    @XStreamAlias("BusinessProfession")
+	private BusinessProfession businessProfession;
 
 }

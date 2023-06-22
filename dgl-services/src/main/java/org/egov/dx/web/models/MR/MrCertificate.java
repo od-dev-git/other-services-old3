@@ -26,14 +26,10 @@ public class MrCertificate {
     private IssuedBy issuedBy;
 	
 	@XStreamAlias("IssuedTo")
-    private IssuedTo issuedTo;
+    private MRIssuedTo issuedTo;
 	
 	@XStreamAlias("CertificateData")
     private MrCertificateData certificateData;
-	
-    @Size(max=64)
-    @XStreamAlias("Signature")
-    private String signature;
 
     @XmlAttribute
     @XStreamAlias("language")
@@ -48,31 +44,15 @@ public class MrCertificate {
     private String type;
     
     @XmlAttribute
-    @XStreamAlias("number")
-    private String number;
+    @XStreamAlias("date")
+    private String date;
     
     @XmlAttribute
-    @XStreamAlias("prevNumber")
-    private String prevNumber;
+    @XStreamAlias("mobile")
+    private String mobile;
     
     @XmlAttribute
-    @XStreamAlias("expiryDate")
-    private String expiryDate;
-    
-    @XmlAttribute
-    @XStreamAlias("validFromDate")
-    private String validFromDate;
-    
-    @XmlAttribute
-    @XStreamAlias("issuedAt")
-    private String issuedAt;
-    
-    @XmlAttribute
-    @XStreamAlias("issueDate")
-    private String issueDate;
-    
-    @XmlAttribute
-    @XStreamAlias("status")
-    private String status;
+    @XStreamAlias("Application_no")
+    private String applicationNo;
 	
 }

@@ -1,4 +1,4 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.TL;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
@@ -7,28 +7,24 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode
-@XStreamAlias("Certificate")
+@XStreamAlias("propertyDetails")
+public class PropertyDetails {
 
-public class CertificateForData {
+	@XmlAttribute
+    @XStreamAlias("assessed")
+	private String assessed;
 	
 	@XmlAttribute
-    @XStreamAlias("number")
-    private String number;
-    
-	@XmlAttribute
-    @XStreamAlias("place")
-    private String place;
+    @XStreamAlias("buid")
+	private String buid;
 	
 	@XmlAttribute
-    @XStreamAlias("date")
-    private String date;
-    
+    @XStreamAlias("address")
+	private String address;
 }

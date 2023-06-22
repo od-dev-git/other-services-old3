@@ -12,7 +12,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,13 +53,27 @@ import org.egov.dx.web.models.BPA.BPACertificate;
 import org.egov.dx.web.models.BPA.BPACertificateData;
 import org.egov.dx.web.models.BPA.BPASearchCriteria;
 import org.egov.dx.web.models.BPA.BuildingPlanCertificate;
+import org.egov.dx.web.models.MR.Husband;
+import org.egov.dx.web.models.MR.MRIssuedTo;
 import org.egov.dx.web.models.MR.MRSearchCriteria;
 import org.egov.dx.web.models.MR.MarriageCertificate;
+import org.egov.dx.web.models.MR.MarriagePlace;
 import org.egov.dx.web.models.MR.MarriageRegistration;
 import org.egov.dx.web.models.MR.MrCertificate;
 import org.egov.dx.web.models.MR.MrCertificateData;
+import org.egov.dx.web.models.MR.PersonMR;
+import org.egov.dx.web.models.MR.Registration;
+import org.egov.dx.web.models.MR.Ward;
+import org.egov.dx.web.models.MR.Wife;
+import org.egov.dx.web.models.TL.BusinessProfession;
+import org.egov.dx.web.models.TL.DocDetailsIssuedTo;
+import org.egov.dx.web.models.TL.DocDetailsPerson;
+import org.egov.dx.web.models.TL.Licensee;
+import org.egov.dx.web.models.TL.Pan;
+import org.egov.dx.web.models.TL.PropertyDetails;
 import org.egov.dx.web.models.TL.TLCertificate;
 import org.egov.dx.web.models.TL.TLCertificateData;
+import org.egov.dx.web.models.TL.TLIssuedTo;
 import org.egov.dx.web.models.TL.TradeLicense;
 import org.egov.dx.web.models.TL.TradeLicenseCertificate;
 import org.egov.dx.web.models.TL.TradeLicenseSearchCriteria;
@@ -123,7 +141,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("f0427f13-96f9-49b5-8e3a-78152d3926fc");
+		//request.setAuthToken("77aba144-81c8-44df-9298-0ef96bcb7912");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -221,7 +239,7 @@ public class DataExchangeService {
 
 				}
 				
-				createCeritificateFromFilestoreIdForMR(searchCriteria, model, xstream, certificate, filestoreid, filestore);
+				createCeritificateFromFilestoreIdForMR(searchCriteria, model, xstream, certificate, filestoreid, filestore, registrations.get(0));
 			}
 		}	
 		else
@@ -235,8 +253,8 @@ public class DataExchangeService {
 		     model.setResponseStatus(responseStatus);
 		 
 		     DocDetailsResponse docDetailsResponse=new DocDetailsResponse();
-		     IssuedTo issuedTo=new IssuedTo();
-		     List<Person> persons= new ArrayList<Person>();
+		     DocDetailsIssuedTo issuedTo=new DocDetailsIssuedTo();
+		     List<DocDetailsPerson> persons= new ArrayList<DocDetailsPerson>();
 		     issuedTo.setPersons(persons);
 		     docDetailsResponse.setURI(null);
 		     docDetailsResponse.setIssuedTo(issuedTo);
@@ -250,7 +268,8 @@ public class DataExchangeService {
 	}
 
 	private void createCeritificateFromFilestoreIdForMR(SearchCriteria searchCriteria, PullURIResponse model,
-			XStream xstream, MrCertificate certificate, FileStoreUrlResponse filestoreid, String filestore)
+			XStream xstream, MrCertificate certificate, FileStoreUrlResponse filestoreid, String filestore,
+			MarriageRegistration marriageRegistration)
 			throws MalformedURLException, IOException {
 		String tenantId = ("od."+searchCriteria.getCity());
 		String pdfPath = filestoreid.getFilestoreIds().get(0).get("url");
@@ -280,11 +299,26 @@ public class DataExchangeService {
 			responseStatus.setTxn(searchCriteria.getTxn());
 			model.setResponseStatus(responseStatus);
 
+			DocDetailsPerson person = new DocDetailsPerson();
+			person.setName(marriageRegistration.getCoupleDetails().get(0).getGroom().getFirstName());
+			person.setPhone("");
+			person.setGender("Male");
+			Long dob = marriageRegistration.getCoupleDetails().get(0).getGroom().getDateOfBirth();
+			if(dob!= null) {
+				LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+				DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+				person.setDob(date.format(formatters));
+			}else {
+				person.setDob("dd-mm-yyyy");
+			}
+			
+			List persons = new ArrayList<>();
+			persons.add(person);
+			
+			DocDetailsIssuedTo issuedTo = new DocDetailsIssuedTo();
 			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
-			IssuedTo issuedTo = new IssuedTo();
-			List<Person> persons = new ArrayList<Person>();
 			issuedTo.setPersons(persons);
-			docDetailsResponse.setURI(tenantId.concat("-").concat(DIGILOCKER_ISSUER_ID).concat("-")
+			docDetailsResponse.setURI(tenantId.concat("-")
 					.concat(DIGILOCKER_DOCTYPE_MR_CERT).concat("-").concat(filestore));
 			docDetailsResponse.setIssuedTo(issuedTo);
 
@@ -304,57 +338,143 @@ public class DataExchangeService {
 	private MrCertificate populateCertificateForMR(MarriageRegistration marriageRegistration) {
 		MrCertificate certificate = new MrCertificate();
 		certificate.setLanguage("99");
-		certificate.setName("Marriage Certificate");
 		certificate.setType("RMCER");
-		certificate.setNumber("");
-		certificate.setPrevNumber("");
-		certificate.setExpiryDate("");
-		certificate.setValidFromDate("");
-		certificate.setIssuedAt("");
-		certificate.setIssueDate("");
-		certificate.setStatus("A");
+		certificate.setName("Marriage Registration Certificate");
+		certificate.setApplicationNo(marriageRegistration.getApplicationNumber());
+		certificate.setMobile("");
+		Long dateIssued = marriageRegistration.getIssuedDate();
+		if(dateIssued!= null) {
+			LocalDate date = Instant.ofEpochMilli(dateIssued).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			certificate.setDate(date.format(formatters));
+		}else {
+			certificate.setDate("dd-mm-yyyy");
+		}
 
 		IssuedBy issuedBy = new IssuedBy();
 		Organization organization = new Organization();
-		organization.setName("");
 		organization.setType("SG");
-		Address address = new Address();
-		address.setCountry("IN");
-		organization.setAddress(address);
+		Address addressIssuedBy = new Address();
+		addressIssuedBy.setCountry("IN");
+		addressIssuedBy.setType("");
+		addressIssuedBy.setLine1("");
+		addressIssuedBy.setLine2("");
+		addressIssuedBy.setLandmark("");
+		addressIssuedBy.setLocality("");
+		addressIssuedBy.setDistrict("");
+		addressIssuedBy.setPin("");
+		addressIssuedBy.setState("Odisha");
+		organization.setAddress(addressIssuedBy);
 		issuedBy.setOrganisation(organization);
 		certificate.setIssuedBy(issuedBy);
 
-		IssuedTo issuedTo = new IssuedTo();
-		Person person = new Person();
-		person.setAddress(address);
-		person.setPhoto("");
+		MRIssuedTo issuedTo = new MRIssuedTo();
+		List<PersonMR> persons = new ArrayList<>();
+		PersonMR personGroom = new PersonMR();
+		personGroom.setTitle("Mr.");
+		personGroom.setName(marriageRegistration.getCoupleDetails().get(0).getGroom().getFirstName());
+		personGroom.setGender("Male");
+		personGroom.setMaritalStatus("1");
+		personGroom.setReligion("");
+		Long dobGroom = marriageRegistration.getCoupleDetails().get(0).getGroom().getDateOfBirth();
+		if(dobGroom!= null) {
+			LocalDate date = Instant.ofEpochMilli(dobGroom).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			personGroom.setDob(date.format(formatters));
+		}else {
+			personGroom.setDob("dd-mm-yyyy");
+		}
+		
+		Address addressGroom = new Address();
+		addressGroom.setLine1(marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress().getAddressLine1());
+		addressGroom.setLine2("");
+		addressGroom.setHouse("");
+		addressGroom.setLandmark("");
+		addressGroom.setLocality("");
+		addressGroom.setDistrict(marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress().getDistrict());
+		addressGroom.setPin(marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress().getPinCode());
+		addressGroom.setState(marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress().getState());		
+		addressGroom.setCountry(marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress().getCountry());		
+		
+		personGroom.setAddress(addressGroom);
+		
+		
+		PersonMR personBride = new PersonMR();
+		personBride.setTitle("Ms.");
+		personBride.setName(marriageRegistration.getCoupleDetails().get(0).getBride().getFirstName());
+		personBride.setGender("Female");
+		personBride.setMaritalStatus("1");
+		personBride.setReligion("");
+		Long dob = marriageRegistration.getCoupleDetails().get(0).getBride().getDateOfBirth();
+		if(dob!= null) {
+			LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			personBride.setDob(date.format(formatters));
+		}else {
+			personBride.setDob("dd-mm-yyyy");
+		}
+		
+		Address addressBride = new Address();
+		addressBride.setLine1(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getAddressLine1());
+		addressBride.setLine2("");
+		addressBride.setHouse("");
+		addressBride.setLandmark("");
+		addressBride.setLocality("");
+		addressBride.setDistrict(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getDistrict());
+		addressBride.setPin(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getPinCode());
+		addressBride.setState(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getState());		
+		addressBride.setCountry(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getCountry());
+		
+		personBride.setAddress(addressBride);
+		
+		persons.add(personGroom);
+		persons.add(personBride);
+		issuedTo.setPersons(persons);;
 		certificate.setIssuedTo(issuedTo);
+		
 
 		MrCertificateData certificateData = new MrCertificateData();
-		CertificateForData certificateForData = new CertificateForData();
-		certificateData.setCertificate(certificateForData);
+		
 		
 		MarriageCertificate marriageCertificate = new MarriageCertificate();
-		marriageCertificate.builder().applicationDate(marriageRegistration.getApplicationDate())
-				.marriageDate(marriageRegistration.getMarriageDate()).mrNumber(marriageRegistration.getMrNumber())
-				.applicationNumber(marriageRegistration.getApplicationNumber())
-				.brideDOB(marriageRegistration.getCoupleDetails().get(0).getBride().getDateOfBirth())
-				.brideGroomDOB(marriageRegistration.getCoupleDetails().get(0).getGroom().getDateOfBirth())
-				.brideGuardianName(marriageRegistration.getCoupleDetails().get(0).getBride().getFatherName())
-				.brideGuardianAddress(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress())
-				.brideGroomGuardianName(marriageRegistration.getCoupleDetails().get(0).getGroom().getFatherName())
-				.brideGroomGuardianAddress(marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress())
-				.brideWitnessName(marriageRegistration.getCoupleDetails().get(0).getBride().getWitness().getFirstName())
-				.brideWitnessAddress(
-						marriageRegistration.getCoupleDetails().get(0).getBride().getWitness().getAddress())
-				.brideGroomWitnessName(
-						marriageRegistration.getCoupleDetails().get(0).getGroom().getWitness().getFirstName())
-				.brideGroomWitnessAddress(
-						marriageRegistration.getCoupleDetails().get(0).getGroom().getWitness().getAddress())
-				.build();
 		
-		certificateData.setCertificate(certificateForData);
+		MarriagePlace marriagePlace = marriageRegistration.getMarriagePlace();
+		
+		marriageCertificate.setPlace(marriagePlace.getPlaceOfMarriage().concat("," + marriagePlace.getWard())
+				.concat("," + marriagePlace.getLocality().getName()));		
+		Long issuedDate = marriageRegistration.getIssuedDate();
+		if(issuedDate!= null) {
+			LocalDate date = Instant.ofEpochMilli(issuedDate).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			marriageCertificate.setSolemnizedDate(date.format(formatters));
+		}else {
+			marriageCertificate.setSolemnizedDate("dd-mm-yyyy");
+		}
+		
+		Registration registration = new Registration();
+		registration.setNumber(marriageRegistration.getMrNumber());
+		if(issuedDate!= null) {
+			LocalDate date = Instant.ofEpochMilli(issuedDate).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			marriageCertificate.setSolemnizedDate(date.format(formatters));
+		}else {
+			marriageCertificate.setSolemnizedDate("dd-mm-yyyy");
+		}
+		
+		Ward ward = Ward.builder().name("").build();
+		
+		Husband husband = Husband.builder().name(personGroom.getName()).residingAt(addressGroom.toString()).build();
+		
+		Wife wife = Wife.builder().name(personBride.getName()).residingAt(addressBride.toString()).build();
+		
+		marriageCertificate.setHusband(husband);
+		marriageCertificate.setWife(wife);
+		marriageCertificate.setWard(ward);
+		marriageCertificate.setRegistration(registration);
+		
+		
 		certificateData.setMarriageCertificate(marriageCertificate);
+		certificate.setCertificateData(certificateData);
 		return certificate;
 	}
 
@@ -416,7 +536,7 @@ public class DataExchangeService {
 			List<Person> persons = new ArrayList<Person>();
 			issuedTo.setPersons(persons);
 			docDetailsResponse.setURI(null);
-			docDetailsResponse.setIssuedTo(issuedTo);
+			//docDetailsResponse.setIssuedTo(issuedTo);
 			// docDetailsResponse.setDataContent("");
 			docDetailsResponse.setDocContent("");
 			log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_MR);
@@ -463,7 +583,7 @@ public class DataExchangeService {
 			issuedTo.setPersons(persons);
 			docDetailsResponse
 					.setURI(DIGILOCKER_ISSUER_ID.concat("-").concat(DIGILOCKER_DOCTYPE).concat("-").concat(filestore));
-			docDetailsResponse.setIssuedTo(issuedTo);
+			//docDetailsResponse.setIssuedTo(issuedTo);
 
 			docDetailsResponse
 					.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
@@ -545,7 +665,7 @@ public class DataExchangeService {
 				List<Person> persons = new ArrayList<Person>();
 				issuedTo.setPersons(persons);
 				docDetailsResponse.setURI(null);
-				docDetailsResponse.setIssuedTo(issuedTo);
+				//docDetailsResponse.setIssuedTo(issuedTo);
 				// docDetailsResponse.setDataContent(encodedString);
 				docDetailsResponse.setDocContent(encodedString);
 
@@ -571,7 +691,7 @@ public class DataExchangeService {
 			List<Person> persons = new ArrayList<Person>();
 			issuedTo.setPersons(persons);
 			docDetailsResponse.setURI(null);
-			docDetailsResponse.setIssuedTo(issuedTo);
+			//docDetailsResponse.setIssuedTo(issuedTo);
 			// docDetailsResponse.setDataContent("");
 			docDetailsResponse.setDocContent("");
 
@@ -627,8 +747,8 @@ public class DataExchangeService {
 
 		IssuedTo issuedTo = new IssuedTo();
 		Person person = new Person();
-		person.setAddress(address);
-		person.setPhoto("");
+//		person.setAddress(address);
+//		person.setPhoto("");
 		certificate.setIssuedTo(issuedTo);
 
 		CertificateData certificateData = new CertificateData();
@@ -699,7 +819,7 @@ public class DataExchangeService {
 
 				}
 				
-				createCeritificateFromFilestoreIdForTL(searchCriteria, model, xstream, certificate, filestoreid, filestore);
+				createCeritificateFromFilestoreIdForTL(searchCriteria, model, xstream, certificate, filestoreid, filestore, licenses.get(0));
 			}
 		}	
 		else
@@ -713,8 +833,8 @@ public class DataExchangeService {
 		     model.setResponseStatus(responseStatus);
 		 
 		     DocDetailsResponse docDetailsResponse=new DocDetailsResponse();
-		     IssuedTo issuedTo=new IssuedTo();
-		     List<Person> persons= new ArrayList<Person>();
+		     DocDetailsIssuedTo issuedTo=new DocDetailsIssuedTo();
+		     List<DocDetailsPerson> persons= new ArrayList<DocDetailsPerson>();
 		     issuedTo.setPersons(persons);
 		     docDetailsResponse.setURI(null);
 		     docDetailsResponse.setIssuedTo(issuedTo);
@@ -732,7 +852,8 @@ public class DataExchangeService {
 	}
 
 	private void createCeritificateFromFilestoreIdForTL(SearchCriteria searchCriteria, PullURIResponse model,
-			XStream xstream, TLCertificate certificate, FileStoreUrlResponse filestoreid, String filestore)
+			XStream xstream, TLCertificate certificate, FileStoreUrlResponse filestoreid, String filestore,
+			TradeLicense tradeLicense)
 			throws IOException, MalformedURLException {
 
 		String tenantId = ("od." + searchCriteria.getCity());
@@ -763,11 +884,27 @@ public class DataExchangeService {
 			responseStatus.setTxn(searchCriteria.getTxn());
 			model.setResponseStatus(responseStatus);
 
+			
+			DocDetailsPerson person = new DocDetailsPerson();
+			person.setName(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getName());
+			person.setPhone(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getMobileNumber());
+			person.setGender(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getGender());
+			Long dob = tradeLicense.getTradeLicenseDetail().getOwners().get(0).getDob();
+			if(dob!= null) {
+				LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+				DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+				person.setDob(date.format(formatters));
+			}else {
+				person.setDob("dd-mm-yyyy");
+			}
+			
+			List persons = new ArrayList<>();
+			persons.add(person);			
 			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
-			IssuedTo issuedTo = new IssuedTo();
-			List<Person> persons = new ArrayList<Person>();
+			DocDetailsIssuedTo issuedTo = new DocDetailsIssuedTo();
+			
 			issuedTo.setPersons(persons);
-			docDetailsResponse.setURI(tenantId.concat("-").concat(DIGILOCKER_ISSUER_ID).concat("-")
+			docDetailsResponse.setURI(tenantId.concat("-")
 					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT).concat("-").concat(filestore));
 			docDetailsResponse.setIssuedTo(issuedTo);
 
@@ -788,30 +925,92 @@ public class DataExchangeService {
 		
 		TLCertificate certificate = new TLCertificate();
 		certificate.setLanguage("99");
-		certificate.setName("Trade License");
-		certificate.setType("TDLCS");
-		certificate.setNumber("");
 		certificate.setPrevNumber("");
-		certificate.setExpiryDate("");
-		certificate.setValidFromDate("");
 		certificate.setIssuedAt("");
 		certificate.setIssueDate("");
-		certificate.setStatus("A");
+		certificate.setStatus("1");
+		certificate.setName("Trade License Certificate");
+		certificate.setType("TDLCS");
+		certificate.setNumber(tradeLicense.getLicenseNumber());
+		certificate.setPrevNumber("");
+		Long expiryDate = tradeLicense.getValidTo();
+		if(expiryDate!= null) {
+			LocalDate date = Instant.ofEpochMilli(expiryDate).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			certificate.setExpiryDate(date.format(formatters));
+		}else {
+			certificate.setExpiryDate("dd-mm-yyyy");
+		}
+		Long validFrom = tradeLicense.getValidFrom();
+		if(validFrom!= null) {
+			LocalDate date = Instant.ofEpochMilli(validFrom).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			certificate.setValidFromDate(date.format(formatters));
+		}else {
+			certificate.setValidFromDate("dd-mm-yyyy");
+		}
 
 		IssuedBy issuedBy = new IssuedBy();
 		Organization organization = new Organization();
 		organization.setName("");
+		organization.setTin("");
+		organization.setCode("");
+		organization.setUid("");
 		organization.setType("SG");
-		Address address = new Address();
-		address.setCountry("IN");
-		organization.setAddress(address);
+		Address addressIssuedBy = new Address();
+		addressIssuedBy.setCountry("IN");
+		addressIssuedBy.setType("");
+		addressIssuedBy.setLine1("");
+		addressIssuedBy.setLine2("");
+		addressIssuedBy.setLandmark("");
+		addressIssuedBy.setLocality("");
+		addressIssuedBy.setDistrict("");
+		addressIssuedBy.setPin("");
+		addressIssuedBy.setState("Odisha");
+		organization.setAddress(addressIssuedBy);
 		issuedBy.setOrganisation(organization);
 		certificate.setIssuedBy(issuedBy);
 
-		IssuedTo issuedTo = new IssuedTo();
+		TLIssuedTo issuedTo = new TLIssuedTo();
+		Organization organizationIssuesTo = new Organization();
+		organizationIssuesTo.setName("");
+		organizationIssuesTo.setTin("");
+		organizationIssuesTo.setCode("");
+		organizationIssuesTo.setUid("");
+		organizationIssuesTo.setType("SG");
+		Address addressIssuedTo = new Address();
+		addressIssuedTo.setCountry("IN");
+		addressIssuedTo.setType(tradeLicense.getTradeLicenseDetail().getAddress().getType());
+		addressIssuedTo.setLine1(tradeLicense.getTradeLicenseDetail().getAddress().getAddressLine1());
+		addressIssuedTo.setLine2(tradeLicense.getTradeLicenseDetail().getAddress().getAddressLine2());
+		addressIssuedTo.setLandmark(tradeLicense.getTradeLicenseDetail().getAddress().getLandmark());
+		addressIssuedTo.setLocality(tradeLicense.getTradeLicenseDetail().getAddress().getLocality().getName());
+		addressIssuedTo.setDistrict("");
+		addressIssuedTo.setPin(tradeLicense.getTradeLicenseDetail().getAddress().getPincode());
+		addressIssuedTo.setState("Odisha");
+		organizationIssuesTo.setAddress(addressIssuedTo);
 		Person person = new Person();
-		person.setAddress(address);
-		person.setPhoto("");
+		person.setUid("");
+		person.setName(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getName());
+		person.setPhone(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getMobileNumber());
+		person.setEmail(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getEmailId());
+		person.setTitle(
+				tradeLicense.getTradeLicenseDetail().getOwners().get(0).getGender().equalsIgnoreCase("MALE") ? "Mr."
+						: "Mrs.");
+		Address addressPerson =  new Address();
+		addressPerson.setCountry("IN");
+		addressPerson.setType("");
+		addressPerson.setLine1("");
+		addressPerson.setLine2("");
+		addressPerson.setLandmark("");
+		addressPerson.setLocality(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getPermanentAddress());
+		addressPerson.setDistrict("");
+		addressPerson.setPin("");
+		addressPerson.setState("Odisha");
+		
+		person.setAddress(addressPerson);
+		issuedTo.setOrganization(organizationIssuesTo);
+		issuedTo.setPerson(person);
 		certificate.setIssuedTo(issuedTo);
 
 		TLCertificateData certificateData = new TLCertificateData();
@@ -819,16 +1018,52 @@ public class DataExchangeService {
 		certificateData.setCertificate(certificateForData);
 		
 		TradeLicenseCertificate tradeLicenseCertificate = new TradeLicenseCertificate();
-		tradeLicenseCertificate.builder().applicationNumber(tradeLicense.getApplicationNumber())
-				.licenseNumber(tradeLicense.getLicenseNumber()).licenseIssueDate(tradeLicense.getIssuedDate())
-				.validFrom(tradeLicense.getValidFrom()).validTo(tradeLicense.getValidTo())
-				.tradeName(tradeLicense.getTradeName())
-				.tradeOwner(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getName())
-				.tradeAddress(tradeLicense.getTradeLicenseDetail().getAddress())
-				.build();
+		
+		
+		tradeLicenseCertificate.setMunicipalLicenceNo("");
+		tradeLicenseCertificate.setNewLicenceNo(tradeLicense.getLicenseNumber());
+		tradeLicenseCertificate.setUnitName(tradeLicense.getTradeName());
+		if(expiryDate!= null) {
+			LocalDate date = Instant.ofEpochMilli(expiryDate).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			tradeLicenseCertificate.setValidUpto(date.format(formatters));
+		}else {
+			tradeLicenseCertificate.setValidUpto("dd-mm-yyyy");
+		}
+		Pan pan = Pan.builder().name("").number("").build();
+		
+		PropertyDetails propertyDetails = PropertyDetails.builder().assessed("").buid("").address("").build();
+		
+		Licensee licensee = new Licensee();
+		licensee.setName(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getName());				
+		licensee.setFatherHusbandName(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getFatherOrHusbandName());
+		licensee.setAddress(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getPermanentAddress());		
+		
+		BusinessProfession businessProfession = BusinessProfession.builder().challanNo("").licenseFee("").name("")
+				.penalty("").sdFee("").scrunityFee("").year("").build();	
+		
+		tradeLicenseCertificate.setAddress(addressIssuedTo);
+		tradeLicenseCertificate.setPan(pan);
+		tradeLicenseCertificate.setPropertyDetails(propertyDetails);		
+		tradeLicenseCertificate.setLicensee(licensee);	
+		tradeLicenseCertificate.setBusinessProfession(businessProfession);		
+		
+		certificateForData.setNumber(tradeLicense.getLicenseNumber());
+		
+		Long issuedDate = tradeLicense.getIssuedDate();
+		if(issuedDate!= null) {
+			LocalDate date = Instant.ofEpochMilli(issuedDate).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			certificateForData.setDate(date.format(formatters));
+		}else {
+			certificateForData.setDate("dd-mm-yyyy");
+		}
+		certificateForData.setPlace(tradeLicense.getTradeLicenseDetail().getAddress().getLocality().getName());
 		
 		certificateData.setCertificate(certificateForData);
 		certificateData.setTlCertificate(tradeLicenseCertificate);
+		
+		certificate.setCertificateData(certificateData);		
 		return certificate;
 	}
 	
@@ -866,7 +1101,7 @@ public class DataExchangeService {
 
 				}
 				
-				createCeritificateFromFilestoreIdForBPA(searchCriteria, model, xstream, certificate, filestoreid, filestore);
+				createCeritificateFromFilestoreIdForBPA(searchCriteria, model, xstream, certificate, filestoreid, filestore, applications.get(0));
 			}
 		}	
 		else
@@ -880,8 +1115,8 @@ public class DataExchangeService {
 		     model.setResponseStatus(responseStatus);
 		 
 		     DocDetailsResponse docDetailsResponse=new DocDetailsResponse();
-		     IssuedTo issuedTo=new IssuedTo();
-		     List<Person> persons= new ArrayList<Person>();
+		     DocDetailsIssuedTo issuedTo=new DocDetailsIssuedTo();
+		     List<DocDetailsPerson> persons= new ArrayList<DocDetailsPerson>();
 		     issuedTo.setPersons(persons);
 		     docDetailsResponse.setURI(null);
 		     docDetailsResponse.setIssuedTo(issuedTo);
@@ -925,8 +1160,20 @@ public class DataExchangeService {
 
 		IssuedTo issuedTo = new IssuedTo();
 		Person person = new Person();
-		person.setAddress(address);
-		person.setPhoto("");
+		//person.setAddress(address);
+		//person.setPhoto("");
+		person.setName(bpa.getLandInfo().getOwners().get(0).getName());
+		person.setPhone(bpa.getLandInfo().getOwners().get(0).getMobileNumber());
+		Long dob = bpa.getLandInfo().getOwners().get(0).getDob();
+//		if(dob!= null) {
+//			LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+//			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+//			person.setDob(date.format(formatters));
+//		}else {
+//			person.setDob("dd-mm-yyyy");
+//		}
+//		person.setGender(bpa.getLandInfo().getOwners().get(0).getGender());
+		issuedTo.setPersons(Arrays.asList(person));
 		certificate.setIssuedTo(issuedTo);
 
 		BPACertificateData certificateData = new BPACertificateData();
@@ -944,7 +1191,8 @@ public class DataExchangeService {
 	}
 	
 	private void createCeritificateFromFilestoreIdForBPA(SearchCriteria searchCriteria, PullURIResponse model,
-			XStream xstream, BPACertificate certificate, FileStoreUrlResponse filestoreid, String filestore)
+			XStream xstream, BPACertificate certificate, FileStoreUrlResponse filestoreid, String filestore,
+			BPA bpa)
 			throws MalformedURLException, IOException {
 
 		String tenantId = ("od." + searchCriteria.getCity());
@@ -974,12 +1222,28 @@ public class DataExchangeService {
 			responseStatus.setTs(dtf.format(now));
 			responseStatus.setTxn(searchCriteria.getTxn());
 			model.setResponseStatus(responseStatus);
-
+			
+			DocDetailsPerson person = new DocDetailsPerson();
+			person.setName(bpa.getLandInfo().getOwners().get(0).getName());
+			person.setPhone(bpa.getLandInfo().getOwners().get(0).getMobileNumber());
+			person.setGender(bpa.getLandInfo().getOwners().get(0).getGender());
+			Long dob = bpa.getLandInfo().getOwners().get(0).getDob();
+			if(dob!= null) {
+				LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+				DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+				person.setDob(date.format(formatters));
+			}else {
+				person.setDob("dd-mm-yyyy");
+			}
+			
+			List persons = new ArrayList<>();
+			persons.add(person);
+			
+			
 			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
-			IssuedTo issuedTo = new IssuedTo();
-			List<Person> persons = new ArrayList<Person>();
+			DocDetailsIssuedTo issuedTo = new DocDetailsIssuedTo();
 			issuedTo.setPersons(persons);
-			docDetailsResponse.setURI(tenantId.concat("-").concat(DIGILOCKER_ISSUER_ID).concat("-")
+			docDetailsResponse.setURI(tenantId.concat("-")
 					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT).concat("-").concat(filestore));
 			docDetailsResponse.setIssuedTo(issuedTo);
 
