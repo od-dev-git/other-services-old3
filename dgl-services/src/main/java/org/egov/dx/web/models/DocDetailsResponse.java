@@ -1,5 +1,7 @@
 package org.egov.dx.web.models;
 
+import org.egov.dx.web.models.TL.DocDetailsIssuedTo;
+
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 import lombok.AllArgsConstructor;
@@ -18,7 +20,7 @@ import lombok.NoArgsConstructor;
 public class DocDetailsResponse {
 	
 	@XStreamAlias("IssuedTo")
-    private IssuedTo issuedTo;
+    private DocDetailsIssuedTo issuedTo;
 	
 	@XStreamAlias("URI")
     private String URI;

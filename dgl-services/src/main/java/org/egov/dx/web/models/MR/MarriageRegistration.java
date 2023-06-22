@@ -130,6 +130,10 @@ public class MarriageRegistration {
 	@JsonProperty("coupleDetails")
 	@Valid
 	private List<Couple> coupleDetails = null;
+	
+	@JsonProperty("marriagePlace")
+    @Valid
+    private MarriagePlace  marriagePlace ;
 
 	public MarriageRegistration addCoupleDetailsItem(CoupleDetails coupleDetailItem) {
 		if (this.coupleDetails == null) {
