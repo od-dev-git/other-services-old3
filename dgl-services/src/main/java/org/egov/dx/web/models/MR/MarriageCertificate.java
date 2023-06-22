@@ -13,63 +13,31 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@XStreamAlias("MarriageCertificate")
+@XStreamAlias("Marriage")
 public class MarriageCertificate {
 	
 	@XmlAttribute
-    @XStreamAlias("mrNumber")
-	private String mrNumber;
+    @XStreamAlias("place")
+	private String place;
 	
 	@XmlAttribute
-    @XStreamAlias("applicationNumber")
-	private String applicationNumber;
+    @XStreamAlias("solemnizedDate")
+	private String solemnizedDate;
 	
 	@XmlAttribute
-    @XStreamAlias("marriageDate")
-	private Long marriageDate;
+    @XStreamAlias("registration")
+	private Registration registration;
 	
 	@XmlAttribute
-    @XStreamAlias("applicationDate")
-	private Long applicationDate;
+    @XStreamAlias("ward")
+	private Ward ward;
 	
 	@XmlAttribute
-    @XStreamAlias("brideDOB")
-	private Long brideDOB;
+    @XStreamAlias("husband")
+	private Husband husband;
 
 	@XmlAttribute
-    @XStreamAlias("brideGroomDOB")
-	private Long brideGroomDOB;
-	
-	@XmlAttribute
-    @XStreamAlias("brideGuardianName")
-	private String brideGuardianName;
-	
-	@XmlAttribute
-    @XStreamAlias("brideGuardianAddress")
-	private AddressMR brideGuardianAddress;
-	
-	@XmlAttribute
-    @XStreamAlias("brideGroomGuardianName")
-	private String brideGroomGuardianName;
-	
-	@XmlAttribute
-    @XStreamAlias("brideGroomGuardianAddress")
-	private AddressMR brideGroomGuardianAddress;
-	
-	@XmlAttribute
-    @XStreamAlias("brideGroomWitnessName")
-	private String brideGroomWitnessName;
-	
-	@XmlAttribute
-    @XStreamAlias("brideGroomWitnessAddress")
-	private String brideGroomWitnessAddress;
-	
-	@XmlAttribute
-    @XStreamAlias("brideWitnessName")
-	private String brideWitnessName;
-	
-	@XmlAttribute
-    @XStreamAlias("brideWitnessAddress")
-	private String brideWitnessAddress;
+    @XStreamAlias("wife")
+	private Wife wife;
 	
 }

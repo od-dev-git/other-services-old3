@@ -1,6 +1,6 @@
 package org.egov.dx.web.models.MR;
 
-import org.egov.dx.web.models.CertificateForData;
+import javax.xml.bind.annotation.XmlAttribute;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -14,10 +14,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@XStreamAlias("CertificateData")
-public class MrCertificateData {
-    
-    @XStreamAlias("Marriage")
-    private MarriageCertificate marriageCertificate;
+@EqualsAndHashCode
+@XStreamAlias("husband")
+public class Husband {
+	
+	@XmlAttribute
+    @XStreamAlias("name")
+    private String name;
+	
+	@XmlAttribute
+    @XStreamAlias("residingAt")
+    private String residingAt;
 
 }

@@ -28,7 +28,7 @@ public class TLCertificate {
     private IssuedBy issuedBy;
 	
 	@XStreamAlias("IssuedTo")
-    private IssuedTo issuedTo;
+    private TLIssuedTo issuedTo;
 	
 	@XStreamAlias("CertificateData")
     private TLCertificateData certificateData;

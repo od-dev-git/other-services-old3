@@ -1,6 +1,7 @@
-package org.egov.dx.web.models;
+package org.egov.dx.web.models.TL;
 
-import javax.xml.bind.annotation.XmlAttribute;
+import org.egov.dx.web.models.Organization;
+import org.egov.dx.web.models.Person;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -16,29 +17,18 @@ import lombok.NoArgsConstructor;
 @Builder
 @EqualsAndHashCode
 @XStreamAlias("Person")
-public class Person {
-
-	@XmlAttribute
-	@XStreamAlias("uid")
-	private String uid;
-
-	@XmlAttribute
-	@XStreamAlias("title")
-	private String title;
-
-	@XmlAttribute
+public class DocDetailsPerson {
+	
 	@XStreamAlias("name")
 	private String name;
-
-	@XmlAttribute
+	
 	@XStreamAlias("phone")
 	private String phone;
-
-	@XmlAttribute
-	@XStreamAlias("email")
-	private String email;
-
-	@XStreamAlias("Address")
-	private Address address;
+	
+	@XStreamAlias("gender")
+	private String gender;
+	
+	@XStreamAlias("dob")
+	private String dob;
 
 }

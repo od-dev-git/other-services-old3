@@ -24,7 +24,7 @@ public class TLCertificateData {
 	@XStreamAlias("Certificate")
     private CertificateForData certificate;
     
-    @XStreamAlias("TLCertificate")
+    @XStreamAlias("TradeLicense")
     private TradeLicenseCertificate tlCertificate;
 	
 }
