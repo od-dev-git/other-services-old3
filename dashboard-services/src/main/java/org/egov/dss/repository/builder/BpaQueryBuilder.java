@@ -29,8 +29,15 @@ public static final String BPA_TENANT_WISE_TOTAL_APPLICATIONS = " select bpa.ten
 
 public static final String BPA_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED = " select bpa.tenantid as tenantid , avg((bpa.approvaldate-bpa.applicationdate)/86400000) as totalamt from eg_bpa_buildingplan bpa  ";
 
-public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " select ebe.servicetype as tenantid, count(bpa.applicationno) as totalamt from eg_bpa_buildingplan bpa "
-		                                                                  + " inner join eg_bpa_edcrdata ebe on ebe.applicationno = bpa.applicationno  ";
+public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " select tmp.servicetype as tenantid,count(tmp.applicationno) as totalamt"
+		+ " from ( select ebe.applicationno, case when ebe.alterationsubservice = '' "
+		+ "	and ebe.servicetype = 'New Construction' then ebe.servicetype when ebe.alterationsubservice != '' "
+		+ "	and ebe.servicetype = 'New Construction' then concat('Addition & Alteration ', '(', ebe.alterationsubservice, ')')"
+		+ "	else ebe.servicetype end as servicetype from eg_bpa_buildingplan bpa"
+		+ "	inner join eg_bpa_edcrdata ebe on ebe.applicationno = bpa.applicationno ";
+
+public static final String BPA_SLA_COMPLIENCE_APPLICATIONS = " select count(bpa.applicationno) from eg_bpa_buildingplan bpa inner join eg_bpa_edcrdata ebe on "
+		                                                   + " ebe.applicationno = bpa.applicationno ";
 
 	public static String getTotalPermitIssued(BpaSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATIONS);
@@ -217,6 +224,12 @@ public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " sel
 			preparedStatementValues.put("businessservice", searchCriteria.getBusinessServices());
 		}
 		
+		if (searchCriteria.getRiskType() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ebe.risktype = :riskType ");
+			preparedStatementValues.put("riskType", searchCriteria.getRiskType());
+		}
+		
 
 		return selectQuery.toString();
 
@@ -268,7 +281,7 @@ public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " sel
 	public String getSLAComplianceGeneralQuery(BpaSearchCriteria bpaSearchCriteria,
 			Map<String, Object> preparedStatementValues) {
 		
-		StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATIONS);
+		StringBuilder selectQuery = new StringBuilder(BPA_SLA_COMPLIENCE_APPLICATIONS);
 		addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
 
 		return selectQuery.toString();
@@ -354,7 +367,8 @@ public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " sel
 	            Map<String, Object> preparedStatementValues) {
 	        StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE);
 	        addWhereClauseForApplicationReceived(selectQuery, preparedStatementValues, bpaSearchCriteria);
-	        addGroupByClause(selectQuery," ebe.servicetype ");
+	        selectQuery.append(" ) tmp ");
+	        addGroupByClause(selectQuery," tmp.servicetype ");
 	        return selectQuery.toString();
 	    }
 	    
@@ -362,7 +376,8 @@ public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " sel
 	            Map<String, Object> preparedStatementValues) {
 	        StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE);
 	        addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
-	        addGroupByClause(selectQuery," ebe.servicetype ");
+	        selectQuery.append(" ) tmp ");
+	        addGroupByClause(selectQuery," tmp.servicetype ");
 	        return selectQuery.toString();
 	    }
 
