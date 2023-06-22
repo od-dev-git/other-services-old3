@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -283,9 +284,10 @@ public class DataExchangeService {
 			responseStatus.setTxn(searchCriteria.getTxn());
 			model.setResponseStatus(responseStatus);
 
+			List<Person> persons = new ArrayList<Person>();
+			persons.addAll(certificate.getIssuedTo().getPersons());	
 			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
 			IssuedTo issuedTo = new IssuedTo();
-			List<Person> persons = new ArrayList<Person>();
 			issuedTo.setPersons(persons);
 			docDetailsResponse.setURI(tenantId.concat("-")
 					.concat(DIGILOCKER_DOCTYPE_MR_CERT).concat("-").concat(filestore));
@@ -334,8 +336,13 @@ public class DataExchangeService {
 		person.setName(marriageRegistration.getCoupleDetails().get(0).getGroom().getFirstName());
 		person.setPhone("");
 		Long dob = marriageRegistration.getCoupleDetails().get(0).getGroom().getDateOfBirth();
-		LocalDate date = Instant.ofEpochSecond(dob).atZone(ZoneId.systemDefault()).toLocalDate();
-		person.setDob(date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+		if(dob!= null) {
+			LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			person.setDob(date.format(formatters));
+		}else {
+			person.setDob("dd-mm-yyyy");
+		}
 		person.setGender("Male");
 		issuedTo.setPersons(Arrays.asList(person));
 		certificate.setIssuedTo(issuedTo);
@@ -773,9 +780,11 @@ public class DataExchangeService {
 			responseStatus.setTxn(searchCriteria.getTxn());
 			model.setResponseStatus(responseStatus);
 
+			List<Person> persons = new ArrayList<Person>();
+			persons.addAll(certificate.getIssuedTo().getPersons());	
 			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
 			IssuedTo issuedTo = new IssuedTo();
-			List<Person> persons = new ArrayList<Person>();
+			
 			issuedTo.setPersons(persons);
 			docDetailsResponse.setURI(tenantId.concat("-")
 					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT).concat("-").concat(filestore));
@@ -820,8 +829,20 @@ public class DataExchangeService {
 
 		IssuedTo issuedTo = new IssuedTo();
 		Person person = new Person();
-		person.setAddress(address);
-		person.setPhoto("");
+		//person.setAddress(address);
+		//person.setPhoto("");
+		person.setName(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getName());
+		person.setPhone(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getMobileNumber());
+		Long dob = tradeLicense.getTradeLicenseDetail().getOwners().get(0).getDob();
+		if(dob!= null) {
+			LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			person.setDob(date.format(formatters));
+		}else {
+			person.setDob("dd-mm-yyyy");
+		}
+		person.setGender(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getGender());
+		issuedTo.setPersons(Arrays.asList(person));
 		certificate.setIssuedTo(issuedTo);
 
 		TLCertificateData certificateData = new TLCertificateData();
@@ -935,8 +956,20 @@ public class DataExchangeService {
 
 		IssuedTo issuedTo = new IssuedTo();
 		Person person = new Person();
-		person.setAddress(address);
-		person.setPhoto("");
+		//person.setAddress(address);
+		//person.setPhoto("");
+		person.setName(bpa.getLandInfo().getOwners().get(0).getName());
+		person.setPhone(bpa.getLandInfo().getOwners().get(0).getMobileNumber());
+		Long dob = bpa.getLandInfo().getOwners().get(0).getDob();
+		if(dob!= null) {
+			LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			person.setDob(date.format(formatters));
+		}else {
+			person.setDob("dd-mm-yyyy");
+		}
+		person.setGender(bpa.getLandInfo().getOwners().get(0).getGender());
+		issuedTo.setPersons(Arrays.asList(person));
 		certificate.setIssuedTo(issuedTo);
 
 		BPACertificateData certificateData = new BPACertificateData();
@@ -985,9 +1018,11 @@ public class DataExchangeService {
 			responseStatus.setTxn(searchCriteria.getTxn());
 			model.setResponseStatus(responseStatus);
 
+			List<Person> persons = new ArrayList<Person>();
+			persons.addAll(certificate.getIssuedTo().getPersons());
+			
 			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
 			IssuedTo issuedTo = new IssuedTo();
-			List<Person> persons = new ArrayList<Person>();
 			issuedTo.setPersons(persons);
 			docDetailsResponse.setURI(tenantId.concat("-")
 					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT).concat("-").concat(filestore));
