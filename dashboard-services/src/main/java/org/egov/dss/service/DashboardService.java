@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.DemandPayload;
@@ -24,6 +25,8 @@ import org.egov.dss.web.model.Filter;
 import org.egov.dss.web.model.Plot;
 import org.egov.dss.web.model.RequestInfoWrapper;
 import org.egov.dss.web.model.ResponseData;
+import org.egov.tracer.model.CustomException;
+import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -57,6 +60,9 @@ public class DashboardService {
 	public void processRequest(RequestInfoWrapper requestInfoWrapper) {
 		int skipped = 0;
 		int processed = 0;
+		String cacheBustResponse = callCacheBust(requestInfoWrapper.getRequestInfo());
+		if(StringUtils.hasText(cacheBustResponse))
+			log.info("Redis cache clear status : "+cacheBustResponse);
 		Long schedulerStartTime = System.currentTimeMillis();
 		ResponseData responseData = new ResponseData();
 		HashMap<String, String> tenantsTableMap = DashboardUtility.getSystemProperties().getTenantstable();
@@ -161,7 +167,7 @@ public class DashboardService {
 				responseData.setData(responseList);
 			} else {
 				if(DashboardConstants.OBPS_PERFORM_VISULAIZATIONCODE.contains(responseData.getVisualizationCode())) {
-					responseData.getData().stream().forEach(data -> data.setHeaderSymbol("number"));
+					responseData.getData().stream().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol("number")));
 					responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
 				}else {
 				responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
@@ -177,7 +183,12 @@ public class DashboardService {
 			}
 		}
 		if(!(chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString()) || chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {
+			if(DashboardConstants.OBPS_PERFORM_VISULAIZATIONCODE.contains(responseData.getVisualizationCode())) {
+				responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol("number")));
+				responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
+			}else {
 			responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol(valueType)));
+			}
 		}
 		
 		if((chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString()) || chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {
@@ -290,6 +301,20 @@ public class DashboardService {
 
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 
+	}
+	
+	public String callCacheBust(RequestInfo requestInfo) {
+		Object response = null;	
+		StringBuilder uri = new StringBuilder(configurationLoader.getAnalyticsHost());
+		uri.append(configurationLoader.getAnalyticsWorkDir());
+		uri.append(configurationLoader.getAnalyticsEndpoint());
+		try {
+		   response =  commonRepository.fetchResult(uri, requestInfo);
+		} catch (ServiceCallException se) {
+			throw new CustomException("DASHBOARD_ANALYTICS_ERROR", " Invalid analytics service call");
+		}
+		
+		return String.valueOf(response);
 	}
 	
 }

@@ -174,7 +174,7 @@ public class GrievanceService {
 				actionInfo = actionInfos.get(servReqCount);
 				if(null != actionInfo) {
 					actionInfo.setUuid(UUID.randomUUID().toString()); actionInfo.setBusinessKey(currentId);
-					actionInfo.setAction(WorkFlowConfigs.ACTION_OPEN); actionInfo.setAssignee(null); actionInfo.setBy(by);
+					actionInfo.setAction(WorkFlowConfigs.ACTION_OPEN); actionInfo.setBy(by);
 					actionInfo.setWhen(auditDetails.getCreatedTime()); actionInfo.setTenantId(tenantId); actionInfo.setStatus(actionStatusMap.get(WorkFlowConfigs.ACTION_OPEN));	
 				}else {
 					ActionInfo newActionInfo = ActionInfo.builder().uuid(UUID.randomUUID().toString()).businessKey(currentId)
@@ -190,10 +190,12 @@ public class GrievanceService {
 			}
 			servReq.setAuditDetails(auditDetails); servReq.setServiceRequestId(currentId);servReq.setActive(true);
 			servReq.setStatus(StatusEnum.OPEN);servReq.setFeedback(null);servReq.setRating(null); 
-			servReq.getAddressDetail().setUuid(UUID.randomUUID().toString());
-			servReq.getAddressDetail().setAuditDetails(auditDetails);
-			servReq.getAddressDetail().setTenantId(tenantId);
-			servReq.setAddressId(servReq.getAddressDetail().getUuid());
+			
+//			Commented address code, as it is not required for now
+//			servReq.getAddressDetail().setUuid(UUID.randomUUID().toString());
+//			servReq.getAddressDetail().setAuditDetails(auditDetails);
+//			servReq.getAddressDetail().setTenantId(tenantId);
+//			servReq.setAddressId(servReq.getAddressDetail().getUuid());
 			
 			List<Object> serivceDefs = getServiceType(servReq, requestInfo);
 			if(!CollectionUtils.isEmpty(serivceDefs))
