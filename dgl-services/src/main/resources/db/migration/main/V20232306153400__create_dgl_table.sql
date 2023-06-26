@@ -1,4 +1,4 @@
-CREATE TABLE eg_dgl_reference_data(
+CREATE TABLE if not exists eg_dgl_reference_data(
 
 tenantid                character varying(64) NOT NULL,
 consumercode            character varying(256),
