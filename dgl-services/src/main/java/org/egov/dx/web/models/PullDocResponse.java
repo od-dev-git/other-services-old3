@@ -19,11 +19,13 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("PullDocResponse")
 public class PullDocResponse {
 
+	@XStreamAlias("xmlns")
+	private String xmlns = "http://tempuri.org/";
+	
 	@XStreamAlias("ResponseStatus")
 	private ResponseStatus responseStatus;
     
 	@XStreamAlias("DocDetails")
     private DocDetailsResponse docDetails;
-    
-     
+  
 }

@@ -18,6 +18,9 @@ import lombok.NoArgsConstructor;
 @XmlRootElement
 @XStreamAlias("PullURIResponse")
 public class PullURIResponse {
+	
+	@XStreamAlias("xmlns")
+	private String xmlns = "http://tempuri.org/";
 
 	@XStreamAlias("ResponseStatus")
 	private ResponseStatus responseStatus;

@@ -1,12 +1,17 @@
 package org.egov.dx.repository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.egov.dx.util.PTServiceDXConstants;
+import org.egov.dx.web.models.DGLModel;
+import org.egov.dx.web.models.DGLSearchCriteria;
 import org.egov.tracer.model.CustomException;
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -25,6 +30,12 @@ public class Repository {
 	@Autowired
 	//@Qualifier("secondaryMapper")
 	private ObjectMapper mapper;
+	
+	@Autowired
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+	
+	@Autowired
+	private DglQueryBuilder queryBuilder;
 		
 	/**
 	 * Fetches results from external services through rest call.
@@ -54,5 +65,17 @@ public class Repository {
 			log.error("Exception while fetching from searcher: ", e);
 		}
 		return response;
+	}
+
+	public DGLModel searchDataForDGL(DGLSearchCriteria criteria) {
+		
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = queryBuilder.getDGLDataQuery(criteria, preparedStatementValues);
+		log.info("query for fetching records: "+query);
+		DGLModel dglResponse = namedParameterJdbcTemplate.query(query, preparedStatementValues, new DglRowMapper());
+		if(StringUtils.isEmpty(dglResponse.getConsumerCode()))
+			return null;
+		return dglResponse;
+
 	}
 }

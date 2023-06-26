@@ -25,7 +25,6 @@ public class DocDetailsResponse {
 	@XStreamAlias("URI")
     private String URI;
 	
-	
 	@XStreamAlias("DocContent")
     private String docContent;
 	
