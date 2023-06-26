@@ -64,4 +64,10 @@ public class Configurations {
 	
 	@Value("${bpa.service.search.endpoint}")
 	private String bpaSearchEndpoint;
+	
+	@Value("${kafka.topics.save.dgl}")
+	private String saveTopic;
+
+	@Value("${kafka.topics.update.dgl}")
+	private String updateTopic;
 }

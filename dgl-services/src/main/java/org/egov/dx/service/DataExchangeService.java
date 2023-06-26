@@ -23,15 +23,22 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
+import org.egov.dx.producer.DGLProducer;
+import org.egov.dx.repository.Repository;
 import org.egov.dx.util.Configurations;
 import org.egov.dx.util.PTServiceDXConstants;
 import org.egov.dx.web.models.Address;
 import org.egov.dx.web.models.Certificate;
 import org.egov.dx.web.models.CertificateData;
 import org.egov.dx.web.models.CertificateForData;
+import org.egov.dx.web.models.DGLModel;
+import org.egov.dx.web.models.DGLRequest;
+import org.egov.dx.web.models.DGLSearchCriteria;
 import org.egov.dx.web.models.DocDetailsResponse;
 import org.egov.dx.web.models.FileStoreUrlResponse;
 import org.egov.dx.web.models.IssuedBy;
@@ -110,11 +117,18 @@ public class DataExchangeService {
 	@Autowired
 	private BPAService bpaService;
 	
+	@Autowired 
+	private Repository repository;
+	
+	@Autowired
+	private DGLProducer producer;
+	
+	
 	public String searchPullURIRequest(SearchCriteria  searchCriteria) throws IOException {
 		
 		if(searchCriteria.getOrigin().equals(ORIGIN))
 		{
-			return searchForDigiLockerURIRequest(searchCriteria);
+			return searchForDigiLockerURIRequest(searchCriteria, false);
 		}
 		return DIGILOCKER_ORIGIN_NOT_SUPPORTED;
 	}
@@ -130,7 +144,8 @@ public class DataExchangeService {
 	}
 	
 
-	public String searchForDigiLockerURIRequest(SearchCriteria searchCriteria) throws IOException {
+	public String searchForDigiLockerURIRequest(SearchCriteria searchCriteria, Boolean isRequestForDoc)
+			throws IOException {
 
 		RequestInfo request = new RequestInfo();
 		request.setApiId("Rainmaker");
@@ -141,38 +156,58 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("77aba144-81c8-44df-9298-0ef96bcb7912");
+		request.setAuthToken("77aba144-81c8-44df-9298-0ef96bcb7912");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
+		PullDocResponse modelDoc = new PullDocResponse();
 		XStream xstream = new XStream();
 		xstream.addPermission(NoTypePermission.NONE); // forbid everything
 		xstream.addPermission(NullPermission.NULL); // allow "null"
 		xstream.addPermission(PrimitiveTypePermission.PRIMITIVES);
 		xstream.addPermission(AnyTypePermission.ANY);
 
-		if (PTServiceDXConstants.DIGILOCKER_DOCTYPE.equals(searchCriteria.getDocType())) {
-			return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
-			//processPTPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
-		} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_MR_CERT.equals(searchCriteria.getDocType())) {
-			processMRPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
-		} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT.equals(searchCriteria.getDocType())) {
-			processTLPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
-		} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT.equals(searchCriteria.getDocType())) {
-			processBPAPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
-		} else {
-			return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
+		
+		if(isRequestForDoc) {
+			if (PTServiceDXConstants.DIGILOCKER_DOCTYPE.equals(searchCriteria.getDocType())) {
+				return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
+				//processPTPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
+			} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_MR_CERT.equals(searchCriteria.getDocType())) {
+				processMRPullUriRequest(searchCriteria, requestInfoWrapper, modelDoc, xstream);
+			} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT.equals(searchCriteria.getDocType())) {
+				processTLPullUriRequest(searchCriteria, requestInfoWrapper, modelDoc, xstream);
+			} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT.equals(searchCriteria.getDocType())) {
+				processBPAPullUriRequest(searchCriteria, requestInfoWrapper, modelDoc, xstream);
+			} else {
+				return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
+			}
+			xstream.processAnnotations(PullDocResponse.class);
+			xstream.toXML(modelDoc);
+			return xstream.toXML(modelDoc);
+		}else {
+			if (PTServiceDXConstants.DIGILOCKER_DOCTYPE.equals(searchCriteria.getDocType())) {
+				return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
+				//processPTPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
+			} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_MR_CERT.equals(searchCriteria.getDocType())) {
+				processMRPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
+			} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT.equals(searchCriteria.getDocType())) {
+				processTLPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
+			} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT.equals(searchCriteria.getDocType())) {
+				processBPAPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
+			} else {
+				return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
+			}
+			xstream.processAnnotations(PullURIResponse.class);
+			xstream.toXML(model);
+			return xstream.toXML(model);
 		}
-
-		xstream.processAnnotations(PullURIResponse.class);
-		xstream.toXML(model);
-
-		return xstream.toXML(model);
+		
+		
 
 	}
 	
 	private void processBPAPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
-			PullURIResponse model, XStream xstream) throws IOException {
+			Object model, XStream xstream) throws IOException {
 		BPASearchCriteria criteria = new BPASearchCriteria();
 		criteria.setTenantId("od."+searchCriteria.getCity());
 		criteria.setApprovalNo(searchCriteria.getApprovalNumber());
@@ -180,7 +215,7 @@ public class DataExchangeService {
 	}
 
 	private void processTLPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
-			PullURIResponse model, XStream xstream) throws MalformedURLException, IOException {
+			Object model, XStream xstream) throws MalformedURLException, IOException {
 		TradeLicenseSearchCriteria criteria = new TradeLicenseSearchCriteria();
 		criteria.setTenantId("od."+searchCriteria.getCity());
 		criteria.setLicenseNumbers(Arrays.asList(searchCriteria.getLicenseNumber()));
@@ -188,7 +223,7 @@ public class DataExchangeService {
 	}
 
 	private void processMRPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
-			PullURIResponse model, XStream xstream) throws IOException, MalformedURLException {
+			Object model, XStream xstream) throws IOException, MalformedURLException {
 		MRSearchCriteria criteria = new MRSearchCriteria();
 		criteria.setTenantId("od."+searchCriteria.getCity());
 		criteria.setMrNumbers(Arrays.asList(searchCriteria.getMrNumber()));
@@ -204,7 +239,7 @@ public class DataExchangeService {
 	}
 
 	private void generateMRCertificate(SearchCriteria searchCriteria, MRSearchCriteria criteria,
-			RequestInfoWrapper requestInfoWrapper, PullURIResponse model, XStream xstream)
+			RequestInfoWrapper requestInfoWrapper, Object model, XStream xstream)
 			throws IOException, MalformedURLException {
 		
 		List<MarriageRegistration> registrations = mrService.getMarriageRegistrations(criteria, requestInfoWrapper);
@@ -240,6 +275,7 @@ public class DataExchangeService {
 				}
 				
 				createCeritificateFromFilestoreIdForMR(searchCriteria, model, xstream, certificate, filestoreid, filestore, registrations.get(0));
+			
 			}
 		}	
 		else
@@ -250,7 +286,7 @@ public class DataExchangeService {
 		     LocalDateTime now = LocalDateTime.now();  
 		     responseStatus.setTs(dtf.format(now));
 		     responseStatus.setTxn(searchCriteria.getTxn());
-		     model.setResponseStatus(responseStatus);
+		     
 		 
 		     DocDetailsResponse docDetailsResponse=new DocDetailsResponse();
 		     DocDetailsIssuedTo issuedTo=new DocDetailsIssuedTo();
@@ -261,13 +297,20 @@ public class DataExchangeService {
 		     //docDetailsResponse.setDataContent("");
 		     docDetailsResponse.setDocContent("");
 		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_MR);
-		     model.setDocDetails(docDetailsResponse);
+		     if(model.getClass().equals(PullDocResponse.class)){
+		    	 ((PullDocResponse) model).setDocDetails(docDetailsResponse);
+		    	 ((PullDocResponse) model).setResponseStatus(responseStatus);
+		     }else {
+		    	 ((PullURIResponse) model).setDocDetails(docDetailsResponse);
+		    	 ((PullURIResponse) model).setResponseStatus(responseStatus);
+		     }
+		     
 
 		}
 
 	}
 
-	private void createCeritificateFromFilestoreIdForMR(SearchCriteria searchCriteria, PullURIResponse model,
+	private void createCeritificateFromFilestoreIdForMR(SearchCriteria searchCriteria, Object model,
 			XStream xstream, MrCertificate certificate, FileStoreUrlResponse filestoreid, String filestore,
 			MarriageRegistration marriageRegistration)
 			throws MalformedURLException, IOException {
@@ -286,7 +329,7 @@ public class DataExchangeService {
 			while ((nRead = is1.read(data, 0, data.length)) != -1) {
 				buffer.write(data, 0, nRead);
 			}
-
+			
 			buffer.flush();
 			byte[] targetArray = buffer.toByteArray();
 			String encodedString = Base64.getEncoder().encodeToString(targetArray);
@@ -297,7 +340,6 @@ public class DataExchangeService {
 			LocalDateTime now = LocalDateTime.now();
 			responseStatus.setTs(dtf.format(now));
 			responseStatus.setTxn(searchCriteria.getTxn());
-			model.setResponseStatus(responseStatus);
 
 			DocDetailsPerson person = new DocDetailsPerson();
 			person.setName(marriageRegistration.getCoupleDetails().get(0).getGroom().getFirstName());
@@ -315,19 +357,35 @@ public class DataExchangeService {
 			List persons = new ArrayList<>();
 			persons.add(person);
 			
-			DocDetailsIssuedTo issuedTo = new DocDetailsIssuedTo();
-			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
-			issuedTo.setPersons(persons);
-			docDetailsResponse.setURI(tenantId.concat("-")
-					.concat(DIGILOCKER_DOCTYPE_MR_CERT).concat("-").concat(filestore));
-			docDetailsResponse.setIssuedTo(issuedTo);
+			if(model.getClass().equals(PullDocResponse.class)) {
 
-			docDetailsResponse
-					.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
+				DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
+				docDetailsResponse
+						.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
+				docDetailsResponse.setDocContent(encodedString);
+				((PullDocResponse) model).setResponseStatus(responseStatus);
+				((PullDocResponse) model).setDocDetails(docDetailsResponse);
+			}else {
+				
+				DGLRequest dgl = populateDataAfterSuccessResponse(searchCriteria,filestore);
+				String maskedId = dgl.getDglModel().getMaskedId();
+				
+				DocDetailsIssuedTo issuedTo = new DocDetailsIssuedTo();
+				DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
+				issuedTo.setPersons(persons);
+				docDetailsResponse.setURI(DIGILOCKER_ISSUER_ID.concat("-")
+						.concat(DIGILOCKER_DOCTYPE_MR_CERT).concat("-").concat(maskedId));
+				docDetailsResponse.setIssuedTo(issuedTo);
 
-			docDetailsResponse.setDocContent(encodedString);
+				docDetailsResponse
+						.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
 
-			model.setDocDetails(docDetailsResponse);
+				docDetailsResponse.setDocContent(encodedString);
+				((PullURIResponse) model).setResponseStatus(responseStatus);
+				((PullURIResponse) model).setDocDetails(docDetailsResponse);
+			}
+
+			
 		} catch (NullPointerException npe) {
 			log.error(npe.getMessage());
 			log.info("Error Occured", npe.getMessage());
@@ -619,22 +677,34 @@ public class DataExchangeService {
 		String[] urlArray = searchCriteria.getURI().split("-");
 		int len = urlArray.length;
 		String filestoreId = "";
-		String tenantId = urlArray[0];
-		for (int i = 3; i < len; i++) {
+		String docType = urlArray[1];
+		for (int i = 2; i < len; i++) {
 			if (i == (len - 1))
 				filestoreId = filestoreId.concat(urlArray[i]);
 			else
 				filestoreId = filestoreId.concat(urlArray[i]).concat("-");
 
 		}
-		FileStoreUrlResponse o = paymentService.getFilestore(filestoreId, tenantId);
-
+		
+		DGLSearchCriteria criteria = DGLSearchCriteria.builder().maskedId(filestoreId).build();
+		
+		DGLModel dglModel = repository.searchDataForDGL(criteria); 
+	
+		String tenantId = "";
+		String unMaskedId = "";
+		FileStoreUrlResponse o = null;
+		if (Objects.nonNull(dglModel)) {
+			tenantId = dglModel.getTenantId();
+			unMaskedId = dglModel.getFilestore();
+			o = paymentService.getFilestore(unMaskedId, tenantId);
+		}
+		
 		if (o != null && !o.getFilestoreIds().isEmpty()) {
 			String pdfPath = o.getFilestoreIds().get(0).get("url");
 			URL url1 = new URL(pdfPath);
 			try {
 
-				// Read the PDF from the URL and save to a local file
+				/*// Read the PDF from the URL and save to a local file
 				InputStream is1 = url1.openStream();
 				ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
@@ -669,9 +739,21 @@ public class DataExchangeService {
 				// docDetailsResponse.setDataContent(encodedString);
 				docDetailsResponse.setDocContent(encodedString);
 
-				model.setDocDetails(docDetailsResponse);
+				model.setDocDetails(docDetailsResponse);*/
 
 				// return targetArray.toString();
+				
+				SearchCriteria searchCriteriaForPullUri = SearchCriteria.builder()
+						.city(tenantId.substring(3, tenantId.length())).docType(docType).build();
+				
+				if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_MR_CERT.equals(docType)) {
+					searchCriteriaForPullUri.setMrNumber(dglModel.getConsumerCode());
+				} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT.equals(docType)) {
+					searchCriteriaForPullUri.setLicenseNumber(dglModel.getConsumerCode());
+				} else if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT.equals(docType)) {
+					searchCriteriaForPullUri.setApprovalNumber(dglModel.getConsumerCode());;
+				}
+				return searchForDigiLockerURIRequest(searchCriteriaForPullUri, true);
 
 			} catch (NullPointerException npe) {
 				log.error(npe.getMessage());
@@ -692,7 +774,7 @@ public class DataExchangeService {
 			issuedTo.setPersons(persons);
 			docDetailsResponse.setURI(null);
 			//docDetailsResponse.setIssuedTo(issuedTo);
-			// docDetailsResponse.setDataContent("");
+			docDetailsResponse.setDataContent("");
 			docDetailsResponse.setDocContent("");
 
 			model.setDocDetails(docDetailsResponse);
@@ -784,7 +866,7 @@ public class DataExchangeService {
 	}
 	
 	private void generateTlLicense(SearchCriteria searchCriteria, TradeLicenseSearchCriteria criteria,
-			RequestInfoWrapper requestInfoWrapper, PullURIResponse model, XStream xstream)
+			RequestInfoWrapper requestInfoWrapper, Object model, XStream xstream)
 			throws IOException, MalformedURLException {
 		
 		List<TradeLicense> licenses = tlService.getTradeLicenses(criteria, requestInfoWrapper);
@@ -820,6 +902,7 @@ public class DataExchangeService {
 				}
 				
 				createCeritificateFromFilestoreIdForTL(searchCriteria, model, xstream, certificate, filestoreid, filestore, licenses.get(0));
+				
 			}
 		}	
 		else
@@ -830,7 +913,7 @@ public class DataExchangeService {
 		     LocalDateTime now = LocalDateTime.now();  
 		     responseStatus.setTs(dtf.format(now));
 		     responseStatus.setTxn(searchCriteria.getTxn());
-		     model.setResponseStatus(responseStatus);
+		     
 		 
 		     DocDetailsResponse docDetailsResponse=new DocDetailsResponse();
 		     DocDetailsIssuedTo issuedTo=new DocDetailsIssuedTo();
@@ -841,7 +924,15 @@ public class DataExchangeService {
 		     //docDetailsResponse.setDataContent("");
 		     docDetailsResponse.setDocContent("");
 		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_TL);
-		     model.setDocDetails(docDetailsResponse);
+		     
+		     if(model.getClass().equals(PullDocResponse.class)){
+		    	 ((PullDocResponse) model).setDocDetails(docDetailsResponse);
+		    	 ((PullDocResponse) model).setResponseStatus(responseStatus);
+		     }else {
+		    	 ((PullURIResponse) model).setDocDetails(docDetailsResponse);
+		    	 ((PullURIResponse) model).setResponseStatus(responseStatus);
+		     }
+		     
 
 		}
 	}
@@ -851,7 +942,7 @@ public class DataExchangeService {
 		return true;
 	}
 
-	private void createCeritificateFromFilestoreIdForTL(SearchCriteria searchCriteria, PullURIResponse model,
+	private void createCeritificateFromFilestoreIdForTL(SearchCriteria searchCriteria, Object model,
 			XStream xstream, TLCertificate certificate, FileStoreUrlResponse filestoreid, String filestore,
 			TradeLicense tradeLicense)
 			throws IOException, MalformedURLException {
@@ -882,7 +973,6 @@ public class DataExchangeService {
 			LocalDateTime now = LocalDateTime.now();
 			responseStatus.setTs(dtf.format(now));
 			responseStatus.setTxn(searchCriteria.getTxn());
-			model.setResponseStatus(responseStatus);
 
 			
 			DocDetailsPerson person = new DocDetailsPerson();
@@ -900,20 +990,33 @@ public class DataExchangeService {
 			
 			List persons = new ArrayList<>();
 			persons.add(person);			
-			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
-			DocDetailsIssuedTo issuedTo = new DocDetailsIssuedTo();
-			
-			issuedTo.setPersons(persons);
-			docDetailsResponse.setURI(tenantId.concat("-")
-					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT).concat("-").concat(filestore));
-			docDetailsResponse.setIssuedTo(issuedTo);
+			if(model.getClass().equals(PullDocResponse.class)) {
 
-			docDetailsResponse
-					.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
+				DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
+				docDetailsResponse
+						.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
+				docDetailsResponse.setDocContent(encodedString);
+				((PullDocResponse) model).setResponseStatus(responseStatus);
+				((PullDocResponse) model).setDocDetails(docDetailsResponse);
+			}else {
+				
+				DGLRequest dgl = populateDataAfterSuccessResponse(searchCriteria,filestore);
+				String maskedId = dgl.getDglModel().getMaskedId();
+				
+				DocDetailsIssuedTo issuedTo = new DocDetailsIssuedTo();
+				DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
+				issuedTo.setPersons(persons);
+				docDetailsResponse.setURI(DIGILOCKER_ISSUER_ID.concat("-")
+						.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT).concat("-").concat(maskedId));
+				docDetailsResponse.setIssuedTo(issuedTo);
 
-			docDetailsResponse.setDocContent(encodedString);
+				docDetailsResponse
+						.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
 
-			model.setDocDetails(docDetailsResponse);
+				docDetailsResponse.setDocContent(encodedString);
+				((PullURIResponse) model).setResponseStatus(responseStatus);
+				((PullURIResponse) model).setDocDetails(docDetailsResponse);
+			}
 		} catch (NullPointerException npe) {
 			log.error(npe.getMessage());
 			log.info("Error Occured", npe.getMessage());
@@ -996,7 +1099,7 @@ public class DataExchangeService {
 		person.setEmail(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getEmailId());
 		person.setTitle(
 				tradeLicense.getTradeLicenseDetail().getOwners().get(0).getGender().equalsIgnoreCase("MALE") ? "Mr."
-						: "Mrs.");
+						: "Ms.");
 		Address addressPerson =  new Address();
 		addressPerson.setCountry("IN");
 		addressPerson.setType("");
@@ -1068,7 +1171,7 @@ public class DataExchangeService {
 	}
 	
 	private void generateBPALetter(SearchCriteria searchCriteria, BPASearchCriteria criteria,
-			RequestInfoWrapper requestInfoWrapper, PullURIResponse model, XStream xstream) throws IOException {
+			RequestInfoWrapper requestInfoWrapper, Object model, XStream xstream) throws IOException {
 		
 		List<BPA> applications = bpaService.getBPAPermitLetter(criteria, requestInfoWrapper);
 		
@@ -1102,6 +1205,7 @@ public class DataExchangeService {
 				}
 				
 				createCeritificateFromFilestoreIdForBPA(searchCriteria, model, xstream, certificate, filestoreid, filestore, applications.get(0));
+			
 			}
 		}	
 		else
@@ -1112,7 +1216,6 @@ public class DataExchangeService {
 		     LocalDateTime now = LocalDateTime.now();  
 		     responseStatus.setTs(dtf.format(now));
 		     responseStatus.setTxn(searchCriteria.getTxn());
-		     model.setResponseStatus(responseStatus);
 		 
 		     DocDetailsResponse docDetailsResponse=new DocDetailsResponse();
 		     DocDetailsIssuedTo issuedTo=new DocDetailsIssuedTo();
@@ -1123,7 +1226,13 @@ public class DataExchangeService {
 		     //docDetailsResponse.setDataContent("");
 		     docDetailsResponse.setDocContent("");
 		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_BPA);
-		     model.setDocDetails(docDetailsResponse);
+		     if(model.getClass().equals(PullDocResponse.class)){
+		    	 ((PullDocResponse) model).setDocDetails(docDetailsResponse);
+		    	 ((PullDocResponse) model).setResponseStatus(responseStatus);
+		     }else {
+		    	 ((PullURIResponse) model).setDocDetails(docDetailsResponse);
+		    	 ((PullURIResponse) model).setResponseStatus(responseStatus);
+		     }
 
 		}
 		
@@ -1190,7 +1299,7 @@ public class DataExchangeService {
 		return certificate;
 	}
 	
-	private void createCeritificateFromFilestoreIdForBPA(SearchCriteria searchCriteria, PullURIResponse model,
+	private void createCeritificateFromFilestoreIdForBPA(SearchCriteria searchCriteria, Object model,
 			XStream xstream, BPACertificate certificate, FileStoreUrlResponse filestoreid, String filestore,
 			BPA bpa)
 			throws MalformedURLException, IOException {
@@ -1221,7 +1330,6 @@ public class DataExchangeService {
 			LocalDateTime now = LocalDateTime.now();
 			responseStatus.setTs(dtf.format(now));
 			responseStatus.setTxn(searchCriteria.getTxn());
-			model.setResponseStatus(responseStatus);
 			
 			DocDetailsPerson person = new DocDetailsPerson();
 			person.setName(bpa.getLandInfo().getOwners().get(0).getName());
@@ -1239,25 +1347,81 @@ public class DataExchangeService {
 			List persons = new ArrayList<>();
 			persons.add(person);
 			
+			if(model.getClass().equals(PullDocResponse.class)) {
+
+				DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
+				docDetailsResponse
+						.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
+				docDetailsResponse.setDocContent(encodedString);
+				((PullDocResponse) model).setResponseStatus(responseStatus);
+				((PullDocResponse) model).setDocDetails(docDetailsResponse);
+			}else {
+				
+				DGLRequest dgl = populateDataAfterSuccessResponse(searchCriteria,filestore);
+				String maskedId = dgl.getDglModel().getMaskedId();
+				
+				DocDetailsIssuedTo issuedTo = new DocDetailsIssuedTo();
+				DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
+				issuedTo.setPersons(persons);
+				docDetailsResponse.setURI(DIGILOCKER_ISSUER_ID.concat("-")
+						.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT).concat("-").concat(maskedId));
+				docDetailsResponse.setIssuedTo(issuedTo);
+
+				docDetailsResponse
+						.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
+
+				docDetailsResponse.setDocContent(encodedString);
+				((PullURIResponse) model).setResponseStatus(responseStatus);
+				((PullURIResponse) model).setDocDetails(docDetailsResponse);
+			}
 			
-			DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
-			DocDetailsIssuedTo issuedTo = new DocDetailsIssuedTo();
-			issuedTo.setPersons(persons);
-			docDetailsResponse.setURI(tenantId.concat("-")
-					.concat(PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT).concat("-").concat(filestore));
-			docDetailsResponse.setIssuedTo(issuedTo);
-
-			docDetailsResponse
-					.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
-
-			docDetailsResponse.setDocContent(encodedString);
-
-			model.setDocDetails(docDetailsResponse);
 		} catch (NullPointerException npe) {
 			log.error(npe.getMessage());
 			log.info("Error Occured", npe.getMessage());
 		}
 
+	}
+	
+	private DGLRequest populateDataAfterSuccessResponse(SearchCriteria searchCriteria, String filestore) {
+		
+		String docType = searchCriteria.getDocType();
+		String tenantId = "od."+searchCriteria.getCity();
+		String consumerCode = "";
+		
+		if(docType.equalsIgnoreCase(PTServiceDXConstants.DIGILOCKER_DOCTYPE_MR_CERT)) {
+			consumerCode = searchCriteria.getMrNumber();
+		}else if (docType.equalsIgnoreCase(PTServiceDXConstants.DIGILOCKER_DOCTYPE_TL_CERT)) {
+			consumerCode = searchCriteria.getLicenseNumber();
+		}else if (docType.equalsIgnoreCase(PTServiceDXConstants.DIGILOCKER_DOCTYPE_BPA_CERT)) {
+			consumerCode = searchCriteria.getApprovalNumber();
+		}
+		
+		String maskedId = getMaskedIdForFilestore();
+		
+		DGLSearchCriteria criteria = DGLSearchCriteria.builder().consumerCode(consumerCode).build();
+		
+		DGLModel dglResponse = repository.searchDataForDGL(criteria);
+		
+		DGLModel dglToPersist = DGLModel.builder().consumerCode(consumerCode).maskedId(maskedId).filestore(filestore)
+				.tenantId(tenantId).build();
+		
+		DGLRequest request = DGLRequest.builder().dglModel(dglToPersist).build();
+		
+		if(Objects.nonNull(dglResponse)) {
+			
+			dglToPersist.setMaskedId(dglResponse.getMaskedId());
+			producer.push(configurations.getUpdateTopic(), request);
+			
+		} else {
+			producer.push(configurations.getSaveTopic(), request);
+		}
+		
+		return request;
+	}
+
+	private String getMaskedIdForFilestore() {
+		UUID uuid = UUID.randomUUID();
+		return uuid.toString().replace("-", "");
 	}
 
 }
