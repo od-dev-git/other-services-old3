@@ -48,7 +48,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class }) 
+@SpringBootApplication 
 @ComponentScan
 @Import(TracerConfiguration.class)
 public class PTServicesDxApplication {
