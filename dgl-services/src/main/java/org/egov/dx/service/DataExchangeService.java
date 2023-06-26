@@ -156,7 +156,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		request.setAuthToken("77aba144-81c8-44df-9298-0ef96bcb7912");
+		//request.setAuthToken("77aba144-81c8-44df-9298-0ef96bcb7912");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
