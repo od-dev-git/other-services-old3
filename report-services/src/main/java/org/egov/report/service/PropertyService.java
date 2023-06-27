@@ -2,6 +2,7 @@ package org.egov.report.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -80,6 +81,9 @@ public class PropertyService {
 	
 	@Autowired
     private DemandService demandService;
+	
+	public static final List<String> TAXHEADS_NOT_ALLOWED_FOR_DEMAND_REPORT = Collections
+			.unmodifiableList(Arrays.asList("PT_ADVANCE_CARRYFORWARD","PT_PENALTY","PT_INTEREST","PT_TIME_REBATE","PT_TIME_PENALTY"));
 	
     public List<PropertyDetailsResponse> getPropertyDetails(RequestInfo requestInfo,
             PropertyDetailsSearchCriteria searchCriteria) {
@@ -399,6 +403,7 @@ public class PropertyService {
                     tempResponse.setTaxamount(taxAmount.toString());
                     tempResponse.setCollectionamount(collectionAmount.toString());
                     tempDemandDetail.stream().forEach(demandUnit -> {
+                    	if(!TAXHEADS_NOT_ALLOWED_FOR_DEMAND_REPORT.contains(demandUnit.getTaxHeadMasterCode())) {
                         if (demandUnit.getTaxAmount() != null) {
                             tempResponse.setTaxamount(new BigDecimal(tempResponse.getTaxamount())
                                     .add(demandUnit.getTaxAmount()).toString());
@@ -407,6 +412,7 @@ public class PropertyService {
                             tempResponse.setCollectionamount(new BigDecimal(tempResponse.getCollectionamount())
                                     .add(demandUnit.getCollectionAmount()).toString());
                         }
+                    	}
                     });
                     taxAmount = new BigDecimal(tempResponse.getTaxamount());
                     collectionAmount = new BigDecimal(tempResponse.getCollectionamount());
