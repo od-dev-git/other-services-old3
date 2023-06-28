@@ -675,25 +675,31 @@ public class BPAService {
         criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
         HashMap<String, BigDecimal> totalAppicationReceived = getTotalApplicationReceivedByService(payloadDetails);
         HashMap<String, BigDecimal> totalAppicationApproved = getTotalApplicationApprovedByService(payloadDetails);
-        
-        
+        HashMap<String, BigDecimal> concatedHashMap = new HashMap<>(totalAppicationReceived);
+        concatedHashMap.putAll(totalAppicationApproved);
+                
         List<Data> response = new ArrayList<>();
         int serialNumber = 1;
 
-        for (HashMap.Entry<String, BigDecimal> totalApplication : totalAppicationReceived.entrySet()) {
+        for (HashMap.Entry<String, BigDecimal> totalApplication : concatedHashMap.entrySet()) {
             List<Plot> plots = new ArrayList();
             plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
 
             plots.add(Plot.builder().name("Service").label(totalApplication.getKey().toString()).symbol("text")
                     .build());
 
-            plots.add(Plot.builder().name("Application Received").value(totalApplication.getValue() == null ? BigDecimal.ZERO : totalApplication.getValue())
-                    .symbol("number").build());
+			plots.add(Plot.builder().name("Application Received")
+					.value(totalAppicationReceived.get(totalApplication.getKey()) == null ? BigDecimal.ZERO
+							: totalAppicationReceived.get(totalApplication.getKey()))
+					.symbol("number").build());
 
-            plots.add(Plot.builder().name("Application Approved")
-                    .value(totalAppicationApproved.get(totalApplication.getKey()) == null ? BigDecimal.ZERO : totalAppicationApproved.get(totalApplication.getKey())).symbol("number").build());
+			plots.add(Plot.builder().name("Application Approved")
+					.value(totalAppicationApproved.get(totalApplication.getKey()) == null ? BigDecimal.ZERO
+							: totalAppicationApproved.get(totalApplication.getKey()))
+					.symbol("number").build());
 
-            response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber).build());
+			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
+					.build());
 
             serialNumber++;
 
