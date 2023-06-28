@@ -184,6 +184,12 @@ public class PGRConstants {
 	public static final String ULB_GRADE_MUNICIPALITY = "Municipality";
 	public static final String ULB_GRADE_NAC = "NAC";
 	
+	public static final String LOCALIZATION_MODULE = "rainmaker-sr";
+	public static final String CREATE_MSG_CODE = "sr.notification.create";
+	public static final String L2_FORWARD_MSG_CODE = "sr.notification.forward.l2";
+	public static final String L3_FORWARD_MSG_CODE = "sr.notification.forward.l3";
+	public static final String CLOSED_MSG_CODE = "sr.notification.closed";
+	
 	
 	
 	private static Map<String, String> statusNotifKeyMap = prepareStatusNotifKeyMap();
