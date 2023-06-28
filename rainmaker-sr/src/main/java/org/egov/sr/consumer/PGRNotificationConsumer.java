@@ -37,6 +37,7 @@ import org.egov.sr.service.GrievanceService;
 import org.egov.sr.service.NotificationService;
 import org.egov.sr.utils.PGRConstants;
 import org.egov.sr.utils.PGRUtils;
+import org.egov.sr.utils.SRUtils;
 import org.egov.sr.utils.WorkFlowConfigs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -131,6 +132,9 @@ public class PGRNotificationConsumer {
 
     @Autowired
     private GrievanceService requestService;
+    
+    @Autowired 
+    private SRUtils srUtils;
 
     @KafkaListener(topics = {"${kafka.topics.save.service}", "${kafka.topics.update.service}"})
 
@@ -257,7 +261,27 @@ public class PGRNotificationConsumer {
 
 	private String getMessageFromLocalization(Service serviceReq, ActionInfo actionInfo, RequestInfo requestInfo) {
 		
-		return "Dear User, This is a Test Message. Thank you ! Govt of Odisha ";
+		String tenantId = "od";
+		String customMessage = "";
+		String localizationMessages = srUtils.getLocalizationMessages(tenantId, requestInfo);
+		if (actionInfo.getAction().equals(WorkFlowConfigs.ACTION_OPEN)) {
+			String notificationCode = PGRConstants.CREATE_MSG_CODE;
+			customMessage = srUtils.getMessageTemplate(notificationCode, localizationMessages);
+			customMessage = customMessage.replace("<1>", serviceReq.getServiceRequestId());
+		} else if (actionInfo.getAction().equals(WorkFlowConfigs.ACTION_FORWARD_TO_L2)) {
+			String notificationCode = PGRConstants.L2_FORWARD_MSG_CODE;
+			customMessage = srUtils.getMessageTemplate(notificationCode, localizationMessages);
+			customMessage = customMessage.replace("<1>", serviceReq.getServiceRequestId());
+		} else if (actionInfo.getAction().equals(WorkFlowConfigs.ACTION_FORWARD_TO_L3)) {
+			String notificationCode = PGRConstants.L3_FORWARD_MSG_CODE;
+			customMessage = srUtils.getMessageTemplate(notificationCode, localizationMessages);
+			customMessage = customMessage.replace("<1>", serviceReq.getServiceRequestId());
+		} else if (actionInfo.getAction().equals(WorkFlowConfigs.ACTION_CLOSE)) {
+			String notificationCode = PGRConstants.CLOSED_MSG_CODE;
+			customMessage = srUtils.getMessageTemplate(notificationCode, localizationMessages);
+			customMessage = customMessage.replace("<1>", serviceReq.getServiceRequestId());
+		} 
+		return customMessage;
 	}
 
 
