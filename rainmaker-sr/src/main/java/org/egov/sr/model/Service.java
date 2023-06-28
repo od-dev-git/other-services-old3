@@ -81,11 +81,11 @@ public class Service   {
   private String accountId;
 
   @JsonProperty("firstName")
-  @Pattern(regexp="(^[a-zA-Z. ]$)")
+  @Pattern(regexp="^[a-zA-Z. ]{1,}$")
   private String firstName;
 
   @JsonProperty("lastName")
-  @Pattern(regexp="(^[a-zA-Z. ]$)")
+  @Pattern(regexp="^[a-zA-Z. ]{1,}$")
   private String lastName;
 
   @JsonProperty("phone")
