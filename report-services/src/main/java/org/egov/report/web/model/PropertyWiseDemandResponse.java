@@ -50,6 +50,12 @@ public class PropertyWiseDemandResponse {
     @JsonProperty("paidAmount")
     private String collectionamount ;
     
+    @JsonProperty("advanceDemandAmount")
+    private String advanceDemandAmount ;
+    
+    @JsonProperty("advanceCollectedAmount")
+    private String advanceCollectedAmount ;
+    
     @JsonProperty("dueAmount")
     private String dueamount ;
 
