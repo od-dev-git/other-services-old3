@@ -7,6 +7,7 @@ import org.egov.dx.web.models.MR.AddressMR;
 import org.egov.dx.web.models.MR.MarriageCertificate;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,19 +21,19 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("TradeLicense")
 public class TradeLicenseCertificate {
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("municipalLicenceNo")
 	private String municipalLicenceNo;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("newLicenceNo")
 	private String newLicenceNo;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("unitName")
 	private String unitName;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("validUpto")
 	private String validUpto;
 	

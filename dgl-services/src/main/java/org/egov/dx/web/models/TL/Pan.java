@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import org.egov.dx.web.models.Address;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,11 +19,11 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("pan")
 public class Pan {
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("number")
 	private String number;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("name")
 	private String name;
 

@@ -3,6 +3,7 @@ package org.egov.dx.web.models.MR;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,11 +17,11 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("Marriage")
 public class MarriageCertificate {
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("place")
 	private String place;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("solemnizedDate")
 	private String solemnizedDate;
 	
@@ -33,11 +34,19 @@ public class MarriageCertificate {
 	private Ward ward;
 	
 	@XmlAttribute
-    @XStreamAlias("husband")
+    @XStreamAlias("Husband")
 	private Husband husband;
 
 	@XmlAttribute
+    @XStreamAlias("husband")
+	private HusbandResiding husbandResiding;
+	
+	@XmlAttribute
     @XStreamAlias("wife")
 	private Wife wife;
+
+	@XmlAttribute
+    @XStreamAlias("wife")
+	private WifeResiding wifeResiding;
 	
 }

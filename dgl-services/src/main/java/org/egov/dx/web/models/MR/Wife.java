@@ -3,6 +3,7 @@ package org.egov.dx.web.models.MR;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,15 +16,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
-@XStreamAlias("wife")
+@XStreamAlias("Wife")
 public class Wife {
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("name")
     private String name;
 	
-	@XmlAttribute
-    @XStreamAlias("residingAt")
-    private String residingAt;
+	
 
 }

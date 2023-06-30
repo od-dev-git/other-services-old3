@@ -61,6 +61,7 @@ import org.egov.dx.web.models.BPA.BPACertificateData;
 import org.egov.dx.web.models.BPA.BPASearchCriteria;
 import org.egov.dx.web.models.BPA.BuildingPlanCertificate;
 import org.egov.dx.web.models.MR.Husband;
+import org.egov.dx.web.models.MR.HusbandResiding;
 import org.egov.dx.web.models.MR.MRIssuedTo;
 import org.egov.dx.web.models.MR.MRSearchCriteria;
 import org.egov.dx.web.models.MR.MarriageCertificate;
@@ -72,6 +73,7 @@ import org.egov.dx.web.models.MR.PersonMR;
 import org.egov.dx.web.models.MR.Registration;
 import org.egov.dx.web.models.MR.Ward;
 import org.egov.dx.web.models.MR.Wife;
+import org.egov.dx.web.models.MR.WifeResiding;
 import org.egov.dx.web.models.TL.BusinessProfession;
 import org.egov.dx.web.models.TL.DocDetailsIssuedTo;
 import org.egov.dx.web.models.TL.DocDetailsPerson;
@@ -86,6 +88,7 @@ import org.egov.dx.web.models.TL.TradeLicenseCertificate;
 import org.egov.dx.web.models.TL.TradeLicenseSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.security.AnyTypePermission;
@@ -156,7 +159,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("77aba144-81c8-44df-9298-0ef96bcb7912");
+		//request.setAuthToken("6f0a4b05-2493-432a-a31c-c73dd33626ef");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -169,6 +172,7 @@ public class DataExchangeService {
 
 		
 		if(isRequestForDoc) {
+			String responseHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 			if (PTServiceDXConstants.DIGILOCKER_DOCTYPE.equals(searchCriteria.getDocType())) {
 				return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
 				//processPTPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
@@ -183,8 +187,9 @@ public class DataExchangeService {
 			}
 			xstream.processAnnotations(PullDocResponse.class);
 			xstream.toXML(modelDoc);
-			return xstream.toXML(modelDoc);
+			return responseHeader+xstream.toXML(modelDoc);
 		}else {
+			String responseHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 			if (PTServiceDXConstants.DIGILOCKER_DOCTYPE.equals(searchCriteria.getDocType())) {
 				return DIGILOCKER_DOCTYPE_NOT_SUPPORTED;
 				//processPTPullUriRequest(searchCriteria, requestInfoWrapper, model, xstream);
@@ -199,7 +204,7 @@ public class DataExchangeService {
 			}
 			xstream.processAnnotations(PullURIResponse.class);
 			xstream.toXML(model);
-			return xstream.toXML(model);
+			return responseHeader +xstream.toXML(model);
 		}
 		
 		
@@ -412,9 +417,11 @@ public class DataExchangeService {
 		IssuedBy issuedBy = new IssuedBy();
 		Organization organization = new Organization();
 		organization.setType("SG");
+		organization.setTin(null);
+		organization.setCode(null);
 		Address addressIssuedBy = new Address();
+		addressIssuedBy.setType(null);
 		addressIssuedBy.setCountry("IN");
-		addressIssuedBy.setType("");
 		addressIssuedBy.setLine1("");
 		addressIssuedBy.setLine2("");
 		addressIssuedBy.setLandmark("");
@@ -427,7 +434,6 @@ public class DataExchangeService {
 		certificate.setIssuedBy(issuedBy);
 
 		MRIssuedTo issuedTo = new MRIssuedTo();
-		List<PersonMR> persons = new ArrayList<>();
 		PersonMR personGroom = new PersonMR();
 		personGroom.setTitle("Mr.");
 		personGroom.setName(marriageRegistration.getCoupleDetails().get(0).getGroom().getFirstName());
@@ -444,9 +450,10 @@ public class DataExchangeService {
 		}
 		
 		Address addressGroom = new Address();
+		addressGroom.setType(null);
+		addressGroom.setHouse("");
 		addressGroom.setLine1(marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress().getAddressLine1());
 		addressGroom.setLine2("");
-		addressGroom.setHouse("");
 		addressGroom.setLandmark("");
 		addressGroom.setLocality("");
 		addressGroom.setDistrict(marriageRegistration.getCoupleDetails().get(0).getGroom().getAddress().getDistrict());
@@ -473,11 +480,12 @@ public class DataExchangeService {
 		}
 		
 		Address addressBride = new Address();
+		addressBride.setType(null);;
 		addressBride.setLine1(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getAddressLine1());
 		addressBride.setLine2("");
-		addressBride.setHouse("");
 		addressBride.setLandmark("");
 		addressBride.setLocality("");
+		addressBride.setHouse("");
 		addressBride.setDistrict(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getDistrict());
 		addressBride.setPin(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getPinCode());
 		addressBride.setState(marriageRegistration.getCoupleDetails().get(0).getBride().getAddress().getState());		
@@ -485,9 +493,8 @@ public class DataExchangeService {
 		
 		personBride.setAddress(addressBride);
 		
-		persons.add(personGroom);
-		persons.add(personBride);
-		issuedTo.setPersons(persons);;
+		issuedTo.setPersonBride(personBride);
+		issuedTo.setPersonGroom(personGroom);
 		certificate.setIssuedTo(issuedTo);
 		
 
@@ -499,7 +506,7 @@ public class DataExchangeService {
 		MarriagePlace marriagePlace = marriageRegistration.getMarriagePlace();
 		
 		marriageCertificate.setPlace(marriagePlace.getPlaceOfMarriage().concat("," + marriagePlace.getWard())
-				.concat("," + marriagePlace.getLocality().getName()));		
+				.concat("," + marriagePlace.getPinCode()));		
 		Long issuedDate = marriageRegistration.getIssuedDate();
 		if(issuedDate!= null) {
 			LocalDate date = Instant.ofEpochMilli(issuedDate).atZone(ZoneId.systemDefault()).toLocalDate();
@@ -514,19 +521,31 @@ public class DataExchangeService {
 		if(issuedDate!= null) {
 			LocalDate date = Instant.ofEpochMilli(issuedDate).atZone(ZoneId.systemDefault()).toLocalDate();
 			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
-			marriageCertificate.setSolemnizedDate(date.format(formatters));
+			registration.setDate(date.format(formatters));
 		}else {
-			marriageCertificate.setSolemnizedDate("dd-mm-yyyy");
+			registration.setDate("dd-mm-yyyy");
 		}
 		
 		Ward ward = Ward.builder().name("").build();
 		
-		Husband husband = Husband.builder().name(personGroom.getName()).residingAt(addressGroom.toString()).build();
+		Husband husband = Husband.builder().name(personGroom.getName()).build();
 		
-		Wife wife = Wife.builder().name(personBride.getName()).residingAt(addressBride.toString()).build();
+		HusbandResiding husbandResiding = HusbandResiding.builder()
+				.residingAt(
+						addressGroom.getLocality() + "," + addressGroom.getState() + "," + addressGroom.getCountry())
+				.build();
+		
+		Wife wife = Wife.builder().name(personBride.getName()).build();
+		
+		WifeResiding wifeResiding = WifeResiding.builder()
+				.residingAt(
+						addressBride.getLocality() + "," + addressBride.getState() + "," + addressBride.getCountry())
+				.build();
 		
 		marriageCertificate.setHusband(husband);
 		marriageCertificate.setWife(wife);
+		marriageCertificate.setHusbandResiding(husbandResiding);
+		marriageCertificate.setWifeResiding(wifeResiding);
 		marriageCertificate.setWard(ward);
 		marriageCertificate.setRegistration(registration);
 		
@@ -744,7 +763,8 @@ public class DataExchangeService {
 				// return targetArray.toString();
 				
 				SearchCriteria searchCriteriaForPullUri = SearchCriteria.builder()
-						.city(tenantId.substring(3, tenantId.length())).docType(docType).build();
+						.city(tenantId.substring(3, tenantId.length())).txn(searchCriteria.getTxn()).docType(docType)
+						.build();
 				
 				if (PTServiceDXConstants.DIGILOCKER_DOCTYPE_MR_CERT.equals(docType)) {
 					searchCriteriaForPullUri.setMrNumber(dglModel.getConsumerCode());
@@ -1030,7 +1050,14 @@ public class DataExchangeService {
 		certificate.setLanguage("99");
 		certificate.setPrevNumber("");
 		certificate.setIssuedAt("");
-		certificate.setIssueDate("");
+		Long issueDate = tradeLicense.getIssuedDate();
+		if(issueDate!= null) {
+			LocalDate date = Instant.ofEpochMilli(issueDate).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			certificate.setIssueDate(date.format(formatters));
+		}else {
+			certificate.setIssueDate("dd-mm-yyyy");
+		}
 		certificate.setStatus("1");
 		certificate.setName("Trade License Certificate");
 		certificate.setType("TDLCS");
@@ -1083,20 +1110,29 @@ public class DataExchangeService {
 		organizationIssuesTo.setType("SG");
 		Address addressIssuedTo = new Address();
 		addressIssuedTo.setCountry("IN");
-		addressIssuedTo.setType(tradeLicense.getTradeLicenseDetail().getAddress().getType());
-		addressIssuedTo.setLine1(tradeLicense.getTradeLicenseDetail().getAddress().getAddressLine1());
-		addressIssuedTo.setLine2(tradeLicense.getTradeLicenseDetail().getAddress().getAddressLine2());
-		addressIssuedTo.setLandmark(tradeLicense.getTradeLicenseDetail().getAddress().getLandmark());
-		addressIssuedTo.setLocality(tradeLicense.getTradeLicenseDetail().getAddress().getLocality().getName());
+		String type = tradeLicense.getTradeLicenseDetail().getAddress().getType();
+		addressIssuedTo.setType(StringUtils.isEmpty(type)?"":type);
+		String line1 = tradeLicense.getTradeLicenseDetail().getAddress().getAddressLine1();
+		addressIssuedTo.setLine1(StringUtils.isEmpty(line1)?"":line1);
+		String line2 = tradeLicense.getTradeLicenseDetail().getAddress().getAddressLine2();
+		addressIssuedTo.setLine2(StringUtils.isEmpty(line2)?"":line2);
+		String landmark = tradeLicense.getTradeLicenseDetail().getAddress().getLandmark();
+		addressIssuedTo.setLandmark(StringUtils.isEmpty(landmark)?"":landmark);
+		String locality = tradeLicense.getTradeLicenseDetail().getAddress().getLocality().getName();
+		addressIssuedTo.setLocality(StringUtils.isEmpty(locality)?"":locality);
 		addressIssuedTo.setDistrict("");
-		addressIssuedTo.setPin(tradeLicense.getTradeLicenseDetail().getAddress().getPincode());
+		String pin = tradeLicense.getTradeLicenseDetail().getAddress().getPincode();
+		addressIssuedTo.setPin(StringUtils.isEmpty(pin)?"":pin);
 		addressIssuedTo.setState("Odisha");
 		organizationIssuesTo.setAddress(addressIssuedTo);
 		Person person = new Person();
 		person.setUid("");
 		person.setName(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getName());
 		person.setPhone(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getMobileNumber());
-		person.setEmail(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getEmailId());
+		String email = tradeLicense.getTradeLicenseDetail().getOwners().get(0).getEmailId();
+		person.setEmail(email);
+		if(StringUtils.isEmpty(email))
+			person.setEmail("");
 		person.setTitle(
 				tradeLicense.getTradeLicenseDetail().getOwners().get(0).getGender().equalsIgnoreCase("MALE") ? "Mr."
 						: "Ms.");
@@ -1133,6 +1169,7 @@ public class DataExchangeService {
 		}else {
 			tradeLicenseCertificate.setValidUpto("dd-mm-yyyy");
 		}
+		
 		Pan pan = Pan.builder().name("").number("").build();
 		
 		PropertyDetails propertyDetails = PropertyDetails.builder().assessed("").buid("").address("").build();
@@ -1145,7 +1182,7 @@ public class DataExchangeService {
 		BusinessProfession businessProfession = BusinessProfession.builder().challanNo("").licenseFee("").name("")
 				.penalty("").sdFee("").scrunityFee("").year("").build();	
 		
-		tradeLicenseCertificate.setAddress(addressIssuedTo);
+		tradeLicenseCertificate.setAddress(new Address(addressIssuedTo));
 		tradeLicenseCertificate.setPan(pan);
 		tradeLicenseCertificate.setPropertyDetails(propertyDetails);		
 		tradeLicenseCertificate.setLicensee(licensee);	
@@ -1166,7 +1203,8 @@ public class DataExchangeService {
 		certificateData.setCertificate(certificateForData);
 		certificateData.setTlCertificate(tradeLicenseCertificate);
 		
-		certificate.setCertificateData(certificateData);		
+		certificate.setCertificateData(certificateData);
+		certificate.setSignature("");
 		return certificate;
 	}
 	

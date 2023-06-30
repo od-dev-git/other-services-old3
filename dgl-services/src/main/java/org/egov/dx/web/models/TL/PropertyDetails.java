@@ -3,6 +3,7 @@ package org.egov.dx.web.models.TL;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,15 +17,15 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("propertyDetails")
 public class PropertyDetails {
 
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("assessed")
 	private String assessed;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("buid")
 	private String buid;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("address")
 	private String address;
 }

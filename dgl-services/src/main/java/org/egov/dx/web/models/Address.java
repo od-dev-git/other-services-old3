@@ -3,6 +3,7 @@ package org.egov.dx.web.models;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,47 +20,59 @@ import lombok.NoArgsConstructor;
 
 public class Address {
 	
-	@XmlAttribute
+	public Address(Address addressIssuedTo) {
+		this.type = addressIssuedTo.type;
+		this.line1 = addressIssuedTo.line1;
+		this.line2 = addressIssuedTo.line2;
+		this.landmark = addressIssuedTo.landmark;
+		this.locality =  addressIssuedTo.locality;
+		this.district = addressIssuedTo.district;
+		this.pin = addressIssuedTo.pin;
+		this.state = addressIssuedTo.state;
+		this.country = addressIssuedTo.country;
+	}
+
+	@XStreamAsAttribute
     @XStreamAlias("type")
-    private String type;
+    private String type="";
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("line1")
-    private String line1;
+    private String line1="";
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("line2")
-    private String line2;
+    private String line2="";
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("house")
     private String house;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("landmark")
-    private String landmark;
+    private String landmark="";
 	
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("locality")
-    private String locality;
+    private String locality="";
     
-    @XmlAttribute
+	@XmlAttribute
     @XStreamAlias("vtc")
     private String vtc;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("district")
-    private String district;
+    private String district="";
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("pin")
-    private String pin;
+    private String pin="";
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("state")
-    private String state;
+    private String state="";
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("country")
     private String country="IN";
 	
