@@ -85,6 +85,14 @@ public class PropertyService {
 	public static final List<String> TAXHEADS_NOT_ALLOWED_FOR_DEMAND_REPORT = Collections
 			.unmodifiableList(Arrays.asList("PT_ADVANCE_CARRYFORWARD","PT_PENALTY","PT_INTEREST","PT_TIME_REBATE","PT_TIME_PENALTY"));
 	
+	public static final List<String> TAXHEADS_FOR_ADVANCE = Collections
+	.unmodifiableList(Arrays.asList("PT_ADVANCE_CARRYFORWARD"));
+	
+	public static final String PAYMENTMODE_ONLINE = "ONLINE";
+
+	public static final String PAYMENTMODE_OFFLINE = "OFFLINE";
+
+	
     public List<PropertyDetailsResponse> getPropertyDetails(RequestInfo requestInfo,
             PropertyDetailsSearchCriteria searchCriteria) {
 
@@ -147,6 +155,18 @@ public class PropertyService {
         PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder().businessServices(businessService)
                 .tenantId(searchCriteria.getUlbName()).fromDate(searchCriteria.getStartDate())
                 .toDate(searchCriteria.getEndDate()).build();
+        
+        if(searchCriteria.getCollectionMode() != null && !searchCriteria.getCollectionMode().isEmpty()) {
+        	String collectionMode = searchCriteria.getCollectionMode();
+        	if(collectionMode.equals(PAYMENTMODE_ONLINE)) {
+        		paymentSearchCriteria.setPaymentModes(Stream.of("CARD","ONLINE").collect(Collectors.toSet()));
+        	}
+        	
+        	if(collectionMode.equals(PAYMENTMODE_OFFLINE)) {
+        		paymentSearchCriteria.setPaymentModes(Stream.of("CASH","OFFLINE_RTGS","OFFLINE_NEFT","POSTAL_ORDER","CHEQUE").collect(Collectors.toSet()));
+        	}
+
+        }
 
         List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
         List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse =  payments.parallelStream().map(payment  ->{
@@ -391,18 +411,41 @@ public class PropertyService {
 
                 List<PropertyWiseDemandResponse> tempResponseList = demands.parallelStream().map(row -> {
 
+                    String tenantIdStyled = row.getTenantId().replace("od.", "");
+                    tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+                    
                     PropertyWiseDemandResponse tempResponse = PropertyWiseDemandResponse.builder()
                             .propertyId(row.getConsumerCode())
                             .taxperiodfrom(String.valueOf(row.getTaxPeriodFrom()))
-                            .taxperiodto(String.valueOf(row.getTaxPeriodTo())).ulb(row.getTenantId())
+                            .taxperiodto(String.valueOf(row.getTaxPeriodTo())).ulb(tenantIdStyled)
                             .build();
 
                     List<DemandDetail> tempDemandDetail = row.getDemandDetails();
                     BigDecimal taxAmount = BigDecimal.ZERO;
                     BigDecimal collectionAmount = BigDecimal.ZERO;
+                    BigDecimal advanceTaxAmount = BigDecimal.ZERO;
+                    BigDecimal advanceCollectionAmount = BigDecimal.ZERO;
                     tempResponse.setTaxamount(taxAmount.toString());
                     tempResponse.setCollectionamount(collectionAmount.toString());
+                    tempResponse.setAdvanceDemandAmount(advanceTaxAmount.toString());
+                    tempResponse.setAdvanceCollectedAmount(advanceCollectionAmount.toString());
                     tempDemandDetail.stream().forEach(demandUnit -> {
+                    	
+                    	
+                    	
+                    	if(TAXHEADS_FOR_ADVANCE.contains(demandUnit.getTaxHeadMasterCode())) {
+                            if (demandUnit.getTaxAmount() != null) {
+                                tempResponse.setAdvanceDemandAmount(new BigDecimal(tempResponse.getAdvanceDemandAmount())
+                                        .add(demandUnit.getTaxAmount()).toString());
+                            }
+                            if (demandUnit.getCollectionAmount() != null) {
+                                tempResponse.setAdvanceCollectedAmount(new BigDecimal(tempResponse.getAdvanceCollectedAmount())
+                                        .add(demandUnit.getCollectionAmount()).toString());
+                            }
+                        	}
+                    	
+                    	
+                    	
                     	if(!TAXHEADS_NOT_ALLOWED_FOR_DEMAND_REPORT.contains(demandUnit.getTaxHeadMasterCode())) {
                         if (demandUnit.getTaxAmount() != null) {
                             tempResponse.setTaxamount(new BigDecimal(tempResponse.getTaxamount())
@@ -413,6 +456,9 @@ public class PropertyService {
                                     .add(demandUnit.getCollectionAmount()).toString());
                         }
                     	}
+                    	
+                    	
+                    	
                     });
                     taxAmount = new BigDecimal(tempResponse.getTaxamount());
                     collectionAmount = new BigDecimal(tempResponse.getCollectionamount());

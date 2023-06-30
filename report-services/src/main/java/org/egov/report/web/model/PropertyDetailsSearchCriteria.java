@@ -41,5 +41,8 @@ public class PropertyDetailsSearchCriteria {
 	
 	@JsonProperty("offset")
 	private Integer offset ;
+	
+	@JsonProperty("collectionMode")
+	private String collectionMode ;
 
 }
