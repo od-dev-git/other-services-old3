@@ -22,10 +22,10 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("IssuedTo")
 public class TLIssuedTo {
 	
-	@XStreamAlias("Person")
-	Person person;
-	
 	@XStreamAlias("Organization")
 	Organization organization;
+	
+	@XStreamAlias("Person")
+	Person person;
 
 }

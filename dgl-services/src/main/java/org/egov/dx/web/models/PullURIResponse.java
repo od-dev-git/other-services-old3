@@ -3,6 +3,7 @@ package org.egov.dx.web.models;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,7 @@ import lombok.NoArgsConstructor;
 public class PullURIResponse {
 	
 	@XStreamAlias("xmlns")
+	@XStreamAsAttribute
 	private String xmlns = "http://tempuri.org/";
 
 	@XStreamAlias("ResponseStatus")

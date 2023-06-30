@@ -6,6 +6,7 @@ import org.egov.dx.web.models.Address;
 import org.egov.dx.web.models.Organization;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,27 +22,27 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("Person")
 public class PersonMR {
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("title")
     private String title;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("name")
     private String name;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("dob")
     private String dob;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("gender")
     private String gender;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("maritalStatus")
     private String maritalStatus;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("religion")
     private String religion;
     

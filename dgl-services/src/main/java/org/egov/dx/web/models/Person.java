@@ -3,6 +3,7 @@ package org.egov.dx.web.models;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,23 +19,23 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("Person")
 public class Person {
 
-	@XmlAttribute
+	@XStreamAsAttribute
 	@XStreamAlias("uid")
 	private String uid;
 
-	@XmlAttribute
+	@XStreamAsAttribute
 	@XStreamAlias("title")
 	private String title;
 
-	@XmlAttribute
+	@XStreamAsAttribute
 	@XStreamAlias("name")
 	private String name;
 
-	@XmlAttribute
+	@XStreamAsAttribute
 	@XStreamAlias("phone")
 	private String phone;
 
-	@XmlAttribute
+	@XStreamAsAttribute
 	@XStreamAlias("email")
 	private String email;
 

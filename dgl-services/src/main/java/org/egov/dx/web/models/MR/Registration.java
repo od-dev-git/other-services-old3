@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import org.egov.dx.web.models.CertificateForData;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,11 +21,11 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("registration")
 public class Registration {
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("number")
     private String number;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("date")
     private String date;
 

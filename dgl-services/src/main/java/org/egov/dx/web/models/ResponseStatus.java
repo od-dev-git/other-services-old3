@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 
 public class ResponseStatus {
 	
-	 @XStreamAsAttribute
+	 	@XStreamAsAttribute
 	    private String ts;
 	    	
 	    @XStreamAsAttribute

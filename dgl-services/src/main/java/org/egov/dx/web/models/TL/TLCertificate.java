@@ -9,6 +9,7 @@ import org.egov.dx.web.models.MR.MrCertificate;
 import org.egov.dx.web.models.MR.MrCertificateData;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,46 +35,47 @@ public class TLCertificate {
     private TLCertificateData certificateData;
 	
     @Size(max=64)
+    @XmlAttribute
     @XStreamAlias("Signature")
     private String signature;
 
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("language")
     private String language;
     
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("name")
     private String name;
     
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("type")
     private String type;
     
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("number")
     private String number;
     
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("prevNumber")
     private String prevNumber;
     
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("expiryDate")
     private String expiryDate;
     
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("validFromDate")
     private String validFromDate;
     
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("issuedAt")
     private String issuedAt;
     
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("issueDate")
     private String issueDate;
     
-    @XmlAttribute
+    @XStreamAsAttribute
     @XStreamAlias("status")
     private String status;
 

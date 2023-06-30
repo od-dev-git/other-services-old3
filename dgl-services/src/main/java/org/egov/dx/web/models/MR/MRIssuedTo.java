@@ -3,6 +3,8 @@ package org.egov.dx.web.models.MR;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
+
 import org.egov.dx.web.models.Address;
 import org.egov.dx.web.models.Organization;
 import org.egov.dx.web.models.Person;
@@ -23,7 +25,11 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("IssuedTo")
 public class MRIssuedTo {
 	
-	@XStreamAlias("Persons")
-    private List<PersonMR> persons=new ArrayList<PersonMR>();
+	@XStreamAlias("Person")
+	@XmlAttribute
+    private PersonMR personGroom;
 
+	@XStreamAlias("Person")
+	@XmlAttribute
+    private PersonMR personBride;
 }

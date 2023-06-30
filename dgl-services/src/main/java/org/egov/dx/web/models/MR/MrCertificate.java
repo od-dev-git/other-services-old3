@@ -7,6 +7,7 @@ import org.egov.dx.web.models.IssuedBy;
 import org.egov.dx.web.models.IssuedTo;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,27 +32,27 @@ public class MrCertificate {
 	@XStreamAlias("CertificateData")
     private MrCertificateData certificateData;
 
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("language")
     private String language;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("name")
     private String name;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("type")
     private String type;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("date")
     private String date;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("mobile")
     private String mobile;
     
-    @XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("Application_no")
     private String applicationNo;
 	

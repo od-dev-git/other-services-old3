@@ -3,6 +3,7 @@ package org.egov.dx.web.models;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,15 +20,15 @@ import lombok.NoArgsConstructor;
 
 public class CertificateForData {
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("number")
     private String number;
     
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("place")
     private String place;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("date")
     private String date;
     
