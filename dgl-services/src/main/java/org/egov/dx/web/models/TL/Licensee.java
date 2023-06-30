@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import org.egov.dx.web.models.Address;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,15 +19,15 @@ import lombok.NoArgsConstructor;
 @XStreamAlias("Licensee")
 public class Licensee {
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("name")
 	private String name;
 	
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("fatherHusbandName")
 	private String fatherHusbandName;
 
-	@XmlAttribute
+	@XStreamAsAttribute
     @XStreamAlias("address")
 	private String address;
 }
