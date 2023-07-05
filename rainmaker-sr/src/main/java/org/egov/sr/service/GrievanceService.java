@@ -162,6 +162,7 @@ public class GrievanceService {
 				PGRConstants.SERV_REQ_ID_FORMAT);
 		AuditDetails auditDetails = pGRUtils.getAuditDetails(String.valueOf(requestInfo.getUserInfo().getId()), true);
 		String by = auditDetails.getCreatedBy() + ":" + requestInfo.getUserInfo().getRoles().get(0).getName();
+		String accountId = auditDetails.getCreatedBy();
 		List<ActionInfo> actionInfos = new LinkedList<>();
 		if(!CollectionUtils.isEmpty(serviceRequest.getActionInfo())) {
 			actionInfos = serviceRequest.getActionInfo();
@@ -190,6 +191,7 @@ public class GrievanceService {
 			}
 			servReq.setAuditDetails(auditDetails); servReq.setServiceRequestId(currentId);servReq.setActive(true);
 			servReq.setStatus(StatusEnum.OPEN);servReq.setFeedback(null);servReq.setRating(null); 
+			servReq.setAccountId(accountId);
 			
 //			Commented address code, as it is not required for now
 //			servReq.getAddressDetail().setUuid(UUID.randomUUID().toString());
