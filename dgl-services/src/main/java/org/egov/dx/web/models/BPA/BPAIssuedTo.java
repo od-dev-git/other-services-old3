@@ -1,10 +1,11 @@
-package org.egov.dx.web.models.TL;
+package org.egov.dx.web.models.BPA;
 
-import java.util.List;
+import javax.xml.bind.annotation.XmlAttribute;
 
-import org.egov.dx.web.models.IssuedTo;
 import org.egov.dx.web.models.Organization;
 import org.egov.dx.web.models.Person;
+import org.egov.dx.web.models.MR.PersonMR;
+import org.egov.dx.web.models.TL.TLIssuedTo;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -20,12 +21,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @EqualsAndHashCode
 @XStreamAlias("IssuedTo")
-public class TLIssuedTo {
-	
-	@XStreamAlias("Organization")
-	OrganizationTL organization;
+public class BPAIssuedTo {
 	
 	@XStreamAlias("Person")
-	Person person;
+	@XmlAttribute
+    private PersonBPA person;
 
 }

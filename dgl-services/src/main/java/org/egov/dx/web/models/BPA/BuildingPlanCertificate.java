@@ -6,6 +6,7 @@ import org.egov.dx.web.models.MR.AddressMR;
 import org.egov.dx.web.models.MR.MarriageCertificate;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,27 +17,39 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@XStreamAlias("BuildingPlanCertificate")
+@XStreamAlias("BuuildingPlan")
 public class BuildingPlanCertificate {
+	
+	@XStreamAsAttribute
+	@XStreamAlias("siNo")
+	private String siNo;
+	
+	@XStreamAsAttribute
+	@XStreamAlias("applicationNo")
+	private String applicationNo;
+	
+	@XStreamAsAttribute
+	@XStreamAlias("unitName")
+	private String unitName;
+	
+	@XStreamAsAttribute
+	@XStreamAlias("validUpto")
+	private String validUpto;
+	
+	@XStreamAsAttribute
+	@XStreamAlias("feesPaid")
+	private String feesPaid;
 
 	@XmlAttribute
-	@XStreamAlias("approvalNumber")
-	private String approvalNumber;
+	@XStreamAlias("Address")
+	private AddressBPA address;
 
 	@XmlAttribute
-	@XStreamAlias("applicationNumber")
-	private String applicationNumber;
+	@XStreamAlias("Area")
+	private Area area;
 
 	@XmlAttribute
-	@XStreamAlias("approvalDate")
-	private Long approvalDate;
-
-	@XmlAttribute
-	@XStreamAlias("ownerName")
-	private String ownerName;
-
-	@XmlAttribute
-	@XStreamAlias("ownerAddress")
-	private Address ownerAddress;
+	@XStreamAlias("ConstructionPermission")
+	private ConstructionPermission constructionPermission;
 
 }
