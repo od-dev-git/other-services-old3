@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS eg_sr_service
   landmark character varying(2000),
   active boolean DEFAULT true,
   usertype character varying(256),
-  module character varying(256),
+  service character varying(256),
   priority character varying(256),
   assignee character varying(256),
   impact character varying(256),

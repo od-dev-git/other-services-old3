@@ -76,4 +76,7 @@ public class ServiceReqSearchCriteria {
 	
 	@JsonProperty("slaEndTime")
 	private Long slaEndTime;
+	
+	@JsonProperty("service")
+	private String service;
 }
