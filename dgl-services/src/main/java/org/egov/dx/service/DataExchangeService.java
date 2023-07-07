@@ -175,7 +175,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("0d6cf270-b444-46ff-8723-efc0dca0fe15");
+		//request.setAuthToken("74030f22-da4e-4e52-81ce-87d525aa1bf6");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -1189,10 +1189,10 @@ public class DataExchangeService {
 		Address addressPerson =  new Address();
 		addressPerson.setCountry("IN");
 		addressPerson.setType("");
-		addressPerson.setLine1("");
+		addressPerson.setLine1(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getPermanentAddress());
 		addressPerson.setLine2("");
 		addressPerson.setLandmark("");
-		addressPerson.setLocality(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getPermanentAddress());
+		addressPerson.setLocality("");
 		addressPerson.setDistrict(district);
 		addressPerson.setPin("");
 		addressPerson.setState("Odisha");
@@ -1412,7 +1412,7 @@ public class DataExchangeService {
 		
 		Address addressPerson = new Address();
 		addressPerson.setType("");
-		addressPerson.setLine1("");
+		addressPerson.setLine1(bpa.getLandInfo().getOwners().get(0).getPermanentAddress());
 		addressPerson.setLine2("");
 		addressPerson.setHouse("");
 		addressPerson.setLandmark("");
@@ -1490,9 +1490,9 @@ public class DataExchangeService {
 			area.setApprovedCoveredArea(String.valueOf(totalBUA.get(0)));
 			
 			addressBPA.setType("");
-			addressBPA.setPlotNo(plotNo.get(0));
-			addressBPA.setKhataNo(khataNo.get(0));
-			addressBPA.setMauza(mauza.get(0));
+			addressBPA.setLine1("Plot No: "+plotNo.get(0));
+			addressBPA.setLine2("Khata No: "+khataNo.get(0));
+			addressBPA.setWardNo("Locality: "+mauza.get(0));
 			addressBPA.setDistrict(district.get(0));
 
 			

@@ -20,21 +20,37 @@ public class AddressBPA {
     private String type="";
     
 	@XStreamAsAttribute
-    @XStreamAlias("khataNo")
-    private String khataNo="";
+    @XStreamAlias("line1")
+    private String line1="";
     
 	@XStreamAsAttribute
-    @XStreamAlias("plotNo")
-    private String plotNo="";
+    @XStreamAlias("line2")
+    private String line2="";
 	
 	@XStreamAsAttribute
-    @XStreamAlias("mauza")
-    private String mauza="";
+    @XStreamAlias("holdingNo")
+    private String holdingNo="";
     
+	@XStreamAsAttribute
+    @XStreamAlias("house")
+    private String house="";
+    
+	@XStreamAsAttribute
+    @XStreamAlias("wardNo")
+    private String wardNo="";
+	
+	@XStreamAsAttribute
+    @XStreamAlias("streetRoad")
+    private String streetRoad="";
+	
+	@XStreamAsAttribute
+    @XStreamAlias("toujiNo")
+    private String toujiNo="";
+	
 	@XStreamAsAttribute
     @XStreamAlias("district")
     private String district="";
-    
+	
 	@XStreamAsAttribute
     @XStreamAlias("state")
     private String state="Odisha";
