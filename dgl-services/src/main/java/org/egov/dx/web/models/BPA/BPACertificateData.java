@@ -21,7 +21,7 @@ public class BPACertificateData {
 	@XStreamAlias("Certificate")
     private CertificateForData certificate;
     
-    @XStreamAlias("BuildingPlanCertificate")
+    @XStreamAlias("BuuildingPlan")
     private BuildingPlanCertificate buildingPlanCertificate;
 
 }
