@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@XStreamAlias("BuuildingPlan")
+@XStreamAlias("BuildingPlan")
 public class BuildingPlanCertificate {
 	
 	@XStreamAsAttribute
