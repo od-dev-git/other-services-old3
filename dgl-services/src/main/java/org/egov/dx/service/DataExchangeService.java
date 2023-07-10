@@ -1417,7 +1417,11 @@ public class DataExchangeService {
 		addressPerson.setHouse("");
 		addressPerson.setLandmark("");
 		addressPerson.setLocality("");	
-		addressPerson.setDistrict(bpa.getLandInfo().getOwners().get(0).getPermanentCity().substring(3));
+		String districtPerson = bpa.getLandInfo().getOwners().get(0).getPermanentCity();
+		if(!StringUtils.isEmpty(districtPerson))
+			addressPerson.setDistrict(districtPerson.substring(3));
+		else
+			addressPerson.setDistrict("");
 		addressPerson.setPin(bpa.getLandInfo().getOwners().get(0).getPermanentPincode());
 		addressPerson.setState("Odisha");
 		addressPerson.setCountry("India");
