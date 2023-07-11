@@ -91,5 +91,11 @@ public class ReportServiceConfiguration {
 
 	@Value("${egov.report.service.connections.limit}")
     private Integer reportConnectionsLimit;
+	
+	@Value("${egov.mdms.host}")
+	private String mdmsHost;
+	
+	@Value("${egov.mdms.search.endpoint}")
+	private String mdmsSearchUrl;
 
 }

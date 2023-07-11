@@ -76,5 +76,8 @@ public class ReportResponse {
 
 	@JsonProperty("platformUsageResponse")
 	private List<PlatformUsage> platformUsageResponse;
+	
+	@JsonProperty("srTicketDetailsResponse")
+	private List<TicketDetails> srTicketDetailsResponse;
 		
 }
