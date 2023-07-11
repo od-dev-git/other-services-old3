@@ -1,0 +1,49 @@
+package org.egov.report.web.model;
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class TicketDetails {
+
+	@JsonProperty("tenantid")
+	private String tenantId;
+	
+	@JsonProperty("ticketNo")
+	private String serviceRequestId;
+	
+	@JsonProperty("createdDate")
+	private Long createdDate;
+	
+	@JsonProperty("closedDate")
+	private Long closedDate;
+	
+	@JsonProperty("name")
+	private String name;
+	
+	@JsonProperty("module")
+	private String service;
+	
+	@JsonProperty("type")
+	private String type;
+	
+	@JsonProperty("description")
+	private String description;
+	
+	@JsonProperty("priority")
+	private String priority;
+	
+	@JsonProperty("status")
+	private String status;
+}
