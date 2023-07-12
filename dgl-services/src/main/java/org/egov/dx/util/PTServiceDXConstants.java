@@ -37,7 +37,7 @@ public class PTServiceDXConstants {
 	public static final String STATE_TENANT = "od";
 
 
-
+	public static final String NO_RECORDS_FOUND = "Record not found.";
 
 	//public static final String DIGILOCKER_ISSUER_ID = "upyog.niua.org";
 	

@@ -175,7 +175,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("74030f22-da4e-4e52-81ce-87d525aa1bf6");
+		//request.setAuthToken("c384898e-9c7d-4330-ad43-bd63b6f9c227");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -314,9 +314,10 @@ public class DataExchangeService {
 		     List<DocDetailsPerson> persons= new ArrayList<DocDetailsPerson>();
 		     issuedTo.setPersons(persons);
 		     docDetailsResponse.setURI(null);
-		     docDetailsResponse.setIssuedTo(issuedTo);
+		     //docDetailsResponse.setIssuedTo(issuedTo);
 		     //docDetailsResponse.setDataContent("");
-		     docDetailsResponse.setDocContent("");
+		     //docDetailsResponse.setDocContent("");
+		     docDetailsResponse.setErrorMessage(PTServiceDXConstants.NO_RECORDS_FOUND);
 		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_MR);
 		     if(model.getClass().equals(PullDocResponse.class)){
 		    	 ((PullDocResponse) model).setDocDetails(docDetailsResponse);
@@ -812,9 +813,9 @@ public class DataExchangeService {
 			issuedTo.setPersons(persons);
 			docDetailsResponse.setURI(null);
 			//docDetailsResponse.setIssuedTo(issuedTo);
-			docDetailsResponse.setDataContent("");
-			docDetailsResponse.setDocContent("");
-
+			//docDetailsResponse.setDataContent("");
+			//docDetailsResponse.setDocContent("");
+			docDetailsResponse.setErrorMessage(PTServiceDXConstants.NO_RECORDS_FOUND);
 			model.setDocDetails(docDetailsResponse);
 
 		}
@@ -958,9 +959,10 @@ public class DataExchangeService {
 		     List<DocDetailsPerson> persons= new ArrayList<DocDetailsPerson>();
 		     issuedTo.setPersons(persons);
 		     docDetailsResponse.setURI(null);
-		     docDetailsResponse.setIssuedTo(issuedTo);
+		     //docDetailsResponse.setIssuedTo(issuedTo);
 		     //docDetailsResponse.setDataContent("");
-		     docDetailsResponse.setDocContent("");
+		     //docDetailsResponse.setDocContent("");
+		     docDetailsResponse.setErrorMessage(PTServiceDXConstants.NO_RECORDS_FOUND);
 		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_TL);
 		     
 		     if(model.getClass().equals(PullDocResponse.class)){
@@ -1310,9 +1312,10 @@ public class DataExchangeService {
 		     List<DocDetailsPerson> persons= new ArrayList<DocDetailsPerson>();
 		     issuedTo.setPersons(persons);
 		     docDetailsResponse.setURI(null);
-		     docDetailsResponse.setIssuedTo(issuedTo);
+		     //docDetailsResponse.setIssuedTo(issuedTo);
 		     //docDetailsResponse.setDataContent("");
-		     docDetailsResponse.setDocContent("");
+		     //docDetailsResponse.setDocContent("");
+		     docDetailsResponse.setErrorMessage(PTServiceDXConstants.NO_RECORDS_FOUND);
 		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_BPA);
 		     if(model.getClass().equals(PullDocResponse.class)){
 		    	 ((PullDocResponse) model).setDocDetails(docDetailsResponse);
