@@ -49,12 +49,15 @@ import javax.validation.Valid;
 import javax.xml.bind.JAXBException;
 
 import org.egov.dx.service.DataExchangeService;
+import org.egov.dx.util.PTServiceDXConstants;
 import org.egov.dx.web.models.PullDocRequest;
 import org.egov.dx.web.models.PullURIRequest;
 import org.egov.dx.web.models.SearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,6 +67,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.Dom4JDriver;
+import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.thoughtworks.xstream.security.AnyTypePermission;
 import com.thoughtworks.xstream.security.NoTypePermission;
 import com.thoughtworks.xstream.security.NullPermission;
@@ -83,10 +88,10 @@ public class DataExchangeController {
 	
 	@RequestMapping(path = {"/_exchange"}, method = RequestMethod.POST ,consumes = {MediaType.APPLICATION_XML_VALUE},produces = {"application/xml","text/xml"})
     @ResponseBody()
-    public String search(@Valid @RequestBody String requestBody, HttpServletRequest httpServletRequest) throws IOException, JAXBException
+    public ResponseEntity<?> search(@Valid @RequestBody String requestBody, HttpServletRequest httpServletRequest) throws IOException, JAXBException
     { 
-	    
-		XStream xstream = new XStream();
+	      
+		XStream xstream = new XStream(); 
 		xstream .addPermission(NoTypePermission.NONE); 
 		xstream .addPermission(NullPermission.NULL);   
 		xstream .addPermission(PrimitiveTypePermission.PRIMITIVES);
@@ -136,6 +141,10 @@ public class DataExchangeController {
 
 		}
 		
-		return encodedString;	
+		if(encodedString.contains(PTServiceDXConstants.NO_RECORDS_FOUND)) {
+			return new ResponseEntity<>(encodedString, HttpStatus.NOT_FOUND);
+		}
+		
+		return new ResponseEntity<>(encodedString, HttpStatus.OK);	
      }	
 }
