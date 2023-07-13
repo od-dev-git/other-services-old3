@@ -140,11 +140,12 @@ public class DataExchangeController {
 			encodedString=dataExchangeService.searchPullDocRequest(searchCriteria);
 
 		}
-		
-		if(encodedString.contains(PTServiceDXConstants.NO_RECORDS_FOUND)) {
+		log.info("RESPONSE "+encodedString);
+		if(encodedString.contains(PTServiceDXConstants.NO_RECORDS_FOUND)) {	
+			log.info("inside ro records found ");
 			return new ResponseEntity<>(encodedString, HttpStatus.NOT_FOUND);
 		}
-		
+		log.info(" sending response !");
 		return new ResponseEntity<>(encodedString, HttpStatus.OK);	
      }	
 }

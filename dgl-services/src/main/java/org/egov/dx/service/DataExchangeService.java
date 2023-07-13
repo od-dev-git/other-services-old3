@@ -175,7 +175,7 @@ public class DataExchangeService {
 				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("c384898e-9c7d-4330-ad43-bd63b6f9c227");
+		//request.setAuthToken("72e7b804-86aa-4202-9e64-13ab75922b2c");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -220,6 +220,7 @@ public class DataExchangeService {
 			}
 			xstream.processAnnotations(PullURIResponse.class);
 			xstream.toXML(model);
+			log.info("inside searchForDigiLockerURIRequest");
 			return responseHeader +xstream.toXML(model);
 		}
 		
