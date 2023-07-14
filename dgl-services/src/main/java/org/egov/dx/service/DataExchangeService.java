@@ -23,10 +23,12 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -172,10 +174,10 @@ public class DataExchangeService {
 		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
 
 		User userInfo = User.builder().uuid(configurations.getAuthTokenVariable()).type("EMPLOYEE")
-				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
+				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity().toLowerCase())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("72e7b804-86aa-4202-9e64-13ab75922b2c");
+		//request.setAuthToken("7eaa9a1c-dab9-4d36-ad9c-295d8b43d509");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -231,7 +233,7 @@ public class DataExchangeService {
 	private void processBPAPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
 			Object model, XStream xstream) throws IOException {
 		BPASearchCriteria criteria = new BPASearchCriteria();
-		criteria.setTenantId("od."+searchCriteria.getCity());
+		criteria.setTenantId("od."+searchCriteria.getCity().toLowerCase());
 		criteria.setApprovalNo(searchCriteria.getApprovalNumber());
 		generateBPALetter(searchCriteria, criteria, requestInfoWrapper, model, xstream);	
 	}
@@ -239,7 +241,7 @@ public class DataExchangeService {
 	private void processTLPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
 			Object model, XStream xstream) throws MalformedURLException, IOException {
 		TradeLicenseSearchCriteria criteria = new TradeLicenseSearchCriteria();
-		criteria.setTenantId("od."+searchCriteria.getCity());
+		criteria.setTenantId("od."+searchCriteria.getCity().toLowerCase());
 		criteria.setLicenseNumbers(Arrays.asList(searchCriteria.getLicenseNumber()));
 		generateTlLicense(searchCriteria, criteria, requestInfoWrapper, model, xstream);
 	}
@@ -247,7 +249,7 @@ public class DataExchangeService {
 	private void processMRPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
 			Object model, XStream xstream) throws IOException, MalformedURLException {
 		MRSearchCriteria criteria = new MRSearchCriteria();
-		criteria.setTenantId("od."+searchCriteria.getCity());
+		criteria.setTenantId("od."+searchCriteria.getCity().toLowerCase());
 		criteria.setMrNumbers(Arrays.asList(searchCriteria.getMrNumber()));
 		generateMRCertificate(searchCriteria, criteria, requestInfoWrapper, model, xstream);
 	}
@@ -255,7 +257,7 @@ public class DataExchangeService {
 	private void processPTPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
 			PullURIResponse model, XStream xstream) throws IOException, MalformedURLException {
 		PaymentSearchCriteria criteria = new PaymentSearchCriteria();
-		criteria.setTenantId("od."+searchCriteria.getCity());
+		criteria.setTenantId("od."+searchCriteria.getCity().toLowerCase());
 		criteria.setConsumerCodes(Collections.singleton(searchCriteria.getPropertyId()));
 		generatePTReceipt(searchCriteria, criteria, requestInfoWrapper, model, xstream);
 	}
@@ -266,7 +268,7 @@ public class DataExchangeService {
 		
 		List<MarriageRegistration> registrations = mrService.getMarriageRegistrations(criteria, requestInfoWrapper);
 	
-		if((!registrations.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateMrResponse(searchCriteria, registrations)
+		if((!registrations.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateMrResponse(searchCriteria, registrations,model)
 				|| !registrations.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
 			
 			log.info("Marriage Registrations Found and Validation Passed ! "+ String.valueOf(registrations));
@@ -575,9 +577,22 @@ public class DataExchangeService {
 		return certificate;
 	}
 
-	private boolean validateMrResponse(SearchCriteria searchCriteria, List<MarriageRegistration> registrations) {
-		// Implement if any Validations are needed
-		return true;
+	private boolean validateMrResponse(SearchCriteria searchCriteria, List<MarriageRegistration> registrations, Object model) {
+		
+		if (model.getClass().equals(PullDocResponse.class)) {
+			return true;
+		} else if (model.getClass().equals(PullURIResponse.class)) {
+			Set<String> mobileNos = new HashSet<>();
+			mobileNos.add(registrations.get(0).getCoupleDetails().get(0).getBride().getAddress().getContact());
+			mobileNos.add(registrations.get(0).getCoupleDetails().get(0).getGroom().getAddress().getContact());
+			if (mobileNos.contains(searchCriteria.getMobile())) {
+				return true;
+			} else {
+				return false;
+			}
+
+		}
+		return false;
 	}
 
 	private void generatePTReceipt(SearchCriteria searchCriteria, PaymentSearchCriteria criteria,
@@ -911,7 +926,7 @@ public class DataExchangeService {
 		
 		List<TradeLicense> licenses = tlService.getTradeLicenses(criteria, requestInfoWrapper);
 
-		if((!licenses.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateTLResponse(searchCriteria, licenses)
+		if((!licenses.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateTLResponse(searchCriteria, licenses,model)
 				|| !licenses.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
 			
 			log.info("Trade Licenses Found and Validation Passed ! " + String.valueOf(licenses));
@@ -978,9 +993,19 @@ public class DataExchangeService {
 		}
 	}
 
-	private boolean validateTLResponse(SearchCriteria searchCriteria, List<TradeLicense> licenses) {
-		// Add Validations for Trade License if needed
-		return true;
+	private boolean validateTLResponse(SearchCriteria searchCriteria, List<TradeLicense> licenses, Object model) {
+		if (model.getClass().equals(PullDocResponse.class)) {
+			return true;
+		} else if (model.getClass().equals(PullURIResponse.class)) {
+			Set<String> mobileNos = licenses.get(0).getTradeLicenseDetail().getOwners().stream()
+					.map(owner -> owner.getMobileNumber()).collect(Collectors.toSet());
+			if (mobileNos.contains(searchCriteria.getMobile())) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return false;
 	}
 
 	private void createCeritificateFromFilestoreIdForTL(SearchCriteria searchCriteria, Object model,
@@ -1266,7 +1291,7 @@ public class DataExchangeService {
 		
 		List<BPA> applications = bpaService.getBPAPermitLetter(criteria, requestInfoWrapper);
 		
-		if((!applications.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateBPAResponse(searchCriteria, applications)
+		if((!applications.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateBPAResponse(searchCriteria, applications,model)
 				|| !applications.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
 			
 			log.info("BPA Applications Found and Validation Passed ! " + String.valueOf(applications));
@@ -1330,9 +1355,21 @@ public class DataExchangeService {
 		
 	}
 
-	private boolean validateBPAResponse(SearchCriteria searchCriteria, List<BPA> applications) {
-		// Implement BPA Validations here if any
-		return true;
+	private boolean validateBPAResponse(SearchCriteria searchCriteria, List<BPA> applications, Object model) {
+
+		if (model.getClass().equals(PullDocResponse.class)) {
+			return true;
+		} else if (model.getClass().equals(PullURIResponse.class)) {
+			Set<String> mobileNos = applications.get(0).getLandInfo().getOwners().stream()
+					.map(bpa -> bpa.getMobileNumber()).collect(Collectors.toSet());
+			if (mobileNos.contains(searchCriteria.getMobile())) {
+				return true;
+			} else {
+				return false;
+			}
+
+		}
+		return false;
 	}
 	
 	private BPACertificate populateCertificateForBPA(BPA bpa, RequestInfoWrapper reqInfoWrapper) {
