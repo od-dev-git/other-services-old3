@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -788,9 +789,12 @@ public class PGRNotificationConsumer {
     }
 
     public boolean isNotificationEnabled(String status, String userType, String comment, String action) {
-        boolean isNotifEnabled = true;
-        if ((null != comment && !comment.isEmpty()) && !isCommentByEmpNotifEnaled && userType.equalsIgnoreCase("EMPLOYEE")) {
-            isNotifEnabled = false;
+        boolean isNotifEnabled = false;
+		Set<String> actions = new HashSet<>(
+				Arrays.asList(WorkFlowConfigs.ACTION_OPEN, WorkFlowConfigs.ACTION_FORWARD_TO_L2,
+						WorkFlowConfigs.ACTION_FORWARD_TO_L3, WorkFlowConfigs.ACTION_CLOSE));
+        if(actions.contains(action)) {
+        	isNotifEnabled = true;
         }
         return isNotifEnabled;
     }
