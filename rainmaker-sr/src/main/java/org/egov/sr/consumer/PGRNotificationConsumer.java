@@ -272,10 +272,12 @@ public class PGRNotificationConsumer {
 			String notificationCode = PGRConstants.L2_FORWARD_MSG_CODE;
 			customMessage = srUtils.getMessageTemplate(notificationCode, localizationMessages);
 			customMessage = customMessage.replace("<1>", serviceReq.getServiceRequestId());
+			customMessage = customMessage.replace("<2>", "Level 2");
 		} else if (actionInfo.getAction().equals(WorkFlowConfigs.ACTION_FORWARD_TO_L3)) {
 			String notificationCode = PGRConstants.L3_FORWARD_MSG_CODE;
 			customMessage = srUtils.getMessageTemplate(notificationCode, localizationMessages);
 			customMessage = customMessage.replace("<1>", serviceReq.getServiceRequestId());
+			customMessage = customMessage.replace("<2>", "Level 3");
 		} else if (actionInfo.getAction().equals(WorkFlowConfigs.ACTION_CLOSE)) {
 			String notificationCode = PGRConstants.CLOSED_MSG_CODE;
 			customMessage = srUtils.getMessageTemplate(notificationCode, localizationMessages);
