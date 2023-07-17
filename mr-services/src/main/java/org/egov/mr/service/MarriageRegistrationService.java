@@ -139,7 +139,7 @@ public class MarriageRegistrationService {
         {
         	marriageRegistrations = getMarriageRegistrationsWithOwnerInfo(criteria,requestInfo);
         }
-		
+		util.calculateAgeFromDob(marriageRegistrations);
 		
 
 		return marriageRegistrations;

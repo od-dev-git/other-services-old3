@@ -4,6 +4,10 @@ package org.egov.mr.util;
 
 
 import java.lang.reflect.Field;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -284,5 +288,21 @@ public class MarriageRegistrationUtil {
 
 			return mrModuleDtls;
 		}
-	
+
+		
+		public void calculateAgeFromDob(List<MarriageRegistration> MarriageRegistration) {
+
+			for (MarriageRegistration mr : MarriageRegistration) {
+				LocalDate marriageDate = LocalDate.ofEpochDay(mr.getMarriageDate() / (24 * 60 * 60 * 1000));
+				LocalDate brideDob = LocalDate
+						.ofEpochDay(mr.getCoupleDetails().get(0).getBride().getDateOfBirth() / (24 * 60 * 60 * 1000));
+				LocalDate groomDob = LocalDate
+						.ofEpochDay(mr.getCoupleDetails().get(0).getGroom().getDateOfBirth() / (24 * 60 * 60 * 1000));
+				mr.getCoupleDetails().get(0).getBride().setAge(Period.between(brideDob, marriageDate).getYears());
+				mr.getCoupleDetails().get(0).getGroom().setAge(Period.between(groomDob, marriageDate).getYears());
+			}
+		
+		
+		
+     }
 }
