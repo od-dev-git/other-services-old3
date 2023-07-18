@@ -1,0 +1,94 @@
+package org.egov.usm.repository.rowmapper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.egov.usm.model.enums.Status;
+import org.egov.usm.model.enums.SurveyAnswer;
+import org.egov.usm.web.model.AuditDetails;
+import org.egov.usm.web.model.QuestionDetail;
+import org.egov.usm.web.model.SurveyDetails;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@Slf4j
+public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDetails>>{
+	
+	@Override
+	public List<SurveyDetails> extractData(ResultSet rs) throws SQLException, DataAccessException {
+		
+		Map<String,SurveyDetails> surveyDetailsMap = new LinkedHashMap<>();
+		
+		Map<String,QuestionDetail> questionMap = new LinkedHashMap<>();
+		String surveydetailsId = null;
+		
+        while (rs.next()){
+        	String id = rs.getString("id");
+            QuestionDetail question = questionMap.get(id);
+            
+            surveydetailsId = rs.getString("surveydetailsid");
+            SurveyDetails surveyDetail = surveyDetailsMap.get(surveydetailsId);
+            
+            if(surveyDetail == null) {
+
+                AuditDetails auditdetails = AuditDetails.builder()
+                        .createdBy(rs.getString("surveycreatedby"))
+                        .createdTime(rs.getLong("surveycreatedtime"))
+                        .lastModifiedBy(rs.getString("surveymodifiedby"))
+                        .lastModifiedTime(rs.getLong("surveymodifiedtime"))
+                        .build();
+
+                surveyDetail =  SurveyDetails.builder()
+                        .id(rs.getString("surveydetailsid"))
+                        .surveyNo(rs.getString("surveysubmittedno"))
+                        .tenantId(rs.getString("tenantid"))
+                        .ward(rs.getString("ward"))
+                        .slumCode(rs.getString("slumcode"))
+                        .isClosed(rs.getBoolean("isclosed"))
+                        .auditDetails(auditdetails)
+                        .build();
+            }
+            
+            if(question == null) {
+
+                AuditDetails auditdetails = AuditDetails.builder()
+                        .createdBy(rs.getString("createdby"))
+                        .createdTime(rs.getLong("createdtime"))
+                        .lastModifiedBy(rs.getString("lastmodifiedby"))
+                        .lastModifiedTime(rs.getLong("lastmodifiedtime"))
+                        .build();
+
+                question =  QuestionDetail.builder()
+                        .id(rs.getString("id"))
+                        .surveyId(rs.getString("surveyid"))
+                        .questionStatement(rs.getString("questionstatement"))
+                        .category(rs.getString("category"))
+                        .status(Status.fromValue(rs.getString("status")))
+                        .required(rs.getBoolean("required"))
+                        .options(Arrays.asList(rs.getString("options").split(",")))
+                        .hasOpenTicket(rs.getBoolean("hasopenticket"))
+                        .answer(SurveyAnswer.fromValue(rs.getString("answer")))
+                        .auditDetail(auditdetails)
+                        .build();
+            }
+            
+            log.info("Question : ", question);
+            questionMap.put(id, question);
+            
+            surveyDetailsMap.put(surveydetailsId, surveyDetail);
+        }
+        surveyDetailsMap.get(surveydetailsId).setQuestionDetails(new ArrayList<>(questionMap.values()));
+        
+        return new ArrayList<>(surveyDetailsMap.values());
+	}
+
+}

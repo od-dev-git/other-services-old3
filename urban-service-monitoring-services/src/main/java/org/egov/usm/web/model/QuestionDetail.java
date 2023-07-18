@@ -1,5 +1,8 @@
 package org.egov.usm.web.model;
 
+import java.util.List;
+
+import org.egov.usm.model.enums.Status;
 import org.egov.usm.model.enums.SurveyAnswer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,7 +18,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SurveyDetail {
+public class QuestionDetail {
 
 	@JsonProperty("id")
 	private String id;
@@ -23,16 +26,31 @@ public class SurveyDetail {
 	@JsonProperty("surveyId")
 	private String surveyId;
 	
-	@JsonProperty("questionCode")
-	private String questionCode;
+	@JsonProperty("surveyDetailsId")
+	private String surveyDetailsId;
+	
+	@JsonProperty("questionStatement")
+	private String questionStatement;
+	
+	@JsonProperty("category")
+	private String category;
+	
+	@JsonProperty("options")
+    private List<String> options;
 	
 	@JsonProperty("answer")
 	private SurveyAnswer answer;
 	
-	@JsonProperty("additionalDetail")
-	private String additionalDetail;
-	
 	@JsonProperty("auditDetail")
 	private AuditDetails auditDetail;
+	
+	@JsonProperty("status")
+    private Status status;
+
+    @JsonProperty("required")
+    private Boolean required;
+    
+    @JsonProperty("hasOpenTicket")
+    private Boolean hasOpenTicket;
 	
 }
