@@ -50,7 +50,6 @@ public class Service   {
   private String serviceRequestId;
 
   @JsonProperty("description")
-  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&'\\n]*$")
   @Size(max=1000)
   private String description;
 

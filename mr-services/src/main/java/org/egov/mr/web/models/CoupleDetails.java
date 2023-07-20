@@ -79,4 +79,7 @@ public class CoupleDetails {
     @Valid
 	private Witness witness = null ;
     
+    @JsonProperty("age")
+    private int age = 0 ;
+    
 }
