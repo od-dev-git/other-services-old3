@@ -30,4 +30,7 @@ public class SurveySearchCriteria {
 	
 	@JsonProperty("slumCode")
 	private String slumCode;
+	
+	@JsonProperty("status")
+	private String status;
 }

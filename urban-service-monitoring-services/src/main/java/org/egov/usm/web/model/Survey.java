@@ -1,5 +1,6 @@
 package org.egov.usm.web.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,5 +50,14 @@ public class Survey {
 	
 	@JsonProperty("questionDetails")
 	private List<QuestionDetail> questionDetails;
-	
+
+	public Survey addQuestionsItem(QuestionDetail questionDetail) {
+		if (this.questionDetails == null) {
+            this.questionDetails = new ArrayList<>();
+        }
+
+        if (null != questionDetail)
+            this.questionDetails.add(questionDetail);
+        return this;
+	}
 }

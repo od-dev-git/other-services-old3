@@ -15,7 +15,10 @@ import org.egov.usm.web.model.SurveyRequest;
 import org.egov.usm.web.model.SurveySearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,7 +53,7 @@ public class SurveyRepository {
      */
 	public void save(SurveyRequest surveyRequest) {
 		log.info("Save request :", surveyRequest.toString());
-        producer.push(config.getSubmitSurveyTopic(), surveyRequest);
+        producer.push(config.getCreateSurveyTopic(), surveyRequest);
     }
 
 	/**
@@ -67,6 +70,18 @@ public class SurveyRepository {
 		if(surveyRequests.isEmpty())
 			return Collections.emptyList();
 		return surveyRequests;
+	}
+	
+	/**
+	 * Repository for searching Suvey Requests from db
+	 * @param searchCriteria
+	 * @return List<Survey>
+	 */
+	public List<String> isSurveyExists(SurveySearchCriteria searchCriteria) {
+		log.info("Search Criteria :", searchCriteria.toString());
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = queryBuilder.isSurveyExistsQuery(searchCriteria, preparedStmtList);
+        return jdbcTemplate.query(query, preparedStmtList.toArray(), new SingleColumnRowMapper<>(String.class));
 	}
 
 	/**
@@ -86,7 +101,7 @@ public class SurveyRepository {
      */
 	public void deleteSurvey(@Valid SurveyRequest surveyRequest) {
 		log.info("Delete request :", surveyRequest.toString());
-		producer.push(config.getUpdateSurveyTopic(), surveyRequest);
+		producer.push(config.getDeleteSurveyTopic(), surveyRequest);
 	}
 
 }

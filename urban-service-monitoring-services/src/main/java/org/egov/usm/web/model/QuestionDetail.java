@@ -1,7 +1,5 @@
 package org.egov.usm.web.model;
 
-import java.util.List;
-
 import org.egov.usm.model.enums.Status;
 import org.egov.usm.model.enums.SurveyAnswer;
 
@@ -36,13 +34,16 @@ public class QuestionDetail {
 	private String category;
 	
 	@JsonProperty("options")
-    private List<String> options;
+    private String options;
 	
 	@JsonProperty("answer")
 	private SurveyAnswer answer;
 	
-	@JsonProperty("auditDetail")
-	private AuditDetails auditDetail;
+	@JsonProperty("type")
+	private String type;
+	
+	@JsonProperty("auditDetails")
+	private AuditDetails auditDetails;
 	
 	@JsonProperty("status")
     private Status status;
@@ -51,6 +52,6 @@ public class QuestionDetail {
     private Boolean required;
     
     @JsonProperty("hasOpenTicket")
-    private Boolean hasOpenTicket;
+    private Boolean hasOpenTicket = false;
 	
 }

@@ -40,14 +40,26 @@ public class USMConfiguration {
     private String ticketNoIdgenFormat;
     
     //Persister Config
-    @Value("${persister.submit.survey.topic}")
-    private String submitSurveyTopic;
+    
+    @Value("${persister.create.survey.topic}")
+    private String createSurveyTopic;
     
     @Value("${persister.update.survey.topic}")
     private String updateSurveyTopic;
     
     @Value("${persister.delete.survey.topic}")
     private String deleteSurveyTopic;
+    
+    
+    @Value("${persister.save.submit.survey.topic}")
+    private String saveSubmitSurveyTopic;
+    
+    @Value("${persister.update.submit.survey.topic}")
+    private String updateSubmitSurveyTopic;
+    
+    @Value("${persister.delete.submit.survey.topic}")
+    private String deleteSubmitSurveyTopic;
+    
 
     @Value("${persister.create.ticket.topic}")
     private String createTicketTopic;

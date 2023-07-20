@@ -3,7 +3,6 @@ package org.egov.usm.repository.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,7 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
 		Map<String,QuestionDetail> questionMap = new LinkedHashMap<>();
 		String surveydetailsId = null;
 		
-        while (rs.next()){
+        while (rs.next()) {
         	String id = rs.getString("id");
             QuestionDetail question = questionMap.get(id);
             
@@ -74,10 +73,10 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
                         .category(rs.getString("category"))
                         .status(Status.fromValue(rs.getString("status")))
                         .required(rs.getBoolean("required"))
-                        .options(Arrays.asList(rs.getString("options").split(",")))
+                        .options(rs.getString("options"))
                         .hasOpenTicket(rs.getBoolean("hasopenticket"))
                         .answer(SurveyAnswer.fromValue(rs.getString("answer")))
-                        .auditDetail(auditdetails)
+                        .auditDetails(auditdetails)
                         .build();
             }
             
@@ -86,7 +85,10 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
             
             surveyDetailsMap.put(surveydetailsId, surveyDetail);
         }
-        surveyDetailsMap.get(surveydetailsId).setQuestionDetails(new ArrayList<>(questionMap.values()));
+        
+        if(surveydetailsId != null) {
+        	surveyDetailsMap.get(surveydetailsId).setQuestionDetails(new ArrayList<>(questionMap.values()));
+        }
         
         return new ArrayList<>(surveyDetailsMap.values());
 	}

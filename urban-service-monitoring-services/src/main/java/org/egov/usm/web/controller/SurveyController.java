@@ -23,8 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
 @RequestMapping("/survey")
+@Slf4j
 public class SurveyController {
 	
     private final SurveyService surveyService;
@@ -44,6 +47,7 @@ public class SurveyController {
      */
 	@PostMapping("/_create")
 	public ResponseEntity<SurveyResponse> create(@Valid @RequestBody SurveyRequest surveyRequest) {
+		log.info("In controller request : ", surveyRequest.toString());
 		Survey survey = surveyService.create(surveyRequest);
 		SurveyResponse response =  SurveyResponse.builder()
 				.surveys(Collections.singletonList(survey))

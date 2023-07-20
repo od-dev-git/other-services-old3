@@ -3,7 +3,6 @@ package org.egov.usm.repository.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +44,9 @@ public class QuestionDetailRowMapper implements ResultSetExtractor<List<Question
                         .category(id)
                         .status(Status.fromValue(rs.getString("status")))
                         .required(rs.getBoolean("required"))
-                        .options(Arrays.asList(rs.getString("options").split(",")))
+                        .options(rs.getString("options"))
                         .hasOpenTicket(rs.getBoolean("hasopenticket"))
+                        .auditDetails(auditdetails)
                         .build();
             }
             log.info("Question : ", question);
