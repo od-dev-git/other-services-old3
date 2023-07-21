@@ -60,6 +60,8 @@ public class EnrichmentService {
 		surveyDetailsRequest.getSurveyDetails().setSurveyNo(surveyNumbers.get(0));
 		
 		//enrich question details
+		surveyDetailsRequest.getSurveyDetails().getQuestionDetails()
+			.forEach(question -> question.setAuditDetails(auditDetails));
 		
 	}
 	

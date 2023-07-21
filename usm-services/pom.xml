@@ -10,9 +10,9 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.egov</groupId>
-	<artifactId>urban-service-monitoring-services</artifactId>
+	<artifactId>usm-services</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>urban-service-monitoring-services</name>
+	<name>usm-services</name>
 	<description>Urban Service Monitoring Services</description>
 	<properties>
 		<java.version>1.8</java.version>
