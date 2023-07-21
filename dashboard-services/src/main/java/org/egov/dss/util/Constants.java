@@ -131,6 +131,8 @@ public class Constants {
 		final static String SERVICE_OBPS_SLA_COMPLIANCE_BUILDING_PERMIT = "bpaSLAComplianceBuildingPermit";
 		final static String SERVICE_OBPS_TOP_ULB_BY_PERFORMANCE = "obpsTopUlbByPerformance";
 		final static String SERVICE_OBPS_BOTTOM_ULB_BY_PERFORMANCE = "obpsBottomUlbByPerformance";
+		final static String SERVICE_OBPS_TOP_PERFORMING_ULBS_TABLE = "obpsTopPerformingUlbsTable";
+		final static String SERVICE_OBPS_BOTTOM_PERFORMING_ULBS_TABLE = "obpsBottomPerformingUlbsTable";
 		
 		final static String REVENUE_BPA_APP_FEE_COLLECTIONS = "bpaApplicationFeesCollection";
 		final static String REVENUE_BPA_SANC_FEE_COLLECTIONS = "bpaSanctionFeesCollection";
