@@ -16,48 +16,46 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Survey {
+public class SurveyDetails {
 
 	@JsonProperty("id")
 	private String id;
 	
+	@JsonProperty("surveyNo")
+	private String surveyNo;
+	
 	@JsonProperty("tenantId")
 	private String tenantId;
 	
-	@JsonProperty("title")
-    private String title;
+	@JsonProperty("ward")
+	private String ward;
 	
-	@JsonProperty("status")
-    private String status;
-
-    @JsonProperty("description")
-    private String description;
-    
-    @JsonProperty("startDate")
-    private Long startDate;
-
-    @JsonProperty("endDate")
-    private Long endDate;
-    
-    @JsonProperty("postedBy")
-    private String postedBy;
-    
-    @JsonProperty("collectCitizenInfo")
-    private boolean collectCitizenInfo;
-
+	@JsonProperty("slumCode")
+	private String slumCode;
+	
+	@JsonProperty("surveyTime")
+	private Long surveyTime;
+	
+	@JsonProperty("isClosed")
+	private Boolean isClosed;
+	
+	@JsonProperty("additionalDetail")
+	private Object additionalDetail;
+	
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails;
 	
 	@JsonProperty("questionDetails")
 	private List<QuestionDetail> questionDetails;
-
-	public Survey addQuestionsItem(QuestionDetail questionDetail) {
-		if (this.questionDetails == null) {
+	
+	public SurveyDetails addQuestionsItem(QuestionDetail questionDetail) {
+        if (this.questionDetails == null) {
             this.questionDetails = new ArrayList<>();
         }
 
         if (null != questionDetail)
             this.questionDetails.add(questionDetail);
         return this;
-	}
+    }
+	
 }

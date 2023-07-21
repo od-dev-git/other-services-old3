@@ -38,5 +38,34 @@ public class USMConfiguration {
 
     @Value("${egov.idgen.usm.ticketNo.format}")
     private String ticketNoIdgenFormat;
+    
+    //Persister Config
+    
+    @Value("${persister.create.survey.topic}")
+    private String createSurveyTopic;
+    
+    @Value("${persister.update.survey.topic}")
+    private String updateSurveyTopic;
+    
+    @Value("${persister.delete.survey.topic}")
+    private String deleteSurveyTopic;
+    
+    
+    @Value("${persister.save.submit.survey.topic}")
+    private String saveSubmitSurveyTopic;
+    
+    @Value("${persister.update.submit.survey.topic}")
+    private String updateSubmitSurveyTopic;
+    
+    @Value("${persister.delete.submit.survey.topic}")
+    private String deleteSubmitSurveyTopic;
+    
+
+    @Value("${persister.create.ticket.topic}")
+    private String createTicketTopic;
+
+    @Value("${persister.update.ticket.topic}")
+    private String updateTicketTopic;
+
 
 }

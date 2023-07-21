@@ -1,7 +1,5 @@
 package org.egov.usm.web.model;
 
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.egov.common.contract.response.ResponseInfo;
@@ -19,13 +17,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SurveyResponse {
+public class SurveyDetailsResponse {
 	
 	@JsonProperty("responseInfo")
 	private ResponseInfo responseInfo;
 	
-	@JsonProperty("surveys")
+	@JsonProperty("surveyDetails")
 	@Valid
-	private List<Survey> surveys;
-	
+	private SurveyDetails surveyDetails;
 }
