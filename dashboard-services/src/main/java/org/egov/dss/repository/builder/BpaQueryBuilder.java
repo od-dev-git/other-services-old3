@@ -23,7 +23,7 @@ public static final String TOTAL_PERMIITS_ISSUED_VS_TOTAL_OC_ISSUED_VS_TOTAL_OC_
 
 public static final String MONTH_YEAR_QUERY = " select to_char(monthYear, 'Mon-YYYY') as name , 0 as value "
 		+ "from ( "
-		+ "select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear from eg_bpa_buildingplan bpa  ";
+		+ "select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(approvaldate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(approvaldate/1000))),'DD-MM-YYYY') monthYear from eg_bpa_buildingplan bpa  ";
 
 public static final String BPA_TENANT_WISE_TOTAL_APPLICATIONS = " select bpa.tenantid as tenantid, count(bpa.applicationno) as totalamt from eg_bpa_buildingplan bpa  ";
 
@@ -324,8 +324,8 @@ public static final String BPA_SLA_COMPLIENCE_APPLICATIONS = " select count(bpa.
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(MONTH_YEAR_QUERY);
 		addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
-		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') ");
-		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') asc) bpa_tmp ");
+		addGroupByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(approvaldate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(approvaldate/1000))),'DD-MM-YYYY') ");
+		addOrderByClause(selectQuery," to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(approvaldate/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(approvaldate/1000))),'DD-MM-YYYY') asc) bpa_tmp ");
 		return selectQuery.toString();
 	}
 
