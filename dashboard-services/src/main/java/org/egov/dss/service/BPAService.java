@@ -781,6 +781,22 @@ public class BPAService {
             serialNumber++;
 
         }
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Rank").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
+		}
 
 		return response;
 	}
@@ -818,6 +834,22 @@ public class BPAService {
             serialNumber++;
 
         }
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Rank").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
+			}
 
 		return response;
 	}
