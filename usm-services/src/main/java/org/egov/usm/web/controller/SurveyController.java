@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +87,12 @@ public class SurveyController {
         return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value="/_delete", method = RequestMethod.POST)
+	/**
+	 * Delete the survey
+	 * @param surveyRequest
+	 * @return responseInfo
+	 */
+	@PostMapping("/_delete")
     public ResponseEntity<?> delete(@RequestBody @Valid SurveyRequest surveyRequest) {
         surveyService.deleteSurvey(surveyRequest);
         ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(surveyRequest.getRequestInfo(), true);

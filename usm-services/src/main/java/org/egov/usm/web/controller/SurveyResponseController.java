@@ -1,15 +1,21 @@
 package org.egov.usm.web.controller;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.egov.usm.service.SurveyResponseService;
 import org.egov.usm.utility.ResponseInfoFactory;
+import org.egov.usm.web.model.RequestInfoWrapper;
 import org.egov.usm.web.model.SurveyDetails;
 import org.egov.usm.web.model.SurveyDetailsRequest;
 import org.egov.usm.web.model.SurveyDetailsResponse;
+import org.egov.usm.web.model.SurveySearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +36,7 @@ public class SurveyResponseController {
     }
 	
 	 /**
-     * Creates Survey Request for USM
+     * Generate Survey Questions for USM
      * @param surveyRequest
      * @return SurveyResponse
      */
@@ -38,18 +44,56 @@ public class SurveyResponseController {
 	public ResponseEntity<SurveyDetailsResponse> generateSurvey(@Valid @RequestBody SurveyDetailsRequest surveyRequest) {
 		SurveyDetails surveyDetails = surveyResponseService.generateSurvey(surveyRequest);
 		SurveyDetailsResponse response =  SurveyDetailsResponse.builder()
-				.surveyDetails(surveyDetails)
+				.surveyDetails(Collections.singletonList(surveyDetails))
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(surveyRequest.getRequestInfo(), true))
 				.build();
         return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
+	/**
+	 * Submit Survey Questions with answers
+	 * @param surveyRequest
+	 * @return SurveyDetailsResponse
+	 */
 	@PostMapping("/response/_submit")
 	public ResponseEntity<SurveyDetailsResponse> submitSurvey(@Valid @RequestBody SurveyDetailsRequest surveyRequest) {
 		SurveyDetails surveyDetails = surveyResponseService.submitSurvey(surveyRequest);
 		SurveyDetailsResponse response =  SurveyDetailsResponse.builder()
-				.surveyDetails(surveyDetails)
+				.surveyDetails(Collections.singletonList(surveyDetails))
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(surveyRequest.getRequestInfo(), true))
+				.build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	/**
+	 * Update Submitted Survey Questions with answers
+	 * @param surveyRequest
+	 * @return SurveyDetailsResponse
+	 */
+	@PostMapping("/response/_update")
+	public ResponseEntity<SurveyDetailsResponse> updateSubmittedSurvey(@Valid @RequestBody SurveyDetailsRequest surveyRequest) {
+		SurveyDetails surveyDetails = surveyResponseService.updateSubmittedSurvey(surveyRequest);
+		SurveyDetailsResponse response =  SurveyDetailsResponse.builder()
+				.surveyDetails(Collections.singletonList(surveyDetails))
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(surveyRequest.getRequestInfo(), true))
+				.build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	
+	/**
+	 * Search Submitted Surveys
+	 * @param surveyRequest
+	 * @return SurveyDetailsResponse
+	 */
+	@PostMapping("/response/_search")
+	public ResponseEntity<SurveyDetailsResponse> search(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+										@Valid @ModelAttribute SurveySearchCriteria searchCriteria) {
+		List<SurveyDetails> surveyDetails = surveyResponseService.searchSubmittedSurvey(searchCriteria);
+		
+		SurveyDetailsResponse response =  SurveyDetailsResponse.builder()
+				.surveyDetails(surveyDetails)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
 				.build();
         return new ResponseEntity<>(response, HttpStatus.OK);
 	}
