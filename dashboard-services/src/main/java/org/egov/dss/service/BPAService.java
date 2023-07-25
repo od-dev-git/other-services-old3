@@ -772,7 +772,7 @@ public class BPAService {
 
 			plots.add(Plot.builder().name("Avg. Days to Issue Permit")
 					.value(totalApplication.getValue() == null ? BigDecimal.ZERO
-							: totalApplication.getValue())
+							: totalApplication.getValue().setScale(0, BigDecimal.ROUND_UP))
 					.symbol("number").build());
 
 			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
@@ -807,11 +807,11 @@ public class BPAService {
 		List<Data> response = new ArrayList();
 		HashMap<String, BigDecimal> tenantWiseBpaAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
 		int serialNumber = 1;		
-		// Sort the HashMap in ascending order
+					
 		Map<String, BigDecimal> tenantWiseSorted = tenantWiseBpaAvgDaysPermitIssue.entrySet().parallelStream()
-				.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
-						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-		int rank =  tenantWiseSorted.size();
+		        .sorted(Collections.reverseOrder(Map.Entry.comparingByValue())) // Sort in descending order
+		        .collect(Collectors.toMap(
+		                Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 		for (HashMap.Entry<String, BigDecimal> totalApplication : tenantWiseSorted.entrySet()) {
             List<Plot> plots = new ArrayList();
             plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
@@ -820,17 +820,17 @@ public class BPAService {
                     .build());
 
 			plots.add(Plot.builder().name("Rank")
-					.value(BigDecimal.valueOf(rank))
+					.value(BigDecimal.valueOf(serialNumber))
 					.symbol("number").build());
 
 			plots.add(Plot.builder().name("Avg. Days to Issue Permit")
 					.value(totalApplication.getValue() == null ? BigDecimal.ZERO
-							: totalApplication.getValue())
+							: totalApplication.getValue().setScale(0, BigDecimal.ROUND_UP))
 					.symbol("number").build());
 
 			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
 					.build());
-            rank --;
+           
             serialNumber++;
 
         }
