@@ -209,6 +209,12 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_OBPS_BOTTOM_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
 			return bpaService.bottomUlbByPerformance(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_TOP_PERFORMING_ULBS_TABLE.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.topPerformingUlbsTable(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_OBPS_BOTTOM_PERFORMING_ULBS_TABLE.equalsIgnoreCase(visualizationCode)) {
+			return bpaService.bottomPerformingUlbsTable(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.SERVICE_OBPS_PERMITS_AND_OC_ISSUED_AND_OC_SUBMITTED.equalsIgnoreCase(visualizationCode)) {
 			return bpaService.permitsAndOcIssuedAndOcSubmitted(requestInfoWrapper.getPayloadDetails());
 		}

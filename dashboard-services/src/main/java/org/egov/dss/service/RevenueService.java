@@ -1349,6 +1349,9 @@ public class RevenueService {
 		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			criteria.setFromDate(dashboardUtils.getStartDateGmt(String.valueOf(payloadDetails.getTimeinterval())));
+		}
 		List<Chart> cumulativeCollection = paymentRepository.getCumulativeCollection(criteria);
 		List<Plot> plots = new ArrayList<Plot>();
 		extractDataForChart(cumulativeCollection, plots);
