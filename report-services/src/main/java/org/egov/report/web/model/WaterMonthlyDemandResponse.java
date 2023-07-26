@@ -100,5 +100,8 @@ public class WaterMonthlyDemandResponse {
 	@JsonProperty("amountPayableWithPenaltyAmount")
 	@Default
 	private BigDecimal payableWithPenaltyAmt = BigDecimal.ZERO;
+	
+	@JsonProperty("monthYear")
+	private String monthYear;
 
 }
