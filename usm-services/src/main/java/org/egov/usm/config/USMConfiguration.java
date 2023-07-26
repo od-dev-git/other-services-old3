@@ -66,6 +66,13 @@ public class USMConfiguration {
 
     @Value("${persister.update.ticket.topic}")
     private String updateTicketTopic;
+    
+    
+    @Value("${persister.create.lookup.topic}")
+    private String createQuestionLookupTopic;
+
+    @Value("${persister.update.lookup.topic}")
+    private String updateQuestionLookupTopic;
 
 
 }

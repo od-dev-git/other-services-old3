@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.usm.model.enums.Status;
 import org.egov.usm.repository.SurveyRepository;
 import org.egov.usm.utility.USMUtil;
 import org.egov.usm.validator.SurveyRequestValidator;
@@ -21,20 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class SurveyService {
 	
-	public static final String ACTIVE = "ACTIVE";
-    public static final String INACTIVE = "INACTIVE";
-
 	private SurveyRequestValidator surveyRequestValidator;
 
 	private SurveyRepository repository;
-	
-	private USMUtil USMUtil;
 	
 	@Autowired
 	public SurveyService(SurveyRequestValidator surveyRequestValidator, SurveyRepository repository, USMUtil USMUtil) {
 		this.surveyRequestValidator = surveyRequestValidator;
 		this.repository = repository;
-		this.USMUtil = USMUtil;
 	}
 
 	/**
@@ -112,12 +107,16 @@ public class SurveyService {
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Service layer for Delete Survey
+	 * @param surveyRequest
+	 */
 	public void deleteSurvey(@Valid SurveyRequest surveyRequest) {
 		Survey survey = surveyRequest.getSurvey();
         // Validate survey existence
 		Boolean isSurveyExists = surveyRequestValidator.isSurveyExists(survey);
 
-		survey.setStatus(INACTIVE);
+		survey.setStatus(Status.INACTIVE);
         AuditDetails auditDetails = USMUtil.getAuditDetails(surveyRequest.getRequestInfo().getUserInfo().getUuid(), false);
         survey.setAuditDetails(auditDetails);
         

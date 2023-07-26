@@ -24,6 +24,9 @@ public class SurveyDetails {
 	@JsonProperty("surveyNo")
 	private String surveyNo;
 	
+	@JsonProperty("surveyId")
+	private String surveyId;
+	
 	@JsonProperty("tenantId")
 	private String tenantId;
 	
@@ -48,13 +51,13 @@ public class SurveyDetails {
 	@JsonProperty("questionDetails")
 	private List<QuestionDetail> questionDetails;
 	
-	public SurveyDetails addQuestionsItem(QuestionDetail questionDetail) {
+	public SurveyDetails addQuestionsItem(QuestionDetail questionDetails) {
         if (this.questionDetails == null) {
             this.questionDetails = new ArrayList<>();
         }
 
-        if (null != questionDetail)
-            this.questionDetails.add(questionDetail);
+        if (null != questionDetails)
+            this.questionDetails.add(questionDetails);
         return this;
     }
 	
