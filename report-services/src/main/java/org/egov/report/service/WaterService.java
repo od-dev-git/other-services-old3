@@ -413,13 +413,16 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                 searchCriteria.setToDate(taxperiodToDate);
                 searchCriteria.setConsumerNumbers(waterConnectionsSet);
                 
+                Long taxperiodFromDate = wsReportUtils.formatFromDate(searchCriteria.getFromDate());
+                
                 // get Water Connection details here
 
                 Map<String, WaterConnectionDetails> waterConnectionDetails = reportRepository.getWaterConnectionDetails(searchCriteria);//make a new query
 
                 // get Demands
-                DemandCriteria demandCriteria = DemandCriteria.builder().tenantId(searchCriteria.getTenantId())
-                        .consumerCode(waterConnectionsSet).periodTo(taxperiodToDate).build();
+				DemandCriteria demandCriteria = DemandCriteria.builder().tenantId(searchCriteria.getTenantId())
+						.consumerCode(waterConnectionsSet).periodTo(taxperiodToDate).periodFrom(taxperiodFromDate)
+						.build();
                 log.info(" Demands Criteria " + demandCriteria.toString());
                 List<Demand> allDemands = demandService.getDemands(demandCriteria, requestInfo);
                 log.info(" Demands Count fetched from DB " + allDemands.size());;
