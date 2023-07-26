@@ -3,6 +3,8 @@ package org.egov.usm.web.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.egov.usm.model.enums.Status;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -28,7 +30,7 @@ public class Survey {
     private String title;
 	
 	@JsonProperty("status")
-    private String status;
+	private Status status;
 
     @JsonProperty("description")
     private String description;

@@ -5,7 +5,6 @@ import java.util.List;
 import org.egov.usm.web.model.SurveyDetails;
 import org.egov.usm.web.model.SurveySearchCriteria;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +41,7 @@ public class SurveyQueryBuilder {
 
 	public String validateSurveyDetailsForCurrentDate(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
 		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, "
-				+ "question.options, answer.answer , question.status, question.required, question.createdby, "
+				+ "question.options, answer.answer , question.status, question.required, question.type, question.createdby, "
 				+ "question.createdtime , question.lastmodifiedtime , question.lastmodifiedby, "
 				+ "surveysubmitted.id as surveydetailsid, surveysubmitted.surveysubmittedno , "
 				+ "surveysubmitted.tenantid , surveysubmitted.ward , surveysubmitted.slumcode , "
@@ -75,25 +74,23 @@ public class SurveyQueryBuilder {
 			query.append(" surveysubmitted.slumcode = ?");
 			preparedStmtList.add(surveyDetails.getSlumCode());
 		}
+		
+		if (!ObjectUtils.isEmpty(surveyDetails.getSurveyId())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" question.surveyid = ?");
+			preparedStmtList.add(surveyDetails.getSurveyId());
+		}
 		log.info("Query for get Questions ", query.toString());
 		return query.toString();
 	}
 
 	public String getQuestionDetails(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, question.options, question.status, question.required, question.createdby, question.createdtime, question.lastmodifiedby, question.lastmodifiedtime");
-		query.append(", exists(select hasopenticket from eg_usm_slum_question_lookup lookup WHERE question.id = lookup.questionid");
-
-		if (!ObjectUtils.isEmpty(surveyDetails.getTenantId())) {
-			query.append(" AND lookup.tenantid = ?");
-			preparedStmtList.add(surveyDetails.getTenantId());
-		}
-
-		if (!ObjectUtils.isEmpty(surveyDetails.getSlumCode())) {
-			query.append(" AND lookup.slumcode = ?");
-			preparedStmtList.add(surveyDetails.getSlumCode());
-		}
+		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, question.options, question.status, question.required, question.type, question.createdby, question.createdtime, question.lastmodifiedby, question.lastmodifiedtime, false as hasopenticket FROM eg_usm_question question");
 		
-		query.append(") as hasopenticket FROM eg_usm_question question");
+		if (!ObjectUtils.isEmpty(surveyDetails.getSurveyId())) {
+			query.append(" WHERE question.surveyid = ?");
+			preparedStmtList.add(surveyDetails.getSurveyId());
+		}
 		
 		log.info("Query for get Questions ", query.toString());
 		return query.toString();

@@ -1,7 +1,6 @@
 package org.egov.usm.service;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
@@ -15,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Service
-@Slf4j
 public class EnrichmentService {
 	
 	private USMConfiguration config;
@@ -37,11 +33,10 @@ public class EnrichmentService {
 	public void enrichSurveySubmitRequest(SurveyDetailsRequest surveyDetailsRequest) {
 		RequestInfo requestInfo = surveyDetailsRequest.getRequestInfo();
 		String uuid = requestInfo.getUserInfo().getUuid();
-		AuditDetails auditDetails = usmUtil.getAuditDetails(uuid, true);
+		AuditDetails auditDetails = USMUtil.getAuditDetails(uuid, true);
 		
-		surveyDetailsRequest.getSurveyDetails().setId(UUID.randomUUID().toString());
-		//set audit details
-		surveyDetailsRequest.getSurveyDetails().setAuditDetails(auditDetails);
+		surveyDetailsRequest.getSurveyDetails().setId(USMUtil.generateUUID());
+		
 		surveyDetailsRequest.getSurveyDetails().setSurveyTime(auditDetails.getCreatedTime());
 		
 		//check all question answered or not , then set status accordingly
@@ -63,6 +58,19 @@ public class EnrichmentService {
 		surveyDetailsRequest.getSurveyDetails().getQuestionDetails()
 			.forEach(question -> question.setAuditDetails(auditDetails));
 		
+	}
+
+
+
+	public void enrichLookupDetails(SurveyDetailsRequest surveyDetailsRequest) {
+		RequestInfo requestInfo = surveyDetailsRequest.getRequestInfo();
+		String uuid = "";
+		if(requestInfo.getUserInfo() != null ) {
+			uuid = requestInfo.getUserInfo().getUuid();
+		}
+		AuditDetails auditDetails = USMUtil.getAuditDetails(uuid, false);
+		//set audit details
+		surveyDetailsRequest.getSurveyDetails().setAuditDetails(auditDetails);
 	}
 	
 	

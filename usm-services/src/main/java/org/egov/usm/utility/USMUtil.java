@@ -1,6 +1,7 @@
 package org.egov.usm.utility;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
@@ -29,7 +30,7 @@ public class USMUtil {
 	 * @param isCreate
 	 * @return AuditDetails
 	 */
-	public AuditDetails getAuditDetails(String by, Boolean isCreate) {
+	public static AuditDetails getAuditDetails(String by, Boolean isCreate) {
 		Long time = System.currentTimeMillis();
 		log.info("Audit user by :", by);
 		if(isCreate)
@@ -59,5 +60,14 @@ public class USMUtil {
 		return idResponses.stream()
 				.map(IdResponse::getId).collect(Collectors.toList());
 	}
+	
+	/**
+	 * To generate UUID
+	 * @return generated UUID
+	 */
+	public static String generateUUID () {
+		return UUID.randomUUID().toString();
+	}
+	
 	
 }
