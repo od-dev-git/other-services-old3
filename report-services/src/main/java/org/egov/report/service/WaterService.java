@@ -413,16 +413,13 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                 searchCriteria.setToDate(taxperiodToDate);
                 searchCriteria.setConsumerNumbers(waterConnectionsSet);
                 
-                Long taxperiodFromDate = wsReportUtils.formatFromDate(searchCriteria.getFromDate());
-                
                 // get Water Connection details here
 
                 Map<String, WaterConnectionDetails> waterConnectionDetails = reportRepository.getWaterConnectionDetails(searchCriteria);//make a new query
 
                 // get Demands
 				DemandCriteria demandCriteria = DemandCriteria.builder().tenantId(searchCriteria.getTenantId())
-						.consumerCode(waterConnectionsSet).periodTo(taxperiodToDate).periodFrom(taxperiodFromDate)
-						.build();
+						.consumerCode(waterConnectionsSet).periodTo(taxperiodToDate).build();
                 log.info(" Demands Criteria " + demandCriteria.toString());
                 List<Demand> allDemands = demandService.getDemands(demandCriteria, requestInfo);
                 log.info(" Demands Count fetched from DB " + allDemands.size());;
@@ -485,6 +482,7 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
                             }
                             responsePerConnection.setTaxPriodFrom(wsReportUtils.getConvertedDate(connectionDemands.get(0).getTaxPeriodFrom()));
                             responsePerConnection.setTaxPeriodTo(wsReportUtils.getConvertedDate(connectionDemands.get(0).getTaxPeriodTo()));
+                            responsePerConnection.setMonthYear(wsReportUtils.getMonthYear(connectionDemands.get(0).getTaxPeriodTo()));
                             String tenantId = connectionDemands.get(0).getTenantId();
                             String tenantIdStyled = tenantId.replace("od.", "");
                             tenantIdStyled = tenantIdStyled.substring(0,1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
