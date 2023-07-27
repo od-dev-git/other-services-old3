@@ -18,33 +18,36 @@ import lombok.Setter;
 public class SurveyTicket {
 
 	@JsonProperty("id")
-	private String id;
-	
-	@JsonProperty("tenantId")
-	private String tenantId;
-	
-	@JsonProperty("ticketNo")
-	private String ticketNo;
-	
-	@JsonProperty("surveyDetailId")
-	private String surveyDetailId;
-	
-	@JsonProperty("questionCode")
-	private String questionCode;
-	
-	@JsonProperty("id")
-	private String ticketDescription;
-	
-	@JsonProperty("id")
-	private TicketStatus status;
-	
-	@JsonProperty("ticketClosedTime")
-	private String ticketClosedTime;
-	
-	@JsonProperty("additionalDetail")
-	private String additionalDetail;
-	
-	@JsonProperty("auditDetail")
-	private AuditDetails auditDetail;
+    private String id;
+    
+    @JsonProperty("tenantId")
+    private String tenantId;
+    
+    @JsonProperty("ticketNo")
+    private String ticketNo;
+    
+    @JsonProperty("surveyAnswerId")
+    private String surveyAnswerId;
+    
+    @JsonProperty("questionId")
+    private String questionId;
+    
+    @JsonProperty("ticketDescription")
+    private String ticketDescription;
+    
+    @JsonProperty("status")
+    private TicketStatus status;
+    
+    @JsonProperty("ticketCreatedTime")
+    private Long ticketCreatedTime;
+    
+    @JsonProperty("ticketClosedTime")
+    private Long ticketClosedTime;
+    
+    @JsonProperty("additionalDetail")
+    private String additionalDetail;
+    
+    @JsonProperty("auditDetails")
+    private AuditDetails auditDetails;
 	
 }
