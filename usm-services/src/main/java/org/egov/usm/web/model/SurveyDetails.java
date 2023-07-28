@@ -61,4 +61,16 @@ public class SurveyDetails {
         return this;
     }
 	
+	@JsonProperty("submittedAnswers")
+	List<SubmittedAnswer> submittedAnswers  = new ArrayList<>();
+	
+	@JsonProperty("surveyTickets")
+	private List<SurveyTicket> surveyTickets = new ArrayList<>();
+	
+	@JsonProperty("saveQuestionLookup")
+	private List<QuestionLookup> saveQuestionLookup = new ArrayList<>();
+	
+	@JsonProperty("updateQuestionLookup")
+	private List<QuestionLookup> updateQuestionLookup = new ArrayList<>();
+	
 }

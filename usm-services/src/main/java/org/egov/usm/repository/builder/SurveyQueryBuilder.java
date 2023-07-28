@@ -132,4 +132,21 @@ public class SurveyQueryBuilder {
 		return query.toString();
 	}
 
+	public String searchQuestionInLookup(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
+		StringBuilder query = new StringBuilder("SELECT lookup.questionId FROM eg_usm_slum_question_lookup lookup");
+
+		if (!ObjectUtils.isEmpty(surveyDetails.getTenantId())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" lookup.tenantid = ?");
+			preparedStmtList.add(surveyDetails.getTenantId());
+		}
+
+		if (!ObjectUtils.isEmpty(surveyDetails.getSlumCode())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" lookup.slumcode = ?");
+			preparedStmtList.add(surveyDetails.getSlumCode());
+		}
+		return query.toString();
+	}
+
 }
