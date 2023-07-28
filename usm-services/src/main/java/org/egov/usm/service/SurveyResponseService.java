@@ -72,27 +72,27 @@ public class SurveyResponseService {
 	 */
 	public SurveyDetails submitSurvey(SurveyDetailsRequest surveyDetailsRequest) {
 		
-		// Validate Survey Submitted Request
-		
-		
 		// Enrich survey details
 		enrichmentService.enrichSurveySubmitRequest(surveyDetailsRequest);
 		
-		// persist the submitted survey
-		repository.submitSurvey(surveyDetailsRequest);
-		
-		// persist the submitted answer
-		
-		
 		// Check if any answers are NO then  Create the TICKET
 		List<SurveyTicket> tickets = ticketService.prepareTickets(surveyDetailsRequest) ;
+		surveyDetailsRequest.getSurveyDetails().setSurveyTickets(tickets);
 		
 		// If any ticket created, then create or update the lookup table
 		if(! CollectionUtils.isEmpty(tickets)) {
-			// persist the ticket table
+			//check is present in question lookup
+			List<String> questionIds = repository.searchQuestionInLookup(surveyDetailsRequest.getSurveyDetails());
 			
-			// persist the lookup table
+			if(CollectionUtils.isEmpty(questionIds) || questionIds.size() != surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers().size()) {
+				enrichmentService.enrichSaveQuestionLookup(surveyDetailsRequest, questionIds);
+			} 
+			
+			//update question lookup
+			enrichmentService.enrichUpdateQuestionLookup(surveyDetailsRequest, tickets);
 		}
+		
+		repository.submitSurvey(surveyDetailsRequest);
 		
 		return surveyDetailsRequest.getSurveyDetails();
 	}
