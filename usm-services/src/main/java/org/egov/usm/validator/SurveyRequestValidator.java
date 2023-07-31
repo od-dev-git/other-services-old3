@@ -37,10 +37,6 @@ public class SurveyRequestValidator {
 	}
 
 	public void validateSurveyUniqueness(Survey survey) {
-		SurveySearchCriteria criteria = SurveySearchCriteria.builder()
-                .tenantId(survey.getTenantId())
-                .build();
-
         
 	}
 

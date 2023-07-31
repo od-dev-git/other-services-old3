@@ -39,6 +39,9 @@ public class QuestionDetail {
 	@JsonProperty("answer")
 	private SurveyAnswer answer;
 	
+	@JsonProperty("answerId")
+    private String answerId;
+	
 	@JsonProperty("type")
 	private String type;
 	

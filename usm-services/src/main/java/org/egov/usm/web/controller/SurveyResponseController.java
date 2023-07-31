@@ -56,11 +56,11 @@ public class SurveyResponseController {
 	 * @return SurveyDetailsResponse
 	 */
 	@PostMapping("/response/_submit")
-	public ResponseEntity<SurveyDetailsResponse> submitSurvey(@Valid @RequestBody SurveyDetailsRequest surveyRequest) {
-		SurveyDetails surveyDetails = surveyResponseService.submitSurvey(surveyRequest);
+	public ResponseEntity<SurveyDetailsResponse> submitSurvey(@Valid @RequestBody SurveyDetailsRequest surveyDetailsRequest) {
+		SurveyDetails surveyDetails = surveyResponseService.submitSurvey(surveyDetailsRequest);
 		SurveyDetailsResponse response =  SurveyDetailsResponse.builder()
 				.surveyDetails(Collections.singletonList(surveyDetails))
-				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(surveyRequest.getRequestInfo(), true))
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(surveyDetailsRequest.getRequestInfo(), true))
 				.build();
         return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -71,11 +71,11 @@ public class SurveyResponseController {
 	 * @return SurveyDetailsResponse
 	 */
 	@PostMapping("/response/_update")
-	public ResponseEntity<SurveyDetailsResponse> updateSubmittedSurvey(@Valid @RequestBody SurveyDetailsRequest surveyRequest) {
-		SurveyDetails surveyDetails = surveyResponseService.updateSubmittedSurvey(surveyRequest);
+	public ResponseEntity<SurveyDetailsResponse> updateSubmittedSurvey(@Valid @RequestBody SurveyDetailsRequest surveyDetailsRequest) {
+		SurveyDetails surveyDetails = surveyResponseService.updateSubmittedSurvey(surveyDetailsRequest);
 		SurveyDetailsResponse response =  SurveyDetailsResponse.builder()
 				.surveyDetails(Collections.singletonList(surveyDetails))
-				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(surveyRequest.getRequestInfo(), true))
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(surveyDetailsRequest.getRequestInfo(), true))
 				.build();
         return new ResponseEntity<>(response, HttpStatus.OK);
 	}
