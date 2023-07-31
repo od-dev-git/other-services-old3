@@ -39,9 +39,6 @@ public class SurveyDetails {
 	@JsonProperty("surveyTime")
 	private Long surveyTime;
 	
-	@JsonProperty("isClosed")
-	private Boolean isClosed;
-	
 	@JsonProperty("additionalDetail")
 	private Object additionalDetail;
 	
@@ -63,6 +60,16 @@ public class SurveyDetails {
 	
 	@JsonProperty("submittedAnswers")
 	List<SubmittedAnswer> submittedAnswers  = new ArrayList<>();
+	
+	public SurveyDetails addSubmittedAnswer(SubmittedAnswer submittedAnswer) {
+        if (this.submittedAnswers == null) {
+            this.submittedAnswers = new ArrayList<>();
+        }
+
+        if (null != submittedAnswers)
+            this.submittedAnswers.add(submittedAnswer);
+        return this;
+    }
 	
 	@JsonProperty("surveyTickets")
 	private List<SurveyTicket> surveyTickets = new ArrayList<>();

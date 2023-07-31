@@ -45,7 +45,6 @@ public class EnrichmentService {
 		surveyDetailsRequest.getSurveyDetails().setSurveyNo(surveyNumbers.get(0));
 		surveyDetailsRequest.getSurveyDetails().setId(USMUtil.generateUUID());
 		surveyDetailsRequest.getSurveyDetails().setSurveyTime(auditDetails.getCreatedTime());
-		surveyDetailsRequest.getSurveyDetails().setIsClosed(Boolean.FALSE);
 		surveyDetailsRequest.getSurveyDetails().setAuditDetails(auditDetails);
 		
 		//enrich SubmittedAnswer details

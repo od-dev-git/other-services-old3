@@ -20,7 +20,6 @@ public class SurveyResponseValidator {
 
 		SurveySearchCriteria criteria = SurveySearchCriteria.builder()
         		.surveyId(surveyDetails.getId())
-        		.isClosed(Boolean.FALSE)
                 .build();
 		
         Boolean isSurveyExists = repository.isSurveyExistsForToday(criteria);

@@ -138,8 +138,8 @@ public class SurveyResponseService {
 	 * @return
 	 */
 	public List<SurveyDetails> searchSubmittedSurvey(@Valid SurveySearchCriteria searchCriteria) {
-		// TODO Auto-generated method stub
-		return null;
+		List<SurveyDetails> surveys = repository.searchSubmittedSurvey(searchCriteria);
+		return surveys;
 	}
 
 
