@@ -39,11 +39,20 @@ public class SurveyService {
 	 * @return created Survey
 	 */
 	public Survey create(SurveyRequest surveyRequest) {
+		Survey survey = surveyRequest.getSurvey();
+
+		// Validate whether authorized usertype is trying to create survey.
+		//surveyRequestValidator.validateUserType(surveyRequest.getRequestInfo());
+		// Validate question types.
+		//surveyRequestValidator.validateQuestions(survey);
+		// Validate survey uniqueness.
+		//surveyRequestValidator.validateSurveyUniqueness(survey);
+		
 		//Enrich service
 		surveyRequestValidator.enrichSurveyRequest(surveyRequest);
 
 		repository.save(surveyRequest);
-		return surveyRequest.getSurvey();
+		return survey;
 	}
 
 	/**
@@ -68,8 +77,9 @@ public class SurveyService {
 		Survey survey = surveyRequest.getSurvey();
 		RequestInfo requestInfo = surveyRequest.getRequestInfo();
 		
-		// Validate survey existence
+		
         Survey existingSurvey = surveyRequestValidator.validateSurveyExistence(survey);
+
         
         survey.setAuditDetails(existingSurvey.getAuditDetails());
 
@@ -81,10 +91,14 @@ public class SurveyService {
         	qs.getAuditDetails().setLastModifiedTime(survey.getAuditDetails().getLastModifiedTime());
         });
         
+        
 		repository.update(surveyRequest);
 		return survey;
 	}
 
+	private void sanitizeSurveyForUpdate(Survey survey) {
+		// TODO Auto-generated method stub
+	}
 
 	/**
 	 * Service layer for Delete Survey
