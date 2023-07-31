@@ -6,13 +6,19 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.common.contract.response.ResponseInfo;
+import org.egov.usm.service.SurveyResponseService;
 import org.egov.usm.service.SurveyService;
+import org.egov.usm.service.TicketService;
 import org.egov.usm.utility.ResponseInfoFactory;
 import org.egov.usm.web.model.RequestInfoWrapper;
 import org.egov.usm.web.model.Survey;
+import org.egov.usm.web.model.SurveyDetailsResponse;
 import org.egov.usm.web.model.SurveyRequest;
 import org.egov.usm.web.model.SurveyResponse;
 import org.egov.usm.web.model.SurveySearchCriteria;
+import org.egov.usm.web.model.SurveyTicket;
+import org.egov.usm.web.model.SurveyTicketRequest;
+import org.egov.usm.web.model.SurveyTicketResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,15 +34,16 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/survey")
 @Slf4j
 public class SurveyController {
-	
+	private final TicketService ticketService;
     private final SurveyService surveyService;
-    
     private final ResponseInfoFactory responseInfoFactory;
 
     @Autowired
-    public SurveyController(SurveyService surveyService, ResponseInfoFactory responseInfoFactory) {
-        this.surveyService = surveyService;
+    public SurveyController(SurveyService surveyService, ResponseInfoFactory responseInfoFactory,SurveyResponseService  surveyResponseService,TicketService ticketService ) {
+        this.ticketService = ticketService;
+		this.surveyService = surveyService;
         this.responseInfoFactory = responseInfoFactory;
+       
     }
 
     /**
@@ -71,6 +78,10 @@ public class SurveyController {
 				.build();
         return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+
+
+
 	
 	/**
 	 * Update Survey Request for USM

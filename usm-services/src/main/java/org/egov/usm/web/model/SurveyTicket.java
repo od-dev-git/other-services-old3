@@ -44,6 +44,9 @@ public class SurveyTicket {
     @JsonProperty("ticketClosedTime")
     private Long ticketClosedTime;
     
+    @JsonProperty("hasOpenTicket")
+    private Boolean hasOpenTicket ;
+    
     @JsonProperty("additionalDetail")
     private String additionalDetail;
     
