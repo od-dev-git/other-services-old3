@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.usm.config.USMConfiguration;
 import org.egov.usm.model.enums.TicketStatus;
@@ -156,6 +158,25 @@ public class EnrichmentService {
 		
 		//set UpdateQuestionLookup
 		surveyDetailsRequest.getSurveyDetails().setSaveQuestionLookup(questionLookupList);
+	}
+
+
+
+	public void enrichSurveyUpdateRequest(@Valid SurveyDetailsRequest surveyDetailsRequest) {
+		RequestInfo requestInfo = surveyDetailsRequest.getRequestInfo();
+		String uuid = requestInfo.getUserInfo().getUuid();
+		AuditDetails auditDetails = USMUtil.getAuditDetails(uuid, false);
+		
+		surveyDetailsRequest.getSurveyDetails().setSurveyTime(auditDetails.getLastModifiedTime());
+		surveyDetailsRequest.getSurveyDetails().setAuditDetails(auditDetails);
+		
+		//enrich SubmittedAnswer details
+		surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers()
+				.forEach(answer -> {
+					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getId());
+					answer.setAuditDetails(auditDetails);
+				});
+		
 	}
 
 	
