@@ -10,9 +10,7 @@ import org.egov.usm.config.USMConfiguration;
 import org.egov.usm.producer.Producer;
 import org.egov.usm.repository.builder.TicketQueryBuilder;
 import org.egov.usm.repository.rowmapper.TicketRowMapper;
-import org.egov.usm.web.model.LookUp;
-import org.egov.usm.web.model.Survey;
-import org.egov.usm.web.model.SurveySearchCriteria;
+import org.egov.usm.web.model.SurveyDetails;
 import org.egov.usm.web.model.SurveyTicket;
 import org.egov.usm.web.model.SurveyTicketRequest;
 import org.egov.usm.web.model.TicketSearchCriteria;
@@ -22,37 +20,42 @@ import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Repository
 @Slf4j
+@Repository
 public class SurveyTicketRepository {
-
-	private TicketQueryBuilder queryBuilder;
-
+	
 	private JdbcTemplate jdbcTemplate;
 
+	private TicketQueryBuilder queryBuilder;
+	
 	private Producer producer;
 
 	private USMConfiguration config;
 	
 	private TicketRowMapper rowMapper;
      
-	@Autowired
-	public SurveyTicketRepository(TicketQueryBuilder queryBuilder, JdbcTemplate jdbcTemplate, Producer producer,
-			USMConfiguration config,TicketRowMapper rowMapper) {
 
-		this.queryBuilder = queryBuilder;
+    @Autowired
+	public SurveyTicketRepository(JdbcTemplate jdbcTemplate, TicketQueryBuilder queryBuilder, Producer producer,
+			USMConfiguration config, TicketRowMapper rowMapper) {
 		this.jdbcTemplate = jdbcTemplate;
+		this.queryBuilder = queryBuilder;
 		this.producer = producer;
 		this.config = config;
-		this.rowMapper=rowMapper;
+		this.rowMapper = rowMapper;
 	}
 
-	public SurveyTicketRepository(Producer producer, USMConfiguration config) {
 
-		this.producer = producer;
-		this.config = config;
+
+	public List<String> searchQuestionsInTicket(SurveyDetails surveyDetails) {
+		log.info("Search Questions in Ticket table for same survey :", surveyDetails.toString());
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = queryBuilder.searchQuestionsInTicket(surveyDetails, preparedStmtList);
+        List<String> questionIds = jdbcTemplate.queryForList(query, preparedStmtList.toArray(), String.class);
+		return questionIds;
 	}
-
+	
+	
 	public void save(List<SurveyTicket> surveyTickets) {
 		producer.push(config.getCreateTicketTopic(), surveyTickets);
 
@@ -85,4 +88,7 @@ public class SurveyTicketRepository {
 	}
 
 	
+
+    
+
 }

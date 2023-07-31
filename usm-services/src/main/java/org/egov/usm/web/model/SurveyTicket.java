@@ -44,11 +44,11 @@ public class SurveyTicket {
     @JsonProperty("ticketClosedTime")
     private Long ticketClosedTime;
     
-    @JsonProperty("additionalDetail")
-    private String additionalDetail;
-    
     @JsonProperty("hasOpenTicket")
     private Boolean hasOpenTicket ;
+    
+    @JsonProperty("additionalDetail")
+    private String additionalDetail;
     
     @JsonProperty("auditDetails")
     private AuditDetails auditDetails;

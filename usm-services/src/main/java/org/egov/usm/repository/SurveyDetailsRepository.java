@@ -3,14 +3,17 @@ package org.egov.usm.repository;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.egov.usm.config.USMConfiguration;
 import org.egov.usm.producer.Producer;
-import org.egov.usm.repository.builder.SurveyQueryBuilder;
+import org.egov.usm.repository.builder.SurveyResponseQueryBuilder;
 import org.egov.usm.repository.rowmapper.QuestionDetailRowMapper;
 import org.egov.usm.repository.rowmapper.SurveyDetailsRowMapper;
 import org.egov.usm.web.model.QuestionDetail;
 import org.egov.usm.web.model.SurveyDetails;
 import org.egov.usm.web.model.SurveyDetailsRequest;
+import org.egov.usm.web.model.SurveySearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -23,7 +26,7 @@ public class SurveyDetailsRepository {
 	
 	private JdbcTemplate jdbcTemplate;
 
-    private SurveyQueryBuilder queryBuilder;
+    private SurveyResponseQueryBuilder queryBuilder;
 
     private SurveyDetailsRowMapper surveyDetailsRowMapper;
     
@@ -34,7 +37,7 @@ public class SurveyDetailsRepository {
     private USMConfiguration config;
 
     @Autowired
-    public SurveyDetailsRepository(JdbcTemplate jdbcTemplate, SurveyQueryBuilder queryBuilder, SurveyDetailsRowMapper surveyDetailsRowMapper,
+    public SurveyDetailsRepository(JdbcTemplate jdbcTemplate, SurveyResponseQueryBuilder queryBuilder, SurveyDetailsRowMapper surveyDetailsRowMapper,
     		QuestionDetailRowMapper questionDetailsRowMapper,Producer producer, USMConfiguration config) {
         this.jdbcTemplate = jdbcTemplate;
         this.queryBuilder = queryBuilder;
@@ -86,6 +89,19 @@ public class SurveyDetailsRepository {
 	public void submitSurvey(SurveyDetailsRequest surveyDetailsRequest) {
 		log.info("Save Survey Submitted Answers  :", surveyDetailsRequest.toString());
         producer.push(config.getSaveSubmitSurveyTopic(), surveyDetailsRequest);
+	}
+
+	public Boolean isSurveyExistsForToday(@Valid SurveySearchCriteria criteria) {
+		log.info("Search in Question LookUp table :", criteria.toString());
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = queryBuilder.isSurveyExistsForToday(criteria, preparedStmtList);
+        Integer count = jdbcTemplate.queryForObject(query, preparedStmtList.toArray(), Integer.class);
+		return count > 0;
+	}
+
+	public void updateSubmittedSurvey(@Valid SurveyDetailsRequest surveyDetailsRequest) {
+		log.info("Update Survey Submitted Answers  :", surveyDetailsRequest.toString());
+        producer.push(config.getUpdateSubmitSurveyTopic(), surveyDetailsRequest);
 	}
 
 	
