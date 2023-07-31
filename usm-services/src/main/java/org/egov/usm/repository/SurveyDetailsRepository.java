@@ -9,6 +9,7 @@ import org.egov.usm.config.USMConfiguration;
 import org.egov.usm.producer.Producer;
 import org.egov.usm.repository.builder.SurveyResponseQueryBuilder;
 import org.egov.usm.repository.rowmapper.QuestionDetailRowMapper;
+import org.egov.usm.repository.rowmapper.SurveyAnswerDetailsRowMapper;
 import org.egov.usm.repository.rowmapper.SurveyDetailsRowMapper;
 import org.egov.usm.web.model.QuestionDetail;
 import org.egov.usm.web.model.SurveyDetails;
@@ -30,6 +31,8 @@ public class SurveyDetailsRepository {
 
     private SurveyDetailsRowMapper surveyDetailsRowMapper;
     
+    private SurveyAnswerDetailsRowMapper surveyAnswerDetailsRowMapper;
+    
     private QuestionDetailRowMapper questionDetailsRowMapper;
     
     private Producer producer;
@@ -38,11 +41,12 @@ public class SurveyDetailsRepository {
 
     @Autowired
     public SurveyDetailsRepository(JdbcTemplate jdbcTemplate, SurveyResponseQueryBuilder queryBuilder, SurveyDetailsRowMapper surveyDetailsRowMapper,
-    		QuestionDetailRowMapper questionDetailsRowMapper,Producer producer, USMConfiguration config) {
+    		QuestionDetailRowMapper questionDetailsRowMapper, SurveyAnswerDetailsRowMapper surveyAnswerDetailsRowMapper, Producer producer, USMConfiguration config) {
         this.jdbcTemplate = jdbcTemplate;
         this.queryBuilder = queryBuilder;
         this.surveyDetailsRowMapper = surveyDetailsRowMapper;
         this.questionDetailsRowMapper = questionDetailsRowMapper;
+        this.surveyAnswerDetailsRowMapper=surveyAnswerDetailsRowMapper;
         this.producer = producer;
         this.config = config;
     }
@@ -102,6 +106,14 @@ public class SurveyDetailsRepository {
 	public void updateSubmittedSurvey(@Valid SurveyDetailsRequest surveyDetailsRequest) {
 		log.info("Update Survey Submitted Answers  :", surveyDetailsRequest.toString());
         producer.push(config.getUpdateSubmitSurveyTopic(), surveyDetailsRequest);
+	}
+
+	public List<SurveyDetails> searchSubmittedSurvey(@Valid SurveySearchCriteria searchCriteria) {
+		log.info("Search in Survey Submitted :", searchCriteria.toString());
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = queryBuilder.searchSubmittedSurvey(searchCriteria, preparedStmtList);
+        List<SurveyDetails> surveyDetailsList = jdbcTemplate.query(query, preparedStmtList.toArray(), surveyAnswerDetailsRowMapper);
+		return surveyDetailsList;
 	}
 
 	
