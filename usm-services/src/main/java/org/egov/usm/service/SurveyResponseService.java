@@ -5,7 +5,6 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.usm.repository.SurveyDetailsRepository;
-import org.egov.usm.validator.SurveyResponseValidator;
 import org.egov.usm.web.model.QuestionDetail;
 import org.egov.usm.web.model.SurveyDetails;
 import org.egov.usm.web.model.SurveyDetailsRequest;
@@ -24,16 +23,13 @@ public class SurveyResponseService {
 	
 	private EnrichmentService enrichmentService;
 	
-	private SurveyResponseValidator validator;
-	
 	
 	@Autowired
 	public SurveyResponseService(SurveyDetailsRepository repository, TicketService ticketService,
-			EnrichmentService enrichmentService, SurveyResponseValidator validator) {
+			EnrichmentService enrichmentService) {
 		this.repository = repository;
 		this.ticketService = ticketService;
 		this.enrichmentService = enrichmentService;
-		this.validator = validator;
 	}
 
 
@@ -104,30 +100,12 @@ public class SurveyResponseService {
 	
 	/**
 	 * 
-	 * @param surveyDetailsRequest
+	 * @param surveyRequest
 	 * @return SurveyDetails
 	 */
-	public SurveyDetails updateSubmittedSurvey(@Valid SurveyDetailsRequest surveyDetailsRequest) {
-		
-		// Validate survey existence
-        Boolean isSurveyExists = validator.validateSurveyExistsForToday(surveyDetailsRequest.getSurveyDetails());
-        if(isSurveyExists) {
-        	// Enrich survey details
-    		enrichmentService.enrichSurveyUpdateRequest(surveyDetailsRequest);
-    		
-    		// Check if any answers are NO then  Create the TICKET
-    		List<SurveyTicket> tickets = ticketService.prepareTickets(surveyDetailsRequest) ;
-    		surveyDetailsRequest.getSurveyDetails().setSurveyTickets(tickets);
-    		
-    		// If any ticket created, then create or update the lookup table
-    		if(! CollectionUtils.isEmpty(tickets)) {
-    			//update question lookup
-    			enrichmentService.enrichUpdateQuestionLookup(surveyDetailsRequest, tickets);
-    		}
-    		
-    		repository.updateSubmittedSurvey(surveyDetailsRequest);
-        }
-		return surveyDetailsRequest.getSurveyDetails();
+	public SurveyDetails updateSubmittedSurvey(@Valid SurveyDetailsRequest surveyRequest) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

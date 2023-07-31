@@ -21,6 +21,9 @@ public class TicketSearchCriteria {
 	@JsonProperty("ticketNo")
 	private String ticketNo;
 	
+	@JsonProperty("ticketId")
+	private String ticketId;
+	
 	@JsonProperty("surveyId")
 	private String surveyId;
 	
