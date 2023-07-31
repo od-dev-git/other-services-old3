@@ -33,4 +33,7 @@ public class SurveySearchCriteria {
 	
 	@JsonProperty("status")
 	private String status;
+	
+	@JsonProperty("isClosed")
+	private Boolean isClosed;
 }

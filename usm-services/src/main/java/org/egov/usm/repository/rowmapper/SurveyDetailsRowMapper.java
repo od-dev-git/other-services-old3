@@ -111,6 +111,7 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
                 .type(rs.getString("type"))
                 .hasOpenTicket(rs.getBoolean("hasopenticket"))
                 .answer(surveyAnswer)
+                .answerId(rs.getString("answerid"))
                 .auditDetails(auditdetails)
                 .build();
 		surveyDetails.addQuestionsItem(question);
