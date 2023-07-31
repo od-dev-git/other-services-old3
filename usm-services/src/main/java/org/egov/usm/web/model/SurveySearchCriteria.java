@@ -25,6 +25,9 @@ public class SurveySearchCriteria {
 	@JsonProperty("surveyId")
 	private String surveyId;
 	
+	@JsonProperty("surveyNo")
+	private String surveyNo;
+	
 	@JsonProperty("ward")
 	private String ward;
 	
@@ -34,6 +37,6 @@ public class SurveySearchCriteria {
 	@JsonProperty("status")
 	private String status;
 	
-	@JsonProperty("isClosed")
-	private Boolean isClosed;
+	@JsonProperty("surveyDate")
+	private Long surveyDate;
 }
