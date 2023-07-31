@@ -77,16 +77,9 @@ public class SurveyService {
 		Survey survey = surveyRequest.getSurvey();
 		RequestInfo requestInfo = surveyRequest.getRequestInfo();
 		
-		// Validate survey existence
-        Survey existingSurvey = surveyRequestValidator.validateSurveyExistence(survey);
-//		// Validate whether authorized usertype is trying to create survey.
-//		surveyRequestValidator.validateUserType(surveyRequest.getRequestInfo());
-//		// Validate question types.
-//		surveyRequestValidator.validateQuestionsWhileUpdate(survey);
-//		// Validate survey uniqueness.
-//		surveyRequestValidator.validateUpdateRequest(survey);
 		
-//        sanitizeSurveyForUpdate(survey);
+        Survey existingSurvey = surveyRequestValidator.validateSurveyExistence(survey);
+
         
         survey.setAuditDetails(existingSurvey.getAuditDetails());
 

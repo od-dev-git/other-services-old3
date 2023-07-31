@@ -70,13 +70,21 @@ public class SurveyDetailsRepository {
 
 	
 	public void updateLookupDetails(SurveyDetailsRequest surveyDetailsRequest) {
-		log.info("Save request :", surveyDetailsRequest.toString());
+		log.info("Update Question Lookup Topic :", surveyDetailsRequest.toString());
         producer.push(config.getUpdateQuestionLookupTopic(), surveyDetailsRequest);
+	}
+	
+	public List<String> searchQuestionInLookup(SurveyDetails surveyDetails) {
+		log.info("Search in Question LookUp table :", surveyDetails.toString());
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = queryBuilder.searchQuestionInLookup(surveyDetails, preparedStmtList);
+        List<String> questionIds = jdbcTemplate.queryForList(query, preparedStmtList.toArray(), String.class);
+		return questionIds;
 	}
 	
 	
 	public void submitSurvey(SurveyDetailsRequest surveyDetailsRequest) {
-		log.info("Save request :", surveyDetailsRequest.toString());
+		log.info("Save Survey Submitted Answers  :", surveyDetailsRequest.toString());
         producer.push(config.getSaveSubmitSurveyTopic(), surveyDetailsRequest);
 	}
 
