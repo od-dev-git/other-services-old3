@@ -10,7 +10,6 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.usm.model.enums.SurveyAnswer;
 import org.egov.usm.model.enums.TicketStatus;
 import org.egov.usm.repository.SurveyTicketRepository;
-import org.egov.usm.utility.USMUtil;
 import org.egov.usm.validator.SurveyTicketRequestValidator;
 import org.egov.usm.web.model.SubmittedAnswer;
 import org.egov.usm.web.model.SurveyDetailsRequest;
@@ -33,12 +32,8 @@ public class TicketService {
 	@Autowired
 	private SurveyTicketRepository repository;
 
-	
 	@Autowired
 	private SurveyTicketRequestValidator surveyTicketRequestValidator;
-
-	@Autowired
-	private USMUtil usmUtil;
 
 
 
