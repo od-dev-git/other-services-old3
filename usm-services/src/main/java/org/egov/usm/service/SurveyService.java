@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.egov.common.contract.request.RequestInfo;
 import org.egov.usm.model.enums.Status;
 import org.egov.usm.repository.SurveyRepository;
 import org.egov.usm.utility.USMUtil;
@@ -75,29 +74,20 @@ public class SurveyService {
 	 */
 	public Survey updateSurvey(@Valid SurveyRequest surveyRequest) {
 		Survey survey = surveyRequest.getSurvey();
-		RequestInfo requestInfo = surveyRequest.getRequestInfo();
-		
+		AuditDetails auditDetails = USMUtil.getAuditDetails(surveyRequest.getRequestInfo().getUserInfo().getUuid(), false);
 		
         Survey existingSurvey = surveyRequestValidator.validateSurveyExistence(survey);
-
         
         survey.setAuditDetails(existingSurvey.getAuditDetails());
-
-        survey.getAuditDetails().setLastModifiedBy(requestInfo.getUserInfo().getUuid());
-        survey.getAuditDetails().setLastModifiedTime(System.currentTimeMillis());
+        survey.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
+        survey.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
         
-        survey.getQuestionDetails().forEach(qs -> {
-        	qs.getAuditDetails().setLastModifiedBy(requestInfo.getUserInfo().getUuid());
-        	qs.getAuditDetails().setLastModifiedTime(survey.getAuditDetails().getLastModifiedTime());
+        survey.getQuestionDetails().forEach(question -> {
+        	question.setAuditDetails(auditDetails);
         });
-        
         
 		repository.update(surveyRequest);
 		return survey;
-	}
-
-	private void sanitizeSurveyForUpdate(Survey survey) {
-		// TODO Auto-generated method stub
 	}
 
 	/**
