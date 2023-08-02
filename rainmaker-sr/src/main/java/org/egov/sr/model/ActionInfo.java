@@ -35,6 +35,9 @@ public class ActionInfo   {
   @Size(min=2,max=25)
   @Pattern(regexp="^[a-zA-Z.]*$")
   private String tenantId = null;
+  
+  @JsonProperty("city")
+  private String city = null;
 
   @JsonProperty("by")
   private String by = null;
@@ -263,6 +266,14 @@ public class ActionInfo   {
 
   public void setComment(String comment) {
     this.comment = comment;
+  }
+  
+  public String getCity() {
+	return city;
+  }
+
+  public void setCity(String city) {
+	this.city = city;
   }
 
 
