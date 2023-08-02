@@ -135,7 +135,7 @@ public class PGRRequestValidator {
 	 * @param errorMap
 	 */
 	public void validateDataSanity(ServiceRequest serviceRequest, Map<String, String> errorMap, Boolean isCreate) {
-		Set<String> tenants = serviceRequest.getServices().stream().map(Service::getTenantId).collect(Collectors.toSet());
+		Set<String> tenants = serviceRequest.getServices().stream().map(Service::getCity).collect(Collectors.toSet());
 		if(tenants.size() > 1) {
 			errorMap.put(ErrorConstants.INVALID_REQUESTS_ON_TENANT_CODE, ErrorConstants.INVALID_REQUESTS_ON_TENANT_MSG);
 		}

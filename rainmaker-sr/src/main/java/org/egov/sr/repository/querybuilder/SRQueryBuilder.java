@@ -57,6 +57,12 @@ public class SRQueryBuilder {
 			preparedStatementValues.put("service", searchCriteria.getService());
 		}
 		
+		if (!StringUtils.isEmpty(searchCriteria.getCity())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" sr.city = :city ");
+			preparedStatementValues.put("city", searchCriteria.getCity());
+		}
+		
 		selectQuery.append(" order by servicerequestid ");
 		
 		return selectQuery.toString();
