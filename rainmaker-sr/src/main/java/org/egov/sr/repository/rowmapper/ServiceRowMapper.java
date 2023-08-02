@@ -58,6 +58,7 @@ public class ServiceRowMapper implements ResultSetExtractor<List<Service>> {
                     .impact(rs.getString("impact"))
                     .applicationNo(rs.getString("applicationno"))
                     .serviceType(rs.getString("servicetype"))
+                    .city(rs.getString("city"))
                     .auditDetails(auditDetails)
                     .build();
 

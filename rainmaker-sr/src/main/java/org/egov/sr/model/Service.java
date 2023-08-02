@@ -42,6 +42,10 @@ public class Service   {
   @Size(min=2,max=25)
   @Pattern(regexp="^[a-zA-Z.]*$")
   private String tenantId;
+  
+  @NotNull
+  @JsonProperty("city")
+  private String city;
 
   @JsonProperty("serviceCode")
   private String serviceCode;
