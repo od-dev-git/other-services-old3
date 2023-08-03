@@ -24,6 +24,9 @@ public class SurveySearchCriteria {
 	
 	@JsonProperty("surveyId")
 	private String surveyId;
+
+	@JsonProperty("surveySubmittedId")
+	private String surveySubmittedId;
 	
 	@JsonProperty("surveyNo")
 	private String surveyNo;
@@ -39,4 +42,10 @@ public class SurveySearchCriteria {
 	
 	@JsonProperty("surveyDate")
 	private Long surveyDate;
+	
+	@JsonProperty("createdBy")
+	private String createdBy;
+	
+	@JsonProperty("isAdmin")
+	private Boolean isAdmin;
 }

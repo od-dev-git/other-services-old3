@@ -24,8 +24,8 @@ public class QuestionDetail {
 	@JsonProperty("surveyId")
 	private String surveyId;
 	
-	@JsonProperty("surveyDetailsId")
-	private String surveyDetailsId;
+	@JsonProperty("surveySubmittedId")
+	private String surveySubmittedId;
 	
 	@JsonProperty("questionStatement")
 	private String questionStatement;

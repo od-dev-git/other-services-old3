@@ -12,6 +12,6 @@ import org.egov.common.contract.request.RequestInfo;
 @Builder
 public class RequestInfoWrapper {
 
-	@JsonProperty("RequestInfo")
+	@JsonProperty("requestInfo")
 	private RequestInfo requestInfo;
 }

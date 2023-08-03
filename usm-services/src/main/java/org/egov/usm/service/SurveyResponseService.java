@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.egov.usm.repository.SurveyDetailsRepository;
 import org.egov.usm.validator.SurveyResponseValidator;
 import org.egov.usm.web.model.QuestionDetail;
+import org.egov.usm.web.model.RequestInfoWrapper;
 import org.egov.usm.web.model.SurveyDetails;
 import org.egov.usm.web.model.SurveyDetailsRequest;
 import org.egov.usm.web.model.SurveySearchCriteria;
@@ -134,11 +135,16 @@ public class SurveyResponseService {
 
 	/**
 	 * Service layer for Search Survey with searchCriteria
+	 * @param requestInfoWrapper 
 	 * 
 	 * @param searchCriteria
 	 * @return List<SurveyDetails>
 	 */
-	public List<SurveyDetails> searchSubmittedSurvey(@Valid SurveySearchCriteria searchCriteria) {
+	public List<SurveyDetails> searchSubmittedSurvey(RequestInfoWrapper requestInfoWrapper, SurveySearchCriteria searchCriteria) {
+		
+		//Add User uuid for searching Survey for specific user
+		searchCriteria.setCreatedBy(requestInfoWrapper.getRequestInfo().getUserInfo().getUuid());
+				
 		List<SurveyDetails> surveys = repository.searchSubmittedSurvey(searchCriteria);
 		return surveys;
 	}

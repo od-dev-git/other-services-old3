@@ -28,8 +28,8 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
 		Map<String,SurveyDetails> surveyDetailsMap = new LinkedHashMap<>();
 		
         while (rs.next()) {
-            String surveydetailsId = rs.getString("surveydetailsid");
-            SurveyDetails surveyDetails = surveyDetailsMap.get(surveydetailsId);
+            String surveySubmittedId = rs.getString("surveysubmittedid");
+            SurveyDetails surveyDetails = surveyDetailsMap.get(surveySubmittedId);
             
             if(surveyDetails == null) {
             	Long lastModifiedTime = rs.getLong("surveymodifiedtime");
@@ -45,7 +45,7 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
                         .build();
 
                 surveyDetails =  SurveyDetails.builder()
-                        .id(rs.getString("surveydetailsid"))
+                        .surveySubmittedId(rs.getString("surveysubmittedid"))
                         .surveyNo(rs.getString("surveysubmittedno"))
                         .tenantId(rs.getString("tenantid"))
                         .ward(rs.getString("ward"))
@@ -61,7 +61,7 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
             	Collections.sort(surveyDetails.getQuestionDetails(),
                         Comparator.comparing(QuestionDetail::getId));
             }
-            surveyDetailsMap.put(surveydetailsId, surveyDetails);
+            surveyDetailsMap.put(surveySubmittedId, surveyDetails);
         }
         
         return new ArrayList<>(surveyDetailsMap.values());
@@ -70,9 +70,9 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
 	private void addQuestionsToSurveyDetails(ResultSet rs, SurveyDetails surveyDetails) throws SQLException {
 		
 		String questionId = rs.getString("id");
-		String surveyDetailsId = rs.getString("surveydetailsid");
+		String surveySubmittedId = rs.getString("surveysubmittedid");
 
-        if (questionId == null || surveyDetailsId == null ) {
+        if (questionId == null || surveySubmittedId == null ) {
         	surveyDetails.addQuestionsItem(null);
         	return;
         }
@@ -101,7 +101,7 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
 		QuestionDetail question =  QuestionDetail.builder()
                 .id(rs.getString("id"))
                 .surveyId(rs.getString("surveyid"))
-                .surveyDetailsId(rs.getString("surveydetailsid"))
+                .surveySubmittedId(rs.getString("surveysubmittedid"))
                 .questionStatement(rs.getString("questionstatement"))
                 .category(rs.getString("category"))
                 .status(Status.fromValue(rs.getString("status")))
