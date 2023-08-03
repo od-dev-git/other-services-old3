@@ -73,6 +73,43 @@ order by epp.createdtime;
 
 ----------------------------------------------------------------------------------------------------------
 
+------------------------
+PT Mutation report
+------------------------
+select 
+initcap(split_part(epp.tenantid,'.',2)) as ulb,
+ward,
+epp.propertyid ,
+epp.oldpropertyid ,
+epp.acknowldgementnumber,
+case
+  when propertytype='BUILTUP.SHAREDPROPERTY' then 'Shared Property'
+  when propertytype='VACANT' then 'Vacant Land'
+  when propertytype='BUILTUP.INDEPENDENTPROPERTY' then 'Independent Property'
+end as propertytype,
+case
+  when usagecategory='NONRESIDENTIAL.COMMERCIAL' then 'Non Residentials Commercial'
+  when usagecategory='MIXED' then 'Mixed'
+  when usagecategory='RESIDENTIAL' then 'Independent Property'
+  when usagecategory='NONRESIDENTIAL.INSTITUTIONAL' then 'Non Residentials Institutional'
+  when usagecategory='NONRESIDENTIAL.INDUSTRIAL' then 'Non Residentials Industrial'
+  when usagecategory='NONRESIDENTIAL.OTHERS' then 'Non Residentials Others'
+  when usagecategory='RESIDENTIAL' then 'Independent Property'
+end as usagecategory,
+epp.creationreason,
+epp.status,
+to_timestamp(epp.createdtime/1000)::date as createdtime,
+to_timestamp(epp.lastmodifiedtime/1000)::date as lastmodifiedtime
+from eg_pt_property epp
+join eg_pt_address epa on epa.propertyid = epp.id 
+where to_timestamp(epp.createdtime/1000)::date > '2021-11-01'
+and epp.creationreason ='MUTATION'
+and epp.tenantid != 'od.testing' 
+order by epp.createdtime;
+
+
+----------------------------------------------------------------------------------------------------------
+
 --------------------
 PT Collection Report
 --------------------
