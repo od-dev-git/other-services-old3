@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Import({TracerConfiguration.class})
+@Import({ TracerConfiguration.class })
 @Getter
 @Setter
 @AllArgsConstructor
@@ -19,60 +19,59 @@ import lombok.Setter;
 @Builder
 @Component
 public class USMConfiguration {
-	
-	//Idgen Config
-    @Value("${egov.idgen.host}")
-    private String idGenHost;
 
-    @Value("${egov.idgen.path}")
-    private String idGenPath;
+	// Idgen Config
+	@Value("${egov.idgen.host}")
+	private String idGenHost;
 
-    @Value("${egov.idgen.usm.surveyno.name}")
-    private String surveyNoIdgenName;
+	@Value("${egov.idgen.path}")
+	private String idGenPath;
 
-    @Value("${egov.idgen.usm.surveyno.format}")
-    private String surveyNoIdgenFormat;
+	@Value("${egov.idgen.usm.surveyno.name}")
+	private String surveyNoIdgenName;
 
-    @Value("${egov.idgen.usm.ticketNo.name}")
-    private String ticketNoIdgenName;
+	@Value("${egov.idgen.usm.surveyno.format}")
+	private String surveyNoIdgenFormat;
 
-    @Value("${egov.idgen.usm.ticketNo.format}")
-    private String ticketNoIdgenFormat;
-    
-    //Persister Config
-    
-    @Value("${persister.create.survey.topic}")
-    private String createSurveyTopic;
-    
-    @Value("${persister.update.survey.topic}")
-    private String updateSurveyTopic;
-    
-    @Value("${persister.delete.survey.topic}")
-    private String deleteSurveyTopic;
-    
-    
-    @Value("${persister.save.submit.survey.topic}")
-    private String saveSubmitSurveyTopic;
-    
-    @Value("${persister.update.submit.survey.topic}")
-    private String updateSubmitSurveyTopic;
-    
-    @Value("${persister.delete.submit.survey.topic}")
-    private String deleteSubmitSurveyTopic;
-    
+	@Value("${egov.idgen.usm.ticketNo.name}")
+	private String ticketNoIdgenName;
 
-    @Value("${persister.create.ticket.topic}")
-    private String createTicketTopic;
+	@Value("${egov.idgen.usm.ticketNo.format}")
+	private String ticketNoIdgenFormat;
 
-    @Value("${persister.update.ticket.topic}")
-    private String updateTicketTopic;
-    
-    
-    @Value("${persister.create.lookup.topic}")
-    private String createQuestionLookupTopic;
+	// Persister Config
 
-    @Value("${persister.update.lookup.topic}")
-    private String updateQuestionLookupTopic;
+	@Value("${persister.create.survey.topic}")
+	private String createSurveyTopic;
 
+	@Value("${persister.update.survey.topic}")
+	private String updateSurveyTopic;
+
+	@Value("${persister.delete.survey.topic}")
+	private String deleteSurveyTopic;
+
+	@Value("${persister.save.submit.survey.topic}")
+	private String saveSubmitSurveyTopic;
+
+	@Value("${persister.update.submit.survey.topic}")
+	private String updateSubmitSurveyTopic;
+
+	@Value("${persister.delete.submit.survey.topic}")
+	private String deleteSubmitSurveyTopic;
+
+	@Value("${persister.create.ticket.topic}")
+	private String createTicketTopic;
+
+	@Value("${persister.update.ticket.topic}")
+	private String updateTicketTopic;
+
+	@Value("${persister.create.lookup.topic}")
+	private String createQuestionLookupTopic;
+
+	@Value("${persister.update.lookup.topic}")
+	private String updateQuestionLookupTopic;
+
+	@Value("${persister.save.ticket.comment.topic}")
+	private String saveCommentTicketTopic;
 
 }

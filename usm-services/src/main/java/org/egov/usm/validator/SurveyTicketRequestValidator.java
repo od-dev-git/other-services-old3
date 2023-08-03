@@ -2,12 +2,16 @@ package org.egov.usm.validator;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.egov.usm.repository.SurveyTicketRepository;
 import org.egov.usm.utility.USMUtil;
+import org.egov.usm.web.model.AuditDetails;
 import org.egov.usm.web.model.Survey;
 import org.egov.usm.web.model.SurveyTicket;
+import org.egov.usm.web.model.SurveyTicketCommentRequest;
 import org.egov.usm.web.model.TicketSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +56,18 @@ public class SurveyTicketRequestValidator {
 
 	public void validateUpdateRequest(Survey survey) {
 		// TODO Auto-generated method stub
+
+	}
+
+	public void enrichTicketCommentRequest(@Valid SurveyTicketCommentRequest surveyTicketCommentRequest) {
+
+		RequestInfo requestInfo = surveyTicketCommentRequest.getRequestInfo();
+		String uuid = requestInfo.getUserInfo().getUuid();
+		AuditDetails auditDetails = USMUtil.getAuditDetails(uuid, true);
+
+		surveyTicketCommentRequest.getSurveyTicketComment().setId(USMUtil.generateUUID());
+		// set audit details
+		surveyTicketCommentRequest.getSurveyTicketComment().setAuditDetails(auditDetails);
 
 	}
 
