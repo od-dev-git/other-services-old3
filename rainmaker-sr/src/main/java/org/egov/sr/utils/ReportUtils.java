@@ -149,8 +149,8 @@ public class ReportUtils {
 	public RequestInfoWrapper getGROSearchRequest(StringBuilder uri, List<Long> GROids, ReportRequest reportRequest) {
 		RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(reportRequest.getRequestInfo()).build();
 		uri.append(egovHRMShost).append(egovHRMSSearchEndpoint)
-		.append("?tenantId=").append(reportRequest.getTenantId())
-		.append("&ids=").append(GROids.toString().substring(1, GROids.toString().length() - 1));
+		//.append("tenantId=").append(reportRequest.getTenantId())
+		.append("?ids=").append(GROids.toString().substring(1, GROids.toString().length() - 1));
 		
 		return requestInfoWrapper;
 	}

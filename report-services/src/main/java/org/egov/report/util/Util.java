@@ -1,9 +1,18 @@
 package org.egov.report.util;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.mdms.model.MasterDetail;
+import org.egov.mdms.model.MdmsCriteria;
+import org.egov.mdms.model.MdmsCriteriaReq;
+import org.egov.mdms.model.ModuleDetail;
 import org.egov.report.util.Util;
+import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.repository.ServiceRepository;
 import org.egov.report.util.Constants;
 import org.egov.tracer.model.CustomException;
 import org.postgresql.util.PGobject;
@@ -12,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +31,12 @@ public class Util {
     
     @Autowired
     private ObjectMapper mapper;
+    
+    @Autowired
+    private ReportServiceConfiguration config;
+    
+    @Autowired
+    private ServiceRepository repository;
     
     public void validateTenantIdForUserType(String tenantId, RequestInfo requestInfo) {
 
@@ -44,5 +60,28 @@ public class Util {
             throw new CustomException(Constants.EG_BS_JSON_EXCEPTION_KEY, Constants.EG_BS_JSON_EXCEPTION_MSG);
         }
     }
+    
+    
+    public List<Map<String, Object>> getServiceTypefromMdms(RequestInfo requestInfo, String tenantId) {
+		MdmsCriteriaReq mdmsCriteriaReq = getServiceTypeCriteria(requestInfo, tenantId);
+		StringBuilder uri = new StringBuilder(config.getMdmsHost()).append(config.getMdmsSearchUrl());
+		Object res = repository.fetchResult(uri, mdmsCriteriaReq);
+		if (res == null) {
+			throw new CustomException("MDMS_ERROR", "Cannot fetch ServiceTypeData from MDMS");
+		}
+		List<Map<String, Object>> jsonOutput = JsonPath.read(res, "$.MdmsRes.sr-services-master.ServiceType");
+		return jsonOutput;
+	}
+    
+	private MdmsCriteriaReq getServiceTypeCriteria(RequestInfo requestInfo, String tenantId) {
+
+		MasterDetail mstrDetail = MasterDetail.builder().name("ServiceType")
+				.build();
+		ModuleDetail moduleDetail = ModuleDetail.builder().moduleName("sr-services-master")
+				.masterDetails(Arrays.asList(mstrDetail)).build();
+		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().moduleDetails(Arrays.asList(moduleDetail)).tenantId(tenantId)
+				.build();
+		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
+	}
 
 }

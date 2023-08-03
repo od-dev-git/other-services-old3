@@ -27,6 +27,7 @@ import org.egov.dss.model.PgrSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.BPARepository;
 import org.egov.dss.util.DashboardUtility;
+import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,9 @@ public class BPAService {
 
 	@Autowired
 	private ConfigurationLoader config;
+	
+	@Autowired
+	private DashboardUtils dashboardUtils;
 
 	public List<Data> totalPermitIssued(PayloadDetails payloadDetails) {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
@@ -297,7 +301,9 @@ public class BPAService {
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_SERVICES));
-
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			criteria.setFromDate(dashboardUtils.getStartDateGmt(String.valueOf(payloadDetails.getTimeinterval())));
+		}
 		LinkedHashMap<String,Long> monthYearPermit= bpaRepository.getMonthYearData(criteria);
 		LinkedHashMap<String,Long> monthYearOCIssued= bpaRepository.getMonthYearData(criteria);
 		LinkedHashMap<String,Long> monthYearOCSubmitted= bpaRepository.getMonthYearData(criteria);
@@ -741,5 +747,111 @@ public class BPAService {
         criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
         return bpaRepository.getApprovedApplicationByServiceType(criteria);
      }
+	
+	public List<Data> topPerformingUlbsTable(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<Data> response = new ArrayList();
+		HashMap<String, BigDecimal> tenantWiseBpaAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
+		int serialNumber = 1;
+		// Sort the HashMap in ascending order
+		Map<String, BigDecimal> tenantWiseSorted = tenantWiseBpaAvgDaysPermitIssue.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+		
+		for (HashMap.Entry<String, BigDecimal> totalApplication : tenantWiseSorted.entrySet()) {
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+            plots.add(Plot.builder().name("Ulb").label(totalApplication.getKey().toString()).symbol("text")
+                    .build());
+
+			plots.add(Plot.builder().name("Rank")
+					.value(BigDecimal.valueOf(serialNumber))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit")
+					.value(totalApplication.getValue() == null ? BigDecimal.ZERO
+							: totalApplication.getValue().setScale(0, BigDecimal.ROUND_UP))
+					.symbol("number").build());
+
+			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
+					.build());
+
+            serialNumber++;
+
+        }
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Rank").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
+		}
+
+		return response;
+	}
+	
+	public List<Data> bottomPerformingUlbsTable(PayloadDetails payloadDetails) {
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<Data> response = new ArrayList();
+		HashMap<String, BigDecimal> tenantWiseBpaAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
+		int serialNumber = 1;		
+					
+		Map<String, BigDecimal> tenantWiseSorted = tenantWiseBpaAvgDaysPermitIssue.entrySet().parallelStream()
+		        .sorted(Collections.reverseOrder(Map.Entry.comparingByValue())) // Sort in descending order
+		        .collect(Collectors.toMap(
+		                Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+		for (HashMap.Entry<String, BigDecimal> totalApplication : tenantWiseSorted.entrySet()) {
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+            plots.add(Plot.builder().name("Ulb").label(totalApplication.getKey().toString()).symbol("text")
+                    .build());
+
+			plots.add(Plot.builder().name("Rank")
+					.value(BigDecimal.valueOf(serialNumber))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit")
+					.value(totalApplication.getValue() == null ? BigDecimal.ZERO
+							: totalApplication.getValue().setScale(0, BigDecimal.ROUND_UP))
+					.symbol("number").build());
+
+			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
+					.build());
+           
+            serialNumber++;
+
+        }
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Rank").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
+			}
+
+		return response;
+	}
 
 }

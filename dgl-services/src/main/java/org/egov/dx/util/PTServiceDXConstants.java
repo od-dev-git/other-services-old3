@@ -37,14 +37,14 @@ public class PTServiceDXConstants {
 	public static final String STATE_TENANT = "od";
 
 
-
+	public static final String NO_RECORDS_FOUND = "Record not found.";
 
 	//public static final String DIGILOCKER_ISSUER_ID = "upyog.niua.org";
 	
 	//public static final String ORIGIN="https://apisetu.gov.in";
 	public static final String ORIGIN="https://partners.digitallocker.gov.in";
 	
-	public static final String DIGILOCKER_ISSUER_ID = "govodisha";
+	public static final String DIGILOCKER_ISSUER_ID = "in.gov.urbanodisha";
 	
 	public static final String DIGILOCKER_DOCTYPE = "PRTAX";
 	

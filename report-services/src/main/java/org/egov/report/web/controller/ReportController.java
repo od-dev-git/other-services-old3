@@ -1,13 +1,18 @@
 package org.egov.report.web.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.egov.report.service.IncentiveService;
+import org.egov.report.service.SRService;
 import org.egov.report.util.ResponseInfoFactory;
 import org.egov.report.web.model.IncentiveReportCriteria;
 import org.egov.report.web.model.IncentiveResponse;
 import org.egov.report.web.model.ReportResponse;
 import org.egov.report.web.model.RequestInfoWrapper;
+import org.egov.report.web.model.SRReportSearchCriteria;
+import org.egov.report.web.model.TicketDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +32,9 @@ public class ReportController {
 	
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
+	
+	@Autowired
+	private SRService srService;
 
 	@PostMapping("/incentive")
 	@ResponseBody
@@ -36,6 +44,18 @@ public class ReportController {
 		IncentiveResponse incentiveResponse = incentiveService.getIncentiveReport(requestInfoWrapper.getRequestInfo(), incentiveReportCriteria);
 		
 		ReportResponse response = ReportResponse.builder().incentiveResponse(incentiveResponse)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
+		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
+	}
+	
+	@PostMapping("/srTicketDetails")
+	@ResponseBody
+	public ResponseEntity<ReportResponse> getSRTicketDetails(@ModelAttribute SRReportSearchCriteria srReportSearchCriteria,
+			@RequestBody @Valid final RequestInfoWrapper requestInfoWrapper) {
+		
+		List<TicketDetails> tickets = srService.getTicketDetails(requestInfoWrapper.getRequestInfo(), srReportSearchCriteria);
+		
+		ReportResponse response = ReportResponse.builder().srTicketDetailsResponse(tickets)
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
 		return new ResponseEntity<ReportResponse>(response, HttpStatus.OK);
 	}

@@ -69,6 +69,11 @@ public class TradeLicenseDetail {
 	@JsonProperty("owners")
 	@Valid
 	private List<OwnerInfo> owners = new ArrayList<>();
+	
+	@NotNull
+    @JsonProperty("tradeUnits")
+    @Valid
+    private List<TradeUnit> tradeUnits = new ArrayList<>();
 
 	/**
 	 * License can be created from different channels
@@ -134,5 +139,13 @@ public class TradeLicenseDetail {
 			this.dscDetails.add(dscDetailsItem);
 		return this;
 	}
+	
+	public TradeLicenseDetail addTradeUnitsItem(TradeUnit tradeUnitsItem) {
+        if(this.tradeUnits==null)
+            this.tradeUnits = new ArrayList<>();
+        if(!this.tradeUnits.contains(tradeUnitsItem))
+            this.tradeUnits.add(tradeUnitsItem);
+        return this;
+    }
 
 }

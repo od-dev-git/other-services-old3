@@ -24,10 +24,7 @@ import lombok.ToString;
 @Builder
 public class ServiceReqSearchCriteria {
 		
-	@NotNull
 	@JsonProperty("tenantId")
-	@Size(min=2,max=25)
-	@Pattern(regexp="^[a-zA-Z.]*$")
 	private String tenantId;
 	
 	@JsonProperty("serviceRequestId")
@@ -76,4 +73,10 @@ public class ServiceReqSearchCriteria {
 	
 	@JsonProperty("slaEndTime")
 	private Long slaEndTime;
+	
+	@JsonProperty("service")
+	private String service;
+	
+	@JsonProperty("city")
+	private String city;
 }

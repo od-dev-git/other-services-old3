@@ -176,4 +176,16 @@ public class WSReportUtils {
         else
             return BigDecimal.ZERO;
     }
+    
+    public String getMonthYear(Long time) {
+    	
+    	if(time == 0 || time == null )
+			return null;
+		
+		Date date = new Date(time);
+		DateFormat format = new SimpleDateFormat("MM/yyyy");
+		format.setTimeZone(TimeZone.getTimeZone("IST"));
+		String formatted = format.format(date);
+		return formatted;	
+	}
 }

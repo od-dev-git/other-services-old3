@@ -30,5 +30,8 @@ public class DocDetailsResponse {
 	
 	@XStreamAlias("DataContent")
     private String dataContent;
+	
+	@XStreamAlias("Error_Message")
+	private String errorMessage=null;
      
 }

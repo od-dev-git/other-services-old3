@@ -70,4 +70,10 @@ public class Configurations {
 
 	@Value("${kafka.topics.update.dgl}")
 	private String updateTopic;
+	
+	@Value("${egov.edcr.host}")
+	private String edcrHost;
+	
+	@Value("${egov.edcr.getPlan.endpoint}")
+	private String planEndPoint;
 }

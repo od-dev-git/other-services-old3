@@ -156,12 +156,14 @@ public class GrievanceService {
 		RequestInfo requestInfo = serviceRequest.getRequestInfo();
 		List<Service> serviceReqs = serviceRequest.getServices();
 		String tenantId = serviceReqs.get(0).getTenantId();
+		String city = serviceReqs.get(0).getCity();
 		overRideCitizenAccountId(serviceRequest);
 		validateAndCreateUser(serviceRequest);
-		List<String> servReqIdList = getIdList(requestInfo, tenantId, serviceReqs.size(), PGRConstants.SERV_REQ_ID_NAME,
+		List<String> servReqIdList = getIdList(requestInfo, city, serviceReqs.size(), PGRConstants.SERV_REQ_ID_NAME,
 				PGRConstants.SERV_REQ_ID_FORMAT);
 		AuditDetails auditDetails = pGRUtils.getAuditDetails(String.valueOf(requestInfo.getUserInfo().getId()), true);
 		String by = auditDetails.getCreatedBy() + ":" + requestInfo.getUserInfo().getRoles().get(0).getName();
+		String accountId = auditDetails.getCreatedBy();
 		List<ActionInfo> actionInfos = new LinkedList<>();
 		if(!CollectionUtils.isEmpty(serviceRequest.getActionInfo())) {
 			actionInfos = serviceRequest.getActionInfo();
@@ -175,21 +177,22 @@ public class GrievanceService {
 				if(null != actionInfo) {
 					actionInfo.setUuid(UUID.randomUUID().toString()); actionInfo.setBusinessKey(currentId);
 					actionInfo.setAction(WorkFlowConfigs.ACTION_OPEN); actionInfo.setBy(by);
-					actionInfo.setWhen(auditDetails.getCreatedTime()); actionInfo.setTenantId(tenantId); actionInfo.setStatus(actionStatusMap.get(WorkFlowConfigs.ACTION_OPEN));	
+					actionInfo.setWhen(auditDetails.getCreatedTime()); actionInfo.setTenantId(tenantId); actionInfo.setCity(city); actionInfo.setStatus(actionStatusMap.get(WorkFlowConfigs.ACTION_OPEN));	
 				}else {
 					ActionInfo newActionInfo = ActionInfo.builder().uuid(UUID.randomUUID().toString()).businessKey(currentId)
-							.action(WorkFlowConfigs.ACTION_OPEN).assignee(null).by(by).when(auditDetails.getCreatedTime()).tenantId(tenantId)
+							.action(WorkFlowConfigs.ACTION_OPEN).assignee(null).by(by).when(auditDetails.getCreatedTime()).tenantId(tenantId).city(city)
 							.status(actionStatusMap.get(WorkFlowConfigs.ACTION_OPEN)).build();
 					actionInfos.add(newActionInfo);
 				}
 			}catch(Exception e) {
 				ActionInfo newActionInfo = ActionInfo.builder().uuid(UUID.randomUUID().toString()).businessKey(currentId)
-						.action(WorkFlowConfigs.ACTION_OPEN).assignee(null).by(by).when(auditDetails.getCreatedTime()).tenantId(tenantId)
+						.action(WorkFlowConfigs.ACTION_OPEN).assignee(null).by(by).when(auditDetails.getCreatedTime()).tenantId(tenantId).city(city)
 						.status(actionStatusMap.get(WorkFlowConfigs.ACTION_OPEN)).build();
 				actionInfos.add(newActionInfo);
 			}
 			servReq.setAuditDetails(auditDetails); servReq.setServiceRequestId(currentId);servReq.setActive(true);
 			servReq.setStatus(StatusEnum.OPEN);servReq.setFeedback(null);servReq.setRating(null); 
+			servReq.setAccountId(accountId);
 			
 //			Commented address code, as it is not required for now
 //			servReq.getAddressDetail().setUuid(UUID.randomUUID().toString());
@@ -386,7 +389,7 @@ public class GrievanceService {
 					.collect(Collectors.toList()));
 			actionInfo.setUuid(UUID.randomUUID().toString()); actionInfo.setBusinessKey(service.getServiceRequestId()); 
 			actionInfo.setBy(auditDetails.getLastModifiedBy() + ":" + role); actionInfo.setWhen(auditDetails.getLastModifiedTime());
-			actionInfo.setTenantId(service.getTenantId()); 
+			actionInfo.setTenantId(service.getTenantId()); actionInfo.setCity(service.getCity()); 
 			
 			if (actionInfo.getAction() != null) {
 				switch (actionInfo.getAction()) {

@@ -42,6 +42,10 @@ public class Service   {
   @Size(min=2,max=25)
   @Pattern(regexp="^[a-zA-Z.]*$")
   private String tenantId;
+  
+  @NotNull
+  @JsonProperty("city")
+  private String city;
 
   @JsonProperty("serviceCode")
   private String serviceCode;
@@ -50,8 +54,7 @@ public class Service   {
   private String serviceRequestId;
 
   @JsonProperty("description")
-  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$")
-  @Size(max=256)
+  @Size(max=1000)
   private String description;
 
   @JsonProperty("lat")

@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 public class TLIssuedTo {
 	
 	@XStreamAlias("Organization")
-	Organization organization;
+	OrganizationTL organization;
 	
 	@XStreamAlias("Person")
 	Person person;

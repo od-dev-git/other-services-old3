@@ -22,9 +22,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
@@ -55,11 +61,17 @@ import org.egov.dx.web.models.PullURIResponse;
 import org.egov.dx.web.models.RequestInfoWrapper;
 import org.egov.dx.web.models.ResponseStatus;
 import org.egov.dx.web.models.SearchCriteria;
+import org.egov.dx.web.models.BPA.AddressBPA;
+import org.egov.dx.web.models.BPA.Area;
 import org.egov.dx.web.models.BPA.BPA;
 import org.egov.dx.web.models.BPA.BPACertificate;
 import org.egov.dx.web.models.BPA.BPACertificateData;
+import org.egov.dx.web.models.BPA.BPAIssuedTo;
 import org.egov.dx.web.models.BPA.BPASearchCriteria;
 import org.egov.dx.web.models.BPA.BuildingPlanCertificate;
+import org.egov.dx.web.models.BPA.ConstructionPermission;
+import org.egov.dx.web.models.BPA.PersonBPA;
+import org.egov.dx.web.models.BPA.Photo;
 import org.egov.dx.web.models.MR.Husband;
 import org.egov.dx.web.models.MR.HusbandResiding;
 import org.egov.dx.web.models.MR.MRIssuedTo;
@@ -78,6 +90,7 @@ import org.egov.dx.web.models.TL.BusinessProfession;
 import org.egov.dx.web.models.TL.DocDetailsIssuedTo;
 import org.egov.dx.web.models.TL.DocDetailsPerson;
 import org.egov.dx.web.models.TL.Licensee;
+import org.egov.dx.web.models.TL.OrganizationTL;
 import org.egov.dx.web.models.TL.Pan;
 import org.egov.dx.web.models.TL.PropertyDetails;
 import org.egov.dx.web.models.TL.TLCertificate;
@@ -86,10 +99,15 @@ import org.egov.dx.web.models.TL.TLIssuedTo;
 import org.egov.dx.web.models.TL.TradeLicense;
 import org.egov.dx.web.models.TL.TradeLicenseCertificate;
 import org.egov.dx.web.models.TL.TradeLicenseSearchCriteria;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.security.AnyTypePermission;
 import com.thoughtworks.xstream.security.NoTypePermission;
@@ -124,7 +142,7 @@ public class DataExchangeService {
 	private Repository repository;
 	
 	@Autowired
-	private DGLProducer producer;
+	private DGLProducer producer; 
 	
 	
 	public String searchPullURIRequest(SearchCriteria  searchCriteria) throws IOException {
@@ -156,10 +174,10 @@ public class DataExchangeService {
 		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
 
 		User userInfo = User.builder().uuid(configurations.getAuthTokenVariable()).type("EMPLOYEE")
-				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity())).build();
+				.roles(Collections.emptyList()).id(0L).tenantId("od.".concat(searchCriteria.getCity().toLowerCase())).build();
 
 		request = new RequestInfo("", "", 0L, "", "", "", "", "", "", userInfo);
-		//request.setAuthToken("6f0a4b05-2493-432a-a31c-c73dd33626ef");
+		//request.setAuthToken("7eaa9a1c-dab9-4d36-ad9c-295d8b43d509");
 		// request.setUserInfo(userResponse.getUser());
 		requestInfoWrapper.setRequestInfo(request);
 		PullURIResponse model = new PullURIResponse();
@@ -204,6 +222,7 @@ public class DataExchangeService {
 			}
 			xstream.processAnnotations(PullURIResponse.class);
 			xstream.toXML(model);
+			log.info("inside searchForDigiLockerURIRequest");
 			return responseHeader +xstream.toXML(model);
 		}
 		
@@ -214,7 +233,7 @@ public class DataExchangeService {
 	private void processBPAPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
 			Object model, XStream xstream) throws IOException {
 		BPASearchCriteria criteria = new BPASearchCriteria();
-		criteria.setTenantId("od."+searchCriteria.getCity());
+		criteria.setTenantId("od."+searchCriteria.getCity().toLowerCase());
 		criteria.setApprovalNo(searchCriteria.getApprovalNumber());
 		generateBPALetter(searchCriteria, criteria, requestInfoWrapper, model, xstream);	
 	}
@@ -222,7 +241,7 @@ public class DataExchangeService {
 	private void processTLPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
 			Object model, XStream xstream) throws MalformedURLException, IOException {
 		TradeLicenseSearchCriteria criteria = new TradeLicenseSearchCriteria();
-		criteria.setTenantId("od."+searchCriteria.getCity());
+		criteria.setTenantId("od."+searchCriteria.getCity().toLowerCase());
 		criteria.setLicenseNumbers(Arrays.asList(searchCriteria.getLicenseNumber()));
 		generateTlLicense(searchCriteria, criteria, requestInfoWrapper, model, xstream);
 	}
@@ -230,7 +249,7 @@ public class DataExchangeService {
 	private void processMRPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
 			Object model, XStream xstream) throws IOException, MalformedURLException {
 		MRSearchCriteria criteria = new MRSearchCriteria();
-		criteria.setTenantId("od."+searchCriteria.getCity());
+		criteria.setTenantId("od."+searchCriteria.getCity().toLowerCase());
 		criteria.setMrNumbers(Arrays.asList(searchCriteria.getMrNumber()));
 		generateMRCertificate(searchCriteria, criteria, requestInfoWrapper, model, xstream);
 	}
@@ -238,7 +257,7 @@ public class DataExchangeService {
 	private void processPTPullUriRequest(SearchCriteria searchCriteria, RequestInfoWrapper requestInfoWrapper,
 			PullURIResponse model, XStream xstream) throws IOException, MalformedURLException {
 		PaymentSearchCriteria criteria = new PaymentSearchCriteria();
-		criteria.setTenantId("od."+searchCriteria.getCity());
+		criteria.setTenantId("od."+searchCriteria.getCity().toLowerCase());
 		criteria.setConsumerCodes(Collections.singleton(searchCriteria.getPropertyId()));
 		generatePTReceipt(searchCriteria, criteria, requestInfoWrapper, model, xstream);
 	}
@@ -249,7 +268,7 @@ public class DataExchangeService {
 		
 		List<MarriageRegistration> registrations = mrService.getMarriageRegistrations(criteria, requestInfoWrapper);
 	
-		if((!registrations.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateMrResponse(searchCriteria, registrations)
+		if((!registrations.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateMrResponse(searchCriteria, registrations,model)
 				|| !registrations.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
 			
 			log.info("Marriage Registrations Found and Validation Passed ! "+ String.valueOf(registrations));
@@ -298,9 +317,10 @@ public class DataExchangeService {
 		     List<DocDetailsPerson> persons= new ArrayList<DocDetailsPerson>();
 		     issuedTo.setPersons(persons);
 		     docDetailsResponse.setURI(null);
-		     docDetailsResponse.setIssuedTo(issuedTo);
+		     //docDetailsResponse.setIssuedTo(issuedTo);
 		     //docDetailsResponse.setDataContent("");
-		     docDetailsResponse.setDocContent("");
+		     //docDetailsResponse.setDocContent("");
+		     docDetailsResponse.setErrorMessage(PTServiceDXConstants.NO_RECORDS_FOUND);
 		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_MR);
 		     if(model.getClass().equals(PullDocResponse.class)){
 		    	 ((PullDocResponse) model).setDocDetails(docDetailsResponse);
@@ -416,19 +436,21 @@ public class DataExchangeService {
 
 		IssuedBy issuedBy = new IssuedBy();
 		Organization organization = new Organization();
+		organization.setName("Housing and Urban Development Department, Govt Of Odisha");
+		organization.setTin("");
+		organization.setCode("");
+		organization.setUid("");
 		organization.setType("SG");
-		organization.setTin(null);
-		organization.setCode(null);
 		Address addressIssuedBy = new Address();
 		addressIssuedBy.setType(null);
-		addressIssuedBy.setCountry("IN");
-		addressIssuedBy.setLine1("");
-		addressIssuedBy.setLine2("");
+		addressIssuedBy.setLine1("3rd Floor, Kharvel Bhawan");
+		addressIssuedBy.setLine2("West Wing, Room No 301");
 		addressIssuedBy.setLandmark("");
 		addressIssuedBy.setLocality("");
-		addressIssuedBy.setDistrict("");
-		addressIssuedBy.setPin("");
+		addressIssuedBy.setDistrict("Bhubaneswar");
+		addressIssuedBy.setPin("751001");
 		addressIssuedBy.setState("Odisha");
+		addressIssuedBy.setCountry("IN");
 		organization.setAddress(addressIssuedBy);
 		issuedBy.setOrganisation(organization);
 		certificate.setIssuedBy(issuedBy);
@@ -555,9 +577,22 @@ public class DataExchangeService {
 		return certificate;
 	}
 
-	private boolean validateMrResponse(SearchCriteria searchCriteria, List<MarriageRegistration> registrations) {
-		// Implement if any Validations are needed
-		return true;
+	private boolean validateMrResponse(SearchCriteria searchCriteria, List<MarriageRegistration> registrations, Object model) {
+		
+		if (model.getClass().equals(PullDocResponse.class)) {
+			return true;
+		} else if (model.getClass().equals(PullURIResponse.class)) {
+			Set<String> mobileNos = new HashSet<>();
+			mobileNos.add(registrations.get(0).getCoupleDetails().get(0).getBride().getAddress().getContact());
+			mobileNos.add(registrations.get(0).getCoupleDetails().get(0).getGroom().getAddress().getContact());
+			if (mobileNos.contains(searchCriteria.getMobile())) {
+				return true;
+			} else {
+				return false;
+			}
+
+		}
+		return false;
 	}
 
 	private void generatePTReceipt(SearchCriteria searchCriteria, PaymentSearchCriteria criteria,
@@ -794,9 +829,9 @@ public class DataExchangeService {
 			issuedTo.setPersons(persons);
 			docDetailsResponse.setURI(null);
 			//docDetailsResponse.setIssuedTo(issuedTo);
-			docDetailsResponse.setDataContent("");
-			docDetailsResponse.setDocContent("");
-
+			//docDetailsResponse.setDataContent("");
+			//docDetailsResponse.setDocContent("");
+			docDetailsResponse.setErrorMessage(PTServiceDXConstants.NO_RECORDS_FOUND);
 			model.setDocDetails(docDetailsResponse);
 
 		}
@@ -891,7 +926,7 @@ public class DataExchangeService {
 		
 		List<TradeLicense> licenses = tlService.getTradeLicenses(criteria, requestInfoWrapper);
 
-		if((!licenses.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateTLResponse(searchCriteria, licenses)
+		if((!licenses.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateTLResponse(searchCriteria, licenses,model)
 				|| !licenses.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
 			
 			log.info("Trade Licenses Found and Validation Passed ! " + String.valueOf(licenses));
@@ -916,7 +951,7 @@ public class DataExchangeService {
 
 				if (searchCriteria.getDocType().equals("TDLCS")) {
 
-					certificate = populateCertificateForTL(licenses.get(0));
+					certificate = populateCertificateForTL(licenses.get(0), requestInfoWrapper);
 					xstream.processAnnotations(TLCertificate.class);
 
 				}
@@ -940,9 +975,10 @@ public class DataExchangeService {
 		     List<DocDetailsPerson> persons= new ArrayList<DocDetailsPerson>();
 		     issuedTo.setPersons(persons);
 		     docDetailsResponse.setURI(null);
-		     docDetailsResponse.setIssuedTo(issuedTo);
+		     //docDetailsResponse.setIssuedTo(issuedTo);
 		     //docDetailsResponse.setDataContent("");
-		     docDetailsResponse.setDocContent("");
+		     //docDetailsResponse.setDocContent("");
+		     docDetailsResponse.setErrorMessage(PTServiceDXConstants.NO_RECORDS_FOUND);
 		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_TL);
 		     
 		     if(model.getClass().equals(PullDocResponse.class)){
@@ -957,9 +993,19 @@ public class DataExchangeService {
 		}
 	}
 
-	private boolean validateTLResponse(SearchCriteria searchCriteria, List<TradeLicense> licenses) {
-		// Add Validations for Trade License if needed
-		return true;
+	private boolean validateTLResponse(SearchCriteria searchCriteria, List<TradeLicense> licenses, Object model) {
+		if (model.getClass().equals(PullDocResponse.class)) {
+			return true;
+		} else if (model.getClass().equals(PullURIResponse.class)) {
+			Set<String> mobileNos = licenses.get(0).getTradeLicenseDetail().getOwners().stream()
+					.map(owner -> owner.getMobileNumber()).collect(Collectors.toSet());
+			if (mobileNos.contains(searchCriteria.getMobile())) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return false;
 	}
 
 	private void createCeritificateFromFilestoreIdForTL(SearchCriteria searchCriteria, Object model,
@@ -1044,7 +1090,22 @@ public class DataExchangeService {
 
 	}
 
-	private TLCertificate populateCertificateForTL(TradeLicense tradeLicense) {
+	private TLCertificate populateCertificateForTL(TradeLicense tradeLicense, RequestInfoWrapper reqInfoWrapper) {
+		
+		RequestInfo requestInfo = reqInfoWrapper.getRequestInfo();
+		String tenantId = tradeLicense.getTenantId();
+		Object mdmsData = tlService.mDMSCall(requestInfo, tenantId, true);
+		String district="";
+		if (Objects.nonNull(mdmsData)) {
+			List<Map<String, Object>> result = JsonPath.read(mdmsData, "$.MdmsRes.tenant.tenants");
+
+			for (Map<String, Object> item : result) {
+				if (item.get("code").equals(tenantId)) {
+					Map<String, String> city = (Map<String, String>) item.get("city");
+					district = city.get("districtName");
+				}
+			}
+		}
 		
 		TLCertificate certificate = new TLCertificate();
 		certificate.setLanguage("99");
@@ -1082,7 +1143,7 @@ public class DataExchangeService {
 
 		IssuedBy issuedBy = new IssuedBy();
 		Organization organization = new Organization();
-		organization.setName("");
+		organization.setName("Housing and Urban Development Department, Govt Of Odisha");
 		organization.setTin("");
 		organization.setCode("");
 		organization.setUid("");
@@ -1090,24 +1151,41 @@ public class DataExchangeService {
 		Address addressIssuedBy = new Address();
 		addressIssuedBy.setCountry("IN");
 		addressIssuedBy.setType("");
-		addressIssuedBy.setLine1("");
-		addressIssuedBy.setLine2("");
+		addressIssuedBy.setLine1("3rd Floor, Kharvel Bhawan");
+		addressIssuedBy.setLine2("West Wing, Room No 301");
 		addressIssuedBy.setLandmark("");
 		addressIssuedBy.setLocality("");
-		addressIssuedBy.setDistrict("");
-		addressIssuedBy.setPin("");
+		addressIssuedBy.setDistrict("Bhubaneswar");
+		addressIssuedBy.setPin("751001");
 		addressIssuedBy.setState("Odisha");
+		addressIssuedBy.setCountry("IN");
 		organization.setAddress(addressIssuedBy);
 		issuedBy.setOrganisation(organization);
 		certificate.setIssuedBy(issuedBy);
+		
+		String tradeType = "";
+		Object mdmsDataForTradeType = tlService.mDMSCall(requestInfo, tenantId, false);
+		if (Objects.nonNull(mdmsDataForTradeType)) {
+			List<Map<String, Object>> result = JsonPath.read(mdmsDataForTradeType, "$.MdmsRes.TradeLicense.TradeType");
+
+			for (Map<String, Object> item : result) {
+				
+				if (item.get("code")
+						.equals(tradeLicense.getTradeLicenseDetail().getTradeUnits().get(0).getTradeType())) {
+					
+					tradeType = (String) item.get("name");
+				}
+			}
+
+		}
 
 		TLIssuedTo issuedTo = new TLIssuedTo();
-		Organization organizationIssuesTo = new Organization();
-		organizationIssuesTo.setName("");
+		OrganizationTL organizationIssuesTo = new OrganizationTL();
+		organizationIssuesTo.setName(tradeLicense.getTradeName());
 		organizationIssuesTo.setTin("");
 		organizationIssuesTo.setCode("");
 		organizationIssuesTo.setUid("");
-		organizationIssuesTo.setType("SG");
+		organizationIssuesTo.setType(tradeType);
 		Address addressIssuedTo = new Address();
 		addressIssuedTo.setCountry("IN");
 		String type = tradeLicense.getTradeLicenseDetail().getAddress().getType();
@@ -1120,7 +1198,7 @@ public class DataExchangeService {
 		addressIssuedTo.setLandmark(StringUtils.isEmpty(landmark)?"":landmark);
 		String locality = tradeLicense.getTradeLicenseDetail().getAddress().getLocality().getName();
 		addressIssuedTo.setLocality(StringUtils.isEmpty(locality)?"":locality);
-		addressIssuedTo.setDistrict("");
+		addressIssuedTo.setDistrict(district);
 		String pin = tradeLicense.getTradeLicenseDetail().getAddress().getPincode();
 		addressIssuedTo.setPin(StringUtils.isEmpty(pin)?"":pin);
 		addressIssuedTo.setState("Odisha");
@@ -1139,11 +1217,11 @@ public class DataExchangeService {
 		Address addressPerson =  new Address();
 		addressPerson.setCountry("IN");
 		addressPerson.setType("");
-		addressPerson.setLine1("");
+		addressPerson.setLine1(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getPermanentAddress());
 		addressPerson.setLine2("");
 		addressPerson.setLandmark("");
-		addressPerson.setLocality(tradeLicense.getTradeLicenseDetail().getOwners().get(0).getPermanentAddress());
-		addressPerson.setDistrict("");
+		addressPerson.setLocality("");
+		addressPerson.setDistrict(district);
 		addressPerson.setPin("");
 		addressPerson.setState("Odisha");
 		
@@ -1213,7 +1291,7 @@ public class DataExchangeService {
 		
 		List<BPA> applications = bpaService.getBPAPermitLetter(criteria, requestInfoWrapper);
 		
-		if((!applications.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateBPAResponse(searchCriteria, applications)
+		if((!applications.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("TRUE")) && validateBPAResponse(searchCriteria, applications,model)
 				|| !applications.isEmpty() && configurations.getValidationFlag().equalsIgnoreCase("FALSE")) {
 			
 			log.info("BPA Applications Found and Validation Passed ! " + String.valueOf(applications));
@@ -1237,7 +1315,7 @@ public class DataExchangeService {
 
 				if (searchCriteria.getDocType().equals("BPCER")) {
 
-					certificate = populateCertificateForBPA(applications.get(0));
+					certificate = populateCertificateForBPA(applications.get(0), requestInfoWrapper);
 					xstream.processAnnotations(BPACertificate.class);
 
 				}
@@ -1260,9 +1338,10 @@ public class DataExchangeService {
 		     List<DocDetailsPerson> persons= new ArrayList<DocDetailsPerson>();
 		     issuedTo.setPersons(persons);
 		     docDetailsResponse.setURI(null);
-		     docDetailsResponse.setIssuedTo(issuedTo);
+		     //docDetailsResponse.setIssuedTo(issuedTo);
 		     //docDetailsResponse.setDataContent("");
-		     docDetailsResponse.setDocContent("");
+		     //docDetailsResponse.setDocContent("");
+		     docDetailsResponse.setErrorMessage(PTServiceDXConstants.NO_RECORDS_FOUND);
 		     log.info(PTServiceDXConstants.EXCEPTION_TEXT_VALIDATION_BPA);
 		     if(model.getClass().equals(PullDocResponse.class)){
 		    	 ((PullDocResponse) model).setDocDetails(docDetailsResponse);
@@ -1276,64 +1355,202 @@ public class DataExchangeService {
 		
 	}
 
-	private boolean validateBPAResponse(SearchCriteria searchCriteria, List<BPA> applications) {
-		// Implement BPA Validations here if any
-		return true;
+	private boolean validateBPAResponse(SearchCriteria searchCriteria, List<BPA> applications, Object model) {
+
+		if (model.getClass().equals(PullDocResponse.class)) {
+			return true;
+		} else if (model.getClass().equals(PullURIResponse.class)) {
+			Set<String> mobileNos = applications.get(0).getLandInfo().getOwners().stream()
+					.map(bpa -> bpa.getMobileNumber()).collect(Collectors.toSet());
+			if (mobileNos.contains(searchCriteria.getMobile())) {
+				return true;
+			} else {
+				return false;
+			}
+
+		}
+		return false;
 	}
 	
-	private BPACertificate populateCertificateForBPA(BPA bpa) {
+	private BPACertificate populateCertificateForBPA(BPA bpa, RequestInfoWrapper reqInfoWrapper) {
+		
+		RequestInfo requestInfo = reqInfoWrapper.getRequestInfo();
+		
+		//call edcr here to get the required data
+		LinkedHashMap edcrData = bpaService.getEDCRDetails(requestInfo, bpa);
 		
 		BPACertificate certificate = new BPACertificate();
 		certificate.setLanguage("99");
-		certificate.setName("Building Plan Permit Letter");
+		certificate.setName("Building Plan/ License");
 		certificate.setType("BPCER");
-		certificate.setNumber("");
+		certificate.setNumber(bpa.getApprovalNo());
 		certificate.setPrevNumber("");
-		certificate.setExpiryDate("");
-		certificate.setValidFromDate("");
-		certificate.setIssuedAt("");
-		certificate.setIssueDate("");
+		Long validFrom = bpa.getApprovalDate();
+		if(validFrom!= null) {
+			LocalDate date = Instant.ofEpochMilli(validFrom).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			certificate.setValidFromDate(date.format(formatters));
+		}else {
+			certificate.setValidFromDate("dd-mm-yyyy");
+		}
+		certificate.setIssuedAt(bpa.getTenantId().substring(3));
+		if(validFrom!= null) {
+			LocalDate date = Instant.ofEpochMilli(validFrom).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			certificate.setIssueDate(date.format(formatters));
+		}else {
+			certificate.setIssueDate("dd-mm-yyyy");
+		}
 		certificate.setStatus("A");
+		
+		Long validUpto = bpaService.getValidUptoDate(validFrom);
+		if(validUpto!= null) {
+			LocalDate date = Instant.ofEpochMilli(validUpto).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			certificate.setExpiryDate(date.format(formatters));
+		}else {
+			certificate.setExpiryDate("dd-mm-yyyy");
+		}
 
 		IssuedBy issuedBy = new IssuedBy();
 		Organization organization = new Organization();
-		organization.setName("");
+		organization.setName("Housing and Urban Development Department, Govt Of Odisha");
+		organization.setTin("");
+		organization.setCode("");
+		organization.setUid("");
 		organization.setType("SG");
-		Address address = new Address();
-		address.setCountry("IN");
-		organization.setAddress(address);
+		Address addressIssuedBy = new Address();
+		addressIssuedBy.setType("");
+		addressIssuedBy.setLine1("3rd Floor, Kharvel Bhawan");
+		addressIssuedBy.setLine2("West Wing, Room No 301");
+		addressIssuedBy.setLandmark("");
+		addressIssuedBy.setLocality("");
+		addressIssuedBy.setDistrict("Bhubaneswar");
+		addressIssuedBy.setPin("751001");
+		addressIssuedBy.setState("Odisha");
+		addressIssuedBy.setCountry("IN");
+		organization.setAddress(addressIssuedBy);
 		issuedBy.setOrganisation(organization);
 		certificate.setIssuedBy(issuedBy);
 
-		IssuedTo issuedTo = new IssuedTo();
-		Person person = new Person();
-		//person.setAddress(address);
-		//person.setPhoto("");
+		BPAIssuedTo issuedTo = new BPAIssuedTo();
+		PersonBPA person = new PersonBPA();
+		
 		person.setName(bpa.getLandInfo().getOwners().get(0).getName());
 		person.setPhone(bpa.getLandInfo().getOwners().get(0).getMobileNumber());
 		Long dob = bpa.getLandInfo().getOwners().get(0).getDob();
-//		if(dob!= null) {
-//			LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
-//			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
-//			person.setDob(date.format(formatters));
-//		}else {
-//			person.setDob("dd-mm-yyyy");
-//		}
-//		person.setGender(bpa.getLandInfo().getOwners().get(0).getGender());
-		issuedTo.setPersons(Arrays.asList(person));
+		if(dob!= null) {
+			LocalDate date = Instant.ofEpochMilli(dob).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			person.setDob(date.format(formatters));
+		}else {
+			person.setDob("dd-mm-yyyy");
+		}
+		person.setGender(bpa.getLandInfo().getOwners().get(0).getGender());
+		person.setTitle(person.getGender().equalsIgnoreCase("Male")?"Mr.":"Ms.");
+		person.setPhone(bpa.getLandInfo().getOwners().get(0).getMobileNumber());
+		person.setEmail(bpa.getLandInfo().getOwners().get(0).getEmailId());
+		
+		Address addressPerson = new Address();
+		addressPerson.setType("");
+		addressPerson.setLine1(bpa.getLandInfo().getOwners().get(0).getPermanentAddress());
+		addressPerson.setLine2("");
+		addressPerson.setHouse("");
+		addressPerson.setLandmark("");
+		addressPerson.setLocality("");	
+		String districtPerson = bpa.getLandInfo().getOwners().get(0).getPermanentCity();
+		if(!StringUtils.isEmpty(districtPerson))
+			addressPerson.setDistrict(districtPerson.substring(3));
+		else
+			addressPerson.setDistrict("");
+		addressPerson.setPin(bpa.getLandInfo().getOwners().get(0).getPermanentPincode());
+		addressPerson.setState("Odisha");
+		addressPerson.setCountry("India");
+		
+		person.setAddress(addressPerson);
+		person.setPhoto(Photo.builder().format("").build());
+		issuedTo.setPerson(person);
 		certificate.setIssuedTo(issuedTo);
 
 		BPACertificateData certificateData = new BPACertificateData();
 		CertificateForData certificateForData = new CertificateForData();
+		Long issuedDate = bpa.getApprovalDate();
+		if(issuedDate!= null) {
+			LocalDate date = Instant.ofEpochMilli(issuedDate).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			certificateForData.setDate(date.format(formatters));
+		}else {
+			certificateForData.setDate("dd-mm-yyyy");
+		}
+		certificateForData.setNumber(bpa.getApprovalNo());
+		certificateForData.setPlace(bpa.getTenantId().substring(3));
 		certificateData.setCertificate(certificateForData);
 		
 		BuildingPlanCertificate buildingPlanCertificate = new BuildingPlanCertificate();
-		buildingPlanCertificate.builder().applicationNumber(bpa.getApplicationNo()).approvalDate(bpa.getApprovalDate())
-				.approvalNumber(bpa.getApprovalNo()).ownerName(bpa.getLandInfo().getOwners().get(0).getName())
-				.ownerAddress(bpa.getLandInfo().getAddress()).build();
+		buildingPlanCertificate.setSiNo(bpa.getApprovalNo());
+		buildingPlanCertificate.setApplicationNo(bpa.getApplicationNo());
+		buildingPlanCertificate.setUnitName("");
+		buildingPlanCertificate.setFeesPaid("");
+		
+		AddressBPA addressBPA = new AddressBPA();
+		
+		Area area = new Area();
+		if(issuedDate!= null) {
+			LocalDate date = Instant.ofEpochMilli(issuedDate).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			area.setApprovedDate(date.format(formatters));
+		}else {
+			area.setApprovedDate("dd-mm-yyyy");
+		}
+		
+		if(validUpto!= null) {
+			LocalDate date = Instant.ofEpochMilli(validUpto).atZone(ZoneId.systemDefault()).toLocalDate();
+			DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+			buildingPlanCertificate.setValidUpto(date.format(formatters));
+		}else {
+			buildingPlanCertificate.setValidUpto("dd-mm-yyyy");
+		}
+		ConstructionPermission permission = new ConstructionPermission();
+		
+		
+		if(!CollectionUtils.isEmpty(edcrData)) {
+			String jsonString = new JSONObject(edcrData).toString();
+			DocumentContext context = JsonPath.using(Configuration.defaultConfiguration()).parse(jsonString);
+			
+			List<String> totalFloorArea = context.read("edcrDetail.*.planDetail.virtualBuilding.totalFloorArea");
+			List<String> totalBUA = context.read("edcrDetail.*.planDetail.virtualBuilding.totalBuitUpArea");
+			List<Integer> floors = context.read("edcrDetail.*.planDetail.blocks[0].building.totalFloors");
+			List<String> plotNo = context.read("edcrDetail.*.planDetail.planInformation.plotNo");
+			List<String> khataNo = context.read("edcrDetail.*.planDetail.planInformation.khataNo");
+			List<String> mauza = context.read("edcrDetail.*.planDetail.planInformation.mauza");
+			List<String> district = context.read("edcrDetail.*.planDetail.planInformation.district");
+			Integer floor = floors.get(0);
+			
+			permission.setName(bpa.getLandInfo().getOwners().get(0).getName());
+			permission.setOthers("");
+			permission.setSingle((Integer.compare(floor, 1)==0)?"Single":"Multi");
+			area.setType("");
+			
+			area.setFloorArea(String.valueOf(totalFloorArea.get(0)));
+			area.setApprovedCoveredArea(String.valueOf(totalBUA.get(0)));
+			
+			addressBPA.setType("");
+			addressBPA.setLine1("Plot No: "+plotNo.get(0));
+			addressBPA.setLine2("Khata No: "+khataNo.get(0));
+			addressBPA.setWardNo("Locality: "+mauza.get(0));
+			addressBPA.setDistrict(district.get(0));
+
+			
+		}
+		
+		
+		buildingPlanCertificate.setAddress(addressBPA);
+		buildingPlanCertificate.setArea(area);
+		buildingPlanCertificate.setConstructionPermission(permission);
 		
 		certificateData.setCertificate(certificateForData);
 		certificateData.setBuildingPlanCertificate(buildingPlanCertificate);
+		certificate.setCertificateData(certificateData);
 		return certificate;
 	}
 	
