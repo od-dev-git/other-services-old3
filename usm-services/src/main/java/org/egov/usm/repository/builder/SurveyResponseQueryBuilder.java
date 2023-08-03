@@ -19,11 +19,11 @@ public class SurveyResponseQueryBuilder {
 		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, "
 				+ "question.options, answer.id as answerid, answer.answer , question.status, question.required, question.type, question.createdby, "
 				+ "question.createdtime , question.lastmodifiedtime , question.lastmodifiedby, "
-				+ "surveysubmitted.id as surveydetailsid, surveysubmitted.surveysubmittedno , "
+				+ "surveysubmitted.id as surveysubmittedid, surveysubmitted.surveysubmittedno , "
 				+ "surveysubmitted.tenantid , surveysubmitted.ward , surveysubmitted.slumcode , "
 				+ "surveysubmitted.createdtime as surveycreatedtime, surveysubmitted.createdby as surveycreatedby, "
 				+ "surveysubmitted.lastmodifiedtime as surveymodifiedtime, surveysubmitted.lastmodifiedby as surveymodifiedby");
-		query.append(", exists(select hasopenticket from eg_usm_slum_question_lookup lookup WHERE question.id = lookup.questionid");
+		query.append(", (select hasopenticket from eg_usm_slum_question_lookup lookup WHERE question.id = lookup.questionid");
 
 		if (!ObjectUtils.isEmpty(surveyDetails.getTenantId())) {
 			query.append(" AND lookup.tenantid = ?");
@@ -131,7 +131,7 @@ public class SurveyResponseQueryBuilder {
 
 
 	public String searchSubmittedSurvey(@Valid SurveySearchCriteria searchCriteria, List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("SELECT surveysubmitted.id as surveydetailsid, surveysubmitted.surveyid, surveysubmitted.surveysubmittedno , "
+		StringBuilder query = new StringBuilder("SELECT surveysubmitted.id as surveysubmittedid, surveysubmitted.surveyid, surveysubmitted.surveysubmittedno , "
 				+ "surveysubmitted.tenantid , surveysubmitted.ward , surveysubmitted.slumcode ,surveysubmitted.surveytime, surveysubmitted.createdtime as surveycreatedtime, "
 				+ "surveysubmitted.createdby as surveycreatedby, surveysubmitted.lastmodifiedtime as surveymodifiedtime, surveysubmitted.lastmodifiedby as surveymodifiedby, "
 				+ "answer.id as answerid, answer.questionid, question.questionstatement, answer.questioncategory, answer.answer, answer.createdtime, answer.createdby, "
@@ -139,10 +139,10 @@ public class SurveyResponseQueryBuilder {
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON surveysubmitted.id = answer.surveysubmittedid");
 		query.append(" LEFT OUTER JOIN eg_usm_question question ON answer.questionid = question.id");
 
-		if (!ObjectUtils.isEmpty(searchCriteria.getSurveyId())) {
+		if (!ObjectUtils.isEmpty(searchCriteria.getSurveySubmittedId())) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" surveysubmitted.id = ?");
-			preparedStmtList.add(searchCriteria.getSurveyId());
+			preparedStmtList.add(searchCriteria.getSurveySubmittedId());
 		}
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getTenantId())) {
@@ -175,8 +175,13 @@ public class SurveyResponseQueryBuilder {
 			preparedStmtList.add(searchCriteria.getSurveyDate());
 		}
 		
+		if(searchCriteria.getIsAdmin() != Boolean.TRUE) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" surveysubmitted.createdby = ?");
+			preparedStmtList.add(searchCriteria.getCreatedBy());
+		}
+		
 		query.append(" ORDER BY surveycreatedtime DESC ");
-		log.info("Query for get Questions ", query.toString());
 		return query.toString();
 	}
 

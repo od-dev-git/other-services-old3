@@ -13,9 +13,9 @@ public class TicketQueryBuilder {
 	public String searchQuestionsInTicket(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
 		StringBuilder query = new StringBuilder("SELECT ticket.questionid FROM eg_usm_survey_ticket ticket");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON ticket.surveyanswerid = answer.id");
-		if (!ObjectUtils.isEmpty(surveyDetails.getId())) {
+		if (!ObjectUtils.isEmpty(surveyDetails.getSurveySubmittedId())) {
 			query.append(" WHERE answer.surveysubmittedid = ?");
-			preparedStmtList.add(surveyDetails.getId());
+			preparedStmtList.add(surveyDetails.getSurveySubmittedId());
 		}
 
 		return query.toString();

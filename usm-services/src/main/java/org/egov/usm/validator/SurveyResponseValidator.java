@@ -15,11 +15,11 @@ public class SurveyResponseValidator {
 	private SurveyDetailsRepository repository;
 
 	public Boolean validateSurveyExistsForToday(SurveyDetails surveyDetails) {
-		if(ObjectUtils.isEmpty(surveyDetails.getId()))
+		if(ObjectUtils.isEmpty(surveyDetails.getSurveySubmittedId()))
             throw new CustomException("EG_SY_UUID_NOT_PROVIDED_ERR", "Providing survey id is mandatory for updating and deleting surveys");
 
 		SurveySearchCriteria criteria = SurveySearchCriteria.builder()
-        		.surveyId(surveyDetails.getId())
+        		.surveyId(surveyDetails.getSurveySubmittedId())
                 .build();
 		
         Boolean isSurveyExists = repository.isSurveyExistsForToday(criteria);
