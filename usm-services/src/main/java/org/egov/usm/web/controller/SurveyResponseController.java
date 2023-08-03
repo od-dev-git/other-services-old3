@@ -89,7 +89,7 @@ public class SurveyResponseController {
 	@PostMapping("/response/_search")
 	public ResponseEntity<SurveyDetailsResponse> search(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
 										@Valid @ModelAttribute SurveySearchCriteria searchCriteria) {
-		List<SurveyDetails> surveyDetails = surveyResponseService.searchSubmittedSurvey(searchCriteria);
+		List<SurveyDetails> surveyDetails = surveyResponseService.searchSubmittedSurvey(requestInfoWrapper, searchCriteria);
 		
 		SurveyDetailsResponse response =  SurveyDetailsResponse.builder()
 				.surveyDetails(surveyDetails)

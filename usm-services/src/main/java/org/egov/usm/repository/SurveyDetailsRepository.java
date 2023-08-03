@@ -109,7 +109,6 @@ public class SurveyDetailsRepository {
 	}
 
 	public List<SurveyDetails> searchSubmittedSurvey(@Valid SurveySearchCriteria searchCriteria) {
-		log.info("Search in Survey Submitted :", searchCriteria.toString());
 		List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.searchSubmittedSurvey(searchCriteria, preparedStmtList);
         List<SurveyDetails> surveyDetailsList = jdbcTemplate.query(query, preparedStmtList.toArray(), surveyAnswerDetailsRowMapper);

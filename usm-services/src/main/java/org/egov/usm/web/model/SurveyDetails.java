@@ -18,8 +18,8 @@ import lombok.Setter;
 @Builder
 public class SurveyDetails {
 
-	@JsonProperty("id")
-	private String id;
+	@JsonProperty("surveySubmittedId")
+	private String surveySubmittedId;
 	
 	@JsonProperty("surveyNo")
 	private String surveyNo;

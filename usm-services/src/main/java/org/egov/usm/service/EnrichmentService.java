@@ -43,7 +43,7 @@ public class EnrichmentService {
 		List<String> surveyNumbers = usmUtil.getIdList(requestInfo, surveyDetailsRequest.getSurveyDetails().getTenantId(), config.getSurveyNoIdgenName(), config.getSurveyNoIdgenFormat(), 1 );
 		
 		surveyDetailsRequest.getSurveyDetails().setSurveyNo(surveyNumbers.get(0));
-		surveyDetailsRequest.getSurveyDetails().setId(USMUtil.generateUUID());
+		surveyDetailsRequest.getSurveyDetails().setSurveySubmittedId(uuid);
 		surveyDetailsRequest.getSurveyDetails().setSurveyTime(auditDetails.getCreatedTime());
 		surveyDetailsRequest.getSurveyDetails().setAuditDetails(auditDetails);
 		
@@ -51,7 +51,7 @@ public class EnrichmentService {
 		surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers()
 				.forEach(answer -> {
 					answer.setId(USMUtil.generateUUID());
-					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getId());
+					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
 					answer.setAuditDetails(auditDetails);
 				});
 	}
@@ -171,7 +171,7 @@ public class EnrichmentService {
 		//enrich SubmittedAnswer details
 		surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers()
 				.forEach(answer -> {
-					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getId());
+					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
 					answer.setAuditDetails(auditDetails);
 				});
 
