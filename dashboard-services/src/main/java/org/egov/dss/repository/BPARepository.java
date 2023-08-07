@@ -14,6 +14,7 @@ import org.egov.dss.repository.builder.BpaQueryBuilder;
 import org.egov.dss.repository.rowmapper.BPAPerformanceRateRowMapper;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.RateRowMapper;
+import org.egov.dss.repository.rowmapper.TableChartRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.egov.dss.repository.rowmapper.ULBPerformanceRateRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,6 +222,14 @@ public class BPARepository {
         HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
         return result;
     }
+
+	public List<HashMap<String, Object>> getApplicationsBreakdown(BpaSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = bpaQueryBuilder.getApplicationsBreakdownQuery(criteria, preparedStatementValues);
+        log.info("query for BPA Applications Breakdown: "+query);
+        List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
+        return result;
+	}
     
    
 }
