@@ -431,6 +431,10 @@ public class RedirectService {
             return bpaService.obpsServiceSummary(requestInfoWrapper.getPayloadDetails());
         }
         
+        if(Constants.VisualizationCodes.SERVICE_OBPS_APP_PENDING_BREAKDOWN.equalsIgnoreCase(visualizationCode)) {
+            return bpaService.obpsApplicationsPendingBreakdown(requestInfoWrapper.getPayloadDetails());
+        }
+        
         if(Constants.VisualizationCodes.SERVICE_TL_TOTAL_APPLICATION.equalsIgnoreCase(visualizationCode)) {
         	return tlService.totalApplications(requestInfoWrapper.getPayloadDetails());
         }

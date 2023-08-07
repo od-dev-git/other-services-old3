@@ -854,4 +854,72 @@ public class BPAService {
 		return response;
 	}
 
+	public List<Data> obpsApplicationsPendingBreakdown(PayloadDetails payloadDetails) {
+		
+		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setDeleteStatus(DashboardConstants.STATUS_DELETED);
+		List<HashMap<String, Object>> obpsApplicationPending = bpaRepository.getApplicationsBreakdown(criteria);
+		List<Data> response = new ArrayList();
+		int serailNumber = 0;
+		for (HashMap<String, Object> obpsApplication : obpsApplicationPending) {
+			serailNumber++;
+			String tenantIdStyled = String.valueOf(obpsApplication.get("ulb"));
+			tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(tenantIdStyled).name("ULBs").symbol("text").build());
+
+			row.add(Plot.builder().name("Pending At Doc Verification").value(new BigDecimal(String.valueOf(obpsApplication.get("pendingdocverif"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Pending At Field Inspection").value(new BigDecimal(String.valueOf(obpsApplication.get("pendingfieldinspection"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Pending At Planning Assistance").value(new BigDecimal(String.valueOf(obpsApplication.get("pendingatplanningassistant"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Pending Approval")
+					.value(new BigDecimal(String.valueOf(obpsApplication.get("pendingatplanningofficer")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Pending At Planning Member").value(new BigDecimal(String.valueOf(obpsApplication.get("pendingatplanningmember"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Pending At DPBP Committee")
+					.value(new BigDecimal(String.valueOf(obpsApplication.get("pendingatdpbp")))).symbol("number").build());
+			row.add(Plot.builder().name("Pending For Citizen Action")
+					.value(new BigDecimal(String.valueOf(obpsApplication.get("pendingforcitizenaction")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Pending Sanction Fee Payment")
+					.value(new BigDecimal(String.valueOf(obpsApplication.get("pendingsancfeepayment")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Pending At Accrediated Person")
+					.value(new BigDecimal(String.valueOf(obpsApplication.get("pendingataccrediatedofficer")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Total Applications")
+					.value(new BigDecimal(String.valueOf(obpsApplication.get("totalapplicationreciceved")))).symbol("number")
+					.build());
+
+			response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null)
+					.build());
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serailNumber++;
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(payloadDetails.getTenantid()).name("ULBs").symbol("text").build());
+            row.add(Plot.builder().name("Pending At Doc Verification").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Field Inspection").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Planning Assistance").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending Approval").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Planning Member").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At DPBP Committee").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending For Citizen Action").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending Sanction Fee Payment").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Accrediated Person").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Total Applications").value(BigDecimal.ZERO).symbol("number").build());
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber).plots(row)
+					.insight(null).build());
+		}
+
+		return response;
+	}
+
 }

@@ -39,6 +39,26 @@ public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " sel
 public static final String BPA_SLA_COMPLIENCE_APPLICATIONS = " select count(bpa.applicationno) from eg_bpa_buildingplan bpa inner join eg_bpa_edcrdata ebe on "
 		                                                   + " ebe.applicationno = bpa.applicationno ";
 
+public static final String BPA_APPL_BREAKDOWN_1 = "select INITCAP(SPLIT_PART(internal.tenantid, '.', 2)) as ulb, sum(case when internal.status = 'Pending at Document Verification' then internal.internalcount else 0 end)"
+		+ " pendingDocVerif, sum(case when internal.status = 'Pending at Field Inspection' then internal.internalcount else 0 end) pendingFieldInspection, sum(case when internal.status = 'Pending at Planning Assistant' "
+		+ "then internal.internalcount else 0 end) pendingAtPlanningAssistant, sum(case when internal.status = 'Pending at Planning Officer' then internal.internalcount else 0 end) pendingAtPlanningOfficer, sum(case when "
+		+ "internal.status = 'Pending at Planning Member' then internal.internalcount else 0 end) pendingAtPlanningMember, sum(case when internal.status = 'Pending at DPBP Committee' then internal.internalcount else 0 end) pendingAtDpbp,"
+		+ " sum(case when internal.status = 'Pending for Citizen Action' then internal.internalcount else 0 end) pendingForCitizenAction, sum(case when internal.status = 'Pending for Permit Fee Payment' then internal.internalcount else 0 end)"
+		+ " pendingSancFeePayment , sum(case when internal.status = 'Pending at Accrediated Officer' then internal.internalcount else 0 end) pendingataccrediatedofficer, sum(case when internal.status in ( 'Pending at Document Verification', "
+		+ "'Pending at Field Inspection', 'Pending at Planning Assistant', 'Pending at Planning Officer', 'Pending at Planning Member', 'Pending at DPBP Committee', 'Pending for Citizen Action', 'Pending for Permit Fee Payment', 'Pending at Accrediated Officer')"
+		+ " then internal.internalcount else 0 end) totalApplicationReciceved from ( select bpa.tenantid as tenantid, case when bpa.status = 'APPROVED' then 'Approved' when bpa.status = 'REJECTED' then 'Rejected' when bpa.status = 'DOC_VERIFICATION_INPROGRESS' then"
+		+ " 'Pending at Document Verification' when bpa.status = 'FIELDINSPECTION_INPROGRESS' then 'Pending at Field Inspection' when bpa.status = 'APP_L1_VERIFICATION_INPROGRESS' then 'Pending at Planning Assistant' when bpa.status = 'APPROVAL_INPROGRESS' and "
+		+ "bpa.businessservice in ('BPA1', 'BPA6') then 'Pending at Planning Assistant' when bpa.status = 'APP_L2_VERIFICATION_INPROGRESS' then 'Pending at Planning Officer' when bpa.status = 'APPROVAL_INPROGRESS' and bpa.businessservice = 'BPA2' then 'Pending at Planning Officer'"
+		+ " when bpa.status = 'APP_L3_VERIFICATION_INPROGRESS' then 'Pending at Planning Member' when bpa.status = 'APPROVAL_INPROGRESS' and bpa.businessservice = 'BPA3' then 'Pending at Planning Member' when bpa.status = 'APP_L4_VERIFICATION_INPROGRESS' then 'Pending at DPBP Committee'"
+		+ " when bpa.status = 'APPROVAL_INPROGRESS' and bpa.businessservice = 'BPA4' then 'Pending at DPBP Committee' when bpa.status in ('CITIZEN_ACTION_PENDING_AT_DOC_VERIF', 'CITIZEN_ACTION_PENDING_AT_APP_L1_VERIF', 'CITIZEN_ACTION_PENDING_AT_APP_L2_VERIF', 'CITIZEN_ACTION_PENDING_AT_APP_L3_VERIF',"
+		+ " 'CITIZEN_ACTION_PENDING_AT_APPROVAL') then 'Pending for Citizen Action' when bpa.status = 'PENDING_ARCHITECT_ACTION_FOR_REWORK' then 'Pending for Drawing Rework' when bpa.status = 'PENDING_SANC_FEE_PAYMENT' then 'Pending for Permit Fee Payment' when bpa.status = 'APPROVAL_INPROGRESS'"
+		+ " and bpa.businessservice = 'BPA5' then 'Pending at Accrediated Officer' end as status, count(bpa.applicationno) as internalcount from eg_bpa_buildingplan bpa ";
+
+public static final String BPA_APPL_BREAKDOWN_2 = "group by bpa.status,bpa.tenantid,bpa.businessservice having bpa.businessservice in "
+		+ "('BPA1', 'BPA2', 'BPA3', 'BPA4', 'BPA5', 'BPA6')	and bpa.status not in('DELETED', 'INITIATED', 'CITIZEN_APPROVAL_INPROCESS', 'PENDING_APPL_FEE', 'INPROGRESS', "
+		+ "'PENDING_FORWARD', 'CONSTRUCT_START_INTIMATED', 'PLINTH_VERIFICATION_INPROGRESS', 'GROUNDFLR_VERIFICATION_INPROGRESS', 'TOPFLR_VERIFICATION_INPROGRESS', "
+		+ "'TOPFLR_VERIFICATION_COMPLETED') ) internal group by internal.tenantid";
+
 	public static String getTotalPermitIssued(BpaSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATIONS);
 		return addWhereClause(selectQuery, preparedStatementValues, criteria);
@@ -380,6 +400,14 @@ public static final String BPA_SLA_COMPLIENCE_APPLICATIONS = " select count(bpa.
 	        addGroupByClause(selectQuery," tmp.servicetype ");
 	        return selectQuery.toString();
 	    }
+
+		public String getApplicationsBreakdownQuery(BpaSearchCriteria criteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(BPA_APPL_BREAKDOWN_1);
+			addWhereClauseforPendingApplication(selectQuery, preparedStatementValues, criteria);
+			selectQuery.append(BPA_APPL_BREAKDOWN_2);
+			return selectQuery.toString();
+		}
 
 
 }
