@@ -138,7 +138,7 @@ public class PGRService {
 		List<Plot> plotsForTotalApplications = extractDataForChartComplaints(totalApplications, monthYearData);
 		
 		BigDecimal total = totalApplications.stream().map(application -> application.getValue()).reduce(BigDecimal.ZERO,
-				BigDecimal::add);	
+				BigDecimal::max);	
 		
 		response.add(Data.builder().headerName("Total Complaints").headerSymbol("number").headerValue(total).plots(plotsForTotalApplications).build());
 		
@@ -150,7 +150,7 @@ public class PGRService {
 		List<Plot> plotsForClosedApplications = extractDataForChartComplaints(closedApplications, monthYearDataForClosed);
 		
 		BigDecimal totalClosedApplications = closedApplications.stream().map(application -> application.getValue())
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
+				.reduce(BigDecimal.ZERO, BigDecimal::max);
 
 		response.add(Data.builder().headerName("Closed Complaints").headerSymbol("number").headerValue(totalClosedApplications).plots(plotsForClosedApplications).build());
 		
