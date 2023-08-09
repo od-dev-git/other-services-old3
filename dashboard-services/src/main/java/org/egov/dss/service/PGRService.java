@@ -508,51 +508,55 @@ public class PGRService {
 	public List<Data> totalComplaintsBySource(PayloadDetails payloadDetails) {
 		List<Data> response = new ArrayList<>();
 
-		//Getting Default Month Year Data
+		// Getting Default Month Year Data
 		BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_SERVICES));
-		LinkedHashMap<String,BigDecimal> monthYearDataMobileApp= bpaRepository.getMonthYearBigDecimalData(criteria);
-		LinkedHashMap<String,BigDecimal> monthYearDataIvr  = new LinkedHashMap<>();
-		monthYearDataIvr.putAll(monthYearDataMobileApp);
-		LinkedHashMap<String,BigDecimal> monthYearDataWeb  = new LinkedHashMap<>();
+		LinkedHashMap<String, BigDecimal> monthYearDataMobileApp = bpaRepository.getMonthYearBigDecimalData(criteria);
+		/*
+		 * LinkedHashMap<String,BigDecimal> monthYearDataIvr = new LinkedHashMap<>();
+		 * monthYearDataIvr.putAll(monthYearDataMobileApp);
+		 */
+		LinkedHashMap<String, BigDecimal> monthYearDataWeb = new LinkedHashMap<>();
 		monthYearDataWeb.putAll(monthYearDataMobileApp);
-		LinkedHashMap<String,BigDecimal> monthYearDataWhatsapp  = new LinkedHashMap<>();
-		monthYearDataWhatsapp.putAll(monthYearDataMobileApp);
-
+		/*
+		 * LinkedHashMap<String,BigDecimal> monthYearDataWhatsapp = new
+		 * LinkedHashMap<>(); monthYearDataWhatsapp.putAll(monthYearDataMobileApp);
+		 */
 
 		PgrSearchCriteria pgrCriteria = getPgrSearchCriteria(payloadDetails);
 		pgrCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 
-
-		List<Chart> totalWhatsappComplaints = pgrRepository.totalComplaintsByWhatsapp(pgrCriteria);
-		List<Plot> plotsForWhatsappComplaints = extractedMonthYearData(monthYearDataWhatsapp,
-				totalWhatsappComplaints);
-		BigDecimal totalWhatsapp = monthYearDataWhatsapp.values().stream().reduce(
-				 BigDecimal.ZERO, BigDecimal::add);
-		response.add(Data.builder().headerName("Whatsapp").headerValue(totalWhatsapp).plots(plotsForWhatsappComplaints).build());
-
-		List<Chart> totalIvrComplaints = pgrRepository.totalComplaintsByIvr(pgrCriteria);
-		List<Plot> plotsForIvrComplaints = extractedMonthYearData(monthYearDataIvr,
-				totalIvrComplaints);
-		BigDecimal totalIvr = monthYearDataIvr.values().stream().reduce(
-				 BigDecimal.ZERO, BigDecimal::add);
-		response.add(Data.builder().headerName("Ivr").headerValue(totalIvr).plots(plotsForIvrComplaints).build());
+		/*
+		 * List<Chart> totalWhatsappComplaints =
+		 * pgrRepository.totalComplaintsByWhatsapp(pgrCriteria); List<Plot>
+		 * plotsForWhatsappComplaints = extractedMonthYearData(monthYearDataWhatsapp,
+		 * totalWhatsappComplaints); BigDecimal totalWhatsapp =
+		 * monthYearDataWhatsapp.values().stream().reduce( BigDecimal.ZERO,
+		 * BigDecimal::add);
+		 * response.add(Data.builder().headerName("Whatsapp").headerValue(totalWhatsapp)
+		 * .plots(plotsForWhatsappComplaints).build());
+		 * 
+		 * List<Chart> totalIvrComplaints =
+		 * pgrRepository.totalComplaintsByIvr(pgrCriteria); List<Plot>
+		 * plotsForIvrComplaints = extractedMonthYearData(monthYearDataIvr,
+		 * totalIvrComplaints); BigDecimal totalIvr =
+		 * monthYearDataIvr.values().stream().reduce( BigDecimal.ZERO, BigDecimal::add);
+		 * response.add(Data.builder().headerName("Ivr").headerValue(totalIvr).plots(
+		 * plotsForIvrComplaints).build());
+		 */
 
 		List<Chart> totalWebComplaints = pgrRepository.totalComplaintsByWeb(pgrCriteria);
-		List<Plot> plotsForWebComplaints = extractedMonthYearData(monthYearDataWeb,
-				totalWebComplaints);
-		BigDecimal totalWeb = monthYearDataWeb.values().stream().reduce(
-				 BigDecimal.ZERO, BigDecimal::add);
+		List<Plot> plotsForWebComplaints = extractedMonthYearData(monthYearDataWeb, totalWebComplaints);
+		BigDecimal totalWeb = monthYearDataWeb.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
 		response.add(Data.builder().headerName("Web").headerValue(totalWeb).plots(plotsForWebComplaints).build());
 
 		List<Chart> totalMobileAppComplaints = pgrRepository.totalComplaintsByMobileApp(pgrCriteria);
 		List<Plot> plotsForMobileAppComplaints = extractedMonthYearData(monthYearDataMobileApp,
 				totalMobileAppComplaints);
-		BigDecimal totalMobileApp = monthYearDataMobileApp.values().stream().reduce(
-				 BigDecimal.ZERO, BigDecimal::add);
-		response.add(Data.builder().headerName("Mobileapp").headerValue(totalMobileApp).plots(plotsForMobileAppComplaints).build());
-
+		BigDecimal totalMobileApp = monthYearDataMobileApp.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+		response.add(Data.builder().headerName("Mobileapp").headerValue(totalMobileApp)
+				.plots(plotsForMobileAppComplaints).build());
 
 		return response;
 	}
