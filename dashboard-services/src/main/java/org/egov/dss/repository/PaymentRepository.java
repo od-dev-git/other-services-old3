@@ -280,6 +280,24 @@ public class PaymentRepository {
 		log.info("query for Service Type COllection : " + query);
 		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new ChartRowMapper());
 	}
+
+	public BigDecimal getCurrentCollection(PaymentSearchCriteria paymentSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getCurrentCollection(paymentSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+	}
+
+	public BigDecimal getArrearCollection(PaymentSearchCriteria paymentSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getArrearCollection(paymentSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+	}
 	
 
 }
