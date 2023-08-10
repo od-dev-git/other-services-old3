@@ -389,4 +389,13 @@ public class PTServiceQueryBuilder {
 		return selectQuery.toString();
 	}
 
+
+	public String getTotalNoOfDeactivatedProperties(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTIES_SQL);
+		selectQuery.append(" where epaa.status = :deactive ");
+		preparedStatementValues.put("deactive","DEACTIVATED");
+		return addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,false);
+	}
+
 }

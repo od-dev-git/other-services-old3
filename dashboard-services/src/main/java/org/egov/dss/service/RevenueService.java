@@ -128,10 +128,18 @@ public class RevenueService {
 	}
 	
 	public List<Data> currentCollection(PayloadDetails payloadDetails) {
+        if(!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		setFromAndToDateInGMT(paymentSearchCriteria);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getCurrentCollection(paymentSearchCriteria);
+		if(totalCollection == null) {
+			totalCollection = BigDecimal.ZERO;
+		}
         return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+        }
+        
+        return Arrays.asList(Data.builder().headerValue("NA").build());
+
 	}
 
 	private void setFromAndToDateInGMT(PaymentSearchCriteria paymentSearchCriteria) {
@@ -151,10 +159,17 @@ public class RevenueService {
 	}
 	
 	public List<Data> arrearCollection(PayloadDetails payloadDetails) {
+        if(!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
 		setFromAndToDateInGMT(paymentSearchCriteria);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getArrearCollection(paymentSearchCriteria);
+		if(totalCollection == null) {
+			totalCollection = BigDecimal.ZERO;
+		}
         return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+        }
+        return Arrays.asList(Data.builder().headerValue("NA").build());
+
 	}
 
 	public List<Data> todaysCollection(PayloadDetails payloadDetails) {

@@ -114,6 +114,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_TOTAL_NO_OF_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
 			return ptService.totalnoOfProperties(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_TOTAL_NO_OF_DEACTIVATED_PROPERTIES.equalsIgnoreCase(visualizationCode)) {
+			return ptService.totalNoOfDeactivatedProperties(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.SERVICE_PT_NEW_ASSESSMENT_SHARE.equalsIgnoreCase(visualizationCode)) {
 			return ptService.ptNewAssessmentShare(requestInfoWrapper.getPayloadDetails());
 		}
