@@ -180,6 +180,17 @@ public class PaymentQueryBuilder {
 	
 	public static final String ARREAR_DEMAND_QUERY = " select coalesce(sum(amount), 0) - coalesce(sum(collectionamount), 0) as amount from state.eg_dss_demand ";
 	
+	public static final String PT_CURRENT_COLLECTION_QUERY = " select sum(case when eb2.fromperiod >=startingDate and eb2.toperiod <= endingDate then eb3.adjustedamount else 0 end ) as currentcollectionamount ";
+	
+	public static final String PT_ARREAR_COLLECTION_QUERY = " select sum(case when eb2.toperiod < startingDate then eb3.adjustedamount else 0 end ) as arrearcollection ";
+	
+	public static final String PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY = " from egcl_bill eb "
+			+ "inner join egcl_paymentdetail ep on	eb.id = ep.billid and eb.businessservice IN ('PT','PT.MUTATION') " 
+			+ "inner join egcl_payment epp on epp.id = ep.paymentid	and epp.paymentstatus not in ('CANCELLED', 'DISHONOURED') and epp.tenantid != 'od.testing' "
+			+ "inner join egcl_billdetial eb2 on eb.id = eb2.billid "
+			+ "inner join egcl_billaccountdetail eb3 on	eb2.id = eb3.billdetailid "
+			+ "where 1 = 1 and eb3.taxheadcode not in ('PT_ADVANCE_CARRYFORWARD') ";
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -699,6 +710,67 @@ public class PaymentQueryBuilder {
 				preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenantId());
 			}
 
+		}
+
+		public String getCurrentCollection(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			String query = PT_CURRENT_COLLECTION_QUERY;
+			query = setFromAndToDate(paymentSearchCriteria, query);
+
+			StringBuilder modifiedQuery = new StringBuilder();
+			modifiedQuery.append(query);
+			StringBuilder selectQuery = new StringBuilder(PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY);
+			modifiedQuery.append(selectQuery);
+			setTenantIDAndTransactionDate(paymentSearchCriteria, preparedStatementValues, modifiedQuery);
+
+			return modifiedQuery.toString();
+		}
+
+		private String setFromAndToDate(PaymentSearchCriteria paymentSearchCriteria, String query) {
+			if (paymentSearchCriteria.getFromDate() != null) {
+				query=query.replace("startingDate", paymentSearchCriteria.getFromDate().toString());
+			}
+
+			if (paymentSearchCriteria.getToDate() != null) {
+				query=query.replace("endingDate", paymentSearchCriteria.getToDate().toString());
+			}
+			
+			return query;
+		}
+
+		private void setTenantIDAndTransactionDate(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues, StringBuilder selectQuery) {
+
+			if (paymentSearchCriteria.getFromDate() != null) {
+				selectQuery.append("and epp.transactiondate >= :fromDate ");
+				preparedStatementValues.put("fromDate", paymentSearchCriteria.getFromDate());
+			}
+
+			if (paymentSearchCriteria.getToDate() != null) {
+				selectQuery.append(" and epp.transactiondate <= :toDate ");
+				preparedStatementValues.put("toDate", paymentSearchCriteria.getToDate());
+			}
+
+			if (paymentSearchCriteria.getTenantIds() != null
+					&& !CollectionUtils.isEmpty(paymentSearchCriteria.getTenantIds())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" eb.tenantId in ( :tenantId )");
+				preparedStatementValues.put("tenantId", paymentSearchCriteria.getTenantIds());
+			}
+		}
+
+		public String getArrearCollection(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			String query = PT_ARREAR_COLLECTION_QUERY;
+			query = setFromAndToDate(paymentSearchCriteria, query);
+
+			StringBuilder modifiedQuery = new StringBuilder();
+			modifiedQuery.append(query);
+			StringBuilder selectQuery = new StringBuilder(PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY);
+			modifiedQuery.append(selectQuery);
+			setTenantIDAndTransactionDate(paymentSearchCriteria, preparedStatementValues, modifiedQuery);
+
+			return modifiedQuery.toString();
 		}
 
 	

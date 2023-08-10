@@ -126,6 +126,36 @@ public class RevenueService {
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
         return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
 	}
+	
+	public List<Data> currentCollection(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		setFromAndToDateInGMT(paymentSearchCriteria);
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getCurrentCollection(paymentSearchCriteria);
+        return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+
+	private void setFromAndToDateInGMT(PaymentSearchCriteria paymentSearchCriteria) {
+		Long startTimeMillis = paymentSearchCriteria.getFromDate();
+		
+		ZonedDateTime startIST = Instant.ofEpochMilli(startTimeMillis).atZone(ZoneId.of("Asia/Kolkata"));
+		ZonedDateTime startGMT = startIST.withZoneSameInstant(ZoneId.of("GMT"));
+		
+		ZonedDateTime endGMT = startGMT.plusYears(1).minusNanos(1);
+		
+		Long startMillisGMT = startGMT.toInstant().toEpochMilli();
+		Long endMillisGMT = endGMT.toInstant().toEpochMilli();
+		
+		
+		paymentSearchCriteria.setFromDate(startMillisGMT);
+		paymentSearchCriteria.setToDate(endMillisGMT);
+	}
+	
+	public List<Data> arrearCollection(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		setFromAndToDateInGMT(paymentSearchCriteria);
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getArrearCollection(paymentSearchCriteria);
+        return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+	}
 
 	public List<Data> todaysCollection(PayloadDetails payloadDetails) {
 		Date date = new Date();
