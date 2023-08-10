@@ -38,20 +38,11 @@ public class SurveyService {
 	 * @return created Survey
 	 */
 	public Survey create(SurveyRequest surveyRequest) {
-		Survey survey = surveyRequest.getSurvey();
-
-		// Validate whether authorized usertype is trying to create survey.
-		//surveyRequestValidator.validateUserType(surveyRequest.getRequestInfo());
-		// Validate question types.
-		//surveyRequestValidator.validateQuestions(survey);
-		// Validate survey uniqueness.
-		//surveyRequestValidator.validateSurveyUniqueness(survey);
-		
-		//Enrich service
+		//Enrich surveyRequest
 		surveyRequestValidator.enrichSurveyRequest(surveyRequest);
 
 		repository.save(surveyRequest);
-		return survey;
+		return surveyRequest.getSurvey();
 	}
 
 	/**

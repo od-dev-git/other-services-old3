@@ -5,10 +5,10 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.usm.repository.SDAMemberRepository;
-import org.egov.usm.web.model.RequestInfoWrapper;
+import org.egov.usm.validator.SDAMemberValidator;
+import org.egov.usm.web.model.MemberSearchCriteria;
 import org.egov.usm.web.model.SDAMember;
 import org.egov.usm.web.model.SDAMembersRequest;
-import org.egov.usm.web.model.SurveySearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +19,13 @@ public class SDAMemberService {
 	
 	private MemberEnrichmentService enrichmentService;
 	
+	private SDAMemberValidator validator;
+	
 	@Autowired
-	public SDAMemberService(SDAMemberRepository repository, MemberEnrichmentService enrichmentService) {
+	public SDAMemberService(SDAMemberRepository repository, MemberEnrichmentService enrichmentService, SDAMemberValidator validator) {
 		this.repository = repository;
 		this.enrichmentService = enrichmentService;
+		this.validator = validator;
 	}
 
 	
@@ -33,6 +36,9 @@ public class SDAMemberService {
 	 * @return SDAMember
 	 */
 	public SDAMember assignMember(@Valid SDAMembersRequest sdaMembersRequest) {
+		
+		//Validate member already exist or not
+		validator.isMemberAlreadyExists(sdaMembersRequest.getSdaMember());
 		
 		// Enrich SDA Member details
 		enrichmentService.enrichSDAMembersRequest(sdaMembersRequest);
@@ -51,20 +57,44 @@ public class SDAMemberService {
 	 * @return
 	 */
 	public SDAMember reassignMember(@Valid SDAMembersRequest sdaMembersRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		SDAMember existingSdaMember = validator.isMemberExists(sdaMembersRequest.getSdaMember());
+		
+		// Enrich SDA Member details
+		enrichmentService.enrichReassignMembersRequest(sdaMembersRequest, existingSdaMember);
+
+		// assign the citizen as SDA
+		repository.updateMember(sdaMembersRequest);
+
+		return sdaMembersRequest.getSdaMember();
 	}
 	
 	
-	
+	/**
+	 * Deassign a user from membership
+	 * 
+	 * @param sdaMembersRequest
+	 */
 	public void deassignMember(@Valid SDAMembersRequest sdaMembersRequest) {
-		// TODO Auto-generated method stub
+		SDAMember existingSdaMember = validator.isMemberExists(sdaMembersRequest.getSdaMember());
+		
+		// Enrich SDA Member details
+		enrichmentService.enrichDeassignMembersRequest(sdaMembersRequest, existingSdaMember);
+
+		// assign the citizen as SDA
+		repository.updateMember(sdaMembersRequest);
 		
 	}
+	
+	
 
-	public List<SDAMember> searchMembers(@Valid RequestInfoWrapper requestInfoWrapper,
-			@Valid SurveySearchCriteria searchCriteria) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Search Members based on search criteria
+	 * 
+	 * @param searchCriteria
+	 * @return List<SDAMember>
+	 */
+	public List<SDAMember> searchMembers(@Valid MemberSearchCriteria searchCriteria) {
+		return repository.searchSDAMembers(searchCriteria);
 	}
 }

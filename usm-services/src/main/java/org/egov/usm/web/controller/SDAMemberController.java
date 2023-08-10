@@ -8,11 +8,11 @@ import javax.validation.Valid;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.usm.service.SDAMemberService;
 import org.egov.usm.utility.ResponseInfoFactory;
+import org.egov.usm.web.model.MemberSearchCriteria;
 import org.egov.usm.web.model.RequestInfoWrapper;
 import org.egov.usm.web.model.SDAMember;
 import org.egov.usm.web.model.SDAMembersRequest;
 import org.egov.usm.web.model.SDAMembersResponse;
-import org.egov.usm.web.model.SurveySearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,8 +87,8 @@ public class SDAMemberController {
 	 */
 	@PostMapping("/member/_search")
 	public ResponseEntity<SDAMembersResponse> search(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
-										@Valid @ModelAttribute SurveySearchCriteria searchCriteria) {
-		List<SDAMember> sdaMembers = sdaMemberService.searchMembers(requestInfoWrapper, searchCriteria);
+										@Valid @ModelAttribute MemberSearchCriteria searchCriteria) {
+		List<SDAMember> sdaMembers = sdaMemberService.searchMembers(searchCriteria);
 		
 		SDAMembersResponse response =  SDAMembersResponse.builder()
 				.sdaMembers(sdaMembers)

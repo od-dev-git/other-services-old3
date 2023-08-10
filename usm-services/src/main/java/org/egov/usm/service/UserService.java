@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.Role;
 import org.egov.usm.config.USMConfiguration;
 import org.egov.usm.repository.ServiceRequestRepository;
 import org.egov.usm.utility.Constants;
@@ -49,8 +50,13 @@ public class UserService {
      * @return user uuid
      */
     public String isUserPresent(String mobileNumber, RequestInfo requestInfo, String tenantId) {
-		UserSearchRequest searchRequest = UserSearchRequest.builder().userName(mobileNumber)
-				.tenantId(tenantId).userType(Constants.ROLE_CITIZEN).requestInfo(requestInfo).build();
+    	
+		UserSearchRequest searchRequest = UserSearchRequest.builder()
+				.userName(mobileNumber)
+				.tenantId(tenantId)
+				.userType(Constants.ROLE_CITIZEN)
+				.requestInfo(requestInfo)
+				.build();
 		StringBuilder url = new StringBuilder(config.getUserHost()+config.getUserSearchEndpoint()); 
 		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest), UserResponse.class);
 		if(CollectionUtils.isEmpty(res.getUser())) {
@@ -78,7 +84,7 @@ public class UserService {
 		citizen.setMobileNumber(sdaMember.getMobileNumber());
 		citizen.setTenantId(sdaMember.getTenantId());
 		citizen.setType(UserType.CITIZEN);
-		citizen.setRoles(Arrays.asList(org.egov.common.contract.request.Role.builder().code(Constants.ROLE_CITIZEN).build()));
+		citizen.setRoles(Arrays.asList(Role.builder().code(Constants.ROLE_CITIZEN).build()));
 		
 		StringBuilder url = new StringBuilder(config.getUserHost()+config.getUserCreateEndpoint()); 
 		CreateUserRequest req = CreateUserRequest.builder().citizen(citizen).requestInfo(requestInfo).build();
