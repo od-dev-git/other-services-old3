@@ -218,4 +218,13 @@ public class PTRepository {
 	}
 
 
+	public Integer getTotalNoOfDeactivatedProperties(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = ptServiceQueryBuilder.getTotalNoOfDeactivatedProperties(propertySearchCriteria, preparedStatementValues);
+		log.info("query for total properties: "+ query);
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+		return result.get(0);
+	}
+
+
 }
