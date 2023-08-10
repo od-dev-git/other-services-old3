@@ -2,6 +2,9 @@ package org.egov.dss.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +21,7 @@ import org.egov.dss.model.Chart;
 import org.egov.dss.model.CommonSearchCriteria;
 import org.egov.dss.model.FinancialYearWiseProperty;
 import org.egov.dss.model.PayloadDetails;
+import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.PTRepository;
 import org.egov.dss.web.model.Data;
@@ -28,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
 import lombok.extern.slf4j.Slf4j;
@@ -622,5 +627,32 @@ public class PTService {
 	   
 		return response;
      }
+
+	public List<Data> totalNoOfDeactivatedProperties(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		setFromAndToDateInGMT(criteria);
+		Integer totalNoOfDeactivatedProperties = (Integer) ptRepository.getTotalNoOfDeactivatedProperties(criteria);
+		if(totalNoOfDeactivatedProperties == null) {
+			totalNoOfDeactivatedProperties = 0;
+		}
+		return Arrays.asList(Data.builder().headerValue(totalNoOfDeactivatedProperties).build());
+	}
+	
+	private void setFromAndToDateInGMT(PropertySerarchCriteria propertySearchCriteria) {
+		Long startTimeMillis = propertySearchCriteria.getFromDate();
+		Long endTimeMillis = propertySearchCriteria.getToDate();
+
+		Integer istOffsetHours = 5;
+		Integer istOffsetMinutes = 30;
+
+		Long offsetMillis = ((long) istOffsetHours * 60 + istOffsetMinutes) * 60 * 1000;
+
+		Long startMillisGMT = startTimeMillis + offsetMillis;
+		Long endMillisGMT = endTimeMillis + offsetMillis;
+
+		propertySearchCriteria.setFromDate(startMillisGMT);
+		propertySearchCriteria.setToDate(endMillisGMT);
+	}
 	
 }
