@@ -39,8 +39,20 @@ public class USMConfiguration {
 	@Value("${egov.idgen.usm.ticketNo.format}")
 	private String ticketNoIdgenFormat;
 
-	// Persister Config
+	// User Config
+	@Value("${egov.user.host}")
+	private String userHost;
 
+	@Value("${egov.user.context.path}")
+	private String userContextPath;
+
+	@Value("${egov.user.create.path}")
+	private String userCreateEndpoint;
+
+	@Value("${egov.user.search.path}")
+	private String userSearchEndpoint;
+
+	// Persister Config
 	@Value("${persister.create.survey.topic}")
 	private String createSurveyTopic;
 
@@ -56,9 +68,6 @@ public class USMConfiguration {
 	@Value("${persister.update.submit.survey.topic}")
 	private String updateSubmitSurveyTopic;
 
-	@Value("${persister.delete.submit.survey.topic}")
-	private String deleteSubmitSurveyTopic;
-
 	@Value("${persister.create.ticket.topic}")
 	private String createTicketTopic;
 
@@ -73,5 +82,11 @@ public class USMConfiguration {
 
 	@Value("${persister.save.ticket.comment.topic}")
 	private String saveCommentTicketTopic;
+
+	@Value("${persister.create.member.topic}")
+	private String createMemberTopic;
+
+	@Value("${persister.update.member.topic}")
+	private String updateMemberTopic;
 
 }
