@@ -2,6 +2,9 @@ package org.egov.dss.repository.builder;
 
 import static java.util.stream.Collectors.toSet;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -20,9 +23,12 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 
+import lombok.extern.slf4j.Slf4j;
+
 
 
 @Component
+@Slf4j
 public class PaymentQueryBuilder {
 	
 	
@@ -184,8 +190,10 @@ public class PaymentQueryBuilder {
 	
 	public static final String PT_ARREAR_COLLECTION_QUERY = " select sum(case when eb2.toperiod < startingDate then eb3.adjustedamount else 0 end ) as arrearcollection ";
 	
+	public static final String PT_PREVIOUS_YEAR_COLLECTION_QUERY = " select	coalesce(sum(eb3.adjustedamount),0) as previousyearcollectionamount ";
+
 	public static final String PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY = " from egcl_bill eb "
-			+ "inner join egcl_paymentdetail ep on	eb.id = ep.billid and eb.businessservice IN ('PT','PT.MUTATION') " 
+			+ "inner join egcl_paymentdetail ep on	eb.id = ep.billid and eb.businessservice IN ('PT') " 
 			+ "inner join egcl_payment epp on epp.id = ep.paymentid	and epp.paymentstatus not in ('CANCELLED', 'DISHONOURED') and epp.tenantid != 'od.testing' "
 			+ "inner join egcl_billdetial eb2 on eb.id = eb2.billid "
 			+ "inner join egcl_billaccountdetail eb3 on	eb2.id = eb3.billdetailid "
@@ -742,12 +750,12 @@ public class PaymentQueryBuilder {
 				Map<String, Object> preparedStatementValues, StringBuilder selectQuery) {
 
 			if (paymentSearchCriteria.getFromDate() != null) {
-				selectQuery.append("and epp.transactiondate >= :fromDate ");
+				selectQuery.append("and ep.receiptdate >= :fromDate ");
 				preparedStatementValues.put("fromDate", paymentSearchCriteria.getFromDate());
 			}
 
 			if (paymentSearchCriteria.getToDate() != null) {
-				selectQuery.append(" and epp.transactiondate <= :toDate ");
+				selectQuery.append(" and ep.receiptdate <= :toDate ");
 				preparedStatementValues.put("toDate", paymentSearchCriteria.getToDate());
 			}
 
@@ -769,6 +777,42 @@ public class PaymentQueryBuilder {
 			StringBuilder selectQuery = new StringBuilder(PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY);
 			modifiedQuery.append(selectQuery);
 			setTenantIDAndTransactionDate(paymentSearchCriteria, preparedStatementValues, modifiedQuery);
+
+			return modifiedQuery.toString();
+		}
+
+		public String getPreviousYearCollection(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			String query = PT_PREVIOUS_YEAR_COLLECTION_QUERY;
+
+			Long fromDate = paymentSearchCriteria.getFromDate();
+			
+			StringBuilder modifiedQuery = new StringBuilder();
+			modifiedQuery.append(query);
+			StringBuilder selectQuery = new StringBuilder(PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY);
+			modifiedQuery.append(selectQuery);
+			paymentSearchCriteria.setFromDate(null);
+			setTenantIDAndTransactionDate(paymentSearchCriteria, preparedStatementValues, modifiedQuery);
+			
+						
+			ZonedDateTime startIST = Instant.ofEpochMilli(fromDate).atZone(ZoneId.of("Asia/Kolkata"));		
+			startIST = startIST.minusYears(1);
+			
+			Long startMillisIST = startIST.toInstant().toEpochMilli();
+			
+			log.info("Start TIme in Previous Year Collection : " + startMillisIST.toString());
+			
+			paymentSearchCriteria.setFromDate(startMillisIST);
+			if (paymentSearchCriteria.getFromDate() != null) {
+				selectQuery.append("and eb2.fromperiod >= :pyFromDate ");
+				preparedStatementValues.put("pyFromDate", paymentSearchCriteria.getFromDate());
+			}
+			
+			paymentSearchCriteria.setToDate(fromDate);
+			if (paymentSearchCriteria.getToDate() != null) {
+				selectQuery.append(" and eb2.toperiod <= :pyToDate ");
+				preparedStatementValues.put("pyToDate", paymentSearchCriteria.getToDate());
+			}
 
 			return modifiedQuery.toString();
 		}

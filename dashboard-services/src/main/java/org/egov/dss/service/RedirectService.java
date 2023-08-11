@@ -54,6 +54,10 @@ public class RedirectService {
 			return revenueService.arrearCollection(requestInfoWrapper.getPayloadDetails());
 		}
 		
+		if(Constants.VisualizationCodes.REVENUE_PREVIOUS_YEAR_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.previousYearCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
     	if(Constants.VisualizationCodes.REVENUE_TODAYS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.todaysCollection(requestInfoWrapper.getPayloadDetails());
 		}

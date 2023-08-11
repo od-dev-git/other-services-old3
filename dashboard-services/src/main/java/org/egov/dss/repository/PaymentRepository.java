@@ -298,6 +298,15 @@ public class PaymentRepository {
 				new SingleColumnRowMapper<>(BigDecimal.class));
 		return result.get(0);
 	}
+
+	public BigDecimal getPreviousYearCollection(PaymentSearchCriteria paymentSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getPreviousYearCollection(paymentSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+	}
 	
 
 }
