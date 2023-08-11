@@ -520,6 +520,10 @@ public class RedirectService {
             return revenueService.tlCollectionsByLicenseType(requestInfoWrapper.getPayloadDetails());
         }
         
+        if(Constants.VisualizationCodes.REVENUE_TL_COLLECTION_BY_LICENSE_TYPE_LINE.equalsIgnoreCase(visualizationCode)) {
+            return revenueService.tlCollectionsByLicenseTypeLine(requestInfoWrapper.getPayloadDetails());
+        }
+        
         if(Constants.VisualizationCodes.REVENUE_TL_KEY_FINALCIAL_INDICATORS.equalsIgnoreCase(visualizationCode)) {
             return revenueService.tlKeyFinancialIndicators(requestInfoWrapper.getPayloadDetails());
         }

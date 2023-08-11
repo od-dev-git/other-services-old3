@@ -169,6 +169,7 @@ public class Constants {
 		final static String REVENUE_TL_BOTTOM_ULBS_BY_VOLUME = "tlBottomDigitalCollectionByVolume";
 		final static String REVENUE_TL_COLLECTION_BY_LICENSE_TYPE = "licenseByLicenseType";
 		final static String REVENUE_TL_KEY_FINALCIAL_INDICATORS = "licenseIssuedDDRRevenue";
+		final static String REVENUE_TL_COLLECTION_BY_LICENSE_TYPE_LINE = "collectionByLicenseTypeLine";
 		
 		final static String SERVICE_TL_TOTAL_APPLICATION = "totalApplication";
 		final static String SERVICE_TL_TOTAL_NEW_APPLICATION = "tlTotalNewApplication";
