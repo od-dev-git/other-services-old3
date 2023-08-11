@@ -51,6 +51,7 @@ public class Constants {
 		final static String REVENUE_PT_TAX_HEADS_BREAKUP = "ptTaxHeadTable";
 		final static String REVENUE_CURRENT_COLLECTION = "currentCollection";
 		final static String REVENUE_ARREAR_COLLECTION = "arrearCollection";
+		final static String REVENUE_PREVIOUS_YEAR_COLLECTION = "previousYearCollection";		
 		
 		final static String SERVICE_DSS_TOTAL_APPLICATION_OVERVIEW = "dssTotalApplicationOverview";
 		final static String SERVICE_DSS_CLOSED_APPLICATION_OVERVIEW = "dssClosedApplicationOverview";
