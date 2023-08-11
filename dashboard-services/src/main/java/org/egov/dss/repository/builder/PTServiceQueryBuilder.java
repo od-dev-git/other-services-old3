@@ -49,6 +49,29 @@ public class PTServiceQueryBuilder {
 			+ "case when status='INWORKFLOW' then 1 end as inworkflow "
 			+ "from eg_pt_property epaa ";
 	
+	public static final String PT_APPLICATIONS_AGEING_QUERY = " select tenantid, sum(pending_from_0_to_3_days) pending_from_0_to_3_days,  "
+			+ "sum(pending_from_3_to_7_days) pending_from_3_to_7_days, sum(pending_from_7_to_15_days) pending_from_7_to_15_days, sum(pending_from_more_than_15_days) pending_from_more_than_15_days, count(*) as total_pending_applications from  "
+			+ "( "
+			+ "(select tenantid ,createdtime,lastmodifiedtime,pending_from_0_to_3_days,pending_from_3_to_7_days,pending_from_7_to_15_days,pending_from_more_than_15_days  "
+			+ "from  "
+			+ "( "
+			+ "(select tenantid ,createdtime,lastmodifiedtime, "
+			+ " case when lastmodifiedtime - createdtime <= 259200000 then 1 else 0 end as pending_from_0_to_3_days,  "
+			+ "case when lastmodifiedtime - createdtime > 259200000 and lastmodifiedtime - createdtime <= 604800000 then 1 else 0 end as pending_from_3_to_7_days,  "
+			+ "case when lastmodifiedtime - createdtime > 604800000 and lastmodifiedtime - createdtime <= 1296000000 then 1 else 0 end as pending_from_7_to_15_days,  "
+			+ "case when lastmodifiedtime - createdtime > 1296000000 then 1 else 0 end as pending_from_more_than_15_days  "
+			+ "from eg_pt_property epp  "
+			+ "where status ='INWORKFLOW' ) "
+			+ "union ALL "
+			+ "( select tenantid ,createdtime,lastmodifiedtime, "
+			+ " case when lastmodifiedtime - createdtime <= 259200000 then 1 else 0 end as pending_from_0_to_3_days,  "
+			+ "case when lastmodifiedtime - createdtime > 259200000 and lastmodifiedtime - createdtime <= 604800000 then 1 else 0 end as pending_from_3_to_7_days,  "
+			+ "case when lastmodifiedtime - createdtime > 604800000 and lastmodifiedtime - createdtime <= 1296000000 then 1 else 0 end as pending_from_7_to_15_days,  "
+			+ "case when lastmodifiedtime - createdtime > 1296000000 then 1 else 0 end as pending_from_more_than_15_days  "
+			+ "from eg_pt_asmt_assessment epaa   "
+			+ "where status ='INWORKFLOW') "
+			+ ")as conn ";
+	
 	public static String getAssessedPropertiesCountQuery(PropertySerarchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(ASSESSED_PROPERTIES_SQL);
@@ -396,6 +419,24 @@ public class PTServiceQueryBuilder {
 		selectQuery.append(" where epaa.status = :deactive ");
 		preparedStatementValues.put("deactive","DEACTIVATED");
 		return addWhereClause(selectQuery, preparedStatementValues, propertySearchCriteria,false);
+	}
+
+
+	public String getPTApplicationsAgeingQuery(PropertySerarchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PT_APPLICATIONS_AGEING_QUERY);
+		addClauseIfRequired(preparedStatementValues, selectQuery);
+		selectQuery.append(" conn.tenantId != :excludedTenantId");
+		preparedStatementValues.put("excludedTenantId", criteria.getExcludedTenantId());
+		
+		selectQuery.append(" and conn.createdtime >= :fromdate");
+		preparedStatementValues.put("fromdate", criteria.getFromDate());
+		
+		selectQuery.append(" and conn.lastmodifiedtime <= :todate");
+		preparedStatementValues.put("todate", criteria.getToDate());
+		selectQuery.append( " ) ) tmp ");
+		addGroupByClause(selectQuery," tenantid ");
+		return selectQuery.toString();
 	}
 
 }
