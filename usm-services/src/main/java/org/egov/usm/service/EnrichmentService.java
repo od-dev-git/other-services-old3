@@ -23,13 +23,13 @@ public class EnrichmentService {
 	
 	private USMConfiguration config;
 	
-	private USMUtil usmUtil;
+	private IdGenService idGenService;
 	
 	
 	@Autowired
-	public EnrichmentService(USMConfiguration config, USMUtil usmUtil) {
+	public EnrichmentService(USMConfiguration config, IdGenService idGenService) {
 		this.config = config;
-		this.usmUtil = usmUtil;
+		this.idGenService = idGenService;
 	}
 	
 	
@@ -40,7 +40,7 @@ public class EnrichmentService {
 		AuditDetails auditDetails = USMUtil.getAuditDetails(uuid, true);
 		
 		//Generate Survey number and set it
-		List<String> surveyNumbers = usmUtil.getIdList(requestInfo, surveyDetailsRequest.getSurveyDetails().getTenantId(), config.getSurveyNoIdgenName(), config.getSurveyNoIdgenFormat(), 1 );
+		List<String> surveyNumbers = idGenService.getIdList(requestInfo, surveyDetailsRequest.getSurveyDetails().getTenantId(), config.getSurveyNoIdgenName(), config.getSurveyNoIdgenFormat(), 1 );
 		
 		surveyDetailsRequest.getSurveyDetails().setSurveyNo(surveyNumbers.get(0));
 		surveyDetailsRequest.getSurveyDetails().setSurveySubmittedId(uuid);
@@ -95,7 +95,7 @@ public class EnrichmentService {
             surveyTickets.add(surveyTicket);
         });
 
-        List<String> ticketNumbers = usmUtil.getIdList(requestInfo, surveyDetailsRequest.getSurveyDetails().getTenantId(),
+        List<String> ticketNumbers = idGenService.getIdList(requestInfo, surveyDetailsRequest.getSurveyDetails().getTenantId(),
                 config.getSurveyNoIdgenName(), config.getTicketNoIdgenFormat(), filterSubmittedAnswers.size());
 
         for (int i = 0; i < filterSubmittedAnswers.size(); i++) {
