@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS eg_usm_survey_ticket_comment(
   CONSTRAINT fk_eg_usm_survey_ticket_comment FOREIGN key (ticketid) REFERENCES eg_usm_survey_ticket(id)
 );
 
-CREATE TABLE  eg_usm_dept_mapping(
+CREATE TABLE IF NOT EXISTS eg_usm_dept_mapping(
 
   id         character varying(64),
   role       character varying(64),
@@ -30,5 +30,5 @@ ADD COLUMN IF NOT EXISTS unattended boolean;
 ALTER TABLE eg_usm_survey_ticket
 ADD COLUMN IF NOT EXISTS issatisfied boolean;
 
-ALTER TABLE eg_usm_survey_submitted
+ALTER TABLE  eg_usm_survey_submitted
 DROP COLUMN isclosed;
