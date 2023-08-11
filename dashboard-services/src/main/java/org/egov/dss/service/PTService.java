@@ -631,7 +631,7 @@ public class PTService {
 	public List<Data> totalNoOfDeactivatedProperties(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		setFromAndToDateInGMT(criteria);
+	//	setFromAndToDateInGMT(criteria);
 		Integer totalNoOfDeactivatedProperties = (Integer) ptRepository.getTotalNoOfDeactivatedProperties(criteria);
 		if(totalNoOfDeactivatedProperties == null) {
 			totalNoOfDeactivatedProperties = 0;

@@ -58,9 +58,11 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.annotation.JacksonInject.Value;
 import com.google.common.collect.Sets;
 
+import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.encoder.com.lmax.disruptor.LiteBlockingWaitStrategy;
 
 @Service
+@Slf4j
 public class RevenueService {
 	
 	@Autowired
@@ -130,7 +132,7 @@ public class RevenueService {
 	public List<Data> currentCollection(PayloadDetails payloadDetails) {
         if(!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		setFromAndToDateInGMT(paymentSearchCriteria);
+		setFromAndToDateInIST(paymentSearchCriteria);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getCurrentCollection(paymentSearchCriteria);
 		if(totalCollection == null) {
 			totalCollection = BigDecimal.ZERO;
@@ -142,26 +144,23 @@ public class RevenueService {
 
 	}
 
-	private void setFromAndToDateInGMT(PaymentSearchCriteria paymentSearchCriteria) {
+	private void setFromAndToDateInIST(PaymentSearchCriteria paymentSearchCriteria) {
 		Long startTimeMillis = paymentSearchCriteria.getFromDate();
 		
-		ZonedDateTime startIST = Instant.ofEpochMilli(startTimeMillis).atZone(ZoneId.of("Asia/Kolkata"));
-		ZonedDateTime startGMT = startIST.withZoneSameInstant(ZoneId.of("GMT"));
+		ZonedDateTime startIST = Instant.ofEpochMilli(startTimeMillis).atZone(ZoneId.of("Asia/Kolkata"));		
+		ZonedDateTime endIST = startIST.plusYears(1).minusNanos(1);
 		
-		ZonedDateTime endGMT = startGMT.plusYears(1).minusNanos(1);
+		Long endMillisIST = endIST.toInstant().toEpochMilli();
+		log.info("Start TIme  : " + startTimeMillis.toString());
+		log.info("End TIme  : " + endMillisIST.toString());
 		
-		Long startMillisGMT = startGMT.toInstant().toEpochMilli();
-		Long endMillisGMT = endGMT.toInstant().toEpochMilli();
-		
-		
-		paymentSearchCriteria.setFromDate(startMillisGMT);
-		paymentSearchCriteria.setToDate(endMillisGMT);
+		paymentSearchCriteria.setToDate(endMillisIST);
 	}
 	
 	public List<Data> arrearCollection(PayloadDetails payloadDetails) {
         if(!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
-		setFromAndToDateInGMT(paymentSearchCriteria);
+		setFromAndToDateInIST(paymentSearchCriteria);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getArrearCollection(paymentSearchCriteria);
 		if(totalCollection == null) {
 			totalCollection = BigDecimal.ZERO;
@@ -1704,6 +1703,19 @@ public class RevenueService {
 			totalDemand = paymentRepository.getArrearDemand(demandSearchCriteria);
 		}
 		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+
+	public List<Data> previousYearCollection(PayloadDetails payloadDetails) {
+        if(!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		setFromAndToDateInIST(paymentSearchCriteria); //Instead of Add we have to subtarct
+		BigDecimal previousYearCollection = (BigDecimal) paymentRepository.getPreviousYearCollection(paymentSearchCriteria);
+		if(previousYearCollection == null) {
+			previousYearCollection = BigDecimal.ZERO;
+		}
+        return Arrays.asList(Data.builder().headerValue(previousYearCollection.setScale(2, RoundingMode.HALF_UP)).build());
+        }
+        return Arrays.asList(Data.builder().headerValue("NA").build());
 	}
 	
 
