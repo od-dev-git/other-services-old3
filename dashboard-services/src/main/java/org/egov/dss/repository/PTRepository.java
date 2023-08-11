@@ -227,4 +227,13 @@ public class PTRepository {
 	}
 
 
+	public List<HashMap<String, Object>> getPTApplicationsAgeing(PropertySerarchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getPTApplicationsAgeingQuery(criteria, preparedStatementValues);
+        log.info("query for PT Applications Ageing  : "+query);
+        List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
+        return result;
+	}
+
+
 }

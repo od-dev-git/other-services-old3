@@ -78,6 +78,7 @@ public class Constants {
 		final static String SERVICE_PT_ASMT_STATUS_DDR = "ptAssessmentStatusDDR";
 		final static String SERVICE_PT_STATUS_BY_BOUNDARY = "ptStatusByBoundary";
 		final static String SERVICE_TOTAL_NO_OF_DEACTIVATED_PROPERTIES = "totalNoOfDeactivatedProperties";
+		final static String SERVICE_PT_APPLICATIONS_AGEING = "ptConnectionAgeingDDR";
 		
 		final static String SERVICE_MR_TOTAL_APPLICATION = "mrtotalApplications";
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS = "totalComplaints";

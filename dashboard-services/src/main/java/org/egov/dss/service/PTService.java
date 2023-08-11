@@ -654,5 +654,52 @@ public class PTService {
 		propertySearchCriteria.setFromDate(startMillisGMT);
 		propertySearchCriteria.setToDate(endMillisGMT);
 	}
+
+	public List<Data> ptApplicationsAgeing(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<HashMap<String, Object>> ptApplicationsAgeingBreakup = ptRepository.getPTApplicationsAgeing(criteria);
+
+			 List<Data> response = new ArrayList();
+			 int serailNumber = 0 ;
+			 for( HashMap<String, Object> tenantWiseRow : ptApplicationsAgeingBreakup) {
+				 serailNumber++;
+		            String tenantId = String.valueOf(tenantWiseRow.get("tenantid"));
+		            String tenantIdStyled = tenantId.replace("od.", "");
+		            tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+				 List<Plot> row = new ArrayList<>();
+				row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+				row.add(Plot.builder().label(tenantIdStyled).name("DDRs").symbol("text").build());
+
+				row.add(Plot.builder().name("Pending_from_0_to_3_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_0_to_3_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Pending_from_3_to_7_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_3_to_7_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Pending_from_7_to_15_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_7_to_15_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Pending_from_more_than_15_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_more_than_15_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Total_Pending_Applications").value(new BigDecimal(String.valueOf(tenantWiseRow.get("total_pending_applications")))).symbol("number").build());				
+
+				 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
+			 }	
+
+				if (CollectionUtils.isEmpty(response)) {
+					serailNumber++;
+					List<Plot> row = new ArrayList<>();
+					row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+					row.add(Plot.builder().label(payloadDetails.getTenantid()).name("DDRs").symbol("text").build());
+					row.add(Plot.builder().name("Pending_from_0_to_3_days").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Pending_from_3_to_7_days").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Pending_from_7_to_15_days").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Pending_from_more_than_15_days").value(BigDecimal.ZERO)
+							.symbol("number").build());
+					row.add(Plot.builder().name("Total_Pending_Applications").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber)
+							.plots(row).insight(null).build());
+				}
+
+		return response;
+	}
 	
 }

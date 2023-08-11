@@ -169,6 +169,10 @@ public class RedirectService {
             return ptService.ptStatusByBoundary(requestInfoWrapper.getPayloadDetails());
         }
 		
+		if(Constants.VisualizationCodes.SERVICE_PT_APPLICATIONS_AGEING.equalsIgnoreCase(visualizationCode)) {
+            return ptService.ptApplicationsAgeing(requestInfoWrapper.getPayloadDetails());
+        }
+		
 		if(Constants.VisualizationCodes.SERVICE_WS_TOTAL_ACTIVE_CONNECTIONS.equalsIgnoreCase(visualizationCode)) {
 			return wsService.totalActiveConnections(requestInfoWrapper.getPayloadDetails());
 		}
