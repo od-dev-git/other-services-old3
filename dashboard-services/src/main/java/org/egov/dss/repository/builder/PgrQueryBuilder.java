@@ -200,7 +200,9 @@ public class PgrQueryBuilder {
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(PGR_COMPLAINTS_BY_DEPARTMENT);
 		addWhereClause(selectQuery, preparedStatementValues, pgrSearchCriteria);
-		addGroupByClause(selectQuery," servicecode ");
+		addGroupByClause(selectQuery, " servicecode ");
+		addOrderByClause(selectQuery, " value desc ");
+		selectQuery.append(" limit 5");
 		return selectQuery.toString();
 	}
 

@@ -1718,5 +1718,24 @@ public class RevenueService {
         return Arrays.asList(Data.builder().headerValue("NA").build());
 	}
 	
+	public List<Data> tlCollectionsByLicenseTypeLine(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		List<Chart> licenseTypeWiseAmtCollected = paymentRepository
+				.getTlCollectionsByLicenseType(paymentSearchCriteria);
+
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(licenseTypeWiseAmtCollected, plots);
+
+		BigDecimal total = licenseTypeWiseAmtCollected.stream().map(amount -> amount.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);
+
+		return Arrays
+				.asList(Data.builder().headerName("DSS_TL_LICENSE_BY_TYPE_LINE").headerValue(total).plots(plots).build());
+	}
 
 }
