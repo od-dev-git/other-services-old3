@@ -723,8 +723,10 @@ public class PaymentQueryBuilder {
 		public String getCurrentCollection(PaymentSearchCriteria paymentSearchCriteria,
 				Map<String, Object> preparedStatementValues) {
 			String query = PT_CURRENT_COLLECTION_QUERY;
+			addOffset(paymentSearchCriteria);
 			query = setFromAndToDate(paymentSearchCriteria, query);
-
+			removeOffset(paymentSearchCriteria);
+			
 			StringBuilder modifiedQuery = new StringBuilder();
 			modifiedQuery.append(query);
 			StringBuilder selectQuery = new StringBuilder(PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY);
@@ -732,6 +734,50 @@ public class PaymentQueryBuilder {
 			setTenantIDAndTransactionDate(paymentSearchCriteria, preparedStatementValues, modifiedQuery);
 
 			return modifiedQuery.toString();
+		}
+
+		private void addOffset(PaymentSearchCriteria paymentSearchCriteria) {
+			Long startMillisGMT = paymentSearchCriteria.getFromDate();
+			Long endMillisGMT = paymentSearchCriteria.getToDate();
+			log.info(String.valueOf(startMillisGMT));
+			log.info(String.valueOf(endMillisGMT));
+			
+			Integer istOffsetHours = 5;
+			Integer istOffsetMinutes = 30;
+
+			Long offsetMillis = 2*((long) istOffsetHours * 60 + istOffsetMinutes) * 60 * 1000;
+
+			// increasing range to adjust for error due to timezone variation
+			startMillisGMT = startMillisGMT - offsetMillis;
+			endMillisGMT = endMillisGMT + offsetMillis;
+			
+			log.info(String.valueOf(startMillisGMT));
+			log.info(String.valueOf(endMillisGMT));
+			
+			paymentSearchCriteria.setFromDate(startMillisGMT);
+			paymentSearchCriteria.setToDate(endMillisGMT);
+		}
+		
+		private void removeOffset(PaymentSearchCriteria paymentSearchCriteria) {
+			Long startMillisGMT = paymentSearchCriteria.getFromDate();
+			Long endMillisGMT = paymentSearchCriteria.getToDate();
+			log.info(String.valueOf(startMillisGMT));
+			log.info(String.valueOf(endMillisGMT));
+			
+			Integer istOffsetHours = 5;
+			Integer istOffsetMinutes = 30;
+
+			long offsetMillis = 2*((long) istOffsetHours * 60 + istOffsetMinutes) * 60 * 1000;
+
+			// increasing range to adjust for error due to timezone variation
+			startMillisGMT = startMillisGMT + offsetMillis;
+			endMillisGMT = endMillisGMT - offsetMillis;
+			log.info(String.valueOf(startMillisGMT));
+			log.info(String.valueOf(endMillisGMT));
+
+			
+			paymentSearchCriteria.setFromDate(startMillisGMT);
+			paymentSearchCriteria.setToDate(endMillisGMT);
 		}
 
 		private String setFromAndToDate(PaymentSearchCriteria paymentSearchCriteria, String query) {
@@ -770,7 +816,9 @@ public class PaymentQueryBuilder {
 		public String getArrearCollection(PaymentSearchCriteria paymentSearchCriteria,
 				Map<String, Object> preparedStatementValues) {
 			String query = PT_ARREAR_COLLECTION_QUERY;
+			addOffset(paymentSearchCriteria);
 			query = setFromAndToDate(paymentSearchCriteria, query);
+			removeOffset(paymentSearchCriteria);
 
 			StringBuilder modifiedQuery = new StringBuilder();
 			modifiedQuery.append(query);
@@ -791,10 +839,10 @@ public class PaymentQueryBuilder {
 			modifiedQuery.append(query);
 			StringBuilder selectQuery = new StringBuilder(PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY);
 			modifiedQuery.append(selectQuery);
+			
 			paymentSearchCriteria.setFromDate(null);
 			setTenantIDAndTransactionDate(paymentSearchCriteria, preparedStatementValues, modifiedQuery);
-			
-						
+									
 			ZonedDateTime startIST = Instant.ofEpochMilli(fromDate).atZone(ZoneId.of("Asia/Kolkata"));		
 			startIST = startIST.minusYears(1);
 			
@@ -803,14 +851,17 @@ public class PaymentQueryBuilder {
 			log.info("Start TIme in Previous Year Collection : " + startMillisIST.toString());
 			
 			paymentSearchCriteria.setFromDate(startMillisIST);
+			paymentSearchCriteria.setToDate(fromDate);
+
+			addOffset(paymentSearchCriteria);
+
 			if (paymentSearchCriteria.getFromDate() != null) {
-				selectQuery.append("and eb2.fromperiod >= :pyFromDate ");
+				modifiedQuery.append("and eb2.fromperiod >= :pyFromDate ");
 				preparedStatementValues.put("pyFromDate", paymentSearchCriteria.getFromDate());
 			}
 			
-			paymentSearchCriteria.setToDate(fromDate);
 			if (paymentSearchCriteria.getToDate() != null) {
-				selectQuery.append(" and eb2.toperiod <= :pyToDate ");
+				modifiedQuery.append(" and eb2.toperiod <= :pyToDate ");
 				preparedStatementValues.put("pyToDate", paymentSearchCriteria.getToDate());
 			}
 
