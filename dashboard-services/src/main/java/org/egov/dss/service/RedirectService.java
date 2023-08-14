@@ -262,6 +262,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_PT_GROWTH_RATE.equals(visualizationCode)) {
 			return revenueService.revenueGrowthRate(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.REVENUE_PT_GROWTH_RATE_TABLE.equals(visualizationCode)) {
+			return revenueService.revenueGrowthRateTable(requestInfoWrapper.getPayloadDetails());
+		}
 		if(Constants.VisualizationCodes.REVENUE_PT_TOP_ULBS_BY_DIGITAL_COLLECTION.equals(visualizationCode)) {
 			return revenueService.topUlbsDigitalCollectionByValue(requestInfoWrapper.getPayloadDetails());
 		}
