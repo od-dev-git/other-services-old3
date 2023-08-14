@@ -32,7 +32,7 @@ public class MemberSearchCriteria {
 	private String slumCode;
 
 	@JsonProperty("isActive")
-	private boolean isActive;
+	private Boolean isActive;
 
 	@JsonProperty("surveyDate")
 	private Long surveyDate;
