@@ -193,9 +193,10 @@ public class PGRService {
 		for(Chart monthYear : monthYearData) {		
 			BigDecimal value = complaintsData.stream()
 					.filter(complaint -> complaint.getName().equals(monthYear.getName())).map(item -> item.getValue())
-					.reduce(BigDecimal.ZERO, BigDecimal::add);
-			monthYear.setValue(commulativeValue.add(value));
-			commulativeValue = commulativeValue.add(value);
+					.reduce(BigDecimal.ZERO, BigDecimal::max);
+//			monthYear.setValue(commulativeValue.add(value));
+//			commulativeValue = commulativeValue.add(value);
+			 monthYear.setValue(value); 
 		}
 		
 		List<Plot> plotsForComplaintsData = new ArrayList();
