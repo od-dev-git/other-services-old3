@@ -12,4 +12,6 @@ public class Constants {
 
 	public static final String SDA_MEMBER = "SDA MEMBER";
 	public static final String USM_OFFICIAL = "USM OFFICIAL";
+	
+	public static final String EMPTY_STRING = "";
 }

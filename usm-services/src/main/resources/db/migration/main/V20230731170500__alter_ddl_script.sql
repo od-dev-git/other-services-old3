@@ -31,4 +31,4 @@ ALTER TABLE eg_usm_survey_ticket
 ADD COLUMN IF NOT EXISTS issatisfied boolean;
 
 ALTER TABLE  eg_usm_survey_submitted
-DROP COLUMN isclosed;
+DROP COLUMN IF EXISTS isclosed;
