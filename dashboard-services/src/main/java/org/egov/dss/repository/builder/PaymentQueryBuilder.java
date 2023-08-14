@@ -199,6 +199,20 @@ public class PaymentQueryBuilder {
 			+ "inner join egcl_billaccountdetail eb3 on	eb2.id = eb3.billdetailid "
 			+ "where 1 = 1 and eb3.taxheadcode not in ('PT_ADVANCE_CARRYFORWARD') ";
 	
+	public static final String PT_GROWTH_RATE_QUERY_UPPER_HALF= " with year_collection as ( SELECT "
+			+ " CONCAT( EXTRACT(YEAR FROM financial_year_start) - CASE WHEN EXTRACT(MONTH FROM financial_year_start) < 4 THEN 1 ELSE 0 END,'-', EXTRACT(YEAR FROM financial_year_start) - CASE WHEN EXTRACT(MONTH FROM financial_year_start) < 4 THEN 0 ELSE -1 END) AS Financial_Year, "
+			+ " coalesce(sum(totalamountpaid), 0) AS Total_Collection FROM ( SELECT TO_TIMESTAMP(pyd.receiptdate / 1000) AS payment_date,py.totalamountpaid, "
+			+ " CASE WHEN EXTRACT(MONTH FROM TO_TIMESTAMP(pyd.receiptdate / 1000)) < 4 THEN TO_TIMESTAMP((EXTRACT(YEAR FROM TO_TIMESTAMP(pyd.receiptdate / 1000)) - 1) || '-04-01', 'YYYY-MM-DD') "
+			+ " ELSE TO_TIMESTAMP(EXTRACT(YEAR FROM TO_TIMESTAMP(pyd.receiptdate / 1000)) || '-04-01', 'YYYY-MM-DD') "
+			+ " END AS financial_year_start FROM egcl_payment py INNER JOIN egcl_paymentdetail pyd ON "
+			+ " pyd.paymentid = py.id WHERE UPPER(py.paymentstatus) NOT IN ('CANCELLED', 'DISHONOURED') AND pyd.businessService IN ('PT', 'PT.MUTATION')\r\n"
+			+ " AND py.tenantid != 'od.testing' " ;
+	
+	public static final String PT_GROWTH_RATE_QUERY_LOWER_HALF= " ) AS converted_data GROUP BY Financial_Year ORDER BY Financial_Year ), "
+			+ " year_collection_data as ( select Financial_Year as current_year, lag(Financial_Year) over (order by Financial_Year) as previous_year,Total_Collection as current_collection, "
+			+ " lag(Total_Collection) over (order by Financial_Year) as previous_collection, case  when lag(Total_Collection) over (order by Financial_Year) = 0 then 0.0 else ((Total_Collection)/lag(Total_Collection) over (order by Financial_Year)) * 100.0 end as growth_rate from year_collection order by Financial_Year "
+			+ " ) select previous_year as name, round(growth_rate,2) as value  from year_collection_data where growth_rate is not null ";
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -866,6 +880,21 @@ public class PaymentQueryBuilder {
 			}
 
 			return modifiedQuery.toString();
+		}
+
+		public String getCollectionGrowthRate(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder upperQuery = new StringBuilder(PT_GROWTH_RATE_QUERY_UPPER_HALF);
+			StringBuilder lowerQuery = new StringBuilder(PT_GROWTH_RATE_QUERY_LOWER_HALF);
+			
+			
+			 if (paymentSearchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(paymentSearchCriteria.getTenantIds())) {
+				 upperQuery.append(" AND py.tenantid in ( :tenantId ) ");
+					preparedStatementValues.put("tenantId", paymentSearchCriteria.getTenantIds() );
+					}
+			 upperQuery.append(lowerQuery);
+			
+			return upperQuery.toString();
 		}
 
 	

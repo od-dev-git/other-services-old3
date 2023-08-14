@@ -676,6 +676,23 @@ public class RevenueService {
 
 		return Arrays.asList(Data.builder().headerValue(growthRate).build());
 	}
+	
+	public List<Data> revenueGrowthRateTable(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		
+		List<Chart> collectionGrowthRate = paymentRepository.getCollectionGrowthRate(paymentSearchCriteria);
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(collectionGrowthRate, plots);
+		
+        
+		BigDecimal total = collectionGrowthRate.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);	
+
+		return Arrays.asList(Data.builder().headerName("Collection Growth Rate").headerSymbol("amount").headerValue(total).plots(plots).build());
+	}
 
 	public BigDecimal getPreviousYearCollection(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
