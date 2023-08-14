@@ -307,6 +307,14 @@ public class PaymentRepository {
 				new SingleColumnRowMapper<>(BigDecimal.class));
 		return result.get(0);
 	}
+
+	public List<Chart> getCollectionGrowthRate(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = paymentQueryBuilder.getCollectionGrowthRate(paymentSearchCriteria, preparedStatementValues);
+        log.info("query for Collection Growth Rate : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
 	
 
 }
