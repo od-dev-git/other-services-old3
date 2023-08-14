@@ -34,12 +34,13 @@ public class SDAMemberRepository {
     private USMConfiguration config;
     
 	@Autowired
-    public SDAMemberRepository(JdbcTemplate jdbcTemplate, SDAMemberQueryBuilder queryBuilder, Producer producer,
-			USMConfiguration config) {
+    public SDAMemberRepository(JdbcTemplate jdbcTemplate, SDAMemberQueryBuilder queryBuilder, SDAMemberRowMapper rowMapper,
+    		Producer producer, USMConfiguration config) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.queryBuilder = queryBuilder;
 		this.producer = producer;
 		this.config = config;
+		this.rowMapper = rowMapper;
 	}
 
 
@@ -61,7 +62,6 @@ public class SDAMemberRepository {
 	 * @return List<SDAMember>
 	 */
 	public List<SDAMember> searchSDAMembers(MemberSearchCriteria searchCriteria) {
-		log.info("Search Criteria :", searchCriteria.toString());
 		List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getMemberSearchQuery(searchCriteria, preparedStmtList);
         List<SDAMember> sdaMembers =  jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);

@@ -5,6 +5,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.usm.utility.Constants;
 import org.egov.usm.utility.USMUtil;
 import org.egov.usm.web.model.AuditDetails;
 import org.egov.usm.web.model.SDAMember;
@@ -82,7 +83,7 @@ public class MemberEnrichmentService {
 		RequestInfo requestInfo = sdaMembersRequest.getRequestInfo();
 		AuditDetails auditDetails = USMUtil.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
 		
-		sdaMembersRequest.getSdaMember().setUserId(null);
+		sdaMembersRequest.getSdaMember().setUserId(Constants.EMPTY_STRING);
 		sdaMembersRequest.getSdaMember().setTenantId(existingSdaMember.getTenantId());
 		sdaMembersRequest.getSdaMember().setWard(existingSdaMember.getWard());
 		sdaMembersRequest.getSdaMember().setSlumCode(existingSdaMember.getSlumCode());

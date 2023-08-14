@@ -19,13 +19,13 @@ public class SDAMemberQueryBuilder {
 
         if(!ObjectUtils.isEmpty(searchCriteria.getId())){
             addClauseIfRequired(query, preparedStmtList);
-            query.append(" sda.id = ? " );
+            query.append(" sda.id = ?" );
             preparedStmtList.add(searchCriteria.getId());
         }
 
         if(!ObjectUtils.isEmpty(searchCriteria.getTenantId())){
             addClauseIfRequired(query, preparedStmtList);
-            query.append(" sda.tenantid = ? ");
+            query.append(" sda.tenantid = ?");
             preparedStmtList.add(searchCriteria.getTenantId());
         }
         
@@ -41,10 +41,10 @@ public class SDAMemberQueryBuilder {
 			preparedStmtList.add(searchCriteria.getSlumCode());
 		}
 		
-        if(!ObjectUtils.isEmpty(searchCriteria.isActive())){
+        if(!ObjectUtils.isEmpty(searchCriteria.getIsActive())){
             addClauseIfRequired(query, preparedStmtList);
-            query.append(" sda.active = ? ");
-            preparedStmtList.add(searchCriteria.isActive());
+            query.append(" sda.active = ?");
+            preparedStmtList.add(searchCriteria.getIsActive());
         }
         
         query.append(" ORDER BY sda.createdtime DESC ");
