@@ -89,4 +89,10 @@ public class USMConfiguration {
 	@Value("${persister.update.member.topic}")
 	private String updateMemberTopic;
 
+	@Value("${persister.create.official.topic}")
+	private String createOfficialTopic;
+
+	@Value("${persister.update.official.topic}")
+	private String updateOfficialTopic;
+
 }

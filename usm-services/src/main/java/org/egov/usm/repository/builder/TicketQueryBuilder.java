@@ -9,7 +9,7 @@ import org.springframework.util.ObjectUtils;
 
 @Component
 public class TicketQueryBuilder {
-	
+
 	public String searchQuestionsInTicket(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
 		StringBuilder query = new StringBuilder("SELECT ticket.questionid FROM eg_usm_survey_ticket ticket");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON ticket.surveyanswerid = answer.id");
@@ -20,9 +20,7 @@ public class TicketQueryBuilder {
 
 		return query.toString();
 	}
-	
-	
-	
+
 	private void addClauseIfRequired(StringBuilder query, List<Object> preparedStmtList) {
 		if (preparedStmtList.isEmpty()) {
 			query.append(" WHERE ");
@@ -30,44 +28,46 @@ public class TicketQueryBuilder {
 			query.append(" AND ");
 		}
 	}
-	
-	
+
 	public String getSurveyTicketSearchQuery(TicketSearchCriteria searchCriteria, List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("select ticket.id ,ticket.tenantid ,ticket.ticketno ,ticket.surveyanswerid ,ticket.questionid,ticket.ticketdescription, ticket.status ,ticket.ticketcreatedtime,ticket.ticketclosedtime ,ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,ticket.lastmodifiedby   from eg_usm_survey_ticket ticket");  
+		StringBuilder query = new StringBuilder(
+				"select ticket.id, ticket.tenantid, ticket.ticketno ,ticket.surveyanswerid ,ticket.questionid,ticket.ticketdescription, ticket.status ,ticket.ticketcreatedtime,ticket.ticketclosedtime ,ticket.unattended,ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,ticket.lastmodifiedby FROM eg_usm_survey_ticket ticket left outer join eg_usm_survey_submitted submit on ticket.tenantid=submit.tenantid");
 
-        if(!ObjectUtils.isEmpty(searchCriteria.getTicketId())){
-            addClauseIfRequired(query, preparedStmtList);
-            query.append(" ticket.id = ? " );
-            preparedStmtList.add(searchCriteria.getTicketId());
-        }
-        
-        if(!ObjectUtils.isEmpty(searchCriteria.getTenantId())){
-            addClauseIfRequired(query, preparedStmtList);
-            query.append(" ticket.tenantid = ? " );
-            preparedStmtList.add(searchCriteria.getTenantId());
-        }
-        if(!ObjectUtils.isEmpty(searchCriteria.getTicketNo())){
-            addClauseIfRequired(query, preparedStmtList);
-            query.append(" ticket.ticketno = ? " );
-            preparedStmtList.add(searchCriteria.getTicketNo());
-        }
-        
-        
-        if(!ObjectUtils.isEmpty(searchCriteria.getStatus())){
-            addClauseIfRequired(query, preparedStmtList);
-            query.append(" ticket.status = ? " );
-            preparedStmtList.add(searchCriteria.getStatus());
-        }
-        
-      
-        return query.toString();
+		if (!ObjectUtils.isEmpty(searchCriteria.getTicketId())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.id = ? ");
+			preparedStmtList.add(searchCriteria.getTicketId());
+		}
+
+		if (!ObjectUtils.isEmpty(searchCriteria.getTenantId())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.tenantid = ? ");
+			preparedStmtList.add(searchCriteria.getTenantId());
+		}
+		if (!ObjectUtils.isEmpty(searchCriteria.getTicketNo())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.ticketno = ? ");
+			preparedStmtList.add(searchCriteria.getTicketNo());
+		}
+
+		if (!ObjectUtils.isEmpty(searchCriteria.getStatus())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.status = ? ");
+			preparedStmtList.add(searchCriteria.getStatus());
+		}
+
+		if (!ObjectUtils.isEmpty(searchCriteria.getWard())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" submit.ward = ? ");
+			preparedStmtList.add(searchCriteria.getWard());
+		}
+		if (!ObjectUtils.isEmpty(searchCriteria.getSlumCode())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" submit.slumcode = ? ");
+			preparedStmtList.add(searchCriteria.getSlumCode());
+		}
+
+		return query.toString();
 	}
-	
-	
-	
 
-	
-	
-	
-	
 }
