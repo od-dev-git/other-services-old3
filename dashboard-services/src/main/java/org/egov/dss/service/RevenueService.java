@@ -685,7 +685,7 @@ public class RevenueService {
 		
 		List<Chart> collectionGrowthRate = paymentRepository.getCollectionGrowthRate(paymentSearchCriteria);
 		List<Plot> plots = new ArrayList<Plot>();
-		extractDataForChart(collectionGrowthRate, plots);
+		extractDataForChartPercentage(collectionGrowthRate, plots);
 		
         
 		BigDecimal total = collectionGrowthRate.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
@@ -877,6 +877,12 @@ public class RevenueService {
 	private void extractDataForChart(List<Chart> items, List<Plot> plots) {
 		items.stream().forEach(item ->{
 			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
+		});
+	}
+	
+	private void extractDataForChartPercentage(List<Chart> items, List<Plot> plots) {
+		items.stream().forEach(item ->{
+			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("percentage").build());
 		});
 	}
 
