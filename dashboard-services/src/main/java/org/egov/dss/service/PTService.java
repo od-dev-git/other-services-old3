@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.Null;
+
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.Chart;
@@ -130,20 +132,53 @@ public class PTService {
 	}
 	
 	public List<Data> cumulativePropertiesAssessed(PayloadDetails payloadDetails) {
+		List<Data> response = new ArrayList<>();
 		getPropertySearchCriteria(payloadDetails);
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(DashboardConstants.STATUS_ACTIVE);
 		criteria.setIsPropertyAssessed(Boolean.TRUE);
-		List<Chart> cumulativePropertiesAssessed = ptRepository.getCumulativePropertiesAssessed(criteria);
+		List<Chart> cumulativePropertiesAssessed = ptRepository.getCumulativePropertiesAssessedNewQuery(criteria);
 
-		List<Plot> plots = new ArrayList();
+		List<Plot> plots = new ArrayList<>();
 		extractDataForChart(cumulativePropertiesAssessed, plots);	
-
 		BigDecimal total = cumulativePropertiesAssessed.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
-				BigDecimal::add);		 
+				BigDecimal::add);	
+		response.add(Data.builder().headerName("ReAssessments").headerValue(total).plots(plots).build());
+		
+		
+		// CREATIONREASON CREATE
+		criteria.setIsPropertyAssessed(null);
+		criteria.setStatus(null);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INWORKFLOW));
+		criteria.setCreationReasons(Sets.newHashSet(DashboardConstants.PT_CREATIONREASON_CREATE));
+		List<Chart> cumulativePropertiesCreated = ptRepository.getCumulativeProperties(criteria);
+		List<Plot> plotsForCumulativePropertiesCreated = new ArrayList<>();
+		extractDataForChart(cumulativePropertiesCreated, plotsForCumulativePropertiesCreated);	
+		BigDecimal totalForCumulativePropertiesCreated = cumulativePropertiesCreated.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);	
+		response.add(Data.builder().headerName("Create").headerValue(totalForCumulativePropertiesCreated).plots(plotsForCumulativePropertiesCreated).build());
 
-		return Arrays.asList(Data.builder().headerName("Collections").headerValue(total).plots(plots).build());
+		// CREATIONREASON UPDATE
+		criteria.setCreationReasons(Sets.newHashSet(DashboardConstants.PT_CREATIONREASON_UPDATE));
+		List<Chart> cumulativePropertiesUpdated = ptRepository.getCumulativeProperties(criteria);
+		List<Plot> plotsForCumulativePropertiesUpdated = new ArrayList<>();
+		extractDataForChart(cumulativePropertiesUpdated, plotsForCumulativePropertiesUpdated);	
+		BigDecimal totalForCumulativePropertiesUpdated = cumulativePropertiesUpdated.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);	
+		response.add(Data.builder().headerName("Update").headerValue(totalForCumulativePropertiesUpdated).plots(plotsForCumulativePropertiesUpdated).build());
+
+		// CREATIONREASON MUTATION
+		criteria.setCreationReasons(Sets.newHashSet(DashboardConstants.PT_CREATIONREASON_MUTATION));
+		List<Chart> cumulativePropertiesMutation = ptRepository.getCumulativeProperties(criteria);
+		List<Plot> plotsForCumulativePropertiesMutation= new ArrayList<>();
+        extractDataForChart(cumulativePropertiesMutation, plotsForCumulativePropertiesMutation);	
+		BigDecimal totalForCumulativePropertiesMutation = cumulativePropertiesMutation.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);	
+		response.add(Data.builder().headerName("Mutation").headerValue(totalForCumulativePropertiesMutation).plots(plotsForCumulativePropertiesMutation).build());
+
+		return response;
 	}
 	
 	public List<Data> propertiesByUsageType(PayloadDetails payloadDetails) {

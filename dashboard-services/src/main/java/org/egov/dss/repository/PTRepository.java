@@ -5,6 +5,7 @@ import static java.util.Collections.reverseOrder;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.egov.dss.model.Chart;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.builder.PTServiceQueryBuilder;
+import org.egov.dss.repository.rowmapper.BPAPerformanceRateRowMapper;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.TableChartRowMapper;
 import org.egov.dss.repository.rowmapper.ULBPerformanceRateRowMapper;
@@ -232,6 +234,23 @@ public class PTRepository {
         String query = ptServiceQueryBuilder.getPTApplicationsAgeingQuery(criteria, preparedStatementValues);
         log.info("query for PT Applications Ageing  : "+query);
         List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
+        return result;
+	}
+
+	public List<Chart> getCumulativeProperties(PropertySerarchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getCumulativePropertiesQuery(criteria, preparedStatementValues);
+        log.info("query for Cumulative Properties Count : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
+        return result;
+	}
+
+
+	public List<Chart> getCumulativePropertiesAssessedNewQuery(PropertySerarchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = ptServiceQueryBuilder.getCumulativePropertiesAssessedNewQuery(criteria, preparedStatementValues);
+        log.info("query for Cumulative Properties Reassessed Count : "+query);
+        List<Chart> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new ChartRowMapper());
         return result;
 	}
 

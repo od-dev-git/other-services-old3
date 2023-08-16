@@ -44,4 +44,6 @@ public class PropertySerarchCriteria {
     
     private Set<String> statusNotIn;
     
+    private Set<String> creationReasons;
+    
 }
