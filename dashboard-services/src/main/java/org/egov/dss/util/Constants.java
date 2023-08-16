@@ -96,6 +96,7 @@ public class Constants {
 		final static String REVENUE_PT_PREVIOUS_YEAR_TARGET_ACHIEVED = "previousTargetAchieved";
 		final static String REVENUE_PT_FINANCIAL_INDICATORS = "ptFinancialIndicatorTable";
 		final static String REVENUE_PT_PAYMENT_MODE_DDR = "ptPaymentModeDDR";
+		final static String REVENUE_ALL_PAYMENT_MODE_COLLECTION = "paymentModeCollections";
 		
 		final static String REVENUE_WS_APP_FEE_COLLECTION = "wstotalApplicationFeesCollection";
 		final static String REVENUE_WS_DEMAND_FEE_COLLECTION = "wstotalDemandFeesCollection";

@@ -73,11 +73,21 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_CUMULATIVE_COLLECTION.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.cumulativeCollection(requestInfoWrapper.getPayloadDetails());
 		}
-		if(Constants.VisualizationCodes.REVENUE_TOP_PERFORMING_ULBS.equalsIgnoreCase(visualizationCode)) {
-			return revenueService.topPerformingUlbs(requestInfoWrapper.getPayloadDetails());
+		if (Constants.VisualizationCodes.REVENUE_TOP_PERFORMING_ULBS.equalsIgnoreCase(visualizationCode)) {
+			if (requestInfoWrapper.getPayloadDetails().getModulelevel()
+					.equalsIgnoreCase(DashboardConstants.BS_HOME_REVENUE)) {
+                return revenueService.topPerformingUlbsOverview(requestInfoWrapper.getPayloadDetails());
+			} else {
+				return revenueService.topPerformingUlbs(requestInfoWrapper.getPayloadDetails());
+			}
 		}
 		if(Constants.VisualizationCodes.REVENUE_BOTTOM_PERFORMING_ULBS.equalsIgnoreCase(visualizationCode)) {
-			return revenueService.bottomPerformingUlbs(requestInfoWrapper.getPayloadDetails());
+			if (requestInfoWrapper.getPayloadDetails().getModulelevel()
+					.equalsIgnoreCase(DashboardConstants.BS_HOME_REVENUE)) {
+                return revenueService.bottomPerformingUlbsOverview(requestInfoWrapper.getPayloadDetails());
+			} else {
+				return revenueService.bottomPerformingUlbs(requestInfoWrapper.getPayloadDetails());
+			}
 		}
 		if(Constants.VisualizationCodes.REVENUE_COLLECTION_BY_USAGE_TYPE.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.collectionByUsageType(requestInfoWrapper.getPayloadDetails());
@@ -287,6 +297,10 @@ public class RedirectService {
 		
 		if(Constants.VisualizationCodes.REVENUE_PT_PAYMENT_MODE_DDR.equals(visualizationCode)) {
 			return revenueService.ptPaymentModeData(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_ALL_PAYMENT_MODE_COLLECTION.equals(visualizationCode)) {
+			return revenueService.paymentModeCollection(requestInfoWrapper.getPayloadDetails());
 		}
 		
 		if(Constants.VisualizationCodes.REVENUE_WS_APP_FEE_COLLECTION.equals(visualizationCode)) {
