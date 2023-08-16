@@ -213,6 +213,9 @@ public class PaymentQueryBuilder {
 			+ " lag(Total_Collection) over (order by Financial_Year) as previous_collection, case  when lag(Total_Collection) over (order by Financial_Year) = 0 then 0.0 else ((Total_Collection)/lag(Total_Collection) over (order by Financial_Year)) * 100.0 end as growth_rate from year_collection order by Financial_Year "
 			+ " ) select previous_year as name, round(growth_rate,2) as value  from year_collection_data where growth_rate is not null ";
 	
+	public static final String PAYMENT_MODE_WISE_COLLECTION = " select py.paymentmode as name,sum(py.totalamountpaid) as value from egcl_payment py inner join egcl_paymentdetail pyd on pyd.paymentid = py.id ";
+			
+	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
 		addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -895,6 +898,14 @@ public class PaymentQueryBuilder {
 			 upperQuery.append(lowerQuery);
 			
 			return upperQuery.toString();
+		}
+		
+		public String getPaymentModeCollectionsQuery(PaymentSearchCriteria criteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(PAYMENT_MODE_WISE_COLLECTION);
+			addWhereClause(selectQuery, preparedStatementValues, criteria);
+			selectQuery.append(" group by py.paymentmode ");
+			return selectQuery.toString();
 		}
 
 	

@@ -316,5 +316,13 @@ public class PaymentRepository {
         return result;
 	}
 	
+	
+    public List<Chart> getPaymentModeCollections(PaymentSearchCriteria criteria) {
+		
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = paymentQueryBuilder.getPaymentModeCollectionsQuery(criteria, preparedStatementValues);
+		log.info("query for Service Type COllection : " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues,new ChartRowMapper());
+	}
 
 }
