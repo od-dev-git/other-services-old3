@@ -23,6 +23,11 @@ public class PTServiceQueryBuilder {
 	public static final String TOTAL_PROPERTY_ASSESSMENTS_SQL = SELECT_SQL + " count(distinct propertyid) as totalAsmt from eg_pt_asmt_assessment epaa ";
 	public static final String TOTAL_PROPERTY_NEW_ASSESSMENTS_SQL = SELECT_SQL + " count(*) as newAsmt  from eg_pt_property epaa ";
 	public static final String CUMULATIVE_PROPERTIES_ASSESSED_SQL = " select to_char(monthYear, 'Mon-YYYY') as name, sum(assessedProperties) over (order by monthYear asc rows between unbounded preceding and current row) as value from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear ,count(distinct propertyid) assessedProperties from eg_pt_asmt_assessment epaa ";
+	public static final String CUMULATIVE_PROPERTIES_SQL = " monthly_counts AS ( SELECT DATE_TRUNC('month', TO_TIMESTAMP(lastmodifiedtime / 1000 + 19800 ) AT TIME ZONE 'UTC') AS month_start, COUNT(DISTINCT epaa.acknowldgementnumber) AS assessedProperties FROM eg_pt_property epaa ";
+	public static final String CUMULATIVE_PROPERTIES_REASSESSMENT_SQL = " monthly_counts AS ( SELECT DATE_TRUNC('month', TO_TIMESTAMP(lastmodifiedtime / 1000 + 19800 ) AT TIME ZONE 'UTC') AS month_start, COUNT(DISTINCT epaa.assessmentnumber) AS assessedProperties FROM eg_pt_asmt_assessment epaa ";
+	public static final String CUMULATIVE_PROPERTIES_GROUP_BY_SQL = "  GROUP BY month_start ),all_months AS ( SELECT generate_series(start_month, end_month, INTERVAL '1 month') AS month_range FROM "
+			+ " months ) SELECT TO_CHAR(am.month_range, 'Mon-YYYY') AS name,COALESCE(SUM(assessedProperties) OVER (ORDER BY am.month_range ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) AS value "
+			+ "FROM all_months am LEFT JOIN monthly_counts mc ON am.month_range = mc.month_start ORDER BY am.month_range ";
 	public static final String PROPERTIES_BY_USAGETYPE_SQL = " select usagecategory as name , count(distinct epaa.propertyid) as value from eg_pt_property epaa ";			                                                 
 	public static final String APPLICATIONS_TENANT_WISE_SQL = " select tenantid as name , count(*) as value from eg_pt_property epaa";
 	public static final String TOTAL_PROPERTY_ASSESSMENTS_TENANTWISE_SQL = SELECT_SQL + TENANTID_SQL +" as name , count(distinct propertyid) as value from eg_pt_asmt_assessment epaa ";
@@ -71,6 +76,11 @@ public class PTServiceQueryBuilder {
 			+ "from eg_pt_asmt_assessment epaa   "
 			+ "where status ='INWORKFLOW') "
 			+ ")as conn ";
+	
+	public static final String MONTH_YEAR_QUERY = " WITH  months AS (SELECT "
+			+ " DATE_TRUNC('month', MIN(TO_TIMESTAMP(fromdate / 1000 + 19800)  AT TIME ZONE 'UTC')) AS start_month, "
+			+ " DATE_TRUNC('month', MAX(TO_TIMESTAMP(todate / 1000 + 19800) AT TIME ZONE 'UTC')) AS end_month )  ";
+
 	
 	public static String getAssessedPropertiesCountQuery(PropertySerarchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -138,6 +148,12 @@ public class PTServiceQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" epaa.tenantId != :excludedTenantId");
 			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
+	    }
+		
+		if (searchCriteria.getCreationReasons() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.creationreason = :creationReason");
+			preparedStatementValues.put("creationReason", searchCriteria.getCreationReasons());
 	    }
 		
 		return selectQuery.toString();
@@ -437,6 +453,41 @@ public class PTServiceQueryBuilder {
 		selectQuery.append( " ) ) tmp ");
 		addGroupByClause(selectQuery," tenantid ");
 		return selectQuery.toString();
+	}
+
+	public String getCumulativePropertiesQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder monthQuery = new StringBuilder(MONTH_YEAR_QUERY);
+		String query = monthQuery.toString();
+		query = query.replaceAll("fromdate", propertySearchCriteria.getFromDate().toString());
+		query = query.replaceAll("todate", propertySearchCriteria.getToDate().toString());
+		StringBuilder monthQueryModified = new StringBuilder(query);
+		monthQueryModified.append( " , ");
+
+		StringBuilder selectQuery = new StringBuilder(CUMULATIVE_PROPERTIES_SQL);
+		monthQueryModified.append(selectQuery);
+		addWhereClause(monthQueryModified, preparedStatementValues, propertySearchCriteria,false);
+		
+		monthQueryModified.append( CUMULATIVE_PROPERTIES_GROUP_BY_SQL);
+		return monthQueryModified.toString();
+	}
+
+
+	public String getCumulativePropertiesAssessedNewQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder monthQuery = new StringBuilder(MONTH_YEAR_QUERY);
+		String query = monthQuery.toString();
+		query = query.replaceAll("fromdate", propertySearchCriteria.getFromDate().toString());
+		query = query.replaceAll("todate", propertySearchCriteria.getToDate().toString());
+		StringBuilder monthQueryModified = new StringBuilder(query);
+		monthQueryModified.append( " , ");
+
+		StringBuilder selectQuery = new StringBuilder(CUMULATIVE_PROPERTIES_REASSESSMENT_SQL);
+		monthQueryModified.append(selectQuery);
+		addWhereClause(monthQueryModified, preparedStatementValues, propertySearchCriteria,false);
+		
+		monthQueryModified.append( CUMULATIVE_PROPERTIES_GROUP_BY_SQL);
+		return monthQueryModified.toString();
 	}
 
 }
