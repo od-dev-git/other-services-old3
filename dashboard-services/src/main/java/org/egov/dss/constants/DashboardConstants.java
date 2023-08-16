@@ -166,6 +166,12 @@ public class DashboardConstants {
 	
 	public static final String PT_ROUNDOFF = "PT_ROUNDOFF";
 	
+	public static final String PT_CREATIONREASON_CREATE = "CREATE";
+	
+	public static final String PT_CREATIONREASON_UPDATE = "UPDATE";
+	
+	public static final String PT_CREATIONREASON_MUTATION = "MUTATION";
+	
 	public static final String STATUS_DELETED = "DELETED";
 	
 	public static final String STATUS_PENDING_FORWARD = "PENDING_FORWARD";
