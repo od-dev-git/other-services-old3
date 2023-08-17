@@ -95,8 +95,7 @@ public class Constants {
 		final static String REVENUE_PT_BOTTOM_ULBS_COLLECTION_BY_VOLUME = "ptBottomDigitalCollectionByVolume";
 		final static String REVENUE_PT_PREVIOUS_YEAR_TARGET_ACHIEVED = "previousTargetAchieved";
 		final static String REVENUE_PT_FINANCIAL_INDICATORS = "ptFinancialIndicatorTable";
-		final static String REVENUE_PT_PAYMENT_MODE_DDR = "ptPaymentModeDDR";
-		final static String REVENUE_ALL_PAYMENT_MODE_COLLECTION = "paymentModeCollections";
+		final static String REVENUE_PT_PAYMENT_MODE_DDR = "ptPaymentModeDDR";		
 		
 		final static String REVENUE_WS_APP_FEE_COLLECTION = "wstotalApplicationFeesCollection";
 		final static String REVENUE_WS_DEMAND_FEE_COLLECTION = "wstotalDemandFeesCollection";
@@ -215,6 +214,10 @@ public class Constants {
 		final static String SERVICE_PGR_UNIQUE_CITIZENS = "pgrCitizenOnDateRange";
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS_BY_STATUS = "totalComplaintsbyStatus";
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS_BY_SOURCE = "totalComplaintsbySource";
+		
+		final static String REVENUE_OVERVIEW_TOP_PERFORMING_ULBS = "topPerformingUlbsOverview";
+		final static String REVENUE_OVERVIEW_BOTTOM_PERFORMING_ULBS = "bottomPerformingUlbsOverview";
+		final static String REVENUE_ALL_PAYMENT_MODE_COLLECTION = "paymentModeCollections";
 	}
 
 }

@@ -1775,10 +1775,11 @@ public class RevenueService {
 			payloadDetails.setTimeinterval(dashboardUtils.getCurrentFinancialYear());
 		}
 		int serialNumber = 1;
-		// Sort the HashMap in ascending order
+		
 		Map<String, BigDecimal> tenantWiseSorted = tenantWiseCollection.entrySet().parallelStream()
-				.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
-						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+		        .sorted(Collections.reverseOrder(Map.Entry.comparingByValue())) // Sort in descending order
+		        .collect(Collectors.toMap(
+		                Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 		
 		for (HashMap.Entry<String, BigDecimal> totalApplication : tenantWiseSorted.entrySet()) {
             List<Plot> plots = new ArrayList();
@@ -1832,10 +1833,11 @@ public class RevenueService {
 		List<Data> response = new ArrayList();
 		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
 				.getTenantWiseCollection(paymentSearchCriteria);
+		// Sort the HashMap in ascending order
 		Map<String, BigDecimal> tenantWiseSorted = tenantWiseCollection.entrySet().parallelStream()
-		        .sorted(Collections.reverseOrder(Map.Entry.comparingByValue())) // Sort in descending order
-		        .collect(Collectors.toMap(
-		                Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+				.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+		
 		int serialNumber = 1;
 		for (HashMap.Entry<String, BigDecimal> totalApplication : tenantWiseSorted.entrySet()) {
             List<Plot> plots = new ArrayList();
@@ -1895,6 +1897,69 @@ public class RevenueService {
 
 		return Arrays.asList(
 				Data.builder().headerName("Total Collections").headerValue(total).plots(plots).build());
+	}
+	
+	public List<Data> cumulativeCollectionOverview(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			criteria.setFromDate(dashboardUtils.getStartDateGmt(String.valueOf(payloadDetails.getTimeinterval())));
+		}
+		List<Data> response = new ArrayList<>();
+
+		// PT Collection
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.PT_REVENUE_ALL_BS));
+		List<Chart> ptCollection = paymentRepository.getCumulativeCollection(criteria);
+		List<Plot> ptCollectionPlots = new ArrayList<Plot>();
+		extractDataForChart(ptCollection, ptCollectionPlots);
+		BigDecimal ptTotalCollections = ptCollection.stream().map(usageCategory -> usageCategory.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		response.add(Data.builder().headerName("Property Tax").headerSymbol("amount")
+				.headerValue(ptTotalCollections).plots(ptCollectionPlots).build());
+
+		// WS Collection
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.WS_REVENUE_ALL_BS));
+		List<Chart> wsCollection = paymentRepository.getCumulativeCollection(criteria);
+		List<Plot> wsCollectionPlots = new ArrayList<Plot>();
+		extractDataForChart(wsCollection, wsCollectionPlots);
+		BigDecimal wsTotalCollections = wsCollection.stream().map(usageCategory -> usageCategory.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		response.add(Data.builder().headerName("Water & Sewerage").headerSymbol("amount")
+				.headerValue(wsTotalCollections).plots(wsCollectionPlots).build());
+		
+		// BPA Collection
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		List<Chart> bpaCollection = paymentRepository.getCumulativeCollection(criteria);
+		List<Plot> bpaCollectionPlots = new ArrayList<Plot>();
+		extractDataForChart(bpaCollection, bpaCollectionPlots);
+		BigDecimal bpaTotalCollections = bpaCollection.stream().map(usageCategory -> usageCategory.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		response.add(Data.builder().headerName("OBPS").headerSymbol("amount")
+				.headerValue(bpaTotalCollections).plots(bpaCollectionPlots).build());
+		
+		// TL Collection
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_TL));
+		List<Chart> tlCollection = paymentRepository.getCumulativeCollection(criteria);
+		List<Plot> tlCollectionPlots = new ArrayList<Plot>();
+		extractDataForChart(tlCollection, tlCollectionPlots);
+		BigDecimal tlTotalCollections = tlCollection.stream().map(usageCategory -> usageCategory.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		response.add(Data.builder().headerName("Trade License").headerSymbol("amount").headerValue(tlTotalCollections)
+				.plots(tlCollectionPlots).build());
+		
+
+		// MR Collection
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.BUSINESS_SERVICE_MR));
+		List<Chart> mrCollection = paymentRepository.getCumulativeCollection(criteria);
+		List<Plot> mrCollectionPlots = new ArrayList<Plot>();
+		extractDataForChart(mrCollection, mrCollectionPlots);
+		BigDecimal mrTotalCollections = mrCollection.stream().map(usageCategory -> usageCategory.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		response.add(Data.builder().headerName("Marriage Registration").headerSymbol("amount").headerValue(mrTotalCollections)
+				.plots(mrCollectionPlots).build());
+
+		return response;
 	}
 
 }
