@@ -2,6 +2,9 @@ package org.egov.dss.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,12 +15,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.Null;
+
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.Chart;
 import org.egov.dss.model.CommonSearchCriteria;
 import org.egov.dss.model.FinancialYearWiseProperty;
 import org.egov.dss.model.PayloadDetails;
+import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.repository.PTRepository;
 import org.egov.dss.web.model.Data;
@@ -28,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
 import lombok.extern.slf4j.Slf4j;
@@ -125,20 +132,53 @@ public class PTService {
 	}
 	
 	public List<Data> cumulativePropertiesAssessed(PayloadDetails payloadDetails) {
+		List<Data> response = new ArrayList<>();
 		getPropertySearchCriteria(payloadDetails);
 		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(DashboardConstants.STATUS_ACTIVE);
 		criteria.setIsPropertyAssessed(Boolean.TRUE);
-		List<Chart> cumulativePropertiesAssessed = ptRepository.getCumulativePropertiesAssessed(criteria);
+		List<Chart> cumulativePropertiesAssessed = ptRepository.getCumulativePropertiesAssessedNewQuery(criteria);
 
-		List<Plot> plots = new ArrayList();
+		List<Plot> plots = new ArrayList<>();
 		extractDataForChart(cumulativePropertiesAssessed, plots);	
-
 		BigDecimal total = cumulativePropertiesAssessed.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
-				BigDecimal::add);		 
+				BigDecimal::add);	
+		response.add(Data.builder().headerName("ReAssessments").headerValue(total).plots(plots).build());
+		
+		
+		// CREATIONREASON CREATE
+		criteria.setIsPropertyAssessed(null);
+		criteria.setStatus(null);
+		criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.STATUS_INWORKFLOW));
+		criteria.setCreationReasons(Sets.newHashSet(DashboardConstants.PT_CREATIONREASON_CREATE));
+		List<Chart> cumulativePropertiesCreated = ptRepository.getCumulativeProperties(criteria);
+		List<Plot> plotsForCumulativePropertiesCreated = new ArrayList<>();
+		extractDataForChart(cumulativePropertiesCreated, plotsForCumulativePropertiesCreated);	
+		BigDecimal totalForCumulativePropertiesCreated = cumulativePropertiesCreated.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);	
+		response.add(Data.builder().headerName("Create").headerValue(totalForCumulativePropertiesCreated).plots(plotsForCumulativePropertiesCreated).build());
 
-		return Arrays.asList(Data.builder().headerName("Collections").headerValue(total).plots(plots).build());
+		// CREATIONREASON UPDATE
+		criteria.setCreationReasons(Sets.newHashSet(DashboardConstants.PT_CREATIONREASON_UPDATE));
+		List<Chart> cumulativePropertiesUpdated = ptRepository.getCumulativeProperties(criteria);
+		List<Plot> plotsForCumulativePropertiesUpdated = new ArrayList<>();
+		extractDataForChart(cumulativePropertiesUpdated, plotsForCumulativePropertiesUpdated);	
+		BigDecimal totalForCumulativePropertiesUpdated = cumulativePropertiesUpdated.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);	
+		response.add(Data.builder().headerName("Update").headerValue(totalForCumulativePropertiesUpdated).plots(plotsForCumulativePropertiesUpdated).build());
+
+		// CREATIONREASON MUTATION
+		criteria.setCreationReasons(Sets.newHashSet(DashboardConstants.PT_CREATIONREASON_MUTATION));
+		List<Chart> cumulativePropertiesMutation = ptRepository.getCumulativeProperties(criteria);
+		List<Plot> plotsForCumulativePropertiesMutation= new ArrayList<>();
+        extractDataForChart(cumulativePropertiesMutation, plotsForCumulativePropertiesMutation);	
+		BigDecimal totalForCumulativePropertiesMutation = cumulativePropertiesMutation.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);	
+		response.add(Data.builder().headerName("Mutation").headerValue(totalForCumulativePropertiesMutation).plots(plotsForCumulativePropertiesMutation).build());
+
+		return response;
 	}
 	
 	public List<Data> propertiesByUsageType(PayloadDetails payloadDetails) {
@@ -622,5 +662,79 @@ public class PTService {
 	   
 		return response;
      }
+
+	public List<Data> totalNoOfDeactivatedProperties(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+	//	setFromAndToDateInGMT(criteria);
+		Integer totalNoOfDeactivatedProperties = (Integer) ptRepository.getTotalNoOfDeactivatedProperties(criteria);
+		if(totalNoOfDeactivatedProperties == null) {
+			totalNoOfDeactivatedProperties = 0;
+		}
+		return Arrays.asList(Data.builder().headerValue(totalNoOfDeactivatedProperties).build());
+	}
+	
+	private void setFromAndToDateInGMT(PropertySerarchCriteria propertySearchCriteria) {
+		Long startTimeMillis = propertySearchCriteria.getFromDate();
+		Long endTimeMillis = propertySearchCriteria.getToDate();
+
+		Integer istOffsetHours = 5;
+		Integer istOffsetMinutes = 30;
+
+		Long offsetMillis = ((long) istOffsetHours * 60 + istOffsetMinutes) * 60 * 1000;
+
+		Long startMillisGMT = startTimeMillis + offsetMillis;
+		Long endMillisGMT = endTimeMillis + offsetMillis;
+
+		propertySearchCriteria.setFromDate(startMillisGMT);
+		propertySearchCriteria.setToDate(endMillisGMT);
+	}
+
+	public List<Data> ptApplicationsAgeing(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = getPropertySearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<HashMap<String, Object>> ptApplicationsAgeingBreakup = ptRepository.getPTApplicationsAgeing(criteria);
+
+			 List<Data> response = new ArrayList();
+			 int serailNumber = 0 ;
+			 for( HashMap<String, Object> tenantWiseRow : ptApplicationsAgeingBreakup) {
+				 serailNumber++;
+		            String tenantId = String.valueOf(tenantWiseRow.get("tenantid"));
+		            String tenantIdStyled = tenantId.replace("od.", "");
+		            tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+				 List<Plot> row = new ArrayList<>();
+				row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+				row.add(Plot.builder().label(tenantIdStyled).name("DDRs").symbol("text").build());
+
+				row.add(Plot.builder().name("Pending_from_0_to_3_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_0_to_3_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Pending_from_3_to_7_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_3_to_7_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Pending_from_7_to_15_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_7_to_15_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Pending_from_more_than_15_days").value(new BigDecimal(String.valueOf(tenantWiseRow.get("pending_from_more_than_15_days")))).symbol("number").build());				
+				row.add(Plot.builder().name("Total_Pending_Applications").value(new BigDecimal(String.valueOf(tenantWiseRow.get("total_pending_applications")))).symbol("number").build());				
+
+				 response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null).build());
+			 }	
+
+				if (CollectionUtils.isEmpty(response)) {
+					serailNumber++;
+					List<Plot> row = new ArrayList<>();
+					row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+					row.add(Plot.builder().label(payloadDetails.getTenantid()).name("DDRs").symbol("text").build());
+					row.add(Plot.builder().name("Pending_from_0_to_3_days").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Pending_from_3_to_7_days").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Pending_from_7_to_15_days").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					row.add(Plot.builder().name("Pending_from_more_than_15_days").value(BigDecimal.ZERO)
+							.symbol("number").build());
+					row.add(Plot.builder().name("Total_Pending_Applications").value(BigDecimal.ZERO).symbol("number")
+							.build());
+					response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber)
+							.plots(row).insight(null).build());
+				}
+
+		return response;
+	}
 	
 }

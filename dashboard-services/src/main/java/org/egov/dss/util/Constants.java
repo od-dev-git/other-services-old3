@@ -49,6 +49,9 @@ public class Constants {
 		final static String DIGITAL_COLLECTIONS_BY_VALUE = "ptDigitalCollectionByValue";
 		final static String DIGITAL_COLLECTIONS_BY_VOLUME = "ptDigitalCollectionByVolume";
 		final static String REVENUE_PT_TAX_HEADS_BREAKUP = "ptTaxHeadTable";
+		final static String REVENUE_CURRENT_COLLECTION = "currentCollection";
+		final static String REVENUE_ARREAR_COLLECTION = "arrearCollection";
+		final static String REVENUE_PREVIOUS_YEAR_COLLECTION = "previousYearCollection";		
 		
 		final static String SERVICE_DSS_TOTAL_APPLICATION_OVERVIEW = "dssTotalApplicationOverview";
 		final static String SERVICE_DSS_CLOSED_APPLICATION_OVERVIEW = "dssClosedApplicationOverview";
@@ -74,6 +77,8 @@ public class Constants {
 		final static String SERVICE_PT_SHARE_OF_RE_ASSESSMENT = "ptShareOfReAssessments";
 		final static String SERVICE_PT_ASMT_STATUS_DDR = "ptAssessmentStatusDDR";
 		final static String SERVICE_PT_STATUS_BY_BOUNDARY = "ptStatusByBoundary";
+		final static String SERVICE_TOTAL_NO_OF_DEACTIVATED_PROPERTIES = "totalNoOfDeactivatedProperties";
+		final static String SERVICE_PT_APPLICATIONS_AGEING = "ptConnectionAgeingDDR";
 		
 		final static String SERVICE_MR_TOTAL_APPLICATION = "mrtotalApplications";
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS = "totalComplaints";
@@ -83,6 +88,7 @@ public class Constants {
 		final static String REVENUE_WS_TOTAL_COLLECTION = "wstotalCollection";
 		final static String SERVICE_PGR_SLA_ACHIEVED = "slaAchieved";
 		final static String REVENUE_PT_GROWTH_RATE = "propertyTaxGrowthRate";
+		final static String REVENUE_PT_GROWTH_RATE_TABLE = "propertyTaxGrowthRateTable";
 		final static String REVENUE_PT_TOP_ULBS_BY_DIGITAL_COLLECTION = "ptTopDigitalCollectionByValue";
 		final static String REVENUE_PT_BOTTOM_ULBS_BY_DIGITAL_COLLECTION = "ptBottomDigitalCollectionByValue";
 		final static String REVENUE_PT_TOP_ULBS_COLLECTION_BY_VOLUME = "ptTopDigitalCollectionByVolume";
@@ -90,6 +96,7 @@ public class Constants {
 		final static String REVENUE_PT_PREVIOUS_YEAR_TARGET_ACHIEVED = "previousTargetAchieved";
 		final static String REVENUE_PT_FINANCIAL_INDICATORS = "ptFinancialIndicatorTable";
 		final static String REVENUE_PT_PAYMENT_MODE_DDR = "ptPaymentModeDDR";
+		final static String REVENUE_ALL_PAYMENT_MODE_COLLECTION = "paymentModeCollections";
 		
 		final static String REVENUE_WS_APP_FEE_COLLECTION = "wstotalApplicationFeesCollection";
 		final static String REVENUE_WS_DEMAND_FEE_COLLECTION = "wstotalDemandFeesCollection";
@@ -165,6 +172,7 @@ public class Constants {
 		final static String REVENUE_TL_BOTTOM_ULBS_BY_VOLUME = "tlBottomDigitalCollectionByVolume";
 		final static String REVENUE_TL_COLLECTION_BY_LICENSE_TYPE = "licenseByLicenseType";
 		final static String REVENUE_TL_KEY_FINALCIAL_INDICATORS = "licenseIssuedDDRRevenue";
+		final static String REVENUE_TL_COLLECTION_BY_LICENSE_TYPE_LINE = "collectionByLicenseTypeLine";
 		
 		final static String SERVICE_TL_TOTAL_APPLICATION = "totalApplication";
 		final static String SERVICE_TL_TOTAL_NEW_APPLICATION = "tlTotalNewApplication";

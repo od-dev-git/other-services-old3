@@ -13,6 +13,7 @@ import org.egov.usm.web.model.SurveyTicket;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
+
 @Component
 public class TicketRowMapper implements ResultSetExtractor<List<SurveyTicket>> {
 
@@ -30,26 +31,19 @@ public class TicketRowMapper implements ResultSetExtractor<List<SurveyTicket>> {
 					lastModifiedTime = null;
 				}
 
-				AuditDetails auditdetails = AuditDetails.builder()
-						.createdBy(rs.getString("createdby"))
-						.createdTime(rs.getLong("createdtime"))
-						.lastModifiedBy(rs.getString("lastmodifiedby"))
+				AuditDetails auditdetails = AuditDetails.builder().createdBy(rs.getString("createdby"))
+						.createdTime(rs.getLong("createdtime")).lastModifiedBy(rs.getString("lastmodifiedby"))
 						.lastModifiedTime(lastModifiedTime).build();
 
-				ticket = SurveyTicket.builder()
-						.id(rs.getString("id"))
-						.tenantId(rs.getString("tenantid"))
-						.ticketNo(rs.getString("ticketno"))
-						.surveyAnswerId(rs.getString("surveyanswerid"))
-						.questionId(rs.getString("questionid"))
-						.ticketDescription(rs.getString("ticketdescription"))
+				ticket = SurveyTicket.builder().id(rs.getString("id")).tenantId(rs.getString("tenantid"))
+						.ticketNo(rs.getString("ticketno")).surveyAnswerId(rs.getString("surveyanswerid"))
+						.questionId(rs.getString("questionid")).ticketDescription(rs.getString("ticketdescription"))
 
 						.status(TicketStatus.fromValue(rs.getString("status")))
 						.ticketCreatedTime(rs.getLong("ticketcreatedtime"))
-						.ticketClosedTime(rs.getLong("ticketclosedtime"))
+						.ticketClosedTime(rs.getLong("ticketclosedtime")).unAttended(rs.getBoolean("unattended"))
 
-						.auditDetails(auditdetails)
-						.build();
+						.auditDetails(auditdetails).build();
 			}
 
 			surveyMap.put(id, ticket);

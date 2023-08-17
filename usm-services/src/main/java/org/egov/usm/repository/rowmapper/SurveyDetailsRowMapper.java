@@ -92,12 +92,6 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
                 .lastModifiedTime(rs.getLong("lastmodifiedtime"))
                 .build();
 		
-		SurveyAnswer surveyAnswer =  SurveyAnswer.fromValue(rs.getString("answer"));
-		
-		if(rs.getBoolean("hasopenticket")  && surveyAnswer.equals(SurveyAnswer.NO)) {
-			surveyAnswer = SurveyAnswer.YES;
-		}
-
 		QuestionDetail question =  QuestionDetail.builder()
                 .id(rs.getString("id"))
                 .surveyId(rs.getString("surveyid"))
@@ -109,7 +103,7 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
                 .options(rs.getString("options"))
                 .type(rs.getString("type"))
                 .hasOpenTicket(rs.getBoolean("hasopenticket"))
-                .answer(surveyAnswer)
+                .answer(SurveyAnswer.fromValue(rs.getString("answer")))
                 .answerId(rs.getString("answerid"))
                 .auditDetails(auditdetails)
                 .build();

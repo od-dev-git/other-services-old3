@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;  
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -58,9 +59,11 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.annotation.JacksonInject.Value;
 import com.google.common.collect.Sets;
 
+import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.encoder.com.lmax.disruptor.LiteBlockingWaitStrategy;
 
 @Service
+@Slf4j
 public class RevenueService {
 	
 	@Autowired
@@ -125,6 +128,48 @@ public class RevenueService {
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
         return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+	
+	public List<Data> currentCollection(PayloadDetails payloadDetails) {
+        if(!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		setFromAndToDateInIST(paymentSearchCriteria);
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getCurrentCollection(paymentSearchCriteria);
+		if(totalCollection == null) {
+			totalCollection = BigDecimal.ZERO;
+		}
+        return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+        }
+        
+        return Arrays.asList(Data.builder().headerValue("NA").build());
+
+	}
+
+	private void setFromAndToDateInIST(PaymentSearchCriteria paymentSearchCriteria) {
+		Long startTimeMillis = paymentSearchCriteria.getFromDate();
+		
+		ZonedDateTime startIST = Instant.ofEpochMilli(startTimeMillis).atZone(ZoneId.of("Asia/Kolkata"));		
+		ZonedDateTime endIST = startIST.plusYears(1).minusNanos(1);
+		
+		Long endMillisIST = endIST.toInstant().toEpochMilli();
+		log.info("Start TIme  : " + startTimeMillis.toString());
+		log.info("End TIme  : " + endMillisIST.toString());
+		
+		paymentSearchCriteria.setToDate(endMillisIST);
+	}
+	
+	public List<Data> arrearCollection(PayloadDetails payloadDetails) {
+        if(!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		setFromAndToDateInIST(paymentSearchCriteria);
+		BigDecimal totalCollection = (BigDecimal) paymentRepository.getArrearCollection(paymentSearchCriteria);
+		if(totalCollection == null) {
+			totalCollection = BigDecimal.ZERO;
+		}
+        return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+        }
+        return Arrays.asList(Data.builder().headerValue("NA").build());
+
 	}
 
 	public List<Data> todaysCollection(PayloadDetails payloadDetails) {
@@ -632,6 +677,23 @@ public class RevenueService {
 
 		return Arrays.asList(Data.builder().headerValue(growthRate).build());
 	}
+	
+	public List<Data> revenueGrowthRateTable(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		
+		List<Chart> collectionGrowthRate = paymentRepository.getCollectionGrowthRate(paymentSearchCriteria);
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChartPercentage(collectionGrowthRate, plots);
+		
+        
+		BigDecimal total = collectionGrowthRate.stream().map(usageCategory -> usageCategory.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);	
+
+		return Arrays.asList(Data.builder().headerName("Collection Growth Rate").headerSymbol("amount").headerValue(total).plots(plots).build());
+	}
 
 	public BigDecimal getPreviousYearCollection(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
@@ -816,6 +878,12 @@ public class RevenueService {
 	private void extractDataForChart(List<Chart> items, List<Plot> plots) {
 		items.stream().forEach(item ->{
 			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("number").build());
+		});
+	}
+	
+	private void extractDataForChartPercentage(List<Chart> items, List<Plot> plots) {
+		items.stream().forEach(item ->{
+			plots.add(Plot.builder().name(item.getName()).value(item.getValue()).symbol("percentage").build());
 		});
 	}
 
@@ -1660,6 +1728,173 @@ public class RevenueService {
 		}
 		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
 	}
+
+	public List<Data> previousYearCollection(PayloadDetails payloadDetails) {
+        if(!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		setFromAndToDateInIST(paymentSearchCriteria); //Instead of Add we have to subtarct
+		BigDecimal previousYearCollection = (BigDecimal) paymentRepository.getPreviousYearCollection(paymentSearchCriteria);
+		if(previousYearCollection == null) {
+			previousYearCollection = BigDecimal.ZERO;
+		}
+        return Arrays.asList(Data.builder().headerValue(previousYearCollection.setScale(2, RoundingMode.HALF_UP)).build());
+        }
+        return Arrays.asList(Data.builder().headerValue("NA").build());
+	}
 	
+	public List<Data> tlCollectionsByLicenseTypeLine(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		List<Chart> licenseTypeWiseAmtCollected = paymentRepository
+				.getTlCollectionsByLicenseType(paymentSearchCriteria);
+
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(licenseTypeWiseAmtCollected, plots);
+
+		BigDecimal total = licenseTypeWiseAmtCollected.stream().map(amount -> amount.getValue()).reduce(BigDecimal.ZERO,
+				BigDecimal::add);
+
+		return Arrays
+				.asList(Data.builder().headerName("DSS_TL_LICENSE_BY_TYPE_LINE").headerValue(total).plots(plots).build());
+	}
+	
+	public List<Data> topPerformingUlbsOverview(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		List<Data> response = new ArrayList();
+		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		if (Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			payloadDetails.setTimeinterval(dashboardUtils.getCurrentFinancialYear());
+		}
+		int serialNumber = 1;
+		// Sort the HashMap in ascending order
+		Map<String, BigDecimal> tenantWiseSorted = tenantWiseCollection.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+		
+		for (HashMap.Entry<String, BigDecimal> totalApplication : tenantWiseSorted.entrySet()) {
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+            plots.add(Plot.builder().name("Ulb").label(totalApplication.getKey().toString()).symbol("text")
+                    .build());
+
+			plots.add(Plot.builder().name("Rank")
+					.value(BigDecimal.valueOf(serialNumber))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Collections")
+					.value(totalApplication.getValue() == null ? BigDecimal.ZERO
+							: totalApplication.getValue().setScale(0, BigDecimal.ROUND_UP))
+					.symbol("amount").build());
+
+			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
+					.build());
+
+            serialNumber++;
+
+        }
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Rank").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Collections").value(BigDecimal.ZERO).symbol("amount").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
+		}
+
+		return response;
+
+	}
+	
+	public List<Data> bottomPerformingUlbsOverview(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria paymentSearchCriteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		List<Data> response = new ArrayList();
+		HashMap<String, BigDecimal> tenantWiseCollection = paymentRepository
+				.getTenantWiseCollection(paymentSearchCriteria);
+		Map<String, BigDecimal> tenantWiseSorted = tenantWiseCollection.entrySet().parallelStream()
+		        .sorted(Collections.reverseOrder(Map.Entry.comparingByValue())) // Sort in descending order
+		        .collect(Collectors.toMap(
+		                Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+		int serialNumber = 1;
+		for (HashMap.Entry<String, BigDecimal> totalApplication : tenantWiseSorted.entrySet()) {
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+            plots.add(Plot.builder().name("Ulb").label(totalApplication.getKey().toString()).symbol("text")
+                    .build());
+
+			plots.add(Plot.builder().name("Rank")
+					.value(BigDecimal.valueOf(serialNumber))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Collections")
+					.value(totalApplication.getValue() == null ? BigDecimal.ZERO
+							: totalApplication.getValue().setScale(0, BigDecimal.ROUND_UP))
+					.symbol("amount").build());
+
+			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
+					.build());
+           
+            serialNumber++;
+
+        }
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Rank").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Collections").value(BigDecimal.ZERO).symbol("amount").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
+			}
+
+		return response;
+
+	}
+	
+	public List<Data> paymentModeCollection(PayloadDetails payloadDetails) {
+
+		PaymentSearchCriteria criteria = getTotalCollectionPaymentSearchCriteria(payloadDetails);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		List<Chart> paymantModeWiseCollection = paymentRepository.getPaymentModeCollections(criteria);
+
+		List<Plot> plots = new ArrayList<Plot>();
+		extractDataForChart(paymantModeWiseCollection, plots);
+
+		BigDecimal total = paymantModeWiseCollection.stream().map(serviceType -> serviceType.getValue())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return Arrays.asList(
+				Data.builder().headerName("Total Collections").headerValue(total).plots(plots).build());
+	}
 
 }

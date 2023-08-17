@@ -2,6 +2,9 @@ package org.egov.dss.repository.builder;
 
 import static java.util.stream.Collectors.toSet;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -20,9 +23,12 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 
+import lombok.extern.slf4j.Slf4j;
+
 
 
 @Component
+@Slf4j
 public class PaymentQueryBuilder {
 	
 	
@@ -179,6 +185,36 @@ public class PaymentQueryBuilder {
 	public static final String CURRENT_DEMAND_QUERY = " select coalesce(sum(amount), 0) as amount from state.eg_dss_demand ";
 	
 	public static final String ARREAR_DEMAND_QUERY = " select coalesce(sum(amount), 0) - coalesce(sum(collectionamount), 0) as amount from state.eg_dss_demand ";
+	
+	public static final String PT_CURRENT_COLLECTION_QUERY = " select sum(case when eb2.fromperiod >=startingDate and eb2.toperiod <= endingDate then eb3.adjustedamount else 0 end ) as currentcollectionamount ";
+	
+	public static final String PT_ARREAR_COLLECTION_QUERY = " select sum(case when eb2.toperiod < startingDate then eb3.adjustedamount else 0 end ) as arrearcollection ";
+	
+	public static final String PT_PREVIOUS_YEAR_COLLECTION_QUERY = " select	coalesce(sum(eb3.adjustedamount),0) as previousyearcollectionamount ";
+
+	public static final String PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY = " from egcl_bill eb "
+			+ "inner join egcl_paymentdetail ep on	eb.id = ep.billid and eb.businessservice IN ('PT') " 
+			+ "inner join egcl_payment epp on epp.id = ep.paymentid	and epp.paymentstatus not in ('CANCELLED', 'DISHONOURED') and epp.tenantid != 'od.testing' "
+			+ "inner join egcl_billdetial eb2 on eb.id = eb2.billid "
+			+ "inner join egcl_billaccountdetail eb3 on	eb2.id = eb3.billdetailid "
+			+ "where 1 = 1 and eb3.taxheadcode not in ('PT_ADVANCE_CARRYFORWARD') ";
+	
+	public static final String PT_GROWTH_RATE_QUERY_UPPER_HALF= " with year_collection as ( SELECT "
+			+ " CONCAT( EXTRACT(YEAR FROM financial_year_start) - CASE WHEN EXTRACT(MONTH FROM financial_year_start) < 4 THEN 1 ELSE 0 END,'-', EXTRACT(YEAR FROM financial_year_start) - CASE WHEN EXTRACT(MONTH FROM financial_year_start) < 4 THEN 0 ELSE -1 END) AS Financial_Year, "
+			+ " coalesce(sum(totalamountpaid), 0) AS Total_Collection FROM ( SELECT TO_TIMESTAMP(pyd.receiptdate / 1000) AS payment_date,py.totalamountpaid, "
+			+ " CASE WHEN EXTRACT(MONTH FROM TO_TIMESTAMP(pyd.receiptdate / 1000)) < 4 THEN TO_TIMESTAMP((EXTRACT(YEAR FROM TO_TIMESTAMP(pyd.receiptdate / 1000)) - 1) || '-04-01', 'YYYY-MM-DD') "
+			+ " ELSE TO_TIMESTAMP(EXTRACT(YEAR FROM TO_TIMESTAMP(pyd.receiptdate / 1000)) || '-04-01', 'YYYY-MM-DD') "
+			+ " END AS financial_year_start FROM egcl_payment py INNER JOIN egcl_paymentdetail pyd ON "
+			+ " pyd.paymentid = py.id WHERE UPPER(py.paymentstatus) NOT IN ('CANCELLED', 'DISHONOURED') AND pyd.businessService IN ('PT', 'PT.MUTATION')\r\n"
+			+ " AND py.tenantid != 'od.testing' " ;
+	
+	public static final String PT_GROWTH_RATE_QUERY_LOWER_HALF= " ) AS converted_data GROUP BY Financial_Year ORDER BY Financial_Year ), "
+			+ " year_collection_data as ( select Financial_Year as current_year, lag(Financial_Year) over (order by Financial_Year) as previous_year,Total_Collection as current_collection, "
+			+ " lag(Total_Collection) over (order by Financial_Year) as previous_collection, case  when lag(Total_Collection) over (order by Financial_Year) = 0 then 0.0 else ((Total_Collection)/lag(Total_Collection) over (order by Financial_Year)) * 100.0 end as growth_rate from year_collection order by Financial_Year "
+			+ " ) select previous_year as name, round(growth_rate,2) as value  from year_collection_data where growth_rate is not null ";
+	
+	public static final String PAYMENT_MODE_WISE_COLLECTION = " select py.paymentmode as name,sum(py.totalamountpaid) as value from egcl_payment py inner join egcl_paymentdetail pyd on pyd.paymentid = py.id ";
+			
 	
 	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
@@ -699,6 +735,177 @@ public class PaymentQueryBuilder {
 				preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenantId());
 			}
 
+		}
+
+		public String getCurrentCollection(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			String query = PT_CURRENT_COLLECTION_QUERY;
+			addOffset(paymentSearchCriteria);
+			query = setFromAndToDate(paymentSearchCriteria, query);
+			removeOffset(paymentSearchCriteria);
+			
+			StringBuilder modifiedQuery = new StringBuilder();
+			modifiedQuery.append(query);
+			StringBuilder selectQuery = new StringBuilder(PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY);
+			modifiedQuery.append(selectQuery);
+			setTenantIDAndTransactionDate(paymentSearchCriteria, preparedStatementValues, modifiedQuery);
+
+			return modifiedQuery.toString();
+		}
+
+		private void addOffset(PaymentSearchCriteria paymentSearchCriteria) {
+			Long startMillisGMT = paymentSearchCriteria.getFromDate();
+			Long endMillisGMT = paymentSearchCriteria.getToDate();
+			log.info(String.valueOf(startMillisGMT));
+			log.info(String.valueOf(endMillisGMT));
+			
+			Integer istOffsetHours = 5;
+			Integer istOffsetMinutes = 30;
+
+			Long offsetMillis = 2*((long) istOffsetHours * 60 + istOffsetMinutes) * 60 * 1000;
+
+			// increasing range to adjust for error due to timezone variation
+			startMillisGMT = startMillisGMT - offsetMillis;
+			endMillisGMT = endMillisGMT + offsetMillis;
+			
+			log.info(String.valueOf(startMillisGMT));
+			log.info(String.valueOf(endMillisGMT));
+			
+			paymentSearchCriteria.setFromDate(startMillisGMT);
+			paymentSearchCriteria.setToDate(endMillisGMT);
+		}
+		
+		private void removeOffset(PaymentSearchCriteria paymentSearchCriteria) {
+			Long startMillisGMT = paymentSearchCriteria.getFromDate();
+			Long endMillisGMT = paymentSearchCriteria.getToDate();
+			log.info(String.valueOf(startMillisGMT));
+			log.info(String.valueOf(endMillisGMT));
+			
+			Integer istOffsetHours = 5;
+			Integer istOffsetMinutes = 30;
+
+			long offsetMillis = 2*((long) istOffsetHours * 60 + istOffsetMinutes) * 60 * 1000;
+
+			// increasing range to adjust for error due to timezone variation
+			startMillisGMT = startMillisGMT + offsetMillis;
+			endMillisGMT = endMillisGMT - offsetMillis;
+			log.info(String.valueOf(startMillisGMT));
+			log.info(String.valueOf(endMillisGMT));
+
+			
+			paymentSearchCriteria.setFromDate(startMillisGMT);
+			paymentSearchCriteria.setToDate(endMillisGMT);
+		}
+
+		private String setFromAndToDate(PaymentSearchCriteria paymentSearchCriteria, String query) {
+			if (paymentSearchCriteria.getFromDate() != null) {
+				query=query.replace("startingDate", paymentSearchCriteria.getFromDate().toString());
+			}
+
+			if (paymentSearchCriteria.getToDate() != null) {
+				query=query.replace("endingDate", paymentSearchCriteria.getToDate().toString());
+			}
+			
+			return query;
+		}
+
+		private void setTenantIDAndTransactionDate(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues, StringBuilder selectQuery) {
+
+			if (paymentSearchCriteria.getFromDate() != null) {
+				selectQuery.append("and ep.receiptdate >= :fromDate ");
+				preparedStatementValues.put("fromDate", paymentSearchCriteria.getFromDate());
+			}
+
+			if (paymentSearchCriteria.getToDate() != null) {
+				selectQuery.append(" and ep.receiptdate <= :toDate ");
+				preparedStatementValues.put("toDate", paymentSearchCriteria.getToDate());
+			}
+
+			if (paymentSearchCriteria.getTenantIds() != null
+					&& !CollectionUtils.isEmpty(paymentSearchCriteria.getTenantIds())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" eb.tenantId in ( :tenantId )");
+				preparedStatementValues.put("tenantId", paymentSearchCriteria.getTenantIds());
+			}
+		}
+
+		public String getArrearCollection(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			String query = PT_ARREAR_COLLECTION_QUERY;
+			addOffset(paymentSearchCriteria);
+			query = setFromAndToDate(paymentSearchCriteria, query);
+			removeOffset(paymentSearchCriteria);
+
+			StringBuilder modifiedQuery = new StringBuilder();
+			modifiedQuery.append(query);
+			StringBuilder selectQuery = new StringBuilder(PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY);
+			modifiedQuery.append(selectQuery);
+			setTenantIDAndTransactionDate(paymentSearchCriteria, preparedStatementValues, modifiedQuery);
+
+			return modifiedQuery.toString();
+		}
+
+		public String getPreviousYearCollection(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			String query = PT_PREVIOUS_YEAR_COLLECTION_QUERY;
+
+			Long fromDate = paymentSearchCriteria.getFromDate();
+			
+			StringBuilder modifiedQuery = new StringBuilder();
+			modifiedQuery.append(query);
+			StringBuilder selectQuery = new StringBuilder(PT_ARREAR_AND_TOTAL_COLLECTION_COMMON_QUERY);
+			modifiedQuery.append(selectQuery);
+			
+			paymentSearchCriteria.setFromDate(null);
+			setTenantIDAndTransactionDate(paymentSearchCriteria, preparedStatementValues, modifiedQuery);
+									
+			ZonedDateTime startIST = Instant.ofEpochMilli(fromDate).atZone(ZoneId.of("Asia/Kolkata"));		
+			startIST = startIST.minusYears(1);
+			
+			Long startMillisIST = startIST.toInstant().toEpochMilli();
+			
+			log.info("Start TIme in Previous Year Collection : " + startMillisIST.toString());
+			
+			paymentSearchCriteria.setFromDate(startMillisIST);
+			paymentSearchCriteria.setToDate(fromDate);
+
+			addOffset(paymentSearchCriteria);
+
+			if (paymentSearchCriteria.getFromDate() != null) {
+				modifiedQuery.append("and eb2.fromperiod >= :pyFromDate ");
+				preparedStatementValues.put("pyFromDate", paymentSearchCriteria.getFromDate());
+			}
+			
+			if (paymentSearchCriteria.getToDate() != null) {
+				modifiedQuery.append(" and eb2.toperiod <= :pyToDate ");
+				preparedStatementValues.put("pyToDate", paymentSearchCriteria.getToDate());
+			}
+
+			return modifiedQuery.toString();
+		}
+
+		public String getCollectionGrowthRate(PaymentSearchCriteria paymentSearchCriteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder upperQuery = new StringBuilder(PT_GROWTH_RATE_QUERY_UPPER_HALF);
+			StringBuilder lowerQuery = new StringBuilder(PT_GROWTH_RATE_QUERY_LOWER_HALF);
+			
+			
+			 if (paymentSearchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(paymentSearchCriteria.getTenantIds())) {
+				 upperQuery.append(" AND py.tenantid in ( :tenantId ) ");
+					preparedStatementValues.put("tenantId", paymentSearchCriteria.getTenantIds() );
+					}
+			 upperQuery.append(lowerQuery);
+			
+			return upperQuery.toString();
+		}
+		
+		public String getPaymentModeCollectionsQuery(PaymentSearchCriteria criteria,
+				Map<String, Object> preparedStatementValues) {
+			StringBuilder selectQuery = new StringBuilder(PAYMENT_MODE_WISE_COLLECTION);
+			addWhereClause(selectQuery, preparedStatementValues, criteria);
+			selectQuery.append(" group by py.paymentmode ");
+			return selectQuery.toString();
 		}
 
 	

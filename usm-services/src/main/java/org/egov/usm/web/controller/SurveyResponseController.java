@@ -83,7 +83,7 @@ public class SurveyResponseController {
 	
 	/**
 	 * Search Submitted Surveys
-	 * @param surveyRequest
+	 * @param searchCriteria
 	 * @return SurveyDetailsResponse
 	 */
 	@PostMapping("/response/_search")
