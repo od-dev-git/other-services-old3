@@ -124,6 +124,7 @@ public class Constants {
 		final static String SERVICE_WS_TOTAL_APPLICATIONS = "wstotalApplications";
 		final static String SERVICE_WS_CUMULATIVE_CONNECTIONS_BY_USAGE = "wsCumulativeConnectionByUsage";
 		final static String SERVICE_WS_CUMULATIVE_CONNECTIONS_BY_TYPE = "wsCumulativeConnectionByType";
+		final static String SERVICE_WS_STATUS_BY_BOUNDARY = "wsServiceStatusByBoundary";
 		
 		final static String SERVICE_OBPS_TOTAL_APPLICATIONS_RECEIVED = "bpaTotalApplicationsSubmitted";
 		final static String SERVICE_OBPS_TOTAL_APPLICATIONS_REJECTED = "bpaTotalRejectedApplications";

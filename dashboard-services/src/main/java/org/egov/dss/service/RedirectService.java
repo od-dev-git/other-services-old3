@@ -676,6 +676,10 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.REVENUE_OVERVIEW_BOTTOM_PERFORMING_ULBS.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.bottomPerformingUlbsOverview(requestInfoWrapper.getPayloadDetails());
 		}
+		if (Constants.VisualizationCodes.SERVICE_WS_STATUS_BY_BOUNDARY.equalsIgnoreCase(visualizationCode)) {
+			  return wsService.wsStatusByBoundary(requestInfoWrapper.getPayloadDetails());
+		}
+		
 		return null;
 
 	}
