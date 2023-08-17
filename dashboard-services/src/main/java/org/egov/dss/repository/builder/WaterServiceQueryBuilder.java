@@ -34,7 +34,18 @@ public class WaterServiceQueryBuilder {
 			+ "from eg_ws_connection conn ";
 	
 	public static final String TOTAL_COMPLETED_APPLICATIONS_COUNT = " select tenantid as name , count(*) as value from eg_ws_connection  conn ";
-
+	
+	public static final String WS_STATUS_BY_BOUNDARY = "select tenantid, coalesce(sum(docverifier),0) as pendingatdocverf, "
+			+ "coalesce(sum(fi),0) as pendingatfi, "
+			+ "coalesce(sum(approval),0) as pendingatapproval, "
+			+ "coalesce(sum(payment),0) as pendingatpayment , "
+			+ "coalesce(sum(actv),0) as pendingatactv "
+			+ "from ( select tenantid, case when applicationstatus='PENDING_FOR_DOCUMENT_VERIFICATION' then 1 end as docverifier, "
+			+ "case when applicationstatus='PENDING_FOR_FIELD_INSPECTION' then 1 end as fi, "
+			+ "case when applicationstatus='PENDING_FOR_APPROVAL' then 1 end as approval, "
+			+ "case when applicationstatus='PENDING_FOR_PAYMENT' then 1 end as payment, "
+			+ "case when applicationstatus='PENDING_FOR_CONNECTION_ACTIVATION' then 1 end as actv "
+			+ "from eg_ws_connection conn ";
 	
 	public static String getActiveConnectionCount(WaterSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -246,6 +257,14 @@ public class WaterServiceQueryBuilder {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_COMPLETED_APPLICATIONS_COUNT);
 		addWhereClauseWithCreatedTime(selectQuery, preparedStatementValues, waterSearchCriteria);
 	    addGroupByClause(selectQuery," conn.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public String getWSStatusByBoundary(WaterSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(WS_STATUS_BY_BOUNDARY);
+		addWhereClauseWithCreatedTime(selectQuery, preparedStatementValues, criteria);
+		selectQuery.append( " ) wsTmp ");
+		addGroupByClause(selectQuery," tenantid ");
 		return selectQuery.toString();
 	}
 
