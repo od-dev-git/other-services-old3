@@ -136,4 +136,12 @@ public class WSRepository {
         return result;
 	}
 
+	public List<HashMap<String, Object>> getWSStatusByBoundary(WaterSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = wsQueryBuilder.getWSStatusByBoundary(criteria, preparedStatementValues);
+        log.info("WS status by boundary table  : "+query);
+        List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TableChartRowMapper());
+        return result;
+	}
+
 }

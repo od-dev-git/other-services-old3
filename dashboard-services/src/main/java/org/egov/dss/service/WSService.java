@@ -11,6 +11,7 @@ import org.egov.dss.model.Chart;
 import org.egov.dss.model.CommonSearchCriteria;
 import org.egov.dss.model.MarriageSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.WaterSearchCriteria;
 import org.egov.dss.repository.WSRepository;
 import org.egov.dss.web.model.Data;
@@ -301,6 +302,55 @@ public class WSService {
 		total = extractDataForChart(wsConnectionsByType, plots ,total);	 
 
 		return Arrays.asList(Data.builder().headerName("DSS_WS_CUMULATIVE_CONNECTION_BY_TYPE").headerValue(total).plots(plots).build());
+	}
+
+	public List<Data> wsStatusByBoundary(PayloadDetails payloadDetails) {
+		
+		WaterSearchCriteria criteria = getWaterSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		List<HashMap<String, Object>> wsStatusByBoundary = wsRepository.getWSStatusByBoundary(criteria);
+
+		List<Data> response = new ArrayList();
+		int serailNumber = 0;
+		for (HashMap<String, Object> wsStatus : wsStatusByBoundary) {
+			serailNumber++;
+			String tenantId = String.valueOf(wsStatus.get("tenantid"));
+			String tenantIdStyled = tenantId.replace("od.", "");
+			tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(tenantIdStyled).name("ULBs").symbol("text").build());
+
+			row.add(Plot.builder().name("Pending At Doc Verfication")
+					.value(new BigDecimal(String.valueOf(wsStatus.get("pendingatdocverf")))).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Field Inspection")
+					.value(new BigDecimal(String.valueOf(wsStatus.get("pendingatfi")))).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Approval")
+					.value(new BigDecimal(String.valueOf(wsStatus.get("pendingatapproval")))).symbol("number").build());
+			row.add(Plot.builder().name("Pending For Payment")
+					.value(new BigDecimal(String.valueOf(wsStatus.get("pendingatpayment")))).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Connection Activation")
+					.value(new BigDecimal(String.valueOf(wsStatus.get("pendingatactv")))).symbol("number").build());
+			
+			response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null)
+					.build());
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serailNumber++;
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(payloadDetails.getTenantid()).name("ULBs").symbol("text").build());
+            row.add(Plot.builder().name("Pending At Doc Verfication").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Field Inspection").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Approval").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending For Payment").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Connection Activation").value(BigDecimal.ZERO).symbol("number").build());
+		response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber).plots(row)
+					.insight(null).build());
+		}
+	   
+		return response;
 	}
 
 }

@@ -635,6 +635,9 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.SERVICE_WS_CUMULATIVE_CONNECTIONS_BY_TYPE.equalsIgnoreCase(visualizationCode)) {
 			  return wsService.wsCumulativeConnectionByType(requestInfoWrapper.getPayloadDetails());
 		}
+		if (Constants.VisualizationCodes.SERVICE_WS_STATUS_BY_BOUNDARY.equalsIgnoreCase(visualizationCode)) {
+			  return wsService.wsStatusByBoundary(requestInfoWrapper.getPayloadDetails());
+		}
 		
 		return null;
 
