@@ -203,7 +203,15 @@ public class DashboardConstants {
 	public static final String BPA_RISK_TYPE_LOW = "LOW";
 	
 	public static final String BPA_RISK_TYPE_HIGH = "HIGH";
-	
+
+	public static final String STATUS_ESCALATED_LEVEL_1 = "escaltedlevel1pending";
+
+	public static final String STATUS_ESCALATED_LEVEL_2 = "escaltedlevel2pending";
+
+	public static final String STATUS_ESCALATED_LEVEL_3 = "escaltedlevel3pending";
+
+	public static final String STATUS_ESCALATED_LEVEL_4 = "escaltedlevel4pending";
+
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
 					BUSINESS_SERVICE_OC_APP_FEE, BUSINESS_SERVICE_OC_SAN_FEE));

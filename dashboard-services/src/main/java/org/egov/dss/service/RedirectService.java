@@ -679,6 +679,9 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.SERVICE_WS_STATUS_BY_BOUNDARY.equalsIgnoreCase(visualizationCode)) {
 			  return wsService.wsStatusByBoundary(requestInfoWrapper.getPayloadDetails());
 		}
+		if(Constants.VisualizationCodes.SERVICE_PGR_TOTAL_ESCALATED_COMPLAINTS.equalsIgnoreCase(visualizationCode)) {
+            return pgrService.totalEscalatedComplaints(requestInfoWrapper.getPayloadDetails());
+        }
 		
 		return null;
 

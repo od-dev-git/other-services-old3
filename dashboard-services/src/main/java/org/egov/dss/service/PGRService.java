@@ -568,5 +568,15 @@ public class PGRService {
 		HashMap<String, Long> totalApplication = pgrRepository.getTenantWiseTotalApplication(criteria);
         return totalApplication;
 	}
+	
+	public List<Data> totalEscalatedComplaints(PayloadDetails payloadDetails) {
+		PgrSearchCriteria criteria = getPgrSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_ESCALATED_LEVEL_1,
+				DashboardConstants.STATUS_ESCALATED_LEVEL_2, DashboardConstants.STATUS_ESCALATED_LEVEL_3,
+				DashboardConstants.STATUS_ESCALATED_LEVEL_4));
+		Integer totalEscalatedComplaints = (Integer) pgrRepository.getTotalApplications(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalEscalatedComplaints).build());
+	}
 
 }
