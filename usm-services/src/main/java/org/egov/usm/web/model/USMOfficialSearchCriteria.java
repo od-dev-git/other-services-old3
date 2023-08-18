@@ -15,6 +15,9 @@ import lombok.Setter;
 @Builder
 public class USMOfficialSearchCriteria {
 
+	@JsonProperty("id")
+	private String id;
+
 	@JsonProperty("tenantId")
 	private String tenantId;
 

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.usm.repository.USMOfficialRepository;
+import org.egov.usm.validator.USMOfficialValidator;
 import org.egov.usm.web.model.USMOfficial;
 import org.egov.usm.web.model.USMOfficialRequest;
 import org.egov.usm.web.model.USMOfficialSearchCriteria;
@@ -21,10 +22,14 @@ public class USMOfficialService {
 
 	private OfficialEnrichmentService enrichmentService;
 
+	private USMOfficialValidator validator;
+
 	@Autowired
-	public USMOfficialService(USMOfficialRepository repository, OfficialEnrichmentService enrichmentService) {
+	public USMOfficialService(USMOfficialRepository repository, OfficialEnrichmentService enrichmentService,
+			USMOfficialValidator validator) {
 		this.repository = repository;
 		this.enrichmentService = enrichmentService;
+		this.validator = validator;
 	}
 
 	/**
@@ -35,6 +40,8 @@ public class USMOfficialService {
 	 */
 
 	public USMOfficial create(@Valid USMOfficialRequest usmOfficialRequest) {
+
+		validator.isOfficialAlreadyExists(usmOfficialRequest.getUsmOffcial());
 		// Enrich official details
 		enrichmentService.enrichUSMOfficialRequest(usmOfficialRequest);
 
@@ -57,6 +64,46 @@ public class USMOfficialService {
 		log.info("search: " + searchCriteria.toString());
 		List<USMOfficial> usmOfficials = repository.getOfficialRequests(searchCriteria);
 		return usmOfficials;
+	}
+
+	public List<USMOfficial> deassingOfficial(@Valid USMOfficialRequest usmOfficialRequest) {
+
+		return null;
+	}
+
+	/**
+	 * Deassign a official
+	 * 
+	 * @param usmOfficialRequest
+	 */
+	public void deassignOfficial(@Valid USMOfficialRequest usmOfficialRequest) {
+		USMOfficial existingOfficialMember = validator.isOfficialExists(usmOfficialRequest.getUsmOffcial());
+
+		// Enrich official Member details
+		enrichmentService.enrichDeassignOfficialRequest(usmOfficialRequest, existingOfficialMember);
+
+		// update the official and deassign
+		repository.updateOfficial(usmOfficialRequest);
+
+	}
+
+	/**
+	 * reassign a official
+	 * 
+	 * @param usmOfficialRequest
+	 */
+
+	public USMOfficial reassignOfficial(@Valid USMOfficialRequest usmOfficialRequest) {
+
+		USMOfficial existingOfficial = validator.isOfficialExists(usmOfficialRequest.getUsmOffcial());
+
+		// Enrich SDA Member details
+		enrichmentService.enrichReassignMembersRequest(usmOfficialRequest, existingOfficial);
+
+		// assign the citizen as SDA
+		repository.updateOfficial(usmOfficialRequest);
+
+		return usmOfficialRequest.getUsmOffcial();
 	}
 
 }
