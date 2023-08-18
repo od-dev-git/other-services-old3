@@ -1,7 +1,9 @@
 package org.egov.usm.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
@@ -47,12 +49,13 @@ public class UserService {
 	 * @param mobileNumber
 	 * @param requestInfo
 	 * @param tenantId
+	 * @param role
 	 * @return user uuid
 	 */
-	public String isUserPresent(String mobileNumber, RequestInfo requestInfo, String tenantId) {
+	public String isUserPresent(String mobileNumber, RequestInfo requestInfo, String tenantId, String role) {
 
 		UserSearchRequest searchRequest = UserSearchRequest.builder().userName(mobileNumber).tenantId(tenantId)
-				.userType(Constants.ROLE_CITIZEN).requestInfo(requestInfo).build();
+				.userType(role).requestInfo(requestInfo).build();
 		StringBuilder url = new StringBuilder(config.getUserHost() + config.getUserSearchEndpoint());
 		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest),
 				UserResponse.class);
@@ -80,7 +83,12 @@ public class UserService {
 		citizen.setMobileNumber(sdaMember.getMobileNumber());
 		citizen.setTenantId(sdaMember.getTenantId());
 		citizen.setType(UserType.CITIZEN);
-		citizen.setRoles(Arrays.asList(Role.builder().code(Constants.ROLE_CITIZEN).build()));
+		
+		List<Role> userRoles = new ArrayList<>();
+		userRoles.add(Role.builder().code(Constants.ROLE_CITIZEN).build());
+		userRoles.add(Role.builder().code(Constants.ROLE_SDA_MEMBER).build());
+		
+		citizen.setRoles(userRoles);
 
 		StringBuilder url = new StringBuilder(config.getUserHost() + config.getUserCreateEndpoint());
 		CreateUserRequest req = CreateUserRequest.builder().citizen(citizen).requestInfo(requestInfo).build();
@@ -89,24 +97,26 @@ public class UserService {
 		return res.getUser().get(0).getUuid().toString();
 	}
 
+	
+	
 	/**
 	 * 
 	 * @param uuid
 	 * @param requestInfo
 	 * @param tenantId
-	 * @return user uuid
+	 * @param role
+	 * @return Citizen
 	 */
-	public String isEmployeePresent(String uuid, RequestInfo requestInfo, String tenantId) {
+	public Citizen getUserByUuidAndRole(String uuid, RequestInfo requestInfo, String tenantId, String role) {
 		UserSearchRequest searchRequest = UserSearchRequest.builder().uuid(Collections.singletonList(uuid))
-				.tenantId(tenantId).userType(Constants.ROLE_EMPLOYEE).requestInfo(requestInfo).build();
-		StringBuilder url = new StringBuilder(config.getUserHost() + config.getUserSearchEndpoint());
-		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest),
-				UserResponse.class);
-
-		if (CollectionUtils.isEmpty(res.getUser())) {
+				.tenantId(tenantId).userType(role).requestInfo(requestInfo).build();
+		StringBuilder url = new StringBuilder(config.getUserHost()+config.getUserSearchEndpoint()); 
+		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest), UserResponse.class);
+		
+		if(CollectionUtils.isEmpty(res.getUser())) {
 			return null;
 		}
-		return res.getUser().get(0).getUuid().toString();
+		return res.getUser().get(0);
 	}
 
 }

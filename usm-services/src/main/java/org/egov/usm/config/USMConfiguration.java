@@ -94,5 +94,48 @@ public class USMConfiguration {
 
 	@Value("${persister.update.official.topic}")
 	private String updateOfficialTopic;
+	
+	
+	//Location Config
+    @Value("${egov.location.host}")
+    private String locationHost;
+
+    @Value("${egov.location.context.path}")
+    private String locationContextPath;
+
+    @Value("${egov.location.endpoint}")
+    private String locationEndpoint;
+
+    //Localization
+    @Value("${egov.localization.host}")
+    private String localizationHost;
+
+    @Value("${egov.localization.context.path}")
+    private String localizationContextPath;
+
+    @Value("${egov.localization.search.endpoint}")
+    private String localizationSearchEndpoint;
+
+    @Value("${egov.localization.statelevel}")
+    private Boolean isLocalizationStateLevel;
+    
+
+    //SMS
+    @Value("${kafka.topics.notification.sms}")
+    private String smsNotificationTopic;
+
+    @Value("${notification.sms.enabled}")
+    private Boolean isSMSEnabled;
+
+    
+    //Email
+    @Value("${notification.email.enabled}")
+    private Boolean isEmailEnabled;
+    
+    @Value("${kafka.topics.notification.email}")
+    private String emailNotificationTopic;
+    
+    @Value("${text.for.subject.email.notification}")
+    private String emailSubject;
 
 }

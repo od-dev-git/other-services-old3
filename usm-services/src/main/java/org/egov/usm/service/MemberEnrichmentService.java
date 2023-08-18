@@ -31,7 +31,7 @@ public class MemberEnrichmentService {
 		String userAccountId = null ;
 		
 		//Check User isUserPresent as Citizen
-		userAccountId = userService.isUserPresent(sdaMembersRequest.getSdaMember().getMobileNumber(), requestInfo, sdaMembersRequest.getSdaMember().getTenantId());
+		userAccountId = userService.isUserPresent(sdaMembersRequest.getSdaMember().getMobileNumber(), requestInfo, sdaMembersRequest.getSdaMember().getTenantId(), Constants.ROLE_CITIZEN);
 		
 		//If not present create SdaMember as citizen user
 		if (StringUtils.isEmpty(userAccountId)) {
@@ -61,7 +61,7 @@ public class MemberEnrichmentService {
 		String userAccountId = null ;
 		
 		//Check User isUserPresent as Citizen
-		userAccountId = userService.isUserPresent(sdaMembersRequest.getSdaMember().getMobileNumber(), requestInfo, sdaMembersRequest.getSdaMember().getTenantId());
+		userAccountId = userService.isUserPresent(sdaMembersRequest.getSdaMember().getMobileNumber(), requestInfo, sdaMembersRequest.getSdaMember().getTenantId(), Constants.ROLE_CITIZEN);
 		
 		//If not present create SdaMember as citizen user
 		if (StringUtils.isEmpty(userAccountId)) {
