@@ -1,23 +1,22 @@
-package org.egov.usm.web.model.user;
+package org.egov.usm.web.model;
 
 import org.egov.common.contract.request.RequestInfo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+@Getter
 @AllArgsConstructor
-@Data
 @NoArgsConstructor
 @Builder
-public class CreateEmployeeRequest {
-
+@ToString
+public class EmailRequest {
+	
 	private RequestInfo requestInfo;
 
-	@JsonProperty("user")
-	private Employee employee;
-
+	private Email email;
 }

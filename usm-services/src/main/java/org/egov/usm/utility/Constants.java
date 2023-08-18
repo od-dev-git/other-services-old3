@@ -1,6 +1,12 @@
 package org.egov.usm.utility;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class Constants {
+	
+	public Constants() {}
 
 	public static final String ACTIVE = "ACTIVE";
 	public static final String INACTIVE = "INACTIVE";
@@ -9,9 +15,40 @@ public class Constants {
 
 	public static final String ROLE_CITIZEN = "CITIZEN";
 	public static final String ROLE_EMPLOYEE = "EMPLOYEE";
+	public static final String ROLE_SDA_MEMBER = "USM_SDA";
 
 	public static final String SDA_MEMBER = "SDA MEMBER";
 	public static final String USM_OFFICIAL = "USM OFFICIAL";
 	
 	public static final String EMPTY_STRING = "";
+	
+	
+	//notification
+	
+	public static final String NOTIFICATION_LOCALE = "en_IN";
+	
+	public static final String MODULE = "rainmaker-common";
+	
+	public static final String NOTIFICATION_OWNER_NAME_KEY = "{OWNER_NAME}";
+	
+	public static final String EMAIL_SUBJECT_ID_KEY = "<%application no%>";
+	
+	
+	// ACTION_STATUS combinations for notification
+
+    public static final String TICKET_STATUS_OPEN = "OPEN";
+    public static final String TICKET_STATUS_CLOSED = "CLOSED";
+    
+    
+    
+    // SMS Template for notification
+    
+    public static final String TICKET_CREATED = "USM_TICKET_OPEN_SDA_MEMBER_SMS";
+    public static final String TICKET_CLOSED = "USM_TICKET_CLOSED_SDA_MEMBER_SMS";
+    
+    
+    
+    public static final List<String> NOTIFICATION_CODES = Collections.unmodifiableList(Arrays.asList(TICKET_CREATED));
+    
+    
 }
