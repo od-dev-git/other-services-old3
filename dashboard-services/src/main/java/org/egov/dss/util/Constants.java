@@ -215,6 +215,7 @@ public class Constants {
 		final static String SERVICE_PGR_UNIQUE_CITIZENS = "pgrCitizenOnDateRange";
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS_BY_STATUS = "totalComplaintsbyStatus";
 		final static String SERVICE_PGR_TOTAL_COMPLAINTS_BY_SOURCE = "totalComplaintsbySource";
+		final static String SERVICE_PGR_TOTAL_ESCALATED_COMPLAINTS = "totalEscalatedComplaints";
 		
 		final static String REVENUE_OVERVIEW_TOP_PERFORMING_ULBS = "topPerformingUlbsOverview";
 		final static String REVENUE_OVERVIEW_BOTTOM_PERFORMING_ULBS = "bottomPerformingUlbsOverview";
