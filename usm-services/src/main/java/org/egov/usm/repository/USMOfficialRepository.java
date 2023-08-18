@@ -10,6 +10,7 @@ import org.egov.usm.config.USMConfiguration;
 import org.egov.usm.producer.Producer;
 import org.egov.usm.repository.builder.USMOfficcialQueryBuilder;
 import org.egov.usm.repository.rowmapper.USMOfficialRowMapper;
+import org.egov.usm.web.model.SurveyTicket;
 import org.egov.usm.web.model.USMOfficial;
 import org.egov.usm.web.model.USMOfficialRequest;
 import org.egov.usm.web.model.USMOfficialSearchCriteria;
@@ -83,5 +84,19 @@ public class USMOfficialRepository {
 		log.info("update request :", usmOfficialRequest.toString());
 		producer.push(config.getUpdateOfficialTopic(), usmOfficialRequest);
 	}
+	
+	/**
+	 * searching assigned uuid of USMOfficials
+	 * 
+	 * @param surveyTicket
+	 * @return Uuid Of USMOfficials
+	 */
+	public List<String> getUuidOfUSMOfficials(SurveyTicket surveyTicket) {
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = queryBuilder.getUuidOfUSMOfficials(surveyTicket, preparedStmtList);
+        List<String> uuids = jdbcTemplate.queryForList(query, preparedStmtList.toArray(), String.class);
+		return uuids;
+	}
+
 
 }

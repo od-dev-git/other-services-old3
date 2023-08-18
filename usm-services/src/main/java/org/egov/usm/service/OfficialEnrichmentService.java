@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
+import org.egov.usm.utility.Constants;
 import org.egov.usm.utility.USMUtil;
 import org.egov.usm.web.model.AuditDetails;
 import org.egov.usm.web.model.USMOfficial;
@@ -30,8 +31,8 @@ public class OfficialEnrichmentService {
 		String officialAccountId = null;
 
 		// Check User isUserPresent as Employee
-		officialAccountId = userService.isEmployeePresent(usmOfficialRequest.getUsmOffcial().getAssigned(), requestInfo,
-				usmOfficialRequest.getUsmOffcial().getTenantId());
+		officialAccountId = userService.isUserPresent(usmOfficialRequest.getUsmOffcial().getAssigned(), requestInfo,
+				usmOfficialRequest.getUsmOffcial().getTenantId(), Constants.ROLE_EMPLOYEE);
 
 		// If not present throw exception
 		if (StringUtils.isEmpty(officialAccountId)) {
@@ -71,8 +72,8 @@ public class OfficialEnrichmentService {
 		String officialAccountId = null;
 
 		// Check User isUserPresent as Citizen
-		officialAccountId = userService.isEmployeePresent(usmOfficialRequest.getUsmOffcial().getAssigned(), requestInfo,
-				usmOfficialRequest.getUsmOffcial().getTenantId());
+		officialAccountId = userService.isUserPresent(usmOfficialRequest.getUsmOffcial().getAssigned(), requestInfo,
+				usmOfficialRequest.getUsmOffcial().getTenantId(), Constants.ROLE_EMPLOYEE);
 
 		// If not present throw exception
 		if (StringUtils.isEmpty(officialAccountId)) {

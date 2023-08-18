@@ -43,7 +43,7 @@ public class EnrichmentService {
 		List<String> surveyNumbers = idGenService.getIdList(requestInfo, surveyDetailsRequest.getSurveyDetails().getTenantId(), config.getSurveyNoIdgenName(), config.getSurveyNoIdgenFormat(), 1 );
 		
 		surveyDetailsRequest.getSurveyDetails().setSurveyNo(surveyNumbers.get(0));
-		surveyDetailsRequest.getSurveyDetails().setSurveySubmittedId(uuid);
+		surveyDetailsRequest.getSurveyDetails().setSurveySubmittedId(USMUtil.generateUUID());
 		surveyDetailsRequest.getSurveyDetails().setSurveyTime(auditDetails.getCreatedTime());
 		surveyDetailsRequest.getSurveyDetails().setAuditDetails(auditDetails);
 		
