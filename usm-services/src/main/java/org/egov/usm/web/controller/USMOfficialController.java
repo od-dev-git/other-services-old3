@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.egov.common.contract.response.ResponseInfo;
 import org.egov.usm.service.USMOfficialService;
 import org.egov.usm.utility.ResponseInfoFactory;
 import org.egov.usm.web.model.RequestInfoWrapper;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/member")
+@RequestMapping("/officer")
 public class USMOfficialController {
 
 	private final ResponseInfoFactory responseInfoFactory;
@@ -52,6 +53,44 @@ public class USMOfficialController {
 				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+
+	/**
+	 * Reassign a official
+	 * 
+	 * @param usmOfficialRequest
+	 * @return USMOfficialResponse
+	 */
+	@PostMapping("/_reassign")
+	public ResponseEntity<USMOfficialResponse> reassignOfficial(
+			@Valid @RequestBody USMOfficialRequest usmOfficialRequest) {
+		USMOfficial usmOfficial = usmOfficialService.reassignOfficial(usmOfficialRequest);
+		USMOfficialResponse response = USMOfficialResponse.builder().usmOffcials(Collections.singletonList(usmOfficial))
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(usmOfficialRequest.getRequestInfo(),
+						true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	/**
+	 * Deassisn member
+	 * 
+	 * @param usmOfficialRequest
+	 * @return responseInfo
+	 */
+	@PostMapping("/_deassign")
+	public ResponseEntity<?> deassignOfficial(@Valid @RequestBody USMOfficialRequest usmOfficialRequest) {
+		usmOfficialService.deassignOfficial(usmOfficialRequest);
+		ResponseInfo responseInfo = responseInfoFactory
+				.createResponseInfoFromRequestInfo(usmOfficialRequest.getRequestInfo(), true);
+		return new ResponseEntity<>(responseInfo, HttpStatus.OK);
+	}
+
+	/**
+	 * Search Officials
+	 * 
+	 * @param searchCriteria
+	 * @return USMOfficialResponse
+	 */
 
 	@PostMapping("/_search")
 	public ResponseEntity<USMOfficialResponse> search(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,

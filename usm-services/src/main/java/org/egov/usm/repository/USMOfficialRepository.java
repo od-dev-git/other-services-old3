@@ -74,4 +74,14 @@ public class USMOfficialRepository {
 
 	}
 
+	/**
+	 * Pushes the sdaMembersRequest to update kafka topic
+	 * 
+	 * @param sdaMembersRequest
+	 */
+	public void updateOfficial(@Valid USMOfficialRequest usmOfficialRequest) {
+		log.info("update request :", usmOfficialRequest.toString());
+		producer.push(config.getUpdateOfficialTopic(), usmOfficialRequest);
+	}
+
 }
