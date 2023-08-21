@@ -17,25 +17,38 @@ public class TicketSearchCriteria {
 
 	@JsonProperty("tenantId")
 	private String tenantId;
-	
+
 	@JsonProperty("ticketNo")
 	private String ticketNo;
-	
+
 	@JsonProperty("ticketId")
 	private String ticketId;
-	
+
 	@JsonProperty("surveyId")
 	private String surveyId;
-	
+
 	@JsonProperty("ward")
 	private String ward;
-	
+
+	@JsonProperty("category")
+	private String category;
+
 	@JsonProperty("slumCode")
 	private String slumCode;
-	
+
 	@JsonProperty("questionCode")
 	private String questionCode;
-	
+
 	@JsonProperty("status")
 	private String status;
+
+	@JsonProperty("isOfficial")
+	private Boolean isOfficial;
+
+	@JsonProperty("isSda")
+	private Boolean isSda;
+
+	@JsonProperty("createdBy")
+	private String createdBy;
+
 }
