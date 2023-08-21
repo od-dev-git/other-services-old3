@@ -20,6 +20,9 @@ public class TicketDetails {
 	@JsonProperty("tenantid")
 	private String tenantId;
 	
+	@JsonProperty("city")
+	private String city;
+	
 	@JsonProperty("ticketNo")
 	private String serviceRequestId;
 	
