@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SRQueryBuilder {
 	
 	
-	private static final String QUERY_TCIKET_DETAIL = " select ser.tenantid, ser.servicerequestid, ser.createdtime, ser.lastmodifiedtime, ser.firstname, ser.service, ser.servicetype, "
+	private static final String QUERY_TCIKET_DETAIL = " select ser.tenantid, ser.city, ser.servicerequestid, ser.createdtime, ser.lastmodifiedtime, ser.firstname, ser.service, ser.servicetype, "
 			+ "ser.description, ser.priority, ser.status from eg_sr_service ser  ";
 	
 	public String getTicketDetailsQuery(Map<String, Object> preparedStatement, SRReportSearchCriteria criteria) {
@@ -33,6 +33,12 @@ public class SRQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" ser.tenantid IN ( :tenantId )");
 			preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
+		}
+		
+		if (!StringUtils.isEmpty(searchCriteria.getCity())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ser.city IN ( :city )");
+			preparedStatementValues.put("city", searchCriteria.getCity());
 		}
 		
 		if (searchCriteria.getFromDate() != null) {

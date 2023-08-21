@@ -32,5 +32,8 @@ public class SRReportSearchCriteria {
 	
 	@JsonProperty("status")
 	private String status;
+	
+	@JsonProperty("city")
+	private String city;
 }
 

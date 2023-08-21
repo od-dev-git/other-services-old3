@@ -27,6 +27,7 @@ public class SRTicketDetailsRowMapper implements ResultSetExtractor<List<TicketD
 			reponse.setType(rs.getString("servicetype"));
 			reponse.setDescription(rs.getString("description"));
 			reponse.setPriority(rs.getString("priority"));
+			reponse.setCity(rs.getString("city"));
 			String status = rs.getString("status");
 			reponse.setStatus(status);
 			if(status.equalsIgnoreCase("closed")) {
