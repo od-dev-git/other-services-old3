@@ -23,6 +23,12 @@ public class SurveyTicket {
 	@JsonProperty("tenantId")
 	private String tenantId;
 
+	@JsonProperty("ward")
+	private String ward;
+
+	@JsonProperty("slumCode")
+	private String slumCode;
+
 	@JsonProperty("ticketNo")
 	private String ticketNo;
 
@@ -31,6 +37,9 @@ public class SurveyTicket {
 
 	@JsonProperty("questionId")
 	private String questionId;
+
+	@JsonProperty("questionCategory")
+	private String questionCategory;
 
 	@JsonProperty("ticketDescription")
 	private String ticketDescription;

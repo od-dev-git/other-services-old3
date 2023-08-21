@@ -30,8 +30,21 @@ public class TicketQueryBuilder {
 	}
 
 	public String getSurveyTicketSearchQuery(TicketSearchCriteria searchCriteria, List<Object> preparedStmtList) {
+
 		StringBuilder query = new StringBuilder(
-				"select ticket.id, ticket.tenantid, ticket.ticketno ,ticket.surveyanswerid ,ticket.questionid,ticket.ticketdescription, ticket.status ,ticket.ticketcreatedtime,ticket.ticketclosedtime ,ticket.unattended,ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,ticket.lastmodifiedby FROM eg_usm_survey_ticket ticket left outer join eg_usm_survey_submitted submit on ticket.tenantid=submit.tenantid");
+				"select ticket.id, ticket.tenantid, answer.questioncategory ,  ticket.ticketno , ticket.surveyanswerid, "
+						+ "ticket.questionid,ticket.ticketdescription, ticket.status ,submit.slumcode , submit.ward,"
+						+ "ticket.ticketcreatedtime,ticket.ticketclosedtime ,ticket.unattended,"
+						+ "ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,"
+						+ "ticket.lastmodifiedby FROM eg_usm_survey_ticket ticket ");
+		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer on ticket.surveyanswerid =answer.id");
+		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted submit ON answer.surveysubmittedid =submit.id");
+
+		if (searchCriteria.getIsOfficial() == Boolean.TRUE) {
+			query.append(
+					" JOIN eg_usm_dept_mapping dept ON  submit.tenantid = dept.tenantid and submit.ward = dept.ward and submit.slumcode = dept.slumcode and answer.questioncategory = dept.category");
+
+		}
 
 		if (!ObjectUtils.isEmpty(searchCriteria.getTicketId())) {
 			addClauseIfRequired(query, preparedStmtList);
@@ -66,6 +79,20 @@ public class TicketQueryBuilder {
 			query.append(" submit.slumcode = ? ");
 			preparedStmtList.add(searchCriteria.getSlumCode());
 		}
+
+		if (!ObjectUtils.isEmpty(searchCriteria.getCategory())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" answer.questioncategory  = ? ");
+			preparedStmtList.add(searchCriteria.getCategory());
+		}
+
+		if (!ObjectUtils.isEmpty(searchCriteria.getCreatedBy())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.createdby = ? ");
+			preparedStmtList.add(searchCriteria.getCreatedBy());
+		}
+
+		query.append(" ORDER BY ticket.createdtime  ");
 
 		return query.toString();
 	}

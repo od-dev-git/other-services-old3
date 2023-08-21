@@ -96,6 +96,7 @@ public class TicketService {
 	}
 
 	public List<SurveyTicket> searchTicket(TicketSearchCriteria searchCriteria) {
+
 		log.info("search: " + searchCriteria.toString());
 		List<SurveyTicket> surveyTickets = repository.getSurveyTicketRequests(searchCriteria);
 		return surveyTickets;
