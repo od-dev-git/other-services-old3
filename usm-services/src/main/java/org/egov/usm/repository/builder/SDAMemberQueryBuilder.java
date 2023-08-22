@@ -22,6 +22,12 @@ public class SDAMemberQueryBuilder {
             query.append(" sda.id = ?" );
             preparedStmtList.add(searchCriteria.getId());
         }
+        
+        if(!ObjectUtils.isEmpty(searchCriteria.getUserId())){
+            addClauseIfRequired(query, preparedStmtList);
+            query.append(" sda.userid = ?");
+            preparedStmtList.add(searchCriteria.getUserId());
+        }
 
         if(!ObjectUtils.isEmpty(searchCriteria.getTenantId())){
             addClauseIfRequired(query, preparedStmtList);

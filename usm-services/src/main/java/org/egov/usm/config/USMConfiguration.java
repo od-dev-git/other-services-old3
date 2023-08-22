@@ -121,11 +121,11 @@ public class USMConfiguration {
     
 
     //SMS
-    @Value("${kafka.topics.notification.sms}")
-    private String smsNotificationTopic;
-
     @Value("${notification.sms.enabled}")
     private Boolean isSMSEnabled;
+    
+    @Value("${kafka.topics.notification.sms}")
+    private String smsNotificationTopic;
 
     
     //Email

@@ -43,12 +43,13 @@ public class Constants {
     
     // SMS Template for notification
     
-    public static final String TICKET_CREATED = "USM_TICKET_OPEN_SDA_MEMBER_SMS";
-    public static final String TICKET_CLOSED = "USM_TICKET_CLOSED_SDA_MEMBER_SMS";
+    public static final String TICKET_CREATED_SDA_MEMBER = "USM_TICKET_OPEN_SDA_MEMBER_SMS";
+    public static final String TICKET_CREATED_USM_OFFICIAL = "USM_TICKET_OPEN_USM_OFFICIAL_SMS";
+    public static final String TICKET_CLOSED_SDA_MEMBER = "USM_TICKET_CLOSE_SDA_MEMBER_SMS";
     
     
     
-    public static final List<String> NOTIFICATION_CODES = Collections.unmodifiableList(Arrays.asList(TICKET_CREATED));
+    public static final List<String> NOTIFICATION_CODES = Collections.unmodifiableList(Arrays.asList(TICKET_CREATED_SDA_MEMBER, TICKET_CREATED_USM_OFFICIAL, TICKET_CLOSED_SDA_MEMBER));
     
     
 }

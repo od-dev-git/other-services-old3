@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.egov.usm.service.notification.SurveyNotificationService;
 import org.egov.usm.web.model.SurveyDetailsRequest;
+import org.egov.usm.web.model.SurveyTicketRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -34,6 +35,19 @@ public class SurveyNotificationConsumer {
             log.error("Error while listening to value: " + record + " on topic: " + topic + ": " + e);
         }
        
-        surveyNotificationService.processNotification(surveyDetailsRequest);
+        surveyNotificationService.processTicketCreatedNotification(surveyDetailsRequest);
+	}
+	
+	
+	@KafkaListener(topics = {"${persister.update.ticket.topic}"})
+	public void listenSurveyTicket(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+		SurveyTicketRequest surveyTicketRequest = new SurveyTicketRequest();
+        try {
+        	surveyTicketRequest = mapper.convertValue(record, SurveyTicketRequest.class);
+        } catch (final Exception e) {
+            log.error("Error while listening to value: " + record + " on topic: " + topic + ": " + e);
+        }
+       
+        surveyNotificationService.processTicketClosedNotification(surveyTicketRequest);
 	}
 }
