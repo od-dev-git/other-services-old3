@@ -9,10 +9,10 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.usm.repository.USMOfficialRepository;
 import org.egov.usm.utility.Constants;
 import org.egov.usm.utility.NotificationUtil;
-import org.egov.usm.web.model.EmailRequest;
 import org.egov.usm.web.model.SMSRequest;
 import org.egov.usm.web.model.SurveyDetailsRequest;
 import org.egov.usm.web.model.SurveyTicket;
+import org.egov.usm.web.model.SurveyTicketRequest;
 import org.egov.usm.web.model.user.Citizen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,25 +36,25 @@ public class SMSNotificationEnrichmentService {
 	 * @param surveyDetailsRequest
 	 * @param smsRequests
 	 */
-	public void enrichSMSRequest(SurveyDetailsRequest surveyDetailsRequest, List<SMSRequest> smsRequests) {
+	public void enrichTicketCreatedSMSRequest(SurveyDetailsRequest surveyDetailsRequest, List<SMSRequest> smsRequests) {
 		RequestInfo requestInfo = surveyDetailsRequest.getRequestInfo();
 		String tenantId = surveyDetailsRequest.getSurveyDetails().getTenantId();
 		
 		surveyDetailsRequest.getSurveyDetails().getSurveyTickets().forEach(surveyTicket -> {
 			
 			//Send Message to SDA Member
-			enrichSMSRequestForSDAMember(requestInfo, tenantId, surveyTicket, smsRequests);
+			enrichTicketCreatedSMSRequestForSDAMember(requestInfo, tenantId, surveyTicket, smsRequests);
 			
 			
 			//Send Message to USM OFFICIALS
-			enrichSMSRequestForOfficials(requestInfo, tenantId, surveyTicket, smsRequests);
+			enrichTicketCreatedSMSRequestForOfficials(requestInfo, tenantId, surveyTicket, smsRequests);
 			
 		});
 	}
 	
 	
 	 
-	private void enrichSMSRequestForOfficials(RequestInfo requestInfo, String tenantId, SurveyTicket surveyTicket,
+	private void enrichTicketCreatedSMSRequestForOfficials(RequestInfo requestInfo, String tenantId, SurveyTicket surveyTicket,
 			List<SMSRequest> smsRequests) {
 		
 		String localizationMessage = notificationUtil.getLocalizationMessages(tenantId, requestInfo);
@@ -74,7 +74,7 @@ public class SMSNotificationEnrichmentService {
 
 
 
-	private void enrichSMSRequestForSDAMember(RequestInfo requestInfo, String tenantId, SurveyTicket surveyTicket,
+	private void enrichTicketCreatedSMSRequestForSDAMember(RequestInfo requestInfo, String tenantId, SurveyTicket surveyTicket,
 			List<SMSRequest> smsRequests) {
 		
 		String localizationMessage = notificationUtil.getLocalizationMessages(tenantId, requestInfo);
@@ -101,12 +101,12 @@ public class SMSNotificationEnrichmentService {
 		switch (ACTION_STATUS) {
 
 		case Constants.TICKET_STATUS_OPEN:
-			messageTemplate = notificationUtil.getMessageTemplate(Constants.TICKET_CREATED, localizationMessage);
+			messageTemplate = notificationUtil.getMessageTemplate(Constants.TICKET_CREATED_SDA_MEMBER, localizationMessage);
 			message = getTicketCreatedMsg(surveyTicket, messageTemplate);
 			break;
 
 		case Constants.TICKET_STATUS_CLOSED:
-			messageTemplate = notificationUtil.getMessageTemplate(Constants.TICKET_CLOSED, localizationMessage);
+			messageTemplate = notificationUtil.getMessageTemplate(Constants.TICKET_CLOSED_SDA_MEMBER, localizationMessage);
 			message = getTicketClosedMsg(surveyTicket, messageTemplate);
 			break;
 		}
@@ -124,14 +124,10 @@ public class SMSNotificationEnrichmentService {
 		switch (ACTION_STATUS) {
 
 		case Constants.TICKET_STATUS_OPEN:
-			messageTemplate = notificationUtil.getMessageTemplate(Constants.TICKET_CREATED, localizationMessage);
+			messageTemplate = notificationUtil.getMessageTemplate(Constants.TICKET_CREATED_USM_OFFICIAL, localizationMessage);
 			message = getTicketCreatedMsg(surveyTicket, messageTemplate);
 			break;
 
-		case Constants.TICKET_STATUS_CLOSED:
-			messageTemplate = notificationUtil.getMessageTemplate(Constants.TICKET_CLOSED, localizationMessage);
-			message = getTicketClosedMsg(surveyTicket, messageTemplate);
-			break;
 		}
 		
 		return message;
@@ -141,33 +137,44 @@ public class SMSNotificationEnrichmentService {
 	
 	private String getTicketCreatedMsg(SurveyTicket surveyTicket, String message) {
 		message = message.replace("<ticket_no>", surveyTicket.getTicketNo());
-		
-//		String date = notificationUtil.epochToDate(surveyTicket.getTicketCreatedTime());
-//		if(date!=null)
-//			message = message.replace("<3>", date);
+
 		return message;
 	}
 
 
 	private String getTicketClosedMsg(SurveyTicket surveyTicket, String message) {
-		message = message.replace("<2>", surveyTicket.getTicketNo());
+		message = message.replace("<ticket_no>", surveyTicket.getTicketNo());
 		
-		String date = notificationUtil.epochToDate(surveyTicket.getTicketCreatedTime());
-		if(date!=null)
-			message = message.replace("<3>", date);
 		return message;
 	}
 
 
 	
-	
+
+
 	/**
-	 * Enrich mail
-	 * @param surveyDetailsRequest
-	 * @param emailRequests
+	 * Enrich Msg for closed ticket 
+	 * 
+	 * @param surveyTicketRequest
+	 * @param smsRequests
 	 */
-	public void enrichEmailRequest(SurveyDetailsRequest surveyDetailsRequest, List<EmailRequest> emailRequests) {
-		// TODO Auto-generated method stub
+	public void enrichTicketClosedSMSRequest(SurveyTicketRequest surveyTicketRequest, List<SMSRequest> smsRequests) {
+		RequestInfo requestInfo = surveyTicketRequest.getRequestInfo();
+		SurveyTicket surveyTicket = surveyTicketRequest.getTicket();
+		
+		//Send Message to SDA Member
+		
+		String localizationMessage = notificationUtil.getLocalizationMessages(surveyTicket.getTenantId(), requestInfo);
+		String message = getCustomizedMsgForSDAMember(requestInfo, surveyTicket, localizationMessage);
+
+		Map<String, String> mobileNumberToOwner = new HashMap<>();
+
+		Citizen citizen = userService.getUserByUuidAndRole(surveyTicket.getAuditDetails().getCreatedBy(), requestInfo, surveyTicket.getTenantId(), Constants.ROLE_CITIZEN);
+
+		if (citizen != null)
+			mobileNumberToOwner.put(citizen.getMobileNumber(), citizen.getName());
+
+		smsRequests.addAll(notificationUtil.createSMSRequest(message,mobileNumberToOwner));
 		
 	}
 	
