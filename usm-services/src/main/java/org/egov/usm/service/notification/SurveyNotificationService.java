@@ -10,6 +10,7 @@ import org.egov.usm.utility.NotificationUtil;
 import org.egov.usm.web.model.EmailRequest;
 import org.egov.usm.web.model.SMSRequest;
 import org.egov.usm.web.model.SurveyDetailsRequest;
+import org.egov.usm.web.model.SurveyTicketRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -30,13 +31,13 @@ public class SurveyNotificationService {
 	private USMConfiguration config;
 	
 	
-	public void processNotification(SurveyDetailsRequest surveyDetailsRequest) {
+	public void processTicketCreatedNotification(SurveyDetailsRequest surveyDetailsRequest) {
 		List<SMSRequest> smsRequests = new LinkedList<>();
 		List<EmailRequest> emailRequests = new LinkedList<>();
 		
 		if(null != config.getIsSMSEnabled()) {
 			if(config.getIsSMSEnabled()) {
-				smsEnrichmentService.enrichSMSRequest(surveyDetailsRequest,smsRequests);
+				smsEnrichmentService.enrichTicketCreatedSMSRequest(surveyDetailsRequest,smsRequests);
 				if(!CollectionUtils.isEmpty(smsRequests))
 					notificationUtil.sendSMS(smsRequests,true);
 			}
@@ -44,11 +45,35 @@ public class SurveyNotificationService {
 		
 		if(null != config.getIsEmailEnabled()) {
 			if(config.getIsEmailEnabled()) {
-				mailEnrichmentService.enrichEmailRequest(surveyDetailsRequest, emailRequests);
+				mailEnrichmentService.enrichTicketCreatedEmailRequest(surveyDetailsRequest, emailRequests);
 				if(!CollectionUtils.isEmpty(emailRequests)) 
 					notificationUtil.sendEmail(emailRequests, true);
 			}
 		}
+		
+	}
+
+
+	public void processTicketClosedNotification(SurveyTicketRequest surveyTicketRequest) {
+		List<SMSRequest> smsRequests = new LinkedList<>();
+		List<EmailRequest> emailRequests = new LinkedList<>();
+		
+		if(null != config.getIsSMSEnabled()) {
+			if(config.getIsSMSEnabled()) {
+				smsEnrichmentService.enrichTicketClosedSMSRequest(surveyTicketRequest,smsRequests);
+				if(!CollectionUtils.isEmpty(smsRequests))
+					notificationUtil.sendSMS(smsRequests,true);
+			}
+		}
+		
+		if(null != config.getIsEmailEnabled()) {
+			if(config.getIsEmailEnabled()) {
+				mailEnrichmentService.enrichTicketClosedEmailRequest(surveyTicketRequest, emailRequests);
+				if(!CollectionUtils.isEmpty(emailRequests)) 
+					notificationUtil.sendEmail(emailRequests, true);
+			}
+		}
+		
 		
 	}
 

@@ -21,6 +21,9 @@ public class MemberSearchCriteria {
 
 	@JsonProperty("id")
 	private String id;
+	
+	@JsonProperty("userId")
+	private String userId;
 
 	@JsonProperty("tenantId")
 	private String tenantId;

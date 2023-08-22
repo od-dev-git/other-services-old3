@@ -90,11 +90,21 @@ public class TicketService {
 
 		if (!surveyTicket.getUnAttended())
 			surveyTicket.setUnAttended(true);
+		
+		ticketRequest.getTicket().setTenantId(existingSurveyTickets.getTenantId());
+		ticketRequest.getTicket().setTicketNo(existingSurveyTickets.getTicketNo());
 
 		repository.update(ticketRequest);
 		return surveyTicket;
 	}
 
+	
+	/**
+	 * return List<SurveyTicket> based on search criteria
+	 * 
+	 * @param searchCriteria
+	 * @return List<SurveyTicket>
+	 */
 	public List<SurveyTicket> searchTicket(TicketSearchCriteria searchCriteria) {
 
 		log.info("search: " + searchCriteria.toString());
