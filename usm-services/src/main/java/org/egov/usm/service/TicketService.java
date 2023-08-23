@@ -76,29 +76,30 @@ public class TicketService {
 		SurveyTicket existingSurveyTickets = surveyTicketRequestValidator.validateSurveyTicketExistence(surveyTicket);
 
 		surveyTicket.setAuditDetails(existingSurveyTickets.getAuditDetails());
-		surveyTicket.setUnAttended(existingSurveyTickets.getUnAttended());
+
+//		surveyTicket.setUnAttended(existingSurveyTickets.getUnAttended());
 
 		/* Update the Audit Details */
 		surveyTicket.getAuditDetails().setLastModifiedBy(requestInfo.getUserInfo().getUuid());
 		surveyTicket.getAuditDetails().setLastModifiedTime(System.currentTimeMillis());
 		surveyTicket.setTicketClosedTime(System.currentTimeMillis());
 
-		if (ticketRequest.getTicket().getStatus().equals(TicketStatus.CLOSED))
+		if (surveyTicket.getIsSatisfied() != null) {
+			surveyTicket.setStatus(existingSurveyTickets.getStatus());
 			surveyTicket.setHasOpenTicket(Boolean.FALSE);
-		else
-			surveyTicket.setHasOpenTicket(Boolean.TRUE);
-
-		if (!surveyTicket.getUnAttended())
-			surveyTicket.setUnAttended(true);
-		
-		ticketRequest.getTicket().setTenantId(existingSurveyTickets.getTenantId());
-		ticketRequest.getTicket().setTicketNo(existingSurveyTickets.getTicketNo());
+		} else {
+			if (surveyTicket.getStatus().equals(TicketStatus.CLOSED))
+				surveyTicket.setHasOpenTicket(Boolean.FALSE);
+			else
+				surveyTicket.setHasOpenTicket(Boolean.TRUE);
+		}
+//		if (!surveyTicket.getUnAttended())
+//			surveyTicket.setUnAttended(true);
 
 		repository.update(ticketRequest);
 		return surveyTicket;
 	}
 
-	
 	/**
 	 * return List<SurveyTicket> based on search criteria
 	 * 
