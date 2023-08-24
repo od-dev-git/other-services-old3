@@ -52,7 +52,7 @@ public class SDAMemberValidator {
 		
 		List<SDAMember> sdaMembers = repository.searchSDAMembers(searchCriteria);
         if(CollectionUtils.isEmpty(sdaMembers))
-            throw new CustomException("EG_SURVEY_DOES_NOT_EXIST_ERR", "The survey entity provided in update request does not exist.");
+            throw new CustomException("EG_SURVEY_DOES_NOT_EXIST_ERR", "The SDAMember entity provided in request does not exist.");
 
         return sdaMembers.get(0);
 	}
