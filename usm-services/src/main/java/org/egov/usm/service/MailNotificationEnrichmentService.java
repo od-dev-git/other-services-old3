@@ -14,6 +14,7 @@ public class MailNotificationEnrichmentService {
 	
 	/**
 	 * Enrich mail for create ticket
+	 * 
 	 * @param surveyDetailsRequest
 	 * @param emailRequests
 	 */
@@ -24,13 +25,14 @@ public class MailNotificationEnrichmentService {
 	}
 
 
+
 	/**
 	 * Enrich mail for close ticket
 	 * 
 	 * @param surveyTicketRequest
 	 * @param emailRequests
 	 */
-	public void enrichTicketClosedEmailRequest(SurveyTicketRequest surveyTicketRequest,
+	public void enrichTicketUpdateEmailRequest(SurveyTicketRequest surveyTicketRequest,
 			List<EmailRequest> emailRequests) {
 		// TODO Auto-generated method stub
 		

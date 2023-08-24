@@ -48,6 +48,6 @@ public class SurveyNotificationConsumer {
             log.error("Error while listening to value: " + record + " on topic: " + topic + ": " + e);
         }
        
-        surveyNotificationService.processTicketClosedNotification(surveyTicketRequest);
+        surveyNotificationService.processTicketUpdateNotification(surveyTicketRequest);
 	}
 }
