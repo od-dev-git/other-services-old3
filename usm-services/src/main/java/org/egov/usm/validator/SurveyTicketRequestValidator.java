@@ -71,6 +71,13 @@ public class SurveyTicketRequestValidator {
 
 	}
 
+	public void validateSurveyTicketClose(SurveyTicket existingSurveyTickets) {
+		if (existingSurveyTickets.getUnAttended().equals(Boolean.TRUE)) {
+			throw new CustomException("EG_SY_UNATTENDED_TICKET_ERR", "You can't close unattended ticket");
+		}
+
+	}
+
 //	public void enrichSurveyTickets(SurveyDetailsRequest surveyRequest) {
 //		RequestInfo requestInfo = surveyRequest.getRequestInfo();
 //		String uuid = requestInfo.getUserInfo().getUuid();
