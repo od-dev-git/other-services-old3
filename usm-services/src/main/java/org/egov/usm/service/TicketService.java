@@ -77,24 +77,21 @@ public class TicketService {
 
 		surveyTicket.setAuditDetails(existingSurveyTickets.getAuditDetails());
 
-//		surveyTicket.setUnAttended(existingSurveyTickets.getUnAttended());
-
 		/* Update the Audit Details */
 		surveyTicket.getAuditDetails().setLastModifiedBy(requestInfo.getUserInfo().getUuid());
 		surveyTicket.getAuditDetails().setLastModifiedTime(System.currentTimeMillis());
 		surveyTicket.setTicketClosedTime(System.currentTimeMillis());
 
-		if (surveyTicket.getIsSatisfied() != null) {
+		if (surveyTicket.getIsSatisfied() != null && existingSurveyTickets.getStatus().equals(TicketStatus.CLOSED)) {
 			surveyTicket.setStatus(existingSurveyTickets.getStatus());
 			surveyTicket.setHasOpenTicket(Boolean.FALSE);
+		} else if (surveyTicket.getStatus().equals(TicketStatus.CLOSED)) {
+			surveyTicketRequestValidator.validateSurveyTicketClose(existingSurveyTickets);
+			surveyTicket.setHasOpenTicket(Boolean.FALSE);
 		} else {
-			if (surveyTicket.getStatus().equals(TicketStatus.CLOSED))
-				surveyTicket.setHasOpenTicket(Boolean.FALSE);
-			else
-				surveyTicket.setHasOpenTicket(Boolean.TRUE);
+
+			surveyTicket.setHasOpenTicket(Boolean.TRUE);
 		}
-//		if (!surveyTicket.getUnAttended())
-//			surveyTicket.setUnAttended(true);
 
 		repository.update(ticketRequest);
 		return surveyTicket;
