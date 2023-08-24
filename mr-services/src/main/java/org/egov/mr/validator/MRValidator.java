@@ -1182,5 +1182,13 @@ public class MRValidator {
 		return isHoliday;
 
 	}
+
+	public void validateMRDeletion(MarriageRegistration mr) {
+		if (!(mr.getStatus().equalsIgnoreCase(MRConstants.STATUS_INITIATED))) {
+			throw new CustomException("Delete MR Error",
+					"Application is not allowed to delete other than Initiated Stage");
+		}
+
+	}
 	
 }
