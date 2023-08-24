@@ -5,6 +5,7 @@ import static org.egov.mr.util.MRConstants.businessService_MR;
 import static org.egov.tracer.http.HttpUtils.isInterServiceCall;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -228,7 +229,14 @@ public class MarriageRegistrationService {
 			mrValidator.validateUpdate(marriageRegistartionRequest, searchResult);
 
 			mrValidator.validateNonUpdatableFileds(marriageRegistartionRequest, searchResult);
-
+			
+			if(isRequestForMRDeletion(marriageRegistartionRequest)) {
+				MarriageRegistration mr = marriageRegistartionRequest.getMarriageRegistrations().get(0);
+				Map<String, Boolean> mapForState = new HashMap<>();
+				mapForState.put(mr.getId(), false);
+				return processMRDeletion(marriageRegistartionRequest,mapForState);
+			}
+			
 			Map<String, Difference> diffMap = diffService.getDifference(marriageRegistartionRequest, searchResult);
 			Map<String, Boolean> idToIsStateUpdatableMap = util.getIdToIsStateUpdatableMap(businessService, searchResult);
 
@@ -345,7 +353,25 @@ public class MarriageRegistrationService {
         return marriageRegistrations;
 	}
 
+	private boolean isRequestForMRDeletion(MarriageRegistrationRequest mrRequest) {
+		MarriageRegistration mr = mrRequest.getMarriageRegistrations().get(0);
+		String action = mr.getAction();
+		if(action.equalsIgnoreCase(MRConstants.ACTION_DELETE)) {
+			mrValidator.validateMRDeletion(mr);
+			return true;
+		}
+		return false;
+	}
 
+	private List<MarriageRegistration> processMRDeletion(MarriageRegistrationRequest marriageRegistartionRequest,
+			Map<String, Boolean> isStateUpdateableMap) {
+
+		MarriageRegistration mr = marriageRegistartionRequest.getMarriageRegistrations().get(0);
+		mr.setStatus(MRConstants.STATUS_DELETED);
+		repository.update(marriageRegistartionRequest, isStateUpdateableMap);
+		return marriageRegistartionRequest.getMarriageRegistrations();
+
+	}
 	
     
 

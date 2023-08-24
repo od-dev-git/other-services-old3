@@ -14,6 +14,8 @@ public class MRConstants {
 	
 
     public static final String ACTION_INITIATE = "INITIATE";
+    
+    public static final String ACTION_DELETE = "DELETE";
 
     public static final String ACTION_APPLY  = "APPLY";
     
@@ -47,6 +49,8 @@ public class MRConstants {
     public static final String STATUS_APPROVED  = "APPROVED";
 
     public static final String STATUS_REJECTED  = "REJECTED";
+    
+    public static final String STATUS_DELETED = "DELETED";
 
 
     public static final String STATUS_CANCELLED  = "CANCELLED";

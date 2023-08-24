@@ -129,7 +129,7 @@ public class MRQueryBuilder {
    
         }
         else {
-
+        	
             if (criteria.getTenantId() != null) {
                 addClauseIfRequired(preparedStmtList, builder);
                 builder.append(" mr.tenantid=? ");
@@ -151,9 +151,17 @@ public class MRQueryBuilder {
 
 
             if (criteria.getApplicationNumber() != null) {
-                addClauseIfRequired(preparedStmtList, builder);
-                builder.append("  LOWER(mr.applicationnumber) = LOWER(?) ");
-                preparedStmtList.add(criteria.getApplicationNumber());
+            	
+            	if(criteria.getApplicationNumber().length() == 6) {
+            		addClauseIfRequired(preparedStmtList, builder);
+                    builder.append("  LOWER(mr.applicationnumber) like LOWER(?) ");
+                    preparedStmtList.add("%"+criteria.getApplicationNumber());
+            	}
+            	else {
+            		addClauseIfRequired(preparedStmtList, builder);
+                    builder.append("  LOWER(mr.applicationnumber) = LOWER(?) ");
+                    preparedStmtList.add(criteria.getApplicationNumber());
+            	}  	
             }
 
             if (criteria.getStatus() != null) {
@@ -161,7 +169,10 @@ public class MRQueryBuilder {
                 builder.append("  mr.status = ? ");
                 preparedStmtList.add(criteria.getStatus());
             }
-
+            
+            addClauseIfRequired(preparedStmtList, builder);
+            builder.append(" mr.status != ? ");
+            preparedStmtList.add(String.valueOf(MRConstants.STATUS_DELETED));
 
             List<String> mrNumbers = criteria.getMrNumbers();
             if (!CollectionUtils.isEmpty(mrNumbers)) {
