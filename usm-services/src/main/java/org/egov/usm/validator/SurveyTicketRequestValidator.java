@@ -18,14 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Service
-@Slf4j
 public class SurveyTicketRequestValidator {
 
-	@Autowired
-	private USMUtil usmUtil;
 
 	@Autowired
 	private SurveyTicketRepository ticketRepository;
@@ -71,22 +66,12 @@ public class SurveyTicketRequestValidator {
 
 	}
 
+	
+	
 	public void validateSurveyTicketClose(SurveyTicket existingSurveyTickets) {
-		if (existingSurveyTickets.getUnAttended().equals(Boolean.TRUE)) {
+		if (existingSurveyTickets.getUnAttended() == Boolean.TRUE) {
 			throw new CustomException("EG_SY_UNATTENDED_TICKET_ERR", "You can't close unattended ticket");
 		}
-
 	}
 
-//	public void enrichSurveyTickets(SurveyDetailsRequest surveyRequest) {
-//		RequestInfo requestInfo = surveyRequest.getRequestInfo();
-//		String uuid = requestInfo.getUserInfo().getUuid();
-//		AuditDetails auditDetails = usmUtil.getAuditDetails(uuid, true);
-//		
-//		surveyRequest.getTicket().setId(UUID.randomUUID().toString());
-//		//set audit details
-//		surveyRequest.getTicket().setAuditDetails(auditDetails);
-//		surveyRequest.getTicket().setStatus(TicketStatus.OPEN);;;
-//		
-//		}
 }

@@ -16,7 +16,9 @@ public class Constants {
 	public static final String ROLE_CITIZEN = "CITIZEN";
 	public static final String ROLE_EMPLOYEE = "EMPLOYEE";
 	public static final String ROLE_SDA_MEMBER = "USM_SDA";
-
+	public static final String ROLE_NODAL_OFFICER = "NODAL_OFFICER";
+	public static final String ROLE_ESCALATION_OFFICER = "ESCALATION_OFFICER";
+	
 	public static final String SDA_MEMBER = "SDA MEMBER";
 	public static final String USM_OFFICIAL = "USM OFFICIAL";
 	
@@ -43,13 +45,14 @@ public class Constants {
     
     // SMS Template for notification
     
-    public static final String TICKET_CREATED_SDA_MEMBER = "USM_TICKET_OPEN_SDA_MEMBER_SMS";
-    public static final String TICKET_CREATED_USM_OFFICIAL = "USM_TICKET_OPEN_USM_OFFICIAL_SMS";
+    public static final String TICKET_CREATED_SDA_MEMBER = "USM_TICKET_CREATED_SDA_MEMBER_SMS";
+    public static final String TICKET_CREATED_NODAL_OFFICER = "USM_TICKET_CREATED_NODAL_OFFICER_SMS";
     public static final String TICKET_CLOSED_SDA_MEMBER = "USM_TICKET_CLOSE_SDA_MEMBER_SMS";
+    public static final String TICKET_UNSATISFIED_ESCALATION_OFFICER  = "USM_TICKET_UNSATISFIED_ESCALATION_OFFICER_SMS";
     
+
     
-    
-    public static final List<String> NOTIFICATION_CODES = Collections.unmodifiableList(Arrays.asList(TICKET_CREATED_SDA_MEMBER, TICKET_CREATED_USM_OFFICIAL, TICKET_CLOSED_SDA_MEMBER));
+    public static final List<String> NOTIFICATION_CODES = Collections.unmodifiableList(Arrays.asList(TICKET_CREATED_SDA_MEMBER, TICKET_CREATED_NODAL_OFFICER, TICKET_CLOSED_SDA_MEMBER, TICKET_UNSATISFIED_ESCALATION_OFFICER));
     
     
 }

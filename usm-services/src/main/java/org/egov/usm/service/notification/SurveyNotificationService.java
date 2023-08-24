@@ -30,7 +30,10 @@ public class SurveyNotificationService {
 	@Autowired
 	private USMConfiguration config;
 	
-	
+	/**
+	 * 
+	 * @param surveyDetailsRequest
+	 */
 	public void processTicketCreatedNotification(SurveyDetailsRequest surveyDetailsRequest) {
 		List<SMSRequest> smsRequests = new LinkedList<>();
 		List<EmailRequest> emailRequests = new LinkedList<>();
@@ -54,13 +57,13 @@ public class SurveyNotificationService {
 	}
 
 
-	public void processTicketClosedNotification(SurveyTicketRequest surveyTicketRequest) {
+	public void processTicketUpdateNotification(SurveyTicketRequest surveyTicketRequest) {
 		List<SMSRequest> smsRequests = new LinkedList<>();
 		List<EmailRequest> emailRequests = new LinkedList<>();
 		
 		if(null != config.getIsSMSEnabled()) {
 			if(config.getIsSMSEnabled()) {
-				smsEnrichmentService.enrichTicketClosedSMSRequest(surveyTicketRequest,smsRequests);
+				smsEnrichmentService.enrichTicketUpdateSMSRequest(surveyTicketRequest,smsRequests);
 				if(!CollectionUtils.isEmpty(smsRequests))
 					notificationUtil.sendSMS(smsRequests,true);
 			}
@@ -68,7 +71,7 @@ public class SurveyNotificationService {
 		
 		if(null != config.getIsEmailEnabled()) {
 			if(config.getIsEmailEnabled()) {
-				mailEnrichmentService.enrichTicketClosedEmailRequest(surveyTicketRequest, emailRequests);
+				mailEnrichmentService.enrichTicketUpdateEmailRequest(surveyTicketRequest, emailRequests);
 				if(!CollectionUtils.isEmpty(emailRequests)) 
 					notificationUtil.sendEmail(emailRequests, true);
 			}
