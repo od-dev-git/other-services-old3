@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.egov.integration.model.revenue.RevenueNotification;
 import org.egov.integration.model.revenue.RevenueNotificationRequest;
 import org.egov.integration.util.RevenueNotificationConstants;
+import org.egov.integration.web.model.FeedbackCreationRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -54,5 +55,14 @@ public class EnrichmentService {
 			item.setLastModifiedTime(System.currentTimeMillis());
 		});
 		
+	}
+
+	public void enrichFeedbackCreationRequest(@Valid FeedbackCreationRequest feedbackCreationRequest){
+		Long currentTime = System.currentTimeMillis();
+		feedbackCreationRequest.getFeedback().setId(UUID.randomUUID().toString());
+		feedbackCreationRequest.getFeedback().setCreatedBy(feedbackCreationRequest.getRequestInfo().getUserInfo().getUuid());
+		feedbackCreationRequest.getFeedback().setLastModifiedBy(feedbackCreationRequest.getRequestInfo().getUserInfo().getUuid());
+		feedbackCreationRequest.getFeedback().setCreatedTime(currentTime);
+		feedbackCreationRequest.getFeedback().setLastModifiedTime(currentTime);
 	}
 }

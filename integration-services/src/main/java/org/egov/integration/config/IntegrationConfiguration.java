@@ -75,6 +75,9 @@ public class IntegrationConfiguration {
 	private String bpaHost;
 	
 	@Value("${egov.bpa.search.path}")
-	private String bpaSearchEndpoint;	
+	private String bpaSearchEndpoint;
+
+	@Value("${egov.integration.feedback.save.topic}")
+	private String saveFeedbackTopic;
 
 }
