@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.usm.config.USMConfiguration;
+import org.egov.usm.model.enums.SurveyAnswer;
 import org.egov.usm.model.enums.TicketStatus;
 import org.egov.usm.utility.USMUtil;
 import org.egov.usm.web.model.AuditDetails;
@@ -52,6 +53,9 @@ public class EnrichmentService {
 				.forEach(answer -> {
 					answer.setId(USMUtil.generateUUID());
 					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
+					if(answer.getAnswer() == SurveyAnswer.NO) {
+						answer.setHasOpenTicket(true);
+					}
 					answer.setAuditDetails(auditDetails);
 				});
 	}
@@ -81,6 +85,7 @@ public class EnrichmentService {
 
         // generate ticket number and set it
         filterSubmittedAnswers.forEach(answer -> {
+        	
             SurveyTicket surveyTicket = SurveyTicket.builder()
             								.id(USMUtil.generateUUID())
             								.tenantId(surveyDetailsRequest.getSurveyDetails().getTenantId())
@@ -91,12 +96,15 @@ public class EnrichmentService {
             								.ticketCreatedTime(auditDetails.getCreatedTime())
             								.auditDetails(auditDetails)
             								.build();
+            if(answer.getAnswer() == SurveyAnswer.NO) {
+            	surveyTicket.setHasOpenTicket(true);
+			}
             // Add the ticket into the List
             surveyTickets.add(surveyTicket);
         });
 
         List<String> ticketNumbers = idGenService.getIdList(requestInfo, surveyDetailsRequest.getSurveyDetails().getTenantId(),
-                config.getSurveyNoIdgenName(), config.getTicketNoIdgenFormat(), filterSubmittedAnswers.size());
+                config.getTicketNoIdgenName(), config.getTicketNoIdgenFormat(), filterSubmittedAnswers.size());
 
         for (int i = 0; i < filterSubmittedAnswers.size(); i++) {
             surveyTickets.get(i).setTicketNo(ticketNumbers.get(i));
@@ -172,6 +180,9 @@ public class EnrichmentService {
 		surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers()
 				.forEach(answer -> {
 					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
+					if(answer.getAnswer() == SurveyAnswer.NO) {
+						answer.setHasOpenTicket(true);
+					}
 					answer.setAuditDetails(auditDetails);
 				});
 

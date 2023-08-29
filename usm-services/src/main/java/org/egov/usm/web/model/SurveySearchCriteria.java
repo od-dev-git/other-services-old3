@@ -19,8 +19,8 @@ import lombok.ToString;
 @ToString
 public class SurveySearchCriteria {
 	
-	@JsonProperty("tenantId")
-	private String tenantId;
+	@JsonProperty("tenant")
+	private String tenant;
 	
 	@JsonProperty("surveyId")
 	private String surveyId;

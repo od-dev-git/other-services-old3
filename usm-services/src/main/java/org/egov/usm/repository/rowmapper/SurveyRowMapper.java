@@ -44,7 +44,7 @@ public class SurveyRowMapper implements ResultSetExtractor<List<Survey>> {
 
                 survey = Survey.builder()
                         .id(rs.getString("sid"))
-                        .tenantId(rs.getString("stenantid"))
+                        .tenant(rs.getString("stenantid"))
                         .title(rs.getString("stitle"))
                         .status(Status.fromValue(rs.getString("sstatus")))
                         .description(rs.getString("sdescription"))

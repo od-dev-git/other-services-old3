@@ -27,10 +27,6 @@ public class QuestionDetailRowMapper implements ResultSetExtractor<List<Question
         while (rs.next()){
             String id = rs.getString("id");
             QuestionDetail question = questionMap.get(id);
-            Boolean hasOpenTicket = Boolean.FALSE;
-            if(rs.getBoolean("hasopenticket")) {
-            	hasOpenTicket = Boolean.TRUE;
-            }
             
             if(question == null) {
                 AuditDetails auditdetails = AuditDetails.builder()
@@ -49,7 +45,6 @@ public class QuestionDetailRowMapper implements ResultSetExtractor<List<Question
                         .required(rs.getBoolean("required"))
                         .type(rs.getString("type"))
                         .options(rs.getString("options"))
-                        .hasOpenTicket(hasOpenTicket)
                         .auditDetails(auditdetails)
                         .build();
             }
