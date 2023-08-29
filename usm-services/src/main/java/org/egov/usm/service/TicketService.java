@@ -14,7 +14,6 @@ import org.egov.usm.repository.SurveyTicketRepository;
 import org.egov.usm.utility.USMUtil;
 import org.egov.usm.validator.SurveyTicketRequestValidator;
 import org.egov.usm.web.model.AuditDetails;
-import org.egov.usm.web.model.RequestInfoWrapper;
 import org.egov.usm.web.model.SubmittedAnswer;
 import org.egov.usm.web.model.SurveyDetailsRequest;
 import org.egov.usm.web.model.SurveyTicket;
@@ -145,19 +144,6 @@ public class TicketService {
 		log.info("search: " + searchCriteria.toString());
 		List<SurveyTicket> surveyTickets = repository.getSurveyTicketRequests(searchCriteria);
 		return surveyTickets;
-	}
-
-	public void updateAttendedTickets(RequestInfoWrapper requestInfoWrapper) {
-
-		AuditDetails auditDetails = AuditDetails.builder()
-				.lastModifiedBy(requestInfoWrapper.getRequestInfo().getUserInfo().getUuid())
-				.lastModifiedTime(System.currentTimeMillis()).build();
-		SurveyTicket surveyTicket = SurveyTicket.builder().status(TicketStatus.OPEN).unAttended(Boolean.TRUE)
-				.auditDetails(auditDetails).build();
-		SurveyTicketRequest surveyTicketRequest = SurveyTicketRequest.builder()
-				.requestInfo(requestInfoWrapper.getRequestInfo()).ticket(surveyTicket).build();
-		repository.updateUnAttended(surveyTicketRequest);
-
 	}
 
 }

@@ -78,9 +78,4 @@ public class SurveyTicketController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	@PostMapping("/_jobscheduler")
-	public void jobscheduler(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
-		ticketService.updateAttendedTickets(requestInfoWrapper);
-	}
-
 }
