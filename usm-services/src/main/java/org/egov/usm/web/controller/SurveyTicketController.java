@@ -1,6 +1,5 @@
 package org.egov.usm.web.controller;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -9,6 +8,7 @@ import org.egov.usm.service.TicketService;
 import org.egov.usm.utility.ResponseInfoFactory;
 import org.egov.usm.web.model.RequestInfoWrapper;
 import org.egov.usm.web.model.SurveyTicket;
+import org.egov.usm.web.model.SurveyTicketListRequest;
 import org.egov.usm.web.model.SurveyTicketRequest;
 import org.egov.usm.web.model.SurveyTicketResponse;
 import org.egov.usm.web.model.TicketSearchCriteria;
@@ -50,9 +50,9 @@ public class SurveyTicketController {
 	 */
 
 	@PostMapping("/_update")
-	public ResponseEntity<SurveyTicketResponse> update(@Valid @RequestBody SurveyTicketRequest tiketRequest) {
-		SurveyTicket surveyTicket = ticketService.updateSurveyTicket(tiketRequest);
-		SurveyTicketResponse response = SurveyTicketResponse.builder().tickets(Collections.singletonList(surveyTicket))
+	public ResponseEntity<SurveyTicketResponse> update(@Valid @RequestBody SurveyTicketListRequest tiketRequest) {
+		List<SurveyTicket> surveyTicket = ticketService.updateSurveyTicket(tiketRequest);
+		SurveyTicketResponse response = SurveyTicketResponse.builder().tickets(surveyTicket)
 				.responseInfo(
 						responseInfoFactory.createResponseInfoFromRequestInfo(tiketRequest.getRequestInfo(), true))
 				.build();
@@ -76,6 +76,11 @@ public class SurveyTicketController {
 				responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
 				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@PostMapping("/_jobscheduler")
+	public void jobscheduler(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
+		ticketService.updateAttendedTickets(requestInfoWrapper);
 	}
 
 }
