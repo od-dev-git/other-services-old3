@@ -35,6 +35,9 @@ public class SubmittedAnswer {
 	@JsonProperty("answer")
 	private SurveyAnswer answer;
 	
+    @JsonProperty("hasOpenTicket")
+    private Boolean hasOpenTicket = false;
+	
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails;
 

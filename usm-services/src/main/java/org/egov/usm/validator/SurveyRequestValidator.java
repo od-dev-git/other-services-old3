@@ -24,31 +24,6 @@ public class SurveyRequestValidator {
 	@Autowired
 	private SurveyRepository surveyRepository;
 	
-	
-	
-	public void validateUserType(RequestInfo requestInfo) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void validateQuestions(Survey survey) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void validateSurveyUniqueness(Survey survey) {
-        
-	}
-
-	public void validateQuestionsWhileUpdate(Survey survey) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void validateUpdateRequest(Survey survey) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	public Survey validateSurveyExistence(Survey survey) {
 		if(ObjectUtils.isEmpty(survey.getId()))

@@ -17,45 +17,34 @@ public class SurveyResponseQueryBuilder {
 	
 	public String validateSurveyDetailsForCurrentDate(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
 		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, "
-				+ "question.options, answer.id as answerid, answer.answer , question.status, question.required, question.type, question.createdby, "
-				+ "question.createdtime , question.lastmodifiedtime , question.lastmodifiedby, "
+				+ "question.options, answer.id as answerid, answer.answer, answer.questionid, question.status, question.required, question.type, question.createdby, "
+				+ "question.createdtime , question.lastmodifiedtime , question.lastmodifiedby, lookup.hasopenticket, "
 				+ "surveysubmitted.id as surveysubmittedid, surveysubmitted.surveysubmittedno , "
-				+ "surveysubmitted.tenantid , surveysubmitted.ward , surveysubmitted.slumcode , "
+				+ "surveysubmitted.tenantid , surveysubmitted.ward , surveysubmitted.slumcode , surveysubmitted.surveytime, "
 				+ "surveysubmitted.createdtime as surveycreatedtime, surveysubmitted.createdby as surveycreatedby, "
-				+ "surveysubmitted.lastmodifiedtime as surveymodifiedtime, surveysubmitted.lastmodifiedby as surveymodifiedby");
-		query.append(", (select hasopenticket from eg_usm_slum_question_lookup lookup WHERE question.id = lookup.questionid");
-
-		if (!ObjectUtils.isEmpty(surveyDetails.getTenantId())) {
-			query.append(" AND lookup.tenantid = ?");
-			preparedStmtList.add(surveyDetails.getTenantId());
-		}
-
-		if (!ObjectUtils.isEmpty(surveyDetails.getSlumCode())) {
-			query.append(" AND lookup.slumcode = ? ");
-			preparedStmtList.add(surveyDetails.getSlumCode());
-		}
-		query.append(" ) as hasopenticket FROM eg_usm_question question");
+				+ "surveysubmitted.lastmodifiedtime as surveymodifiedtime, surveysubmitted.lastmodifiedby as surveymodifiedby "
+				+ "FROM eg_usm_question question");
+		
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON answer.questionid = question.id");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted surveysubmitted ON surveysubmitted.id = answer.surveysubmittedid");
+		query.append(" JOIN eg_usm_slum_question_lookup lookup on question.id = lookup.questionid and surveysubmitted.tenantid = lookup.tenantid and surveysubmitted.slumcode = lookup.slumcode");
 		query.append(" WHERE to_timestamp(surveysubmitted.createdtime/1000) :: date = now() :: date");
 
 		if (!ObjectUtils.isEmpty(surveyDetails.getTenantId())) {
-			addClauseIfRequired(query, preparedStmtList);
-			query.append(" surveysubmitted.tenantid = ?");
+			query.append(" AND surveysubmitted.tenantid = ?");
 			preparedStmtList.add(surveyDetails.getTenantId());
 		}
 
 		if (!ObjectUtils.isEmpty(surveyDetails.getSlumCode())) {
-			addClauseIfRequired(query, preparedStmtList);
-			query.append(" surveysubmitted.slumcode = ?");
+			query.append(" AND surveysubmitted.slumcode = ?");
 			preparedStmtList.add(surveyDetails.getSlumCode());
 		}
 		
 		if (!ObjectUtils.isEmpty(surveyDetails.getSurveyId())) {
-			addClauseIfRequired(query, preparedStmtList);
-			query.append(" question.surveyid = ?");
+			query.append(" AND question.surveyid = ?");
 			preparedStmtList.add(surveyDetails.getSurveyId());
 		}
+		
 		log.info("Query for get Questions ", query.toString());
 		return query.toString();
 	}
@@ -120,9 +109,30 @@ public class SurveyResponseQueryBuilder {
 	public String isSurveyExistsForToday(@Valid SurveySearchCriteria criteria, List<Object> preparedStmtList) {
 		StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM eg_usm_survey_submitted survey");
 		query.append(" WHERE to_timestamp(survey.createdtime / 1000) :: date = now() :: date");
-		if (!ObjectUtils.isEmpty(criteria.getSurveyId())) {
+		
+		if (!ObjectUtils.isEmpty(criteria.getSurveySubmittedId())) {
 			query.append(" AND survey.id = ?");
+			preparedStmtList.add(criteria.getSurveySubmittedId());
+		}
+		
+		if (!ObjectUtils.isEmpty(criteria.getSurveyId())) {
+			query.append(" AND survey.surveyid = ?");
 			preparedStmtList.add(criteria.getSurveyId());
+		}
+		
+		if (!ObjectUtils.isEmpty(criteria.getTenant())) {
+			query.append(" AND survey.tenantid = ?");
+			preparedStmtList.add(criteria.getTenant());
+		}
+		
+		if (!ObjectUtils.isEmpty(criteria.getWard())) {
+			query.append(" AND survey.ward = ?");
+			preparedStmtList.add(criteria.getWard());
+		}
+		
+		if (!ObjectUtils.isEmpty(criteria.getSlumCode())) {
+			query.append(" AND survey.slumcode = ?");
+			preparedStmtList.add(criteria.getSlumCode());
 		}
 		
 		return query.toString();
@@ -145,10 +155,10 @@ public class SurveyResponseQueryBuilder {
 			preparedStmtList.add(searchCriteria.getSurveySubmittedId());
 		}
 		
-		if (!ObjectUtils.isEmpty(searchCriteria.getTenantId())) {
+		if (!ObjectUtils.isEmpty(searchCriteria.getTenant())) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" surveysubmitted.tenantid = ?");
-			preparedStmtList.add(searchCriteria.getTenantId());
+			preparedStmtList.add(searchCriteria.getTenant());
 		}
 
 		if (!ObjectUtils.isEmpty(searchCriteria.getSlumCode())) {
