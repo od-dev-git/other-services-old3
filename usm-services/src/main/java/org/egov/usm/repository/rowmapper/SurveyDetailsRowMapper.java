@@ -13,6 +13,7 @@ import org.egov.usm.model.enums.Status;
 import org.egov.usm.model.enums.SurveyAnswer;
 import org.egov.usm.web.model.AuditDetails;
 import org.egov.usm.web.model.QuestionDetail;
+import org.egov.usm.web.model.SubmittedAnswer;
 import org.egov.usm.web.model.SurveyDetails;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -50,10 +51,12 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
                         .tenantId(rs.getString("tenantid"))
                         .ward(rs.getString("ward"))
                         .slumCode(rs.getString("slumcode"))
+                        .surveyTime(rs.getLong("surveytime"))
                         .auditDetails(auditdetails)
                         .build();
             }
             
+            // Add questions to Survey Details
             addQuestionsToSurveyDetails(rs, surveyDetails);
             
             List<QuestionDetail> questions = surveyDetails.getQuestionDetails();
@@ -62,10 +65,22 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
                         Comparator.comparing(QuestionDetail::getId));
             }
             surveyDetailsMap.put(surveySubmittedId, surveyDetails);
+            
+            // Add SubmittedAnswers to Survey Details
+            addSubmittedAnswersToSurveyDetails(rs, surveyDetails);
+            
+            List<SubmittedAnswer> submittedAnswers = surveyDetails.getSubmittedAnswers();
+            if (!CollectionUtils.isEmpty(submittedAnswers)) {
+            	Collections.sort(surveyDetails.getSubmittedAnswers(),
+                        Comparator.comparing(SubmittedAnswer::getId));
+            }
+            surveyDetailsMap.put(surveySubmittedId, surveyDetails);
+            
         }
         
         return new ArrayList<>(surveyDetailsMap.values());
 	}
+
 
 	private void addQuestionsToSurveyDetails(ResultSet rs, SurveyDetails surveyDetails) throws SQLException {
 		
@@ -95,20 +110,56 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
 		QuestionDetail question =  QuestionDetail.builder()
                 .id(rs.getString("id"))
                 .surveyId(rs.getString("surveyid"))
-                .surveySubmittedId(rs.getString("surveysubmittedid"))
                 .questionStatement(rs.getString("questionstatement"))
                 .category(rs.getString("category"))
                 .status(Status.fromValue(rs.getString("status")))
                 .required(rs.getBoolean("required"))
                 .options(rs.getString("options"))
                 .type(rs.getString("type"))
-                .hasOpenTicket(rs.getBoolean("hasopenticket"))
-                .answer(SurveyAnswer.fromValue(rs.getString("answer")))
-                .answerId(rs.getString("answerid"))
                 .auditDetails(auditdetails)
                 .build();
 		surveyDetails.addQuestionsItem(question);
 		
 	}
 
+	
+	private void addSubmittedAnswersToSurveyDetails(ResultSet rs, SurveyDetails surveyDetails) throws SQLException {
+		String answerId = rs.getString("answerid");
+		String surveySubmittedId = rs.getString("surveysubmittedid");
+
+        if (answerId == null || surveySubmittedId == null ) {
+        	surveyDetails.addQuestionsItem(null);
+        	return;
+        }
+           
+        List<SubmittedAnswer> submittedAnswers = surveyDetails.getSubmittedAnswers();
+        
+        if (!CollectionUtils.isEmpty(submittedAnswers))
+            for (SubmittedAnswer answer : submittedAnswers) {
+                if (answer.getId().equals(answerId))
+                    return;
+            }
+        
+		AuditDetails auditdetails = AuditDetails.builder()
+                .createdBy(rs.getString("createdby"))
+                .createdTime(rs.getLong("createdtime"))
+                .lastModifiedBy(rs.getString("lastmodifiedby"))
+                .lastModifiedTime(rs.getLong("lastmodifiedtime"))
+                .build();
+		
+		SubmittedAnswer submittedAnswer = SubmittedAnswer.builder()
+				.id(answerId)	
+				.surveySubmittedId(surveySubmittedId)
+				.questionId(rs.getString("questionid"))
+				.questionStatement(rs.getString("questionstatement"))
+				.questionCategory(rs.getString("category"))
+				.answer(SurveyAnswer.fromValue(rs.getString("answer")))
+				.hasOpenTicket(rs.getBoolean("hasopenticket"))
+				.auditDetails(auditdetails)
+				.build();
+
+	
+		surveyDetails.addSubmittedAnswer(submittedAnswer);
+		
+	}
 }

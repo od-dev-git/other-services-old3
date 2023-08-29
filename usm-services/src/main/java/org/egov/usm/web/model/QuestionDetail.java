@@ -1,8 +1,8 @@
 package org.egov.usm.web.model;
 
 import org.egov.usm.model.enums.Status;
-import org.egov.usm.model.enums.SurveyAnswer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -20,41 +20,29 @@ public class QuestionDetail {
 
 	@JsonProperty("id")
 	private String id;
-	
+
 	@JsonProperty("surveyId")
 	private String surveyId;
-	
-	@JsonProperty("surveySubmittedId")
-	private String surveySubmittedId;
-	
+
 	@JsonProperty("questionStatement")
 	private String questionStatement;
-	
+
 	@JsonProperty("category")
 	private String category;
-	
+
 	@JsonProperty("options")
-    private String options;
-	
-	@JsonProperty("answer")
-	private SurveyAnswer answer;
-	
-	@JsonProperty("answerId")
-    private String answerId;
-	
+	private String options;
+
 	@JsonProperty("type")
 	private String type;
-	
+
+	@JsonIgnore
+	private Status status;
+
+	@JsonProperty("required")
+	private Boolean required;
+
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails;
-	
-	@JsonProperty("status")
-    private Status status;
 
-    @JsonProperty("required")
-    private Boolean required;
-    
-    @JsonProperty("hasOpenTicket")
-    private Boolean hasOpenTicket = false;
-	
 }

@@ -28,10 +28,10 @@ public class SurveyQueryBuilder {
             preparedStmtList.add(searchCriteria.getSurveyId());
         }
 
-        if(!ObjectUtils.isEmpty(searchCriteria.getTenantId())){
+        if(!ObjectUtils.isEmpty(searchCriteria.getTenant())){
             addClauseIfRequired(query, preparedStmtList);
             query.append(" survey.tenantid = ? ");
-            preparedStmtList.add(searchCriteria.getTenantId());
+            preparedStmtList.add(searchCriteria.getTenant());
         }
         
         if(!ObjectUtils.isEmpty(searchCriteria.getStatus())){
