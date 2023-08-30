@@ -51,4 +51,7 @@ public class TicketSearchCriteria {
 	@JsonProperty("createdBy")
 	private String createdBy;
 
+	@JsonProperty("tickDate")
+	private Long ticketDate;
+
 }
