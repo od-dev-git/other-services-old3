@@ -17,7 +17,7 @@ import lombok.Setter;
 @Builder
 public class USMOfficialRequest {
 
-	@JsonProperty("requestInfo")
+	@JsonProperty("RequestInfo")
 	private RequestInfo requestInfo;
 
 	@JsonProperty("usmOffcial")
