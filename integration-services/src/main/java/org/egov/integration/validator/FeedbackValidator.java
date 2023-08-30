@@ -34,10 +34,10 @@ public class FeedbackValidator {
     public void validateCreateRequest(FeedbackCreationRequest feedbackCreationRequest){
         Map<String, String> errorMap = new HashMap<>();
         if(StringUtils.isEmpty(feedbackCreationRequest.getFeedback().getTenantId())){
-            errorMap.put("INVALID_TENANT_ID","Tenant Id passed can't be null or empty");
+            errorMap.put("INVALID_TENANT_ID","Tenant Id can't be null or empty");
         }
         if(StringUtils.isEmpty(feedbackCreationRequest.getFeedback().getModule())){
-            errorMap.put("INVALID_MODULE","Module passed can't be null or empty");
+            errorMap.put("INVALID_MODULE","Module can't be null or empty");
         }
         final ValueRange ratingRange = ValueRange.of(MIN_RATING, MAX_RATING);
         if(!ratingRange.isValidIntValue(feedbackCreationRequest.getFeedback().getRating())){
@@ -52,9 +52,6 @@ public class FeedbackValidator {
         Map<String, String> errorMap = new HashMap<>();
         if(StringUtils.isEmpty(criteria.getTenantId())){
             errorMap.put("INVALID_TENANT_ID","Tenant Id passed can't be null or empty");
-        }
-        if(StringUtils.isEmpty(criteria.getSubmittedBy())){
-            errorMap.put("INVALID_MODULE","Module passed can't be null or empty");
         }
         validateTenantIdByMDMS(criteria.getTenantId(), errorMap, requestInfo);
         if (!errorMap.isEmpty())

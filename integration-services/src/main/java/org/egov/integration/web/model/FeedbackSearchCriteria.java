@@ -20,6 +20,9 @@ public class FeedbackSearchCriteria {
 
     @JsonProperty("submittedBy")
     private String submittedBy;
+    
+    @JsonProperty("rating")
+    private Integer rating;
 
     @JsonProperty("limit")
     private Integer limit;

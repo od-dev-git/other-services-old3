@@ -20,24 +20,19 @@ public class FeedbackService {
     @Autowired
     private FeedbackRepository feedbackRepository;
 
-    public FeedbackCreationResponse createFeedback(FeedbackCreationRequest feedbackCreationRequest){
+    public Feedback createFeedback(FeedbackCreationRequest feedbackCreationRequest){
 
         feedbackValidator.validateCreateRequest(feedbackCreationRequest);
         enrichmentService.enrichFeedbackCreationRequest(feedbackCreationRequest);
 
         feedbackRepository.saveFeedback(feedbackCreationRequest);
 
-        FeedbackCreationResponse feedbackCreationResponse= FeedbackCreationResponse.builder()
-                .requestInfo(feedbackCreationRequest.getRequestInfo())
-                .feedback(feedbackCreationRequest.getFeedback()).build();
-        return feedbackCreationResponse;
+        return feedbackCreationRequest.getFeedback();
     }
 
-    public FeedbackSearchResponse searchFeedbacks(FeedbackSearchCriteria feedbackSearchCriteria, FeedbackSearchRequest feedbackSearchRequest){
-        feedbackValidator.validateSearchCriteria(feedbackSearchCriteria,feedbackSearchRequest.getRequestInfo());
+    public List<Feedback> searchFeedbacks(FeedbackSearchCriteria feedbackSearchCriteria, RequestInfoWrapper requestInfoWrapper){
+        feedbackValidator.validateSearchCriteria(feedbackSearchCriteria,requestInfoWrapper.getRequestInfo());
         List<Feedback> feedbacks=feedbackRepository.getFeedbackList(feedbackSearchCriteria);
-        FeedbackSearchResponse feedbackSearchResponse = FeedbackSearchResponse.builder()
-                .feedbacks(feedbacks).requestInfo(feedbackSearchRequest.getRequestInfo()).build();
-        return feedbackSearchResponse;
+        return feedbacks;
     }
 }

@@ -2,7 +2,7 @@ package org.egov.integration.web.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.response.ResponseInfo;
 
 import java.util.List;
 @Builder
@@ -12,8 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 public class FeedbackSearchResponse {
 
-    @JsonProperty("RequestInfo")
-    private RequestInfo requestInfo;
+    @JsonProperty("ResponseInfo")
+    private ResponseInfo responseInfo;
 
     @JsonProperty("Feedbacks")
     private List<Feedback> feedbacks;

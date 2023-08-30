@@ -42,8 +42,14 @@ public class FeedbackQueryBuilder {
 
         if (!StringUtils.isEmpty(criteria.getSubmittedBy())) {
             addClauseIfRequired(preparedStatement, query);
-            query.append(" euf.lastmodifiedby = ? ");
+            query.append(" euf.createdby = ? ");
             preparedStatement.add(criteria.getSubmittedBy());
+        }
+        
+        if(!StringUtils.isEmpty(criteria.getRating())) {
+        	addClauseIfRequired(preparedStatement, query);
+            query.append(" euf.rating = ? ");
+            preparedStatement.add(criteria.getRating());
         }
 
         return addPaginationWrapper(query.toString(), preparedStatement, criteria);
