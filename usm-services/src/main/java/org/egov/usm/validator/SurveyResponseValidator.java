@@ -28,6 +28,11 @@ public class SurveyResponseValidator {
         if(!isSurveyExists)
             throw new CustomException("EG_SURVEY_DOES_NOT_EXIST_ERR", "The survey entity provided in update request does not exist or closed for today.");
 
+        surveyDetails.getSubmittedAnswers().forEach(answer -> {
+			if(ObjectUtils.isEmpty(answer.getId()))
+	            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing answer id is mandatory for submitting surveys");
+			
+		});
         return isSurveyExists;
 	}
 	

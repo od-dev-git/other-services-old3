@@ -19,10 +19,10 @@ import lombok.Setter;
 @Builder
 public class SurveyTicketResponse {
 	
-	@JsonProperty("responseInfo")
+	@JsonProperty("ResponseInfo")
 	private ResponseInfo responseInfo;
 	
-	@JsonProperty("ticket")
+	@JsonProperty("tickets")
 	private List<SurveyTicket> tickets;
 
 }

@@ -17,7 +17,7 @@ import lombok.Setter;
 @Builder
 public class SDAMembersRequest {
 
-	@JsonProperty("requestInfo")
+	@JsonProperty("RequestInfo")
 	private RequestInfo requestInfo;
 	
 	@JsonProperty("sdaMember")

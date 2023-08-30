@@ -15,7 +15,7 @@ import lombok.Setter;
 @Builder
 public class SurveyRequest {
 	
-	@JsonProperty("requestInfo")
+	@JsonProperty("RequestInfo")
 	private RequestInfo requestInfo;
 	
 	@JsonProperty("survey")

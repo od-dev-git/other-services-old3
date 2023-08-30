@@ -21,7 +21,7 @@ import lombok.Setter;
 @Builder
 public class USMOfficialResponse {
 
-	@JsonProperty("responseInfo")
+	@JsonProperty("ResponseInfo")
 	ResponseInfo responseInfo;
 
 	@JsonProperty("usmOffcials")
