@@ -222,6 +222,14 @@ public class BPARepository {
         HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
         return result;
     }
+    
+    public HashMap<String, BigDecimal> getAvgDaysToIssuePermitByServiceType(BpaSearchCriteria bpaSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = bpaQueryBuilder.getAvgDaysToIssuePermitByServiceType(bpaSearchCriteria, preparedStatementValues);
+        log.info("query for BPA Avg Days to issue permit by Service Type : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
 
 	public List<HashMap<String, Object>> getApplicationsBreakdown(BpaSearchCriteria criteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();

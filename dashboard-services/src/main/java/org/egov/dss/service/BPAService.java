@@ -681,8 +681,11 @@ public class BPAService {
         criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
         HashMap<String, BigDecimal> totalAppicationReceived = getTotalApplicationReceivedByService(payloadDetails);
         HashMap<String, BigDecimal> totalAppicationApproved = getTotalApplicationApprovedByService(payloadDetails);
+        HashMap<String, BigDecimal> avgDaysToIssuePermit =    getAvgDaysToIssuePermitByServiceType(payloadDetails);
+        
         HashMap<String, BigDecimal> concatedHashMap = new HashMap<>(totalAppicationReceived);
         concatedHashMap.putAll(totalAppicationApproved);
+        concatedHashMap.putAll(avgDaysToIssuePermit);
                 
         List<Data> response = new ArrayList<>();
         int serialNumber = 1;
@@ -703,6 +706,11 @@ public class BPAService {
 					.value(totalAppicationApproved.get(totalApplication.getKey()) == null ? BigDecimal.ZERO
 							: totalAppicationApproved.get(totalApplication.getKey()))
 					.symbol("number").build());
+			
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit")
+					.value(avgDaysToIssuePermit.get(totalApplication.getKey()) == null ? BigDecimal.ZERO
+							: avgDaysToIssuePermit.get(totalApplication.getKey()))
+					.symbol("number").build());
 
 			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
 					.build());
@@ -722,6 +730,8 @@ public class BPAService {
 					.build());
 
 			plots.add(Plot.builder().name("Application Approved").value(BigDecimal.ZERO).symbol("number").build());
+			
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit").value(BigDecimal.ZERO).symbol("number").build());
 
 			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
 					.build());
@@ -746,6 +756,14 @@ public class BPAService {
         criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
         criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
         return bpaRepository.getApprovedApplicationByServiceType(criteria);
+     }
+	
+	public HashMap<String,BigDecimal> getAvgDaysToIssuePermitByServiceType(PayloadDetails payloadDetails) {
+        BpaSearchCriteria criteria = getBpaSearchCriteria(payloadDetails);
+        criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+        criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+        return bpaRepository.getAvgDaysToIssuePermitByServiceType(criteria);
      }
 	
 	public List<Data> topPerformingUlbsTable(PayloadDetails payloadDetails) {

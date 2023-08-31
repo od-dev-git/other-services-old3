@@ -1929,7 +1929,7 @@ public class RevenueService {
 				.headerValue(wsTotalCollections).plots(wsCollectionPlots).build());
 		
 		// BPA Collection
-		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_ALL_BUSINESS_SERVICES));
+		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.OBPS_REVENUE_ALL_BS));
 		List<Chart> bpaCollection = paymentRepository.getCumulativeCollection(criteria);
 		List<Plot> bpaCollectionPlots = new ArrayList<Plot>();
 		extractDataForChart(bpaCollection, bpaCollectionPlots);
