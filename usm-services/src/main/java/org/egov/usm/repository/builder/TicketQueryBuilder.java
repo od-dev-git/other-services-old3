@@ -35,7 +35,7 @@ public class TicketQueryBuilder {
 				"select ticket.id, ticket.tenantid, answer.questioncategory ,  ticket.ticketno , ticket.surveyanswerid, "
 						+ "ticket.questionid,ticket.ticketdescription, ticket.status ,submit.slumcode , submit.ward,"
 						+ "ticket.ticketcreatedtime,ticket.ticketclosedtime ,ticket.unattended,"
-						+ "ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,"
+						+ "ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,ticket.issatisfied,"
 						+ "ticket.lastmodifiedby FROM eg_usm_survey_ticket ticket ");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer on ticket.surveyanswerid =answer.id");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted submit ON answer.surveysubmittedid =submit.id");
