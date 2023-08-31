@@ -13,6 +13,7 @@ import org.egov.usm.web.model.SurveyTicket;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 @Component
 public class TicketRowMapper implements ResultSetExtractor<List<SurveyTicket>> {
@@ -35,16 +36,28 @@ public class TicketRowMapper implements ResultSetExtractor<List<SurveyTicket>> {
 						.createdTime(rs.getLong("createdtime")).lastModifiedBy(rs.getString("lastmodifiedby"))
 						.lastModifiedTime(lastModifiedTime).build();
 
-				ticket = SurveyTicket.builder().id(rs.getString("id")).tenantId(rs.getString("tenantid"))
-						.ticketNo(rs.getString("ticketno")).surveyAnswerId(rs.getString("surveyanswerid"))
-						.questionId(rs.getString("questionid")).ticketDescription(rs.getString("ticketdescription"))
-
-						.status(TicketStatus.fromValue(rs.getString("status")))
-						.ticketCreatedTime(rs.getLong("ticketcreatedtime"))
-						.ticketClosedTime(rs.getLong("ticketclosedtime")).unAttended(rs.getBoolean("unattended"))
-						.ward(rs.getString("ward")).slumCode(rs.getString("slumcode"))
-						.isSatisfied(rs.getBoolean("issatisfied")).questionCategory(rs.getString("questioncategory"))
-						.auditDetails(auditdetails).build();
+				ticket = SurveyTicket.builder()
+							.id(rs.getString("id"))
+							.tenantId(rs.getString("tenantid"))
+							.ticketNo(rs.getString("ticketno"))
+							.surveyAnswerId(rs.getString("surveyanswerid"))
+							.questionId(rs.getString("questionid"))
+							.ticketDescription(rs.getString("ticketdescription"))
+							.status(TicketStatus.fromValue(rs.getString("status")))
+							.ticketCreatedTime(rs.getLong("ticketcreatedtime"))
+							.ticketClosedTime(rs.getLong("ticketclosedtime"))
+							.ward(rs.getString("ward"))
+							.slumCode(rs.getString("slumcode"))
+							.questionCategory(rs.getString("questioncategory"))
+							.auditDetails(auditdetails).build();
+				
+				if (!ObjectUtils.isEmpty(rs.getObject("issatisfied"))) {
+					ticket.setIsSatisfied(rs.getBoolean("issatisfied"));
+				}
+				
+				if (!ObjectUtils.isEmpty(rs.getObject("unattended"))) {
+					ticket.setUnAttended(rs.getBoolean("unattended"));
+				}
 			}
 
 			surveyMap.put(id, ticket);
