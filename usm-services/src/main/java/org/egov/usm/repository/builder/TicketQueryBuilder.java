@@ -96,7 +96,11 @@ public class TicketQueryBuilder {
 			query.append(" to_timestamp(ticket.createdtime / 1000) :: date = to_timestamp(? / 1000) :: date");
 			preparedStmtList.add(searchCriteria.getTicketDate());
 		}
-
+		if (!ObjectUtils.isEmpty(searchCriteria.getUnAttended())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.unattended = ? ");
+			preparedStmtList.add(searchCriteria.getUnAttended());
+		}
 		query.append(" ORDER BY ticket.createdtime  ");
 
 		return query.toString();
