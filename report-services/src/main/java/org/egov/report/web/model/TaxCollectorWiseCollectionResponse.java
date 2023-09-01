@@ -1,5 +1,7 @@
 package org.egov.report.web.model;
 
+import java.math.BigDecimal;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -59,6 +61,14 @@ public class TaxCollectorWiseCollectionResponse {
 	
 	@JsonProperty("ammountCollected")
     private String amountpaid ;
+	
+	@JsonProperty("currentCollection")
+	@Builder.Default
+    private BigDecimal currentCollection = BigDecimal.ZERO;
+	
+	@JsonProperty("arrearCollection")
+	@Builder.Default
+    private BigDecimal arrearCollection = BigDecimal.ZERO;
 	
 	@JsonProperty("receiptNumber")
     private String receiptnumber ;
