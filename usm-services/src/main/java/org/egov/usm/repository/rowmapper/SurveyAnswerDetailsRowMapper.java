@@ -46,6 +46,7 @@ public class SurveyAnswerDetailsRowMapper implements ResultSetExtractor<List<Sur
                 surveyDetails =  SurveyDetails.builder()
                         .surveySubmittedId(rs.getString("surveysubmittedid"))
                         .surveyId(rs.getString("surveyid"))
+                        .surveyTitle(rs.getString("title"))
                         .surveyNo(rs.getString("surveysubmittedno"))
                         .tenantId(rs.getString("tenantid"))
                         .ward(rs.getString("ward"))

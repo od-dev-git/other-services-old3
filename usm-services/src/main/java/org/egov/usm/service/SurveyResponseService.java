@@ -46,7 +46,7 @@ public class SurveyResponseService {
 	public SurveyDetails generateSurvey(SurveyDetailsRequest surveyDetailsRequest) {
 		SurveyDetails surveyDetails = null;
 		
-		validator.validateGenerateSurveyRequest(surveyDetailsRequest.getSurveyDetails());
+		validator.validateGenerateSurveyRequest(surveyDetailsRequest);
 		
 		List<SurveyDetails> surveyResponseForCurrentDate = repository.validateSurveyForCurrentDate(surveyDetailsRequest.getSurveyDetails());
 		
@@ -79,7 +79,7 @@ public class SurveyResponseService {
 	public SurveyDetails submitSurvey(SurveyDetailsRequest surveyDetailsRequest) {
 		
 		// Validate survey existence
-		validator.validateSurveySubmittedForToday(surveyDetailsRequest.getSurveyDetails());
+		validator.validateSurveySubmittedForToday(surveyDetailsRequest);
         
 		// Enrich survey details
 		enrichmentService.enrichSurveySubmitRequest(surveyDetailsRequest);
@@ -116,7 +116,7 @@ public class SurveyResponseService {
 	public SurveyDetails updateSubmittedSurvey(@Valid SurveyDetailsRequest surveyDetailsRequest) {
 		
 		// Validate survey existence
-        Boolean isSurveyExists = validator.validateSurveyExistsForToday(surveyDetailsRequest.getSurveyDetails());
+        Boolean isSurveyExists = validator.validateSurveyExistsForToday(surveyDetailsRequest);
         if(isSurveyExists) {
         	// Enrich survey details
     		enrichmentService.enrichSurveyUpdateRequest(surveyDetailsRequest);
