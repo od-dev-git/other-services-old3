@@ -17,10 +17,14 @@ import java.util.stream.Stream;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.service.DemandService;
+import org.egov.report.util.PaymentUtil;
+import org.egov.report.model.BillAccountDetail;
+import org.egov.report.model.BillDetail;
 import org.egov.report.model.Demand;
 import org.egov.report.model.DemandDetail;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.Payment;
+import org.egov.report.model.PaymentDetail;
 import org.egov.report.model.PaymentSearchCriteria;
 import org.egov.report.model.Property;
 import org.egov.report.model.PropertyConnectionRequest;
@@ -81,6 +85,9 @@ public class PropertyService {
 	
 	@Autowired
     private DemandService demandService;
+	
+	@Autowired
+	private PaymentUtil paymentUtil;
 	
 	public static final List<String> TAXHEADS_NOT_ALLOWED_FOR_DEMAND_REPORT = Collections
 			.unmodifiableList(Arrays.asList("PT_ADVANCE_CARRYFORWARD","PT_PENALTY","PT_INTEREST","PT_TIME_REBATE","PT_TIME_PENALTY"));
@@ -155,20 +162,11 @@ public class PropertyService {
         PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder().businessServices(businessService)
                 .tenantId(searchCriteria.getUlbName()).fromDate(searchCriteria.getStartDate())
                 .toDate(searchCriteria.getEndDate()).build();
-        
-        if(searchCriteria.getCollectionMode() != null && !searchCriteria.getCollectionMode().isEmpty()) {
-        	String collectionMode = searchCriteria.getCollectionMode();
-        	if(collectionMode.equals(PAYMENTMODE_ONLINE)) {
-        		paymentSearchCriteria.setPaymentModes(Stream.of("CARD","ONLINE").collect(Collectors.toSet()));
-        	}
-        	
-        	if(collectionMode.equals(PAYMENTMODE_OFFLINE)) {
-        		paymentSearchCriteria.setPaymentModes(Stream.of("CASH","OFFLINE_RTGS","OFFLINE_NEFT","POSTAL_ORDER","CHEQUE").collect(Collectors.toSet()));
-        	}
 
-        }
+		paymentSearchCriteria.setPaymentModes(Stream
+				.of("CASH", "OFFLINE_RTGS", "OFFLINE_NEFT", "POSTAL_ORDER", "CHEQUE").collect(Collectors.toSet()));
 
-        List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
         List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse =  payments.parallelStream().map(payment  ->{
             
             TaxCollectorWiseCollectionResponse taxCollectorWiseCollection = TaxCollectorWiseCollectionResponse
@@ -181,6 +179,11 @@ public class PropertyService {
                   .userid(payment.getAuditDetails().getCreatedBy())
                   .tenantid(payment.getTenantId())
                   .build();
+            
+			BigDecimal arrearCollected = getColletdArrearAmount(payment);
+			taxCollectorWiseCollection.setArrearCollection(taxCollectorWiseCollection.getArrearCollection().add(arrearCollected));
+			taxCollectorWiseCollection.setCurrentCollection(taxCollectorWiseCollection.getCurrentCollection().add(payment.getTotalAmountPaid().subtract(arrearCollected)));
+
             return taxCollectorWiseCollection;
         }).collect(Collectors.toList());
 
@@ -230,6 +233,23 @@ public class PropertyService {
 
         return taxCollectorWiseCollectionResponse;
     }
+    
+	private BigDecimal getColletdArrearAmount(Payment payment) {
+		
+		Comparator<BillDetail> billDetailComparator = (obj1, obj2) -> obj2.getFromPeriod().compareTo(obj1.getFromPeriod());
+		BigDecimal arrearCollected = BigDecimal.ZERO;
+		
+		for (PaymentDetail pd : payment.getPaymentDetails()) {
+			Collections.sort(pd.getBill().getBillDetails(), billDetailComparator);
+			for(int i=0; i<pd.getBill().getBillDetails().size(); i++) {
+				if(i != 0) {
+					arrearCollected = arrearCollected.add(pd.getBill().getBillDetails().get(i).getAmountPaid());
+				}
+			}
+		}
+		
+		return arrearCollected;
+	}
 
 	public List<Property> getProperty(RequestInfo requestInfo, PropertySearchingCriteria searchCriteria) {
 
