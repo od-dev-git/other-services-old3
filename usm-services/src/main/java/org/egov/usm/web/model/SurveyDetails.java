@@ -28,6 +28,9 @@ public class SurveyDetails {
 	@JsonProperty("surveyId")
 	private String surveyId;
 	
+	@JsonProperty("surveyTitle")
+	private String surveyTitle;
+	
 	@JsonProperty("tenantId")
 	private String tenantId;
 	
