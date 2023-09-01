@@ -163,12 +163,6 @@ public class MRQueryBuilder {
                     preparedStmtList.add(criteria.getApplicationNumber());
             	}  	
             }
-
-            if (criteria.getStatus() != null) {
-                addClauseIfRequired(preparedStmtList, builder);
-                builder.append("  mr.status = ? ");
-                preparedStmtList.add(criteria.getStatus());
-            }
             
             addClauseIfRequired(preparedStmtList, builder);
             builder.append(" mr.status != ? ");
@@ -211,6 +205,11 @@ public class MRQueryBuilder {
             	  builder.append(IS_INWORKFLOW_QUERY);
             }
 
+        }
+        if (criteria.getStatus() != null) {
+            addClauseIfRequired(preparedStmtList, builder);
+            builder.append("  mr.status = ? ");
+            preparedStmtList.add(criteria.getStatus());
         }
 
        // enrichCriteriaForUpdateSearch(builder,preparedStmtList,criteria);
