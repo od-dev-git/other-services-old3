@@ -27,12 +27,17 @@ public class SurveyResponseQueryBuilder {
 		
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON answer.questionid = question.id");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted surveysubmitted ON surveysubmitted.id = answer.surveysubmittedid");
-		query.append(" JOIN eg_usm_slum_question_lookup lookup on question.id = lookup.questionid and surveysubmitted.tenantid = lookup.tenantid and surveysubmitted.slumcode = lookup.slumcode");
+		query.append(" LEFT OUTER JOIN eg_usm_slum_question_lookup lookup on answer.questionid = lookup.questionid and surveysubmitted.tenantid = lookup.tenantid and surveysubmitted.slumcode = lookup.slumcode");
 		query.append(" WHERE to_timestamp(surveysubmitted.createdtime/1000) :: date = now() :: date");
 
 		if (!ObjectUtils.isEmpty(surveyDetails.getTenantId())) {
 			query.append(" AND surveysubmitted.tenantid = ?");
 			preparedStmtList.add(surveyDetails.getTenantId());
+		}
+		
+		if (!ObjectUtils.isEmpty(surveyDetails.getWard())) {
+			query.append(" AND surveysubmitted.ward = ?");
+			preparedStmtList.add(surveyDetails.getWard());
 		}
 
 		if (!ObjectUtils.isEmpty(surveyDetails.getSlumCode())) {
@@ -144,10 +149,11 @@ public class SurveyResponseQueryBuilder {
 		StringBuilder query = new StringBuilder("SELECT surveysubmitted.id as surveysubmittedid, surveysubmitted.surveyid, surveysubmitted.surveysubmittedno , "
 				+ "surveysubmitted.tenantid , surveysubmitted.ward , surveysubmitted.slumcode ,surveysubmitted.surveytime, surveysubmitted.createdtime as surveycreatedtime, "
 				+ "surveysubmitted.createdby as surveycreatedby, surveysubmitted.lastmodifiedtime as surveymodifiedtime, surveysubmitted.lastmodifiedby as surveymodifiedby, "
-				+ "answer.id as answerid, answer.questionid, question.questionstatement, answer.questioncategory, answer.answer, answer.createdtime, answer.createdby, "
+				+ "answer.id as answerid, answer.questionid, question.questionstatement, answer.questioncategory, answer.answer, answer.createdtime, answer.createdby, lookup.hasopenticket, "
 				+ "answer.lastmodifiedtime, answer.lastmodifiedby from eg_usm_survey_submitted surveysubmitted");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON surveysubmitted.id = answer.surveysubmittedid");
 		query.append(" LEFT OUTER JOIN eg_usm_question question ON answer.questionid = question.id");
+		query.append(" LEFT OUTER JOIN eg_usm_slum_question_lookup lookup on answer.questionid = lookup.questionid and surveysubmitted.tenantid = lookup.tenantid and surveysubmitted.slumcode = lookup.slumcode");
 
 		if (!ObjectUtils.isEmpty(searchCriteria.getSurveySubmittedId())) {
 			addClauseIfRequired(query, preparedStmtList);
