@@ -53,9 +53,6 @@ public class EnrichmentService {
 				.forEach(answer -> {
 					answer.setId(USMUtil.generateUUID());
 					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
-					if(answer.getAnswer() == SurveyAnswer.NO) {
-						answer.setHasOpenTicket(true);
-					}
 					answer.setAuditDetails(auditDetails);
 				});
 	}
@@ -180,9 +177,6 @@ public class EnrichmentService {
 		surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers()
 				.forEach(answer -> {
 					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
-					if(answer.getAnswer() == SurveyAnswer.NO) {
-						answer.setHasOpenTicket(true);
-					}
 					answer.setAuditDetails(auditDetails);
 				});
 
