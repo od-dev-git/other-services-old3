@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum SurveyAnswer {
-	YES("YES"), NO("NO"), NA("NA");
+	YES("YES"), NO("NO");
 	
 	private String value;
 
