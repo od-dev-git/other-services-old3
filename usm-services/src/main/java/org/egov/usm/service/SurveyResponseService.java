@@ -54,8 +54,8 @@ public class SurveyResponseService {
 			List<QuestionDetail> questionsList = repository.getQuestionDetails(surveyDetailsRequest.getSurveyDetails());
 			
 			// Enrich survey details
-			enrichmentService.enrichLookupDetails(surveyDetailsRequest);
-			repository.updateLookupDetails(surveyDetailsRequest);
+//			enrichmentService.enrichLookupDetails(surveyDetailsRequest);
+//			repository.updateLookupDetails(surveyDetailsRequest);
 			surveyDetails = SurveyDetails.builder()
 								.questionDetails(questionsList)
 								.build();
@@ -90,12 +90,12 @@ public class SurveyResponseService {
 		
 		// If any ticket created, then create or update the lookup table
 		if(! CollectionUtils.isEmpty(tickets)) {
+			
 			//check is present in question lookup
 			List<String> questionIds = repository.searchQuestionInLookup(surveyDetailsRequest.getSurveyDetails());
 			
-			if(CollectionUtils.isEmpty(questionIds) || questionIds.size() != surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers().size()) {
-				enrichmentService.enrichSaveQuestionLookup(surveyDetailsRequest, questionIds);
-			} 
+			//enrich Save Question Lookup
+			enrichmentService.enrichSaveQuestionLookup(surveyDetailsRequest, questionIds);
 			
 			//update question lookup
 			enrichmentService.enrichUpdateQuestionLookup(surveyDetailsRequest, tickets);
