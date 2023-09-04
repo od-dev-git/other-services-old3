@@ -1,5 +1,8 @@
 package org.egov.usm.web.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.egov.usm.model.enums.TicketStatus;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -67,5 +70,18 @@ public class SurveyTicket {
 
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails;
+
+	@JsonProperty("surveyTicketComments")
+	private List<SurveyTicketComment> surveyTicketComments;
+
+	public SurveyTicket addTicketComment(SurveyTicketComment surveyTicketComment) {
+		if (this.surveyTicketComments == null) {
+			this.surveyTicketComments = new ArrayList<>();
+		}
+
+		if (null != surveyTicketComments)
+			this.surveyTicketComments.add(surveyTicketComment);
+		return this;
+	}
 
 }
