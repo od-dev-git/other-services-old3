@@ -39,9 +39,14 @@ public class FeedbackValidator {
         if(StringUtils.isEmpty(feedbackCreationRequest.getFeedback().getModule())){
             errorMap.put("INVALID_MODULE","Module can't be null or empty");
         }
-        final ValueRange ratingRange = ValueRange.of(MIN_RATING, MAX_RATING);
-        if(!ratingRange.isValidIntValue(feedbackCreationRequest.getFeedback().getRating())){
-            errorMap.put("INVALID_RATING_VALUE", "Rating value must be between 1 and 5");
+        if(feedbackCreationRequest.getFeedback().getRating() == null){
+            errorMap.put("INVALID_RATING_VALUE","Rating can't be null");
+        }
+        else {
+            final ValueRange ratingRange = ValueRange.of(MIN_RATING, MAX_RATING);
+            if (!ratingRange.isValidIntValue(feedbackCreationRequest.getFeedback().getRating())) {
+                errorMap.put("INVALID_RATING_VALUE", "Rating value must be between 1 and 5");
+            }
         }
         validateTenantIdByMDMS(feedbackCreationRequest.getFeedback().getTenantId(), errorMap, feedbackCreationRequest.getRequestInfo());
         if (!errorMap.isEmpty())
@@ -54,6 +59,12 @@ public class FeedbackValidator {
             errorMap.put("INVALID_TENANT_ID","Tenant Id passed can't be null or empty");
         }
         validateTenantIdByMDMS(criteria.getTenantId(), errorMap, requestInfo);
+        if(criteria.getRating()!=null){
+            final ValueRange ratingRange = ValueRange.of(MIN_RATING, MAX_RATING);
+            if (!ratingRange.isValidIntValue(criteria.getRating())) {
+                errorMap.put("INVALID_RATING_VALUE", "Rating value must be between 1 and 5");
+            }
+        }
         if (!errorMap.isEmpty())
             throw new CustomException(errorMap);
 
