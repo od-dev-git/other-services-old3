@@ -164,9 +164,11 @@ public class MRQueryBuilder {
             	}  	
             }
             
-            addClauseIfRequired(preparedStmtList, builder);
-            builder.append(" mr.status != ? ");
-            preparedStmtList.add(String.valueOf(MRConstants.STATUS_DELETED));
+            if (criteria.getStatus() != null) {
+                addClauseIfRequired(preparedStmtList, builder);
+                builder.append("  mr.status = ? ");
+                preparedStmtList.add(criteria.getStatus());
+            }
 
             List<String> mrNumbers = criteria.getMrNumbers();
             if (!CollectionUtils.isEmpty(mrNumbers)) {
@@ -206,11 +208,10 @@ public class MRQueryBuilder {
             }
 
         }
-        if (criteria.getStatus() != null) {
-            addClauseIfRequired(preparedStmtList, builder);
-            builder.append("  mr.status = ? ");
-            preparedStmtList.add(criteria.getStatus());
-        }
+        
+        addClauseIfRequired(preparedStmtList, builder);
+        builder.append(" mr.status != ? ");
+        preparedStmtList.add(String.valueOf(MRConstants.STATUS_DELETED));
 
        // enrichCriteriaForUpdateSearch(builder,preparedStmtList,criteria);
 
