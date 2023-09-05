@@ -47,8 +47,14 @@ public class TicketSearchCriteria {
 
 	@JsonProperty("isSda")
 	private Boolean isSda;
+	
+	@JsonProperty("unAttended")
+	private Boolean unAttended;
 
 	@JsonProperty("createdBy")
 	private String createdBy;
+
+	@JsonProperty("tickDate")
+	private Long ticketDate;
 
 }

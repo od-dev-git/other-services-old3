@@ -17,6 +17,7 @@ import org.egov.usm.web.model.AuditDetails;
 import org.egov.usm.web.model.SubmittedAnswer;
 import org.egov.usm.web.model.SurveyDetailsRequest;
 import org.egov.usm.web.model.SurveyTicket;
+import org.egov.usm.web.model.SurveyTicketListRequest;
 import org.egov.usm.web.model.SurveyTicketRequest;
 import org.egov.usm.web.model.TicketSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,6 @@ public class TicketService {
 
 	@Autowired
 	private SurveyTicketRequestValidator surveyTicketRequestValidator;
-	
 
 	/**
 	 * Service layer for create Ticket
@@ -72,58 +72,66 @@ public class TicketService {
 		return surveyTickets;
 	}
 
-	
 	/**
 	 * Service layer for Updating SurveyTicket
 	 * 
 	 * @param SurveyTicketRequest
 	 * @return updated Survey
 	 */
-	public SurveyTicket updateSurveyTicket(@Valid SurveyTicketRequest ticketRequest) {
-		SurveyTicket surveyTicket = ticketRequest.getTicket();
-		RequestInfo requestInfo = ticketRequest.getRequestInfo();
+	public List<SurveyTicket> updateSurveyTicket(@Valid SurveyTicketListRequest ticketRequests) {
+		List<SurveyTicket> surveyListTickets = new ArrayList<>();
 
-		/* Validate the existing ticket */
-		SurveyTicket existingSurveyTickets = surveyTicketRequestValidator.validateSurveyTicketExistence(surveyTicket);
+		for (SurveyTicket surveyTicket : ticketRequests.getTickets()) {
+			RequestInfo requestInfo = ticketRequests.getRequestInfo();
 
-		/* Update the Audit Details */
-		AuditDetails auditDetails = USMUtil.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
-		auditDetails.setCreatedBy(existingSurveyTickets.getAuditDetails().getCreatedBy());
-		auditDetails.setCreatedTime(existingSurveyTickets.getAuditDetails().getCreatedTime());
-		surveyTicket.setAuditDetails(auditDetails);
-		
-		surveyTicket.setTicketClosedTime(auditDetails.getLastModifiedTime());
-		surveyTicket.setQuestionId(existingSurveyTickets.getQuestionId());
-		surveyTicket.setSurveyAnswerId(existingSurveyTickets.getSurveyAnswerId());
-		surveyTicket.setTicketCreatedTime(existingSurveyTickets.getTicketCreatedTime());
-		surveyTicket.setTicketDescription(existingSurveyTickets.getTicketDescription());
+			/* Validate the existing ticket */
+			SurveyTicket existingSurveyTickets = surveyTicketRequestValidator
+					.validateSurveyTicketExistence(surveyTicket);
 
-		if (!ObjectUtils.isEmpty(surveyTicket.getIsSatisfied()) && existingSurveyTickets.getStatus() == TicketStatus.CLOSED) {
-            ticketRequest.getTicket().setStatus(existingSurveyTickets.getStatus());
-            ticketRequest.getTicket().setHasOpenTicket(Boolean.FALSE);
-            
-        } else if (ObjectUtils.isEmpty(surveyTicket.getIsSatisfied()) && surveyTicket.getStatus() == TicketStatus.CLOSED) {
-            surveyTicketRequestValidator.validateSurveyTicketClose(existingSurveyTickets);
-            ticketRequest.getTicket().setHasOpenTicket(Boolean.FALSE);
-            
-        } else if (!ObjectUtils.isEmpty(surveyTicket.getStatus()) && !ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())){
-        	throw new CustomException("EG_INPUT_PARAM_ERR",
-					"The reqest parameter in update request does not valid.");
-            
-        } else {
-        	ticketRequest.getTicket().setHasOpenTicket(Boolean.TRUE);
-        }
-		
-		ticketRequest.getTicket().setTenantId(existingSurveyTickets.getTenantId());
-		ticketRequest.getTicket().setWard(existingSurveyTickets.getWard());
-		ticketRequest.getTicket().setSlumCode(existingSurveyTickets.getSlumCode());
-		ticketRequest.getTicket().setQuestionCategory(existingSurveyTickets.getQuestionCategory());
-		ticketRequest.getTicket().setTicketNo(existingSurveyTickets.getTicketNo());
-		
-		repository.update(ticketRequest);
-		return surveyTicket;
+			/* Update the Audit Details */
+			AuditDetails auditDetails = USMUtil.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
+			auditDetails.setCreatedBy(existingSurveyTickets.getAuditDetails().getCreatedBy());
+			auditDetails.setCreatedTime(existingSurveyTickets.getAuditDetails().getCreatedTime());
+			surveyTicket.setAuditDetails(auditDetails);
+
+			surveyTicket.setTicketClosedTime(auditDetails.getLastModifiedTime());
+			surveyTicket.setQuestionId(existingSurveyTickets.getQuestionId());
+			surveyTicket.setSurveyAnswerId(existingSurveyTickets.getSurveyAnswerId());
+			surveyTicket.setTicketCreatedTime(existingSurveyTickets.getTicketCreatedTime());
+			surveyTicket.setTicketDescription(existingSurveyTickets.getTicketDescription());
+
+			if (!ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())
+					&& existingSurveyTickets.getStatus() == TicketStatus.CLOSED) {
+				surveyTicket.setStatus(existingSurveyTickets.getStatus());
+				surveyTicket.setHasOpenTicket(Boolean.FALSE);
+
+			} else if (ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())
+					&& surveyTicket.getStatus() == TicketStatus.CLOSED) {
+				surveyTicketRequestValidator.validateSurveyTicketClose(existingSurveyTickets);
+				surveyTicket.setHasOpenTicket(Boolean.FALSE);
+
+			} else if (!ObjectUtils.isEmpty(surveyTicket.getStatus())
+					&& !ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())) {
+				throw new CustomException("EG_INPUT_PARAM_ERR",
+						"The reqest parameter in update request does not valid.");
+
+			} else {
+				surveyTicket.setHasOpenTicket(Boolean.TRUE);
+			}
+
+			surveyTicket.setTenantId(existingSurveyTickets.getTenantId());
+			surveyTicket.setWard(existingSurveyTickets.getWard());
+			surveyTicket.setSlumCode(existingSurveyTickets.getSlumCode());
+			surveyTicket.setQuestionCategory(existingSurveyTickets.getQuestionCategory());
+			surveyTicket.setTicketNo(existingSurveyTickets.getTicketNo());
+
+			repository.update(SurveyTicketRequest.builder().ticket(surveyTicket).requestInfo(requestInfo).build());
+			surveyListTickets.add(surveyTicket);
+		}
+
+		return surveyListTickets;
+
 	}
-	
 
 	/**
 	 * return List<SurveyTicket> based on search criteria

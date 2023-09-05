@@ -1,5 +1,7 @@
 package org.egov.usm.web.model;
 
+import java.util.List;
+
 import org.egov.common.contract.request.RequestInfo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,11 +17,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class USMOfficialRequest {
-
+public class SurveyTicketListRequest {
+	
 	@JsonProperty("RequestInfo")
 	private RequestInfo requestInfo;
 
-	@JsonProperty("usmOffcial")
-	private USMOfficial usmOffcial;
+	@JsonProperty("tickets")
+	private List<SurveyTicket> tickets;
+
 }

@@ -69,9 +69,11 @@ public class SurveyService {
 		
         Survey existingSurvey = surveyRequestValidator.validateSurveyExistence(survey);
         
-        survey.setAuditDetails(existingSurvey.getAuditDetails());
-        survey.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
-        survey.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
+        auditDetails.setCreatedBy(existingSurvey.getAuditDetails().getCreatedBy());
+        auditDetails.setCreatedTime(existingSurvey.getAuditDetails().getCreatedTime());
+        
+        survey.setAuditDetails(auditDetails);
+        survey.setStatus(existingSurvey.getStatus());
         
         survey.getQuestionDetails().forEach(question -> {
         	question.setAuditDetails(auditDetails);

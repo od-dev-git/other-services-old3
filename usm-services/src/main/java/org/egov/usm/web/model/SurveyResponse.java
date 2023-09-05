@@ -21,7 +21,7 @@ import lombok.Setter;
 @Builder
 public class SurveyResponse {
 	
-	@JsonProperty("responseInfo")
+	@JsonProperty("ResponseInfo")
 	private ResponseInfo responseInfo;
 	
 	@JsonProperty("surveys")

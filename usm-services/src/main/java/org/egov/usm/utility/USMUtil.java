@@ -1,5 +1,7 @@
 package org.egov.usm.utility;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.UUID;
 
 import org.egov.usm.web.model.AuditDetails;
@@ -34,6 +36,15 @@ public class USMUtil {
 	 */
 	public static String generateUUID () {
 		return UUID.randomUUID().toString();
+	}
+	
+	
+	public static boolean isGreaterTime(int hours) {
+		Calendar calender = new GregorianCalendar();
+        int currentHour = calender.get( Calendar.HOUR_OF_DAY );
+        int currentMinute = calender.get( Calendar.MINUTE );
+
+        return currentHour >= hours && currentMinute > 0 ;
 	}
 	
 	

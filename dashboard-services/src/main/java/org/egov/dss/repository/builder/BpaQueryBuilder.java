@@ -36,6 +36,13 @@ public static final String BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = " sel
 		+ "	else ebe.servicetype end as servicetype from eg_bpa_buildingplan bpa"
 		+ "	inner join eg_bpa_edcrdata ebe on ebe.applicationno = bpa.applicationno ";
 
+public static final String BPA_AVG_DAYS_PERMIT_ISSUE_BY_SERVICETYPE = " select tmp.servicetype as tenantid,avg((tmp.approvaldate-tmp.applicationdate)/86400000) as totalamt"
+		+ " from ( select ebe.applicationno,bpa.approvaldate,bpa.applicationdate, case when ebe.alterationsubservice = '' "
+		+ "	and ebe.servicetype = 'New Construction' then ebe.servicetype when ebe.alterationsubservice != '' "
+		+ "	and ebe.servicetype = 'New Construction' then concat('Addition & Alteration ', '(', ebe.alterationsubservice, ')')"
+		+ "	else ebe.servicetype end as servicetype from eg_bpa_buildingplan bpa"
+		+ "	inner join eg_bpa_edcrdata ebe on ebe.applicationno = bpa.applicationno ";
+
 public static final String BPA_SLA_COMPLIENCE_APPLICATIONS = " select count(bpa.applicationno) from eg_bpa_buildingplan bpa inner join eg_bpa_edcrdata ebe on "
 		                                                   + " ebe.applicationno = bpa.applicationno ";
 
@@ -395,6 +402,15 @@ public static final String BPA_APPL_BREAKDOWN_2 = "group by bpa.status,bpa.tenan
 	    public String getApprovedApplicationByServiceType(BpaSearchCriteria bpaSearchCriteria,
 	            Map<String, Object> preparedStatementValues) {
 	        StringBuilder selectQuery = new StringBuilder(BPA_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE);
+	        addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
+	        selectQuery.append(" ) tmp ");
+	        addGroupByClause(selectQuery," tmp.servicetype ");
+	        return selectQuery.toString();
+	    }
+	    
+	    public String getAvgDaysToIssuePermitByServiceType(BpaSearchCriteria bpaSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(BPA_AVG_DAYS_PERMIT_ISSUE_BY_SERVICETYPE);
 	        addWhereClause(selectQuery, preparedStatementValues, bpaSearchCriteria);
 	        selectQuery.append(" ) tmp ");
 	        addGroupByClause(selectQuery," tmp.servicetype ");

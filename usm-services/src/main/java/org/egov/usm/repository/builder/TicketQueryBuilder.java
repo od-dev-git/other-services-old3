@@ -33,12 +33,13 @@ public class TicketQueryBuilder {
 
 		StringBuilder query = new StringBuilder(
 				"select ticket.id, ticket.tenantid, answer.questioncategory ,  ticket.ticketno , ticket.surveyanswerid, "
-						+ "ticket.questionid,ticket.ticketdescription, ticket.status ,submit.slumcode , submit.ward,"
+						+ "ticket.questionid,ticket.ticketdescription, ticket.status ,comment.id as commentid,comment.ticketid ,submit.slumcode , submit.ward,"
 						+ "ticket.ticketcreatedtime,ticket.ticketclosedtime ,ticket.unattended,"
-						+ "ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,"
+						+ "ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,ticket.issatisfied,"
 						+ "ticket.lastmodifiedby FROM eg_usm_survey_ticket ticket ");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer on ticket.surveyanswerid =answer.id");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted submit ON answer.surveysubmittedid =submit.id");
+		query.append(" LEFT OUTER JOIN eg_usm_survey_ticket_comment comment ON comment.ticketid=ticket.id");
 
 		if (searchCriteria.getIsOfficial() == Boolean.TRUE) {
 			query.append(
@@ -91,7 +92,16 @@ public class TicketQueryBuilder {
 			query.append(" ticket.createdby = ? ");
 			preparedStmtList.add(searchCriteria.getCreatedBy());
 		}
-
+		if (!ObjectUtils.isEmpty(searchCriteria.getTicketDate())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" to_timestamp(ticket.createdtime / 1000) :: date = to_timestamp(? / 1000) :: date");
+			preparedStmtList.add(searchCriteria.getTicketDate());
+		}
+		if (!ObjectUtils.isEmpty(searchCriteria.getUnAttended())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.unattended = ? ");
+			preparedStmtList.add(searchCriteria.getUnAttended());
+		}
 		query.append(" ORDER BY ticket.createdtime  ");
 
 		return query.toString();
