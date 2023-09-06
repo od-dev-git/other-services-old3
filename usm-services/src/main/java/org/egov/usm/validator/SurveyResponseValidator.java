@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
+import org.egov.usm.model.enums.SurveyAnswer;
 import org.egov.usm.repository.SDAMemberRepository;
 import org.egov.usm.repository.SurveyDetailsRepository;
 import org.egov.usm.utility.Constants;
@@ -50,24 +51,35 @@ public class SurveyResponseValidator {
 				
 		SurveySearchCriteria criteria = SurveySearchCriteria.builder()
         		.surveySubmittedId(surveyDetails.getSurveySubmittedId())
+        		.createdBy(requestInfo.getUserInfo().getUuid())
+        		.surveyDate(System.currentTimeMillis())
                 .build();
 		
-        Boolean isSurveyExists = repository.isSurveyExistsForToday(criteria);
-        if(!isSurveyExists)
+        List<SurveyDetails> surveyExists = repository.searchSubmittedSurvey(criteria);
+     
+        if(CollectionUtils.isEmpty(surveyExists))
             throw new CustomException("EG_SURVEY_DOES_NOT_EXIST_ERR", "The survey entity provided in update request does not exist or closed for today.");
 
-        surveyDetails.getSubmittedAnswers().forEach(answer -> {
-			if(ObjectUtils.isEmpty(answer.getId()))
+        surveyDetails.getSubmittedAnswers().forEach(submittedAnswer -> {
+			if(ObjectUtils.isEmpty(submittedAnswer.getId()))
 	            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing answer id is mandatory for submitting surveys");
 			
-			if(ObjectUtils.isEmpty(answer.getQuestionCategory()))
+			if(ObjectUtils.isEmpty(submittedAnswer.getQuestionCategory()))
 	            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing questionCategory is mandatory for submitting surveys");
 			
-			if(ObjectUtils.isEmpty(answer.getAnswer()))
+			if(ObjectUtils.isEmpty(submittedAnswer.getAnswer()))
 	            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing all questions valid answer is mandatory for submitting surveys");
 
+			surveyExists.get(0).getSubmittedAnswers().forEach(existAnswer -> {
+        		if(submittedAnswer.getQuestionId().equals(existAnswer.getQuestionId())
+        				&& submittedAnswer.getAnswer().equals(SurveyAnswer.YES) 
+						&& existAnswer.getAnswer().equals(SurveyAnswer.NO)){
+        			throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "You can't update answer as NO to YES for submitting survey");
+        		}
+        	});
 		});
-        return isSurveyExists;
+        
+        return !CollectionUtils.isEmpty(surveyExists);
 	}
 	
 	
@@ -125,10 +137,13 @@ public class SurveyResponseValidator {
             throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing surveyId is mandatory for generate surveys");
 
 		if(ObjectUtils.isEmpty(surveyDetails.getTenantId()))
-            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing tenantId mandatory for submitting surveys");
+            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing tenantId mandatory for generate surveys");
+
+		if(ObjectUtils.isEmpty(surveyDetails.getTenantId()))
+            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing ward mandatory for generate surveys");
 
 		if(ObjectUtils.isEmpty(surveyDetails.getSlumCode()))
-            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing slumCode is mandatory for submitting surveys");
+            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing slumCode is mandatory for generate surveys");
 
 		//Validate SDA with slum access
 		validateSDAMemberHasAccess(requestInfo.getUserInfo().getUuid(), surveyDetails.getTenantId(), surveyDetails.getWard(), surveyDetails.getSlumCode());

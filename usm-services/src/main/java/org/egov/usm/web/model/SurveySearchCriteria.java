@@ -31,6 +31,9 @@ public class SurveySearchCriteria {
 	@JsonProperty("surveyNo")
 	private String surveyNo;
 	
+	@JsonProperty("ticketId")
+	private String ticketId;
+	
 	@JsonProperty("ward")
 	private String ward;
 	
