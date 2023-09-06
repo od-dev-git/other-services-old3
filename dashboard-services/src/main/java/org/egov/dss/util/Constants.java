@@ -220,6 +220,10 @@ public class Constants {
 		final static String REVENUE_OVERVIEW_TOP_PERFORMING_ULBS = "topPerformingUlbsOverview";
 		final static String REVENUE_OVERVIEW_BOTTOM_PERFORMING_ULBS = "bottomPerformingUlbsOverview";
 		final static String REVENUE_ALL_PAYMENT_MODE_COLLECTION = "paymentModeCollections";
+		
+		final static String REVENUE_URC_TOTALCOLLECTION = "totalCollections";
+		final static String REVENUE_URC_WNSCOLLECTION = "waterSewerageCollections";
+		final static String REVENUE_URC_PTCOLLECTION = "propertyTaxCollections";
 	}
 
 }
