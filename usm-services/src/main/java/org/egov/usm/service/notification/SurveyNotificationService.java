@@ -53,10 +53,10 @@ public class SurveyNotificationService {
 					notificationUtil.sendEmail(emailRequests, true);
 			}
 		}
-		
 	}
 
 
+	
 	public void processTicketUpdateNotification(SurveyTicketRequest surveyTicketRequest) {
 		List<SMSRequest> smsRequests = new LinkedList<>();
 		List<EmailRequest> emailRequests = new LinkedList<>();
@@ -76,9 +76,6 @@ public class SurveyNotificationService {
 					notificationUtil.sendEmail(emailRequests, true);
 			}
 		}
-		
-		
 	}
-
 	
 }

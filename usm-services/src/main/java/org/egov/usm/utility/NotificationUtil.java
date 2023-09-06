@@ -75,6 +75,19 @@ public class NotificationUtil {
 		return message;
 	}
 	
+	
+	
+	/**
+	 * slum code key for getting slum name
+	 * 
+	 * @param tenantId
+	 * @param slumCode
+	 * @return slum code key for getting slum name
+	 */
+	public String getSlumCodeKey(String tenantId, String slumCode) {
+		return 	tenantId.replace('.', '_').toUpperCase().concat("_SLUM_").concat(slumCode.toUpperCase());
+	}
+	
 
 	
 	/**
@@ -82,22 +95,32 @@ public class NotificationUtil {
 	 * 
 	 * @param tenantId
 	 *            TenantId of the propertyRequest
+	 * @param slumCode 
 	 * @return The uri for localization search call
 	 */
-	public StringBuilder getUri(String tenantId, RequestInfo requestInfo) {
-
+	public StringBuilder getUri(String tenantId, String slumCode, RequestInfo requestInfo) {
+		String slumCodeKey = null;
+		String codes = StringUtils.join(Constants.NOTIFICATION_CODES, ',');
+		
+		if (!StringUtils.isEmpty(slumCode)) {
+			slumCodeKey = getSlumCodeKey(tenantId, slumCode);
+			codes = codes.replace(Constants.USM_SLUM_CODE_KEY, slumCodeKey);
+		}
+		
 		if (config.getIsLocalizationStateLevel())
 			tenantId = tenantId.split("\\.")[0];
 
 		String locale = Constants.NOTIFICATION_LOCALE;
 		if (!StringUtils.isEmpty(requestInfo.getMsgId()) && requestInfo.getMsgId().split("|").length >= 2)
 			locale = requestInfo.getMsgId().split("\\|")[1];
-
+		
+		
+		
 		StringBuilder uri = new StringBuilder();
 		uri.append(config.getLocalizationHost()).append(config.getLocalizationContextPath())
 				.append(config.getLocalizationSearchEndpoint()).append("?").append("locale=").append(locale)
 				.append("&tenantId=").append(tenantId).append("&module=").append(Constants.MODULE)
-				.append("&codes=").append(StringUtils.join(Constants.NOTIFICATION_CODES,','));
+				.append("&codes=").append(codes);
 
 		return uri;
 	}
@@ -109,13 +132,14 @@ public class NotificationUtil {
 	 * 
 	 * @param tenantId
 	 *            tenantId of the MarriageRegistration
+	 * @param slumCode 
 	 * @param requestInfo
 	 *            The requestInfo of the request
 	 * @return Localization messages for the module
 	 */
 	@SuppressWarnings("rawtypes")
-	public String getLocalizationMessages(String tenantId, RequestInfo requestInfo) {
-		LinkedHashMap responseMap = (LinkedHashMap) serviceRequestRepository.fetchResult(getUri(tenantId, requestInfo),
+	public String getLocalizationMessages(String tenantId, String slumCode, RequestInfo requestInfo) {
+		LinkedHashMap responseMap = (LinkedHashMap) serviceRequestRepository.fetchResult(getUri(tenantId, slumCode, requestInfo),
 				requestInfo);
 		String jsonString = new JSONObject(responseMap).toString();
 		return jsonString;
