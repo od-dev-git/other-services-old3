@@ -40,7 +40,7 @@ public class SurveyQueryBuilder {
             preparedStmtList.add(searchCriteria.getStatus());
         }
         
-        query.append(" ORDER BY screatedtime DESC ");
+        query.append(" ORDER BY screatedtime DESC, question.createdtime  ASC");
         return query.toString();
 	}
 

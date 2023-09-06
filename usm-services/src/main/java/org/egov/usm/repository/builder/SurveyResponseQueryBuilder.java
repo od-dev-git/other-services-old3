@@ -155,7 +155,11 @@ public class SurveyResponseQueryBuilder {
 		query.append(" LEFT OUTER JOIN eg_usm_survey survey ON surveysubmitted.surveyid = survey.id");
 		query.append(" LEFT OUTER JOIN eg_usm_question question ON answer.questionid = question.id");
 		query.append(" LEFT OUTER JOIN eg_usm_slum_question_lookup lookup on answer.questionid = lookup.questionid and surveysubmitted.tenantid = lookup.tenantid and surveysubmitted.slumcode = lookup.slumcode");
-
+		
+		if (!ObjectUtils.isEmpty(searchCriteria.getTicketId())) {
+			query.append(" LEFT OUTER JOIN eg_usm_survey_ticket ticket ON ticket.surveyanswerid = answer.id");
+		}
+		
 		if (!ObjectUtils.isEmpty(searchCriteria.getSurveySubmittedId())) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" surveysubmitted.id = ?");
@@ -190,6 +194,12 @@ public class SurveyResponseQueryBuilder {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" to_timestamp(surveysubmitted.createdtime / 1000) :: date = to_timestamp(? / 1000) :: date");
 			preparedStmtList.add(searchCriteria.getSurveyDate());
+		}
+		
+		if(!ObjectUtils.isEmpty(searchCriteria.getTicketId())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.id = ?");
+			preparedStmtList.add(searchCriteria.getTicketId());
 		}
 		
 		if(searchCriteria.getIsAdmin() != Boolean.TRUE) {
