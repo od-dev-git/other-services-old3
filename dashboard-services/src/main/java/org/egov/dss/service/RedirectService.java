@@ -698,6 +698,14 @@ public class RedirectService {
             return urcService.wsTotalCollection(requestInfoWrapper.getPayloadDetails());
         }
 		
+		if(Constants.VisualizationCodes.ULBS_UNDER_URC.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ulbsUnderUrc(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.JAlSATHI_ONBOARDED_URC.equalsIgnoreCase(visualizationCode)) {
+            return urcService.jalsathiOnboarded(requestInfoWrapper.getPayloadDetails());
+        }
+		
 		return null;
 
 	}

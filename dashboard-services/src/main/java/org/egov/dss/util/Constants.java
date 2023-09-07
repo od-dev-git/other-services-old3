@@ -224,6 +224,8 @@ public class Constants {
 		final static String REVENUE_URC_TOTALCOLLECTION = "totalCollections";
 		final static String REVENUE_URC_WNSCOLLECTION = "waterSewerageCollections";
 		final static String REVENUE_URC_PTCOLLECTION = "propertyTaxCollections";
+		final static String ULBS_UNDER_URC = "ulbsUnderUrc";
+		final static String JAlSATHI_ONBOARDED_URC = "jalsathiOnboarderUrc";
 	}
 
 }

@@ -9,7 +9,7 @@ import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PaymentSearchCriteria;
-import org.egov.dss.repository.PaymentRepository;
+import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.repository.URCRepository;
 import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.Data;
@@ -75,6 +75,28 @@ public class URCService {
 		return criteria;
 	}
 	
+	public UrcSearchCriteria getUrcSearchCriteria(PayloadDetails payloadDetails) {
+		UrcSearchCriteria criteria = new UrcSearchCriteria();
+
+		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
+			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
+		}
+
+		if (StringUtils.hasText(payloadDetails.getTenantid())) {
+			criteria.setTenantIds(Sets.newHashSet(payloadDetails.getTenantid()));
+		}
+
+		if (payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
+			criteria.setFromDate(payloadDetails.getStartdate());
+		}
+
+		if (payloadDetails.getEnddate() != null && payloadDetails.getEnddate() != 0) {
+			criteria.setToDate(payloadDetails.getEnddate());
+		}
+
+		return criteria;
+	}
+
 	public List<Data> urcTotalCollection(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
@@ -99,6 +121,20 @@ public class URCService {
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
         return Arrays.asList(Data.builder().headerValue(totalCollection.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+	
+	public List<Data> ulbsUnderUrc(PayloadDetails payloadDetails) {	
+		UrcSearchCriteria urcSearchCriteria = getUrcSearchCriteria(payloadDetails);
+		urcSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal ulbsUnderUrc = (BigDecimal) urcRepository.getUlbsUnderUrc(urcSearchCriteria);
+        return Arrays.asList(Data.builder().headerValue(ulbsUnderUrc).build());
+	}
+	
+	public List<Data> jalsathiOnboarded(PayloadDetails payloadDetails) {	
+		UrcSearchCriteria urcSearchCriteria = getUrcSearchCriteria(payloadDetails);
+		urcSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal jalSathiOnboarded = (BigDecimal) urcRepository.jalSathiOnboarded(urcSearchCriteria);
+        return Arrays.asList(Data.builder().headerValue(jalSathiOnboarded).build());
 	}
 	
 
