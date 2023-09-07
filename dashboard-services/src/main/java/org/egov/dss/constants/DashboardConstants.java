@@ -211,6 +211,8 @@ public class DashboardConstants {
 	public static final String STATUS_ESCALATED_LEVEL_3 = "escaltedlevel3pending";
 
 	public static final String STATUS_ESCALATED_LEVEL_4 = "escaltedlevel4pending";
+	
+	public static final String MODULE_LEVEL_URC = "URC";	
 
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
@@ -290,6 +292,9 @@ public class DashboardConstants {
 	
 	public static final List<String> OBPS_PERFORM_VISULAIZATIONCODE = Collections
 			.unmodifiableList(Arrays.asList(OBPS_TOP_PERFORM_VISUALIZATION,OBPS_BOTTOM_PERFORM_VISUALIZATION));
+	
+	public static final List<String> URC_REVENUE_ALL_BS = Collections.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_WS,
+			BUSINESS_SERVICE_SW, BUSINESS_SERVICE_WS_ONE_TIME_FEE, BUSINESS_SERVICE_SW_ONE_TIME_FEE, BUSINESS_SERVICE_PT, BUSINESS_SERVICE_PT_MUTATION));
 
 
 }
