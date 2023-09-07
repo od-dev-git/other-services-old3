@@ -39,6 +39,9 @@ public class RedirectService {
 	@Autowired
 	private CommonService commonService;
 	
+	@Autowired
+	private URCService urcService;
+	
 	public List<Data> redirect(RequestInfoWrapper requestInfoWrapper) {
 		String visualizationCode=requestInfoWrapper.getPayloadDetails().getVisualizationcode();
 		log.info("Currently Processing :"+visualizationCode+"  Module level: "+requestInfoWrapper.getPayloadDetails().getModulelevel());
@@ -681,6 +684,18 @@ public class RedirectService {
 		}
 		if(Constants.VisualizationCodes.SERVICE_PGR_TOTAL_ESCALATED_COMPLAINTS.equalsIgnoreCase(visualizationCode)) {
             return pgrService.totalEscalatedComplaints(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.REVENUE_URC_TOTALCOLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.urcTotalCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.REVENUE_URC_PTCOLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ptTotalCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.REVENUE_URC_WNSCOLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.wsTotalCollection(requestInfoWrapper.getPayloadDetails());
         }
 		
 		return null;
