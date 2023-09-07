@@ -46,7 +46,12 @@ public class TicketQueryBuilder {
 					" JOIN eg_usm_dept_mapping dept ON  submit.tenantid = dept.tenantid and submit.ward = dept.ward and submit.slumcode = dept.slumcode and answer.questioncategory = dept.category");
 
 		}
-
+		if (searchCriteria.getIsEscalateOfficer() == Boolean.TRUE) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.createdtime >=(? - (48 * 3600 * 1000)) and ticket.createdtime <= ?");
+			preparedStmtList.add(searchCriteria.getTicketDate());
+			preparedStmtList.add(searchCriteria.getTicketDate());
+		}
 		if (!ObjectUtils.isEmpty(searchCriteria.getTicketId())) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" ticket.id = ? ");
@@ -92,7 +97,8 @@ public class TicketQueryBuilder {
 			query.append(" ticket.createdby = ? ");
 			preparedStmtList.add(searchCriteria.getCreatedBy());
 		}
-		if (!ObjectUtils.isEmpty(searchCriteria.getTicketDate())) {
+		if (!ObjectUtils.isEmpty(searchCriteria.getTicketDate())
+				&& ObjectUtils.isEmpty(searchCriteria.getIsEscalateOfficer())) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" to_timestamp(ticket.createdtime / 1000) :: date = to_timestamp(? / 1000) :: date");
 			preparedStmtList.add(searchCriteria.getTicketDate());
@@ -101,6 +107,12 @@ public class TicketQueryBuilder {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" ticket.unattended = ? ");
 			preparedStmtList.add(searchCriteria.getUnAttended());
+		}
+
+		if (!ObjectUtils.isEmpty(searchCriteria.getIsSatisfied())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" ticket.issatisfied = ? ");
+			preparedStmtList.add(searchCriteria.getIsSatisfied());
 		}
 		query.append(" ORDER BY ticket.createdtime  ");
 
