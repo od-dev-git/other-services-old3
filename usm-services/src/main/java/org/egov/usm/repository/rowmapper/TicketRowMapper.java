@@ -74,7 +74,7 @@ public class TicketRowMapper implements ResultSetExtractor<List<SurveyTicket>> {
 		String ticketId = rs.getString("ticketid");
 
 		if (commentId == null || ticketId == null) {
-			ticket.addTicketComment(null);
+			// ticket.addTicketComment(null);
 			return;
 		}
 
