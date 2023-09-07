@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 import java.util.Map;
 
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.UrcSearchCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -14,11 +15,26 @@ public class URCQueryBuilder {
 
 	public static final String TOTAL_COLLECTION_QUERY = " select COALESCE(sum(py.totalamountpaid),0) from egcl_payment py "
 			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
-
+	
+	public static final String ULBS_UNDER_URC = "select count(distinct tenantid)  from eg_hrms_employee  where code like 'SUJOG_JAL%' and active = true ";
+	
+	public static final String JALSATHI_ONBOARDED = "select count(distinct id)  from eg_hrms_employee  where code like 'SUJOG_JAL%' and active = true ";
+			
+	
 	public static String getTotalCollection(PaymentSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_COLLECTION_QUERY);
 		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		return selectQuery.toString();
+	}
+	
+	public static String getUlbsUnderUrc(UrcSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(ULBS_UNDER_URC);
+		return selectQuery.toString();
+	}
+	
+	public static String jalSathiOnboarded(UrcSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(JALSATHI_ONBOARDED);
 		return selectQuery.toString();
 	}
 

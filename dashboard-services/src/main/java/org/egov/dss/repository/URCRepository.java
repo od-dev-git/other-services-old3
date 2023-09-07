@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.repository.builder.BpaQueryBuilder;
 import org.egov.dss.repository.builder.URCQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,27 @@ public class URCRepository {
 		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(BigDecimal.class));
 		return result.get(0);
-
 	}
+	
+	public Object getUlbsUnderUrc(UrcSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = urcQueryBuilder.getUlbsUnderUrc(criteria, preparedStatementValues);
+		log.info("Query: " + query);
+		log.info("Params: "+preparedStatementValues);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+	}
+	
+	public Object jalSathiOnboarded(UrcSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = urcQueryBuilder.jalSathiOnboarded(criteria, preparedStatementValues);
+		log.info("Query: " + query);
+		log.info("Params: "+preparedStatementValues);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+	}
+	
+	
 }
