@@ -52,10 +52,6 @@ public class SurveyResponseService {
 		
 		if(surveyResponseForCurrentDate.isEmpty()) {
 			List<QuestionDetail> questionsList = repository.getQuestionDetails(surveyDetailsRequest.getSurveyDetails());
-			
-			// Enrich survey details
-//			enrichmentService.enrichLookupDetails(surveyDetailsRequest);
-//			repository.updateLookupDetails(surveyDetailsRequest);
 			surveyDetails = SurveyDetails.builder()
 								.questionDetails(questionsList)
 								.build();

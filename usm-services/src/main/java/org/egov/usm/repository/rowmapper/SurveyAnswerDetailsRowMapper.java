@@ -3,8 +3,6 @@ package org.egov.usm.repository.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,12 +55,6 @@ public class SurveyAnswerDetailsRowMapper implements ResultSetExtractor<List<Sur
             }
             
             addSubmittedAnswersToSurveyDetails(rs, surveyDetails);
-            
-            List<SubmittedAnswer> submittedAnswers = surveyDetails.getSubmittedAnswers();
-            if (!CollectionUtils.isEmpty(submittedAnswers)) {
-            	Collections.sort(surveyDetails.getSubmittedAnswers(),
-                        Comparator.comparing(SubmittedAnswer::getId));
-            }
             surveyDetailsMap.put(surveySubmittedId, surveyDetails);
         }
         

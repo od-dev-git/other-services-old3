@@ -50,6 +50,7 @@ public class SurveyResponseQueryBuilder {
 			preparedStmtList.add(surveyDetails.getSurveyId());
 		}
 		
+		query.append(" ORDER BY question.questionorder ASC");
 		log.info("Query for get Questions ", query.toString());
 		return query.toString();
 	}
@@ -57,14 +58,13 @@ public class SurveyResponseQueryBuilder {
 
 
 	public String getQuestionDetails(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, question.options, question.status, question.required, question.type, question.createdby, question.createdtime, question.lastmodifiedby, question.lastmodifiedtime, false as hasopenticket FROM eg_usm_question question");
+		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, question.options, question.status, question.required, question.type, question.questionorder, question.createdby, question.createdtime, question.lastmodifiedby, question.lastmodifiedtime, false as hasopenticket FROM eg_usm_question question");
 		
 		if (!ObjectUtils.isEmpty(surveyDetails.getSurveyId())) {
 			query.append(" WHERE question.surveyid = ?");
 			preparedStmtList.add(surveyDetails.getSurveyId());
 		}
-		
-		log.info("Query for get Questions ", query.toString());
+		query.append(" ORDER BY question.questionorder ASC");
 		return query.toString();
 	}
 
@@ -208,7 +208,7 @@ public class SurveyResponseQueryBuilder {
 			preparedStmtList.add(searchCriteria.getCreatedBy());
 		}
 		
-		query.append(" ORDER BY surveycreatedtime DESC ");
+		query.append(" ORDER BY surveycreatedtime DESC, question.questionorder ASC ");
 		return query.toString();
 	}
 
