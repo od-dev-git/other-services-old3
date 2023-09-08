@@ -706,6 +706,14 @@ public class RedirectService {
             return urcService.jalsathiOnboarded(requestInfoWrapper.getPayloadDetails());
         }
 		
+		if(Constants.VisualizationCodes.URC_PROPERTIES_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.totalPropertiesPaid(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_WATER_CONSUMER_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.totalWaterConsumerPaid(requestInfoWrapper.getPayloadDetails());
+        }
+		
 		return null;
 
 	}

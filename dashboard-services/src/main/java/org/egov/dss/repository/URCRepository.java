@@ -8,7 +8,6 @@ import java.util.Map;
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
-import org.egov.dss.repository.builder.BpaQueryBuilder;
 import org.egov.dss.repository.builder.URCQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
@@ -40,24 +39,32 @@ public class URCRepository {
 		return result.get(0);
 	}
 	
-	public Object getUlbsUnderUrc(UrcSearchCriteria criteria) {
+	public Integer getUlbsUnderUrc(UrcSearchCriteria criteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = urcQueryBuilder.getUlbsUnderUrc(criteria, preparedStatementValues);
 		log.info("Query: " + query);
 		log.info("Params: "+preparedStatementValues);
-		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
-				new SingleColumnRowMapper<>(BigDecimal.class));
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(Integer.class));
 		return result.get(0);
 	}
 	
-	public Object jalSathiOnboarded(UrcSearchCriteria criteria) {
+	public Integer jalSathiOnboarded(UrcSearchCriteria criteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = urcQueryBuilder.jalSathiOnboarded(criteria, preparedStatementValues);
 		log.info("Query: " + query);
 		log.info("Params: "+preparedStatementValues);
-		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
-				new SingleColumnRowMapper<>(BigDecimal.class));
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(Integer.class));
 		return result.get(0);
+	}
+	
+	public Object getUrcPropertiesPaid(PaymentSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = urcQueryBuilder.urcPropertiesPaid(criteria, preparedStatementValues);
+        log.info("Query for URC Properties Paid : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
 	}
 	
 	
