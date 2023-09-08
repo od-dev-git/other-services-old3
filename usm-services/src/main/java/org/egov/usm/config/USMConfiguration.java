@@ -48,6 +48,9 @@ public class USMConfiguration {
 
 	@Value("${egov.user.create.path}")
 	private String userCreateEndpoint;
+	
+	@Value("${egov.user.update.path}")
+	private String userUpdateEndpoint;
 
 	@Value("${egov.user.search.path}")
 	private String userSearchEndpoint;
