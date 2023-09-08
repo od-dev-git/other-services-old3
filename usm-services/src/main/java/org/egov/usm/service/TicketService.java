@@ -100,17 +100,30 @@ public class TicketService {
 			surveyTicket.setTicketCreatedTime(existingSurveyTickets.getTicketCreatedTime());
 			surveyTicket.setTicketDescription(existingSurveyTickets.getTicketDescription());
 
-			if (!ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())
+			if (!ObjectUtils.isEmpty(existingSurveyTickets.getIsSatisfied())
+					&& !ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())
+					&& existingSurveyTickets.getStatus() == TicketStatus.CLOSED) {
+				throw new CustomException("EG_SY_FEEDBACK_TICKET", "The feedback already submitted");
+			}
+
+			else if (!ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())
 					&& existingSurveyTickets.getStatus() == TicketStatus.CLOSED) {
 				surveyTicket.setStatus(existingSurveyTickets.getStatus());
 				surveyTicket.setHasOpenTicket(Boolean.FALSE);
 
-			} else if (ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())
+			} else if (existingSurveyTickets.getStatus() == TicketStatus.CLOSED
+					&& surveyTicket.getStatus() == TicketStatus.CLOSED) {
+				throw new CustomException("EG_SY_CLOSED_TICKET", "The status is already closed ");
+			}
+
+			else if (ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())
 					&& surveyTicket.getStatus() == TicketStatus.CLOSED) {
 				surveyTicketRequestValidator.validateSurveyTicketClose(existingSurveyTickets);
 				surveyTicket.setHasOpenTicket(Boolean.FALSE);
 
-			} else if (!ObjectUtils.isEmpty(surveyTicket.getStatus())
+			}
+
+			else if (!ObjectUtils.isEmpty(surveyTicket.getStatus())
 					&& !ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())) {
 				throw new CustomException("EG_INPUT_PARAM_ERR",
 						"The reqest parameter in update request does not valid.");
