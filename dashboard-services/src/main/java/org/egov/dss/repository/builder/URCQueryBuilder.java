@@ -16,9 +16,11 @@ public class URCQueryBuilder {
 	public static final String TOTAL_COLLECTION_QUERY = " select COALESCE(sum(py.totalamountpaid),0) from egcl_payment py "
 			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id   ";
 	
-	public static final String ULBS_UNDER_URC = "select count(distinct tenantid)  from eg_hrms_employee  where code like 'SUJOG_JAL%' and active = true ";
+	public static final String ULBS_UNDER_URC = " select count(distinct hrms.tenantid)  from eg_hrms_employee hrms ";
 	
-	public static final String JALSATHI_ONBOARDED = "select count(distinct id)  from eg_hrms_employee  where code like 'SUJOG_JAL%' and active = true ";
+	public static final String JALSATHI_ONBOARDED = " select count(distinct hrms.id)  from eg_hrms_employee hrms ";
+	
+	public static final String URC_PROPERTIES_PAID = " select count(distinct bill.consumercode) as totalamt from egcl_payment py inner join egcl_paymentdetail pyd on pyd.paymentid = py.id inner join egcl_bill bill on bill.id = pyd.billid  ";
 			
 	
 	public static String getTotalCollection(PaymentSearchCriteria criteria,
@@ -30,11 +32,20 @@ public class URCQueryBuilder {
 	
 	public static String getUlbsUnderUrc(UrcSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(ULBS_UNDER_URC);
+		addWhereClauseForHrms(selectQuery, preparedStatementValues, criteria);
 		return selectQuery.toString();
 	}
 	
 	public static String jalSathiOnboarded(UrcSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(JALSATHI_ONBOARDED);
+		addWhereClauseForHrms(selectQuery, preparedStatementValues, criteria);
+		return selectQuery.toString();
+	}
+	
+	public static String urcPropertiesPaid(PaymentSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(URC_PROPERTIES_PAID);
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
 		return selectQuery.toString();
 	}
 
@@ -148,6 +159,48 @@ public class URCQueryBuilder {
 			preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenant());
 		}
 
+	}
+	
+	private static void addWhereClauseForHrms(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			UrcSearchCriteria searchCriteria) {
+		
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" hrms.tenantId in ( :tenantId )");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
+		}
+		
+		if (searchCriteria.getFromDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" hrms.createddate >= :fromDate");
+			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+		}
+
+		if (searchCriteria.getToDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" hrms.createddate <= :toDate");
+			preparedStatementValues.put("toDate", searchCriteria.getToDate());
+		}
+		
+		if (searchCriteria.getHrmsCode() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" hrms.code like (:hrmsCode)");
+			preparedStatementValues.put("hrmsCode", searchCriteria.getHrmsCode());
+		}
+		
+		if (searchCriteria.getIsActive() == Boolean.TRUE) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" hrms.active = true ");
+			preparedStatementValues.put("isActive", searchCriteria.getIsActive());
+		}
+		
+		if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" hrms.tenantid != :excludedTenant");
+			preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenant());
+		}
+
+		
 	}
 
 	private static void addClauseIfRequired(Map<String, Object> values, StringBuilder queryString) {

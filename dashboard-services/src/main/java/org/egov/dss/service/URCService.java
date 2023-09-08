@@ -125,17 +125,39 @@ public class URCService {
 	
 	public List<Data> ulbsUnderUrc(PayloadDetails payloadDetails) {	
 		UrcSearchCriteria urcSearchCriteria = getUrcSearchCriteria(payloadDetails);
+		urcSearchCriteria.setFromDate(null);
 		urcSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
-		BigDecimal ulbsUnderUrc = (BigDecimal) urcRepository.getUlbsUnderUrc(urcSearchCriteria);
+		urcSearchCriteria.setHrmsCode("SUJOG_JAL%");
+		urcSearchCriteria.setIsActive(Boolean.TRUE);
+		Integer ulbsUnderUrc = urcRepository.getUlbsUnderUrc(urcSearchCriteria);
         return Arrays.asList(Data.builder().headerValue(ulbsUnderUrc).build());
 	}
 	
 	public List<Data> jalsathiOnboarded(PayloadDetails payloadDetails) {	
 		UrcSearchCriteria urcSearchCriteria = getUrcSearchCriteria(payloadDetails);
+		urcSearchCriteria.setFromDate(null);
 		urcSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
-		BigDecimal jalSathiOnboarded = (BigDecimal) urcRepository.jalSathiOnboarded(urcSearchCriteria);
+		urcSearchCriteria.setHrmsCode("SUJOG_JAL%");
+		urcSearchCriteria.setIsActive(Boolean.TRUE);
+		Integer jalSathiOnboarded = urcRepository.jalSathiOnboarded(urcSearchCriteria);
         return Arrays.asList(Data.builder().headerValue(jalSathiOnboarded).build());
 	}
 	
-
+	public List<Data> totalPropertiesPaid(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria criteria = getPaymentSearchCriteria(payloadDetails);
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		Integer propertiesPaid = (Integer) urcRepository.getUrcPropertiesPaid(criteria);
+        return Arrays.asList(Data.builder().headerValue(propertiesPaid).build());
+	}
+	
+	public List<Data> totalWaterConsumerPaid(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		PaymentSearchCriteria criteria = getPaymentSearchCriteria(payloadDetails);
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		Integer waterConsumerPaid = (Integer) urcRepository.getUrcPropertiesPaid(criteria);
+        return Arrays.asList(Data.builder().headerValue(waterConsumerPaid).build());
+	}
+	
+	
 }
