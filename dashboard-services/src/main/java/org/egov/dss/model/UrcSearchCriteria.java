@@ -44,5 +44,9 @@ public class UrcSearchCriteria {
 	private Long slaThreshold;
 
 	private Set<String> statusNotIn;
+	
+	private String hrmsCode;
+	
+	private Boolean isActive;
 
 }
