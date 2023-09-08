@@ -91,7 +91,7 @@ public class TicketRowMapper implements ResultSetExtractor<List<SurveyTicket>> {
 				.lastModifiedTime(rs.getLong("lastmodifiedtime")).build();
 
 		SurveyTicketComment surveyTicketComment = SurveyTicketComment.builder().id(commentId).ticketId(ticketId)
-				.comment("comment").auditDetails(auditdetails).build();
+				.comment(rs.getString("comment")).auditDetails(auditdetails).build();
 
 		ticket.addTicketComment(surveyTicketComment);
 
