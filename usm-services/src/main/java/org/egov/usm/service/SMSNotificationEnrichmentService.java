@@ -1,5 +1,6 @@
 package org.egov.usm.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -296,8 +297,6 @@ public class SMSNotificationEnrichmentService {
 	}
 
 	
-
-
 	
 	/**
 	 * create SMSRequest For SDAMember
@@ -310,16 +309,7 @@ public class SMSNotificationEnrichmentService {
 	private void createSMSRequestForSDAMember(RequestInfo requestInfo, String message, SurveyTicket surveyTicket,
 			List<SMSRequest> smsRequests) {
 		
-		
-		Map<String, String> mobileNumberToOwner = new HashMap<>();
-
-		Citizen citizen = userService.getUserByUuidAndRole(surveyTicket.getAuditDetails().getCreatedBy(), requestInfo,
-				surveyTicket.getTenantId(), Constants.ROLE_CITIZEN);
-
-		if (citizen != null)
-			mobileNumberToOwner.put(citizen.getMobileNumber(), citizen.getName());
-
-		smsRequests.addAll(notificationUtil.createSMSRequest(message, mobileNumberToOwner));
+		enrichSMSRequest(requestInfo, Collections.singletonList(surveyTicket.getAuditDetails().getCreatedBy()), message, smsRequests);
 	}
 	
 	
@@ -333,25 +323,34 @@ public class SMSNotificationEnrichmentService {
 	 * @param officerRole
 	 */
 	private void createSMSRequestForOfficials(RequestInfo requestInfo, String message, SurveyTicket surveyTicket, List<SMSRequest> smsRequests, String officerRole) {
+		
 		USMOfficialSearchCriteria searchCriteria = USMOfficialSearchCriteria.builder()
 				.ticketId(surveyTicket.getId())
 				.role(officerRole)
 				.build();
 		List<String> officerUuid = usmOfficialRepository.getUuidOfUSMOfficials(searchCriteria);
-		
-		officerUuid.forEach(uuid -> {
-			Map<String, String> mobileNumberToOwner = new HashMap<>();
-			Citizen employee = userService.getUserByUuidAndRole(uuid, requestInfo, surveyTicket.getTenantId(), Constants.ROLE_CITIZEN);
-			
-			if (employee != null)
-			mobileNumberToOwner.put(employee.getMobileNumber(), employee.getName());
-			
-			smsRequests.addAll(notificationUtil.createSMSRequest(message, mobileNumberToOwner));
-		});
-		
+		enrichSMSRequest(requestInfo,officerUuid, message, smsRequests);
 	}
 
-	
-	
+
+	/**
+	 * enrich SMSRequest an create SMSRequest
+	 * 
+	 * @param requestInfo
+	 * @param officerUuid
+	 * @param message
+	 * @param smsRequests
+	 */
+	private void enrichSMSRequest(RequestInfo requestInfo, List<String> uuids, String message, List<SMSRequest> smsRequests) {
+		Map<String, String> mobileNumberToOwner = new HashMap<>();
+		List<Citizen> citizens = userService.getUserByUuid(uuids, requestInfo);
+
+		citizens.forEach(citizen -> {
+			mobileNumberToOwner.put(citizen.getMobileNumber(), citizen.getName());
+		});
+		
+		smsRequests.addAll(notificationUtil.createSMSRequest(message, mobileNumberToOwner));
+	}
+
 
 }

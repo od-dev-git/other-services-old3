@@ -51,7 +51,7 @@ public class UserService {
 	 * @param role
 	 * @return user uuid
 	 */
-	public String isUserPresent(String mobileNumber, RequestInfo requestInfo, String tenantId, String role) {
+	public Citizen isUserPresent(String mobileNumber, RequestInfo requestInfo, String tenantId, String role) {
 
 		UserSearchRequest searchRequest = UserSearchRequest.builder().userName(mobileNumber).tenantId(tenantId)
 				.userType(role).requestInfo(requestInfo).build();
@@ -61,7 +61,7 @@ public class UserService {
 		if (CollectionUtils.isEmpty(res.getUser())) {
 			return null;
 		}
-		return res.getUser().get(0).getUuid().toString();
+		return res.getUser().get(0);
 	}
 
 	/**
@@ -99,6 +99,7 @@ public class UserService {
 	
 	
 	/**
+	 * getUserByUuidAndRole
 	 * 
 	 * @param uuid
 	 * @param requestInfo
@@ -116,6 +117,53 @@ public class UserService {
 			return null;
 		}
 		return res.getUser().get(0);
+	}
+	
+	/**
+	 * getUserByUuid
+	 * @param uuids
+	 * @param requestInfo
+	 * @return List<Citizen>
+	 */
+	public List<Citizen> getUserByUuid(List<String> uuids, RequestInfo requestInfo) {
+		UserSearchRequest searchRequest = UserSearchRequest.builder().uuid(uuids)
+				.requestInfo(requestInfo).build();
+		StringBuilder url = new StringBuilder(config.getUserHost()+config.getUserSearchEndpoint()); 
+		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest), UserResponse.class);
+		
+		if(CollectionUtils.isEmpty(res.getUser())) {
+			return null;
+		}
+		return res.getUser();
+	}
+
+	
+	/**
+	 * 
+	 * @param citizen
+	 * @param requestInfo
+	 * @param officerRole
+	 * @return uuid
+	 */
+	public String updateUserOfficialRole(Citizen citizen, RequestInfo requestInfo, String officerRole) {
+		//Get all roles
+		List<Role> userRoles = citizen.getRoles();
+		
+		for(Role userRole : userRoles) {
+			if(userRole.getCode().equals(officerRole)) {
+				return citizen.getUuid().toString();
+			}
+		}
+		
+		userRoles.add(Role.builder().code(officerRole).build());
+		citizen.setRoles(userRoles);
+
+		StringBuilder updateUrl = new StringBuilder(config.getUserHost() + config.getUserUpdateEndpoint());
+		CreateUserRequest updateRequest = CreateUserRequest.builder().citizen(citizen).requestInfo(requestInfo).build();
+
+		UserResponse updateResponse = mapper.convertValue(serviceRequestRepository.fetchResult(updateUrl, updateRequest), UserResponse.class);
+		return updateResponse.getUser().get(0).getUuid().toString();
+		
 	}
 
 }
