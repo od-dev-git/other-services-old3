@@ -19,7 +19,7 @@ public class SurveyQueryBuilder {
 	 * @return Query String
 	 */
 	public String getSurveySearchQuery(SurveySearchCriteria searchCriteria, List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("SELECT survey.id as sid, survey.tenantid as stenantid, survey.title as stitle, survey.description as sdescription, survey.status as sstatus, survey.startdate as sstartdate, survey.enddate as senddate, survey.collectcitizeninfo as scollectcitizeninfo, survey.postedby as spostedby, survey.createdtime as screatedtime, survey.createdby as screatedby, survey.lastmodifiedtime as slastmodifiedtime, survey.lastmodifiedby as slastmodifiedby, question.id, question.surveyid, question.questionstatement, question.category, question.options, question.status, question.type, question.required, question.createdby, question.lastmodifiedby, question.createdtime, question.lastmodifiedtime");
+		StringBuilder query = new StringBuilder("SELECT survey.id as sid, survey.tenantid as stenantid, survey.title as stitle, survey.description as sdescription, survey.status as sstatus, survey.startdate as sstartdate, survey.enddate as senddate, survey.collectcitizeninfo as scollectcitizeninfo, survey.postedby as spostedby, survey.createdtime as screatedtime, survey.createdby as screatedby, survey.lastmodifiedtime as slastmodifiedtime, survey.lastmodifiedby as slastmodifiedby, question.id, question.surveyid, question.questionstatement, question.questionorder, question.category, question.options, question.status, question.type, question.required, question.createdby, question.lastmodifiedby, question.createdtime, question.lastmodifiedtime");
         query.append(" FROM eg_usm_survey survey left outer join eg_usm_question question on survey.id = question.surveyid");
 
         if(!ObjectUtils.isEmpty(searchCriteria.getSurveyId())){
@@ -40,7 +40,7 @@ public class SurveyQueryBuilder {
             preparedStmtList.add(searchCriteria.getStatus());
         }
         
-        query.append(" ORDER BY screatedtime DESC, question.createdtime  ASC");
+        query.append(" ORDER BY screatedtime DESC, question.questionorder ASC");
         return query.toString();
 	}
 
