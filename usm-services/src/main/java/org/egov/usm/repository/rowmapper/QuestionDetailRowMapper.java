@@ -44,6 +44,7 @@ public class QuestionDetailRowMapper implements ResultSetExtractor<List<Question
                         .status(Status.fromValue(rs.getString("status")))
                         .required(rs.getBoolean("required"))
                         .type(rs.getString("type"))
+                        .questionOrder(rs.getInt("questionorder"))
                         .options(rs.getString("options"))
                         .auditDetails(auditdetails)
                         .build();

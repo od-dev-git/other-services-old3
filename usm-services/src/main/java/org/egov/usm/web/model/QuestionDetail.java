@@ -26,7 +26,7 @@ public class QuestionDetail {
 
 	@JsonProperty("questionStatement")
 	private String questionStatement;
-
+	
 	@JsonProperty("category")
 	private String category;
 
@@ -35,6 +35,9 @@ public class QuestionDetail {
 
 	@JsonProperty("type")
 	private String type;
+	
+	@JsonProperty("questionOrder")
+	private Integer questionOrder;
 
 	@JsonIgnore
 	private Status status;
