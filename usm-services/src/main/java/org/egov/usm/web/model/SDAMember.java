@@ -27,8 +27,8 @@ public class SDAMember {
 	@JsonProperty("userId")
 	private String userId;
 
-	@JsonProperty("tenantId")
-	private String tenantId;
+	@JsonProperty("tenant")
+	private String tenant;
 
 	@JsonProperty("ward")
 	private String ward;
