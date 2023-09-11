@@ -38,7 +38,7 @@ public class SDAMemberRowMapper implements ResultSetExtractor<List<SDAMember>> {
                 sdaMember =  SDAMember.builder()
                         .id(id)
                         .userId(rs.getString("userid"))
-                        .tenantId(rs.getString("tenantid"))
+                        .tenant(rs.getString("tenantid"))
                         .ward(rs.getString("ward"))
                         .slumCode(rs.getString("slumcode"))
                         .isActive(rs.getBoolean("active"))
