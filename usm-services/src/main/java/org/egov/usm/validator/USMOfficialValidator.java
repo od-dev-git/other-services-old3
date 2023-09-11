@@ -25,7 +25,7 @@ public class USMOfficialValidator {
 	public void isOfficialAlreadyExists(USMOfficial usmOfficial) {
 
 		USMOfficialSearchCriteria searchCriteria = USMOfficialSearchCriteria.builder()
-				.tenantId(usmOfficial.getTenantId()).ward(usmOfficial.getWard()).slumcode(usmOfficial.getSlumcode())
+				.tenantId(usmOfficial.getTenant()).ward(usmOfficial.getWard()).slumcode(usmOfficial.getSlumcode())
 				.build();
 
 		List<USMOfficial> usmOfficials = repository.getOfficialRequests(searchCriteria);

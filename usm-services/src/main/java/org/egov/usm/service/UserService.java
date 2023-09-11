@@ -53,7 +53,7 @@ public class UserService {
 	 */
 	public Citizen isUserPresent(String mobileNumber, RequestInfo requestInfo, String tenantId, String role) {
 
-		UserSearchRequest searchRequest = UserSearchRequest.builder().userName(mobileNumber).tenantId(tenantId)
+		UserSearchRequest searchRequest = UserSearchRequest.builder().userName(mobileNumber).tenantId(getRootTenantId(tenantId))
 				.userType(role).requestInfo(requestInfo).build();
 		StringBuilder url = new StringBuilder(config.getUserHost() + config.getUserSearchEndpoint());
 		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest),
@@ -80,7 +80,7 @@ public class UserService {
 		citizen.setUserName(sdaMember.getMobileNumber());
 		citizen.setActive(true);
 		citizen.setMobileNumber(sdaMember.getMobileNumber());
-		citizen.setTenantId(sdaMember.getTenantId());
+		citizen.setTenantId(getRootTenantId(sdaMember.getTenant()));
 		citizen.setType(UserType.CITIZEN);
 		
 		List<Role> userRoles = new ArrayList<>();
@@ -97,7 +97,16 @@ public class UserService {
 	}
 
 	
+	/**
+	 * @param tenantId
+	 * @return Root TenatId e.g. od.cuttack as od
+	 */
+	public static String getRootTenantId(String tenantId) {
+		tenantId = tenantId.split("\\.")[0];
+		return tenantId;
+	}
 	
+
 	/**
 	 * getUserByUuidAndRole
 	 * 
@@ -109,7 +118,7 @@ public class UserService {
 	 */
 	public Citizen getUserByUuidAndRole(String uuid, RequestInfo requestInfo, String tenantId, String role) {
 		UserSearchRequest searchRequest = UserSearchRequest.builder().uuid(Collections.singletonList(uuid))
-				.tenantId(tenantId).userType(role).requestInfo(requestInfo).build();
+				.tenantId(getRootTenantId(tenantId)).userType(role).requestInfo(requestInfo).build();
 		StringBuilder url = new StringBuilder(config.getUserHost()+config.getUserSearchEndpoint()); 
 		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest), UserResponse.class);
 		

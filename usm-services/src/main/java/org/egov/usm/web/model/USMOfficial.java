@@ -18,8 +18,8 @@ public class USMOfficial {
 	@JsonProperty("id")
 	private String id;
 
-	@JsonProperty("tenantId")
-	private String tenantId;
+	@JsonProperty("tenant")
+	private String tenant;
 
 	@JsonProperty("ward")
 	private String ward;
