@@ -36,6 +36,9 @@ public class FeedbackValidator {
         if(StringUtils.isEmpty(feedbackCreationRequest.getFeedback().getTenantId())){
             errorMap.put("INVALID_TENANT_ID","Tenant Id can't be null or empty");
         }
+        if(StringUtils.isEmpty(feedbackCreationRequest.getFeedback().getConsumerNo())){
+            errorMap.put("INVALID_CONSUMER_NO","Consumer No can't be null or empty");
+        }
         if(StringUtils.isEmpty(feedbackCreationRequest.getFeedback().getModule())){
             errorMap.put("INVALID_MODULE","Module can't be null or empty");
         }

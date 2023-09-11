@@ -29,6 +29,7 @@ public class FeedbackRowMapper implements ResultSetExtractor<List<Feedback>> {
             Feedback feedback = Feedback.builder()
                     .id(rs.getString("id"))
                     .tenantId(rs.getString("tenantId"))
+                    .consumerNo(rs.getString("consumerNo"))
                     .module(rs.getString("module"))
                     .rating(rs.getInt("rating"))
                     .comment(rs.getString("comment"))

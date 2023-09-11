@@ -15,6 +15,9 @@ public class FeedbackSearchCriteria {
     @JsonProperty("tenantId")
     private String tenantId;
 
+    @JsonProperty("consumerNo")
+    private String consumerNo;
+
     @JsonProperty("module")
     private String module;
 
