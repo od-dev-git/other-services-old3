@@ -119,4 +119,13 @@ public class TicketQueryBuilder {
 		return query.toString();
 	}
 
+	
+	
+	public String getUpdateDailyTicketQuery() {
+		StringBuilder query = new StringBuilder("UPDATE public.eg_usm_survey_ticket SET unattended = true WHERE status = 'OPEN' ;");
+		query.append(" UPDATE eg_usm_slum_question_lookup SET hasopenticket = false, ticketid = '' WHERE hasopenticket = true ");
+
+		return query.toString();
+	}
+
 }

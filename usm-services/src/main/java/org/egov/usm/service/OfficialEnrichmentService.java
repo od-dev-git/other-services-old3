@@ -41,7 +41,7 @@ public class OfficialEnrichmentService {
 
 		usmOfficialRequest.getUsmOffcial().setId(USMUtil.generateUUID());
 		usmOfficialRequest.getUsmOffcial().setAssigned(usmOfficialRequest.getUsmOffcial().getAssigned());
-		usmOfficialRequest.getUsmOffcial().setTenantId(usmOfficialRequest.getUsmOffcial().getTenantId());
+		usmOfficialRequest.getUsmOffcial().setTenant(usmOfficialRequest.getUsmOffcial().getTenant());
 		usmOfficialRequest.getUsmOffcial().setSlumcode(usmOfficialRequest.getUsmOffcial().getSlumcode());
 		usmOfficialRequest.getUsmOffcial().setCategory(usmOfficialRequest.getUsmOffcial().getCategory());
 		usmOfficialRequest.getUsmOffcial().setRole(usmOfficialRequest.getUsmOffcial().getRole());
@@ -53,7 +53,7 @@ public class OfficialEnrichmentService {
 		RequestInfo requestInfo = usmOfficialRequest.getRequestInfo();
 		AuditDetails auditDetails = USMUtil.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
 		usmOfficialRequest.getUsmOffcial().setAssigned(null);
-		usmOfficialRequest.getUsmOffcial().setTenantId(existingOfficialMember.getTenantId());
+		usmOfficialRequest.getUsmOffcial().setTenant(existingOfficialMember.getTenant());
 		usmOfficialRequest.getUsmOffcial().setWard(existingOfficialMember.getWard());
 		usmOfficialRequest.getUsmOffcial().setCategory(existingOfficialMember.getCategory());
 		usmOfficialRequest.getUsmOffcial().setRole(existingOfficialMember.getRole());
@@ -77,7 +77,7 @@ public class OfficialEnrichmentService {
 		} 
 
 		usmOfficialRequest.getUsmOffcial().setAssigned(usmOfficialRequest.getUsmOffcial().getAssigned());
-		usmOfficialRequest.getUsmOffcial().setTenantId(existingOfficial.getTenantId());
+		usmOfficialRequest.getUsmOffcial().setTenant(existingOfficial.getTenant());
 		usmOfficialRequest.getUsmOffcial().setSlumcode(existingOfficial.getSlumcode());
 		usmOfficialRequest.getUsmOffcial().setCategory(existingOfficial.getCategory());
 		usmOfficialRequest.getUsmOffcial().setWard(existingOfficial.getWard());

@@ -32,7 +32,7 @@ public class MemberEnrichmentService {
 		String userAccountId = null ;
 		
 		// Check User isUserPresent as Citizen
-		Citizen citizen = userService.isUserPresent(sdaMembersRequest.getSdaMember().getMobileNumber(), requestInfo, sdaMembersRequest.getSdaMember().getTenantId(), Constants.ROLE_CITIZEN);
+		Citizen citizen = userService.isUserPresent(sdaMembersRequest.getSdaMember().getMobileNumber(), requestInfo, sdaMembersRequest.getSdaMember().getTenant(), Constants.ROLE_CITIZEN);
 
 		if (!ObjectUtils.isEmpty(citizen)) {
 			// If present Update its official role
@@ -65,7 +65,7 @@ public class MemberEnrichmentService {
 		String userAccountId = null ;
 		
 		// Check User isUserPresent as Citizen
-		Citizen citizen = userService.isUserPresent(sdaMembersRequest.getSdaMember().getMobileNumber(), requestInfo, sdaMembersRequest.getSdaMember().getTenantId(), Constants.ROLE_CITIZEN);
+		Citizen citizen = userService.isUserPresent(sdaMembersRequest.getSdaMember().getMobileNumber(), requestInfo, sdaMembersRequest.getSdaMember().getTenant(), Constants.ROLE_CITIZEN);
 
 		if (!ObjectUtils.isEmpty(citizen)) {
 			// If present Update its official role
@@ -76,7 +76,7 @@ public class MemberEnrichmentService {
 		}
 		
 		sdaMembersRequest.getSdaMember().setUserId(userAccountId);
-		sdaMembersRequest.getSdaMember().setTenantId(existingSdaMember.getTenantId());
+		sdaMembersRequest.getSdaMember().setTenant(existingSdaMember.getTenant());
 		sdaMembersRequest.getSdaMember().setWard(existingSdaMember.getWard());
 		sdaMembersRequest.getSdaMember().setSlumCode(existingSdaMember.getSlumCode());
 		sdaMembersRequest.getSdaMember().setActive(Boolean.TRUE);
@@ -91,7 +91,7 @@ public class MemberEnrichmentService {
 		AuditDetails auditDetails = USMUtil.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
 		
 		sdaMembersRequest.getSdaMember().setUserId(Constants.EMPTY_STRING);
-		sdaMembersRequest.getSdaMember().setTenantId(existingSdaMember.getTenantId());
+		sdaMembersRequest.getSdaMember().setTenant(existingSdaMember.getTenant());
 		sdaMembersRequest.getSdaMember().setWard(existingSdaMember.getWard());
 		sdaMembersRequest.getSdaMember().setSlumCode(existingSdaMember.getSlumCode());
 		sdaMembersRequest.getSdaMember().setActive(Boolean.FALSE);

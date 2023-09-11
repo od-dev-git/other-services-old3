@@ -41,7 +41,7 @@ public class USMOfficialService {
 
 	public USMOfficial create(@Valid USMOfficialRequest usmOfficialRequest) {
 
-		validator.isOfficialAlreadyExists(usmOfficialRequest.getUsmOffcial());
+//		validator.isOfficialAlreadyExists(usmOfficialRequest.getUsmOffcial());
 		// Enrich official details
 		enrichmentService.enrichUSMOfficialRequest(usmOfficialRequest);
 
