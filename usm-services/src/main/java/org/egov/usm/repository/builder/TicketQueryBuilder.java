@@ -33,7 +33,7 @@ public class TicketQueryBuilder {
 
 		StringBuilder query = new StringBuilder(
 				"select ticket.id, ticket.tenantid, answer.questioncategory ,  ticket.ticketno , ticket.surveyanswerid, "
-						+ "ticket.questionid,ticket.ticketdescription, ticket.status ,comment.id as commentid,comment.ticketid ,submit.slumcode , submit.ward,"
+						+ "ticket.questionid,ticket.ticketdescription, ticket.status ,comment.id as commentid,comment.ticketid,comment.comment ,submit.slumcode , submit.ward,"
 						+ "ticket.ticketcreatedtime,ticket.ticketclosedtime ,ticket.unattended,"
 						+ "ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,ticket.issatisfied,"
 						+ "ticket.lastmodifiedby FROM eg_usm_survey_ticket ticket ");
@@ -119,11 +119,11 @@ public class TicketQueryBuilder {
 		return query.toString();
 	}
 
-	
-	
 	public String getUpdateDailyTicketQuery() {
-		StringBuilder query = new StringBuilder("UPDATE public.eg_usm_survey_ticket SET unattended = true WHERE status = 'OPEN' ;");
-		query.append(" UPDATE eg_usm_slum_question_lookup SET hasopenticket = false, ticketid = '' WHERE hasopenticket = true ");
+		StringBuilder query = new StringBuilder(
+				"UPDATE public.eg_usm_survey_ticket SET unattended = true WHERE status = 'OPEN' ;");
+		query.append(
+				" UPDATE eg_usm_slum_question_lookup SET hasopenticket = false, ticketid = '' WHERE hasopenticket = true ");
 
 		return query.toString();
 	}
