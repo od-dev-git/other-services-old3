@@ -42,6 +42,9 @@ public class USMOfficialService {
 	public USMOfficial create(@Valid USMOfficialRequest usmOfficialRequest) {
 
 //		validator.isOfficialAlreadyExists(usmOfficialRequest.getUsmOffcial());
+		//Validate Official Request
+		validator.validateUSMOfficialRequest(usmOfficialRequest);
+		
 		// Enrich official details
 		enrichmentService.enrichUSMOfficialRequest(usmOfficialRequest);
 
@@ -66,10 +69,6 @@ public class USMOfficialService {
 		return usmOfficials;
 	}
 
-	public List<USMOfficial> deassingOfficial(@Valid USMOfficialRequest usmOfficialRequest) {
-
-		return null;
-	}
 
 	/**
 	 * Deassign a official
@@ -96,6 +95,9 @@ public class USMOfficialService {
 	public USMOfficial reassignOfficial(@Valid USMOfficialRequest usmOfficialRequest) {
 
 		USMOfficial existingOfficial = validator.isOfficialExists(usmOfficialRequest.getUsmOffcial());
+		
+		//Validate Official Request
+		validator.validateUSMOfficialRequest(usmOfficialRequest);
 
 		// Enrich SDA Member details
 		enrichmentService.enrichReassignMembersRequest(usmOfficialRequest, existingOfficial);
