@@ -42,4 +42,7 @@ public class MemberSearchCriteria {
 
 	@JsonProperty("createdBy")
 	private String createdBy;
+	
+	@JsonProperty("ticketId")
+	private String ticketId;
 }
