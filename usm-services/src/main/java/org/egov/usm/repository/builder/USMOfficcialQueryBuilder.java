@@ -52,6 +52,12 @@ public class USMOfficcialQueryBuilder {
 			query.append(" department.role = ? ");
 			preparedStmtList.add(searchCriteria.getRole());
 		}
+		
+		if (!ObjectUtils.isEmpty(searchCriteria.getAssigned())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" department.assigned = ? ");
+			preparedStmtList.add(searchCriteria.getAssigned());
+		}
 
 		if(!ObjectUtils.isEmpty(searchCriteria.getTicketId())){
             addClauseIfRequired(query, preparedStmtList);

@@ -40,8 +40,10 @@ public class USMOfficialService {
 	 */
 
 	public USMOfficial create(@Valid USMOfficialRequest usmOfficialRequest) {
-
-//		validator.isOfficialAlreadyExists(usmOfficialRequest.getUsmOffcial());
+		
+		//Validate Same User exist for same Slum
+		validator.isOfficialAlreadyExists(usmOfficialRequest.getUsmOffcial());
+		
 		//Validate Official Request
 		validator.validateUSMOfficialRequest(usmOfficialRequest);
 		
