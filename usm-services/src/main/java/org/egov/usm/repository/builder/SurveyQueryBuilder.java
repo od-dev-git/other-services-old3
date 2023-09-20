@@ -19,7 +19,7 @@ public class SurveyQueryBuilder {
 	 * @return Query String
 	 */
 	public String getSurveySearchQuery(SurveySearchCriteria searchCriteria, List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("SELECT survey.id as sid, survey.tenantid as stenantid, survey.title as stitle, survey.description as sdescription, survey.status as sstatus, survey.startdate as sstartdate, survey.enddate as senddate, survey.collectcitizeninfo as scollectcitizeninfo, survey.postedby as spostedby, survey.createdtime as screatedtime, survey.createdby as screatedby, survey.lastmodifiedtime as slastmodifiedtime, survey.lastmodifiedby as slastmodifiedby, question.id, question.surveyid, question.questionstatement, question.questionorder, question.category, question.options, question.status, question.type, question.required, question.createdby, question.lastmodifiedby, question.createdtime, question.lastmodifiedtime");
+		StringBuilder query = new StringBuilder("SELECT survey.id as sid, survey.tenantid as stenantid, survey.title as stitle, survey.description as sdescription, survey.status as sstatus, survey.startdate as sstartdate, survey.enddate as senddate, survey.starttime, survey.endtime, survey.collectcitizeninfo as scollectcitizeninfo, survey.postedby as spostedby, survey.createdtime as screatedtime, survey.createdby as screatedby, survey.lastmodifiedtime as slastmodifiedtime, survey.lastmodifiedby as slastmodifiedby, question.id, question.surveyid, question.questionstatement, question.questionstatement_odia, question.questionorder, question.category, question.options, question.status, question.type, question.required, question.createdby, question.lastmodifiedby, question.createdtime, question.lastmodifiedtime");
         query.append(" FROM eg_usm_survey survey left outer join eg_usm_question question on survey.id = question.surveyid");
 
         if(!ObjectUtils.isEmpty(searchCriteria.getSurveyId())){
@@ -50,7 +50,7 @@ public class SurveyQueryBuilder {
 	 * @return Query String
 	 */
 	public String getQuestionDetails(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, question.options, question.status, question.required, question.type, question.createdby, question.createdtime, question.lastmodifiedby, question.lastmodifiedtime, false as hasopenticket FROM eg_usm_question question");
+		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.questionstatement_odia, question.category, question.options, question.status, question.required, question.type, question.createdby, question.createdtime, question.lastmodifiedby, question.lastmodifiedtime, false as hasopenticket FROM eg_usm_question question");
 		
 		if (!ObjectUtils.isEmpty(surveyDetails.getSurveyId())) {
 			query.append(" WHERE question.surveyid = ?");
