@@ -27,6 +27,9 @@ public class QuestionDetail {
 	@JsonProperty("questionStatement")
 	private String questionStatement;
 	
+	@JsonProperty("questionStatementOdia")
+	private String questionStatementOdia;
+	
 	@JsonProperty("category")
 	private String category;
 

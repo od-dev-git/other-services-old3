@@ -29,6 +29,9 @@ public class SubmittedAnswer {
 	@JsonProperty("questionStatement")
 	private String questionStatement;
 	
+	@JsonProperty("questionStatementOdia")
+	private String questionStatementOdia;
+	
 	@JsonProperty("questionCategory")
 	private String questionCategory;
 	

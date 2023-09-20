@@ -76,17 +76,30 @@ public class SurveyTicketRequestValidator {
 
 
 	public void validateTicketRequest(RequestInfo requestInfo, SurveyTicket surveyTicket,
-		SurveyTicket existingSurveyTickets) {if (!ObjectUtils.isEmpty(surveyTicket.getStatus())
+		SurveyTicket existingSurveyTickets) {
+		
+		if (!ObjectUtils.isEmpty(surveyTicket.getStatus())
 				&& !ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())) {
-			throw new CustomException("EG_INPUT_PARAM_ERR", "The reqest parameter in update request does not valid.");
+			throw new CustomException("EG_INPUT_PARAM_ERR", "Invalid reqest parameter or value in update request.");
+		} 
+		
+		if (ObjectUtils.isEmpty(surveyTicket.getStatus())
+				&& ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())) {
+			throw new CustomException("EG_INPUT_PARAM_ERR", "Invalid reqest parameter or value in update request.");
 		} 
 		
 		if (!ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())) {
+			if(!existingSurveyTickets.getStatus().equals(TicketStatus.CLOSED))
+				throw new CustomException("EG_INPUT_PARAM_ERR", "Invalid feedback submit before close ticket.");
+			
 			//check sda member has access for submit feedback on this ticket
 			validateSDAMemberAccess(requestInfo, surveyTicket);
 		}
 		
 		if (!ObjectUtils.isEmpty(surveyTicket.getStatus())) {
+			if(!surveyTicket.getStatus().equals(TicketStatus.CLOSED))
+				throw new CustomException("EG_INPUT_PARAM_ERR", "Invalid status in update request.");
+			
 			//check Nodal Officer has access for submit feedback on this ticket
 			validateNodalOfficerAccess(requestInfo, surveyTicket);
 		}
@@ -97,8 +110,7 @@ public class SurveyTicketRequestValidator {
 		}
 		
 		if (!ObjectUtils.isEmpty(existingSurveyTickets.getIsSatisfied())
-				&& !ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())
-				&& existingSurveyTickets.getStatus() == TicketStatus.CLOSED) {
+				&& !ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())) {
 			throw new CustomException("EG_SY_FEEDBACK_TICKET", "The feedback already submitted");
 		} 
 	}

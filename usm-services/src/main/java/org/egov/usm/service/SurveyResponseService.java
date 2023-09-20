@@ -61,6 +61,7 @@ public class SurveyResponseService {
 		
 		surveyDetails.setSurveyId(surveyDetailsRequest.getSurveyDetails().getSurveyId());
 		surveyDetails.setTenantId(surveyDetailsRequest.getSurveyDetails().getTenantId());
+		surveyDetails.setWard(surveyDetailsRequest.getSurveyDetails().getWard());
 		surveyDetails.setSlumCode(surveyDetailsRequest.getSurveyDetails().getSlumCode());
 		
 		return surveyDetails;

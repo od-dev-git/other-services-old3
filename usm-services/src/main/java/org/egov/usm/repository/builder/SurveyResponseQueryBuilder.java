@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SurveyResponseQueryBuilder {
 	
 	public String validateSurveyDetailsForCurrentDate(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, "
+		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.questionstatement_odia, question.category, "
 				+ "question.options, answer.id as answerid, answer.answer, answer.questionid, question.status, question.required, question.type, question.createdby, "
 				+ "question.createdtime , question.lastmodifiedtime , question.lastmodifiedby, lookup.hasopenticket, "
 				+ "surveysubmitted.id as surveysubmittedid, surveysubmitted.surveysubmittedno , "
@@ -58,7 +58,7 @@ public class SurveyResponseQueryBuilder {
 
 
 	public String getQuestionDetails(SurveyDetails surveyDetails, List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.category, question.options, question.status, question.required, question.type, question.questionorder, question.createdby, question.createdtime, question.lastmodifiedby, question.lastmodifiedtime, false as hasopenticket FROM eg_usm_question question");
+		StringBuilder query = new StringBuilder("SELECT question.id, question.surveyid, question.questionstatement, question.questionstatement_odia, question.category, question.options, question.status, question.required, question.type, question.questionorder, question.createdby, question.createdtime, question.lastmodifiedby, question.lastmodifiedtime, false as hasopenticket FROM eg_usm_question question");
 		
 		if (!ObjectUtils.isEmpty(surveyDetails.getSurveyId())) {
 			query.append(" WHERE question.surveyid = ?");
@@ -149,7 +149,7 @@ public class SurveyResponseQueryBuilder {
 		StringBuilder query = new StringBuilder("SELECT surveysubmitted.id as surveysubmittedid, surveysubmitted.surveyid, survey.title, surveysubmitted.surveysubmittedno , "
 				+ "surveysubmitted.tenantid , surveysubmitted.ward , surveysubmitted.slumcode ,surveysubmitted.surveytime, surveysubmitted.createdtime as surveycreatedtime, "
 				+ "surveysubmitted.createdby as surveycreatedby, surveysubmitted.lastmodifiedtime as surveymodifiedtime, surveysubmitted.lastmodifiedby as surveymodifiedby, "
-				+ "answer.id as answerid, answer.questionid, question.questionstatement, answer.questioncategory, answer.answer, answer.createdtime, answer.createdby, lookup.hasopenticket, "
+				+ "answer.id as answerid, answer.questionid, question.questionstatement, question.questionstatement_odia, answer.questioncategory, answer.answer, answer.createdtime, answer.createdby, lookup.hasopenticket, "
 				+ "answer.lastmodifiedtime, answer.lastmodifiedby from eg_usm_survey_submitted surveysubmitted");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON surveysubmitted.id = answer.surveysubmittedid");
 		query.append(" LEFT OUTER JOIN eg_usm_survey survey ON surveysubmitted.surveyid = survey.id");
