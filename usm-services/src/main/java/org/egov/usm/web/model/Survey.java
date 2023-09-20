@@ -41,6 +41,12 @@ public class Survey {
     @JsonProperty("endDate")
     private Long endDate;
     
+    @JsonProperty("startTime")
+    private String startTime;
+
+    @JsonProperty("endTime")
+    private String endTime;
+    
     @JsonProperty("postedBy")
     private String postedBy;
     

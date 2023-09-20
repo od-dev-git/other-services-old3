@@ -22,4 +22,6 @@ public class NotificationRequest {
 
 	private USMNotification notification;
 	
+	private MulticastNotification multicastNotification;
+	
 }

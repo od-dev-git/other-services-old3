@@ -15,12 +15,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MulticastMessageRepresentation {
+public class MulticastNotification {
 
 	@JsonProperty("data")
 	private String data;
 	
 	@JsonProperty("registrationTokens")
 	private List<String> registrationTokens;
+	
+	@JsonProperty("ids")
+	private List<String> ids;
 	
 }

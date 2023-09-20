@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.egov.usm.utility.ResponseInfoFactory;
-import org.egov.usm.web.model.MulticastMessageRepresentation;
+import org.egov.usm.web.model.MulticastNotification;
 import org.egov.usm.web.model.NotificationRequest;
 import org.egov.usm.web.model.NotificationResponse;
 import org.egov.usm.web.model.USMNotification;
@@ -56,24 +56,29 @@ public class FirebasePublisherController {
 	}
 	
 	
-	@PostMapping("/clients")
-    public ResponseEntity<List<String>> postToClients(@RequestBody MulticastMessageRepresentation message) throws FirebaseMessagingException {
-        
-        MulticastMessage msg = MulticastMessage.builder()
-          .addAllTokens(message.getRegistrationTokens())
-          .putData("body", message.getData())
+	@PostMapping("/_clients")
+    public ResponseEntity<NotificationResponse> postToClients(@RequestBody NotificationRequest notificationRequest) 
+    		throws FirebaseMessagingException {
+		MulticastNotification multicastNotification = notificationRequest.getMulticastNotification();
+        MulticastMessage message = MulticastMessage.builder()
+          .addAllTokens(multicastNotification.getRegistrationTokens())
+          .putData("body", multicastNotification.getData())
           .build();
 
-        BatchResponse response = firebaseMessaging.sendMulticast(msg);
+        BatchResponse batchResponse = firebaseMessaging.sendMulticast(message);
         
-        List<String> ids = response.getResponses()
+        List<String> ids = batchResponse.getResponses()
           .stream()
-          .map(r->r.getMessageId())
+          .map(response -> response.getMessageId())
           .collect(Collectors.toList());
         
-        return ResponseEntity
-          .status(HttpStatus.ACCEPTED)
-          .body(ids);        
+        multicastNotification.setIds(ids);
+        
+        NotificationResponse response =  NotificationResponse.builder()
+        		.multicastNotification(multicastNotification)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(notificationRequest.getRequestInfo(), true))
+				.build();       
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }    
     
 }

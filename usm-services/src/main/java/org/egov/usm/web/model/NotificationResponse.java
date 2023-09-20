@@ -27,4 +27,7 @@ public class NotificationResponse {
 	@JsonProperty("notifications")
 	private List<USMNotification> notifications;
 	
+	@JsonProperty("multicastNotification")
+	private MulticastNotification multicastNotification;
+	
 }
