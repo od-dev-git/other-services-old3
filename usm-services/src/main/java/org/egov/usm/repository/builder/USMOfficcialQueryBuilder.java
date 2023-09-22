@@ -29,39 +29,35 @@ public class USMOfficcialQueryBuilder {
             query.append(" LEFT OUTER JOIN eg_usm_survey_ticket ticket ON answer.id  = ticket.surveyanswerid ");
         }
 		
+		query.append(" WHERE assigned is not null AND assigned <> '' ");
+		
 		if (!ObjectUtils.isEmpty(searchCriteria.getTenantId())) {
-			addClauseIfRequired(query, preparedStmtList);
-			query.append(" department.tenantid = ? ");
+			query.append(" AND department.tenantid = ? ");
 			preparedStmtList.add(searchCriteria.getTenantId());
 		}
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getWard())) {
-			addClauseIfRequired(query, preparedStmtList);
-			query.append(" department.ward = ? ");
+			query.append(" AND department.ward = ? ");
 			preparedStmtList.add(searchCriteria.getWard());
 		}
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getSlumcode())) {
-			addClauseIfRequired(query, preparedStmtList);
-			query.append(" department.slumcode = ? ");
+			query.append(" AND department.slumcode = ? ");
 			preparedStmtList.add(searchCriteria.getSlumcode());
 		}
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getRole())) {
-			addClauseIfRequired(query, preparedStmtList);
-			query.append(" department.role = ? ");
+			query.append(" AND department.role = ? ");
 			preparedStmtList.add(searchCriteria.getRole());
 		}
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getAssigned())) {
-			addClauseIfRequired(query, preparedStmtList);
-			query.append(" department.assigned = ? ");
+			query.append(" AND department.assigned = ? ");
 			preparedStmtList.add(searchCriteria.getAssigned());
 		}
 
 		if(!ObjectUtils.isEmpty(searchCriteria.getTicketId())){
-            addClauseIfRequired(query, preparedStmtList);
-            query.append(" ticket.id = ?");
+            query.append(" AND ticket.id = ?");
             preparedStmtList.add(searchCriteria.getTicketId());
         }
 		
