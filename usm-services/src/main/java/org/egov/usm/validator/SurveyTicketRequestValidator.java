@@ -46,9 +46,16 @@ public class SurveyTicketRequestValidator {
 		TicketSearchCriteria criteria = TicketSearchCriteria.builder().ticketId(surveyTicket.getId()).build();
 
 		List<SurveyTicket> surveyTickets = ticketRepository.getSurveyTicketRequests(criteria);
+		
 		if (CollectionUtils.isEmpty(surveyTickets))
 			throw new CustomException("EG_SURVEYTICKET_DOES_NOT_EXIST_ERR",
 					"The surveyTicket entity provided in update request does not exist.");
+		
+		surveyTickets.forEach(ticket -> {
+			if(USMUtil.isAfterTime(ticket.getAuditDetails().getLastModifiedTime())) 
+				throw new CustomException("EG_TICKET_COMMENT_TIME_EXCEED_ERR",
+						"The Comment should be provided within 48 hours.");
+		});
 
 		return surveyTickets.get(0);
 	}
