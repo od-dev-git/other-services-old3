@@ -3,8 +3,10 @@ package org.egov.integration.validator;
 import com.jayway.jsonpath.JsonPath;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.integration.config.IntegrationConfiguration;
+import org.egov.integration.repository.FeedbackRepository;
 import org.egov.integration.repository.ServiceRepository;
 import org.egov.integration.util.RevenueNotificationConstants;
+import org.egov.integration.web.model.Feedback;
 import org.egov.integration.web.model.FeedbackCreationRequest;
 import org.egov.integration.web.model.FeedbackSearchCriteria;
 import org.egov.mdms.model.MasterDetail;
@@ -14,6 +16,7 @@ import org.egov.mdms.model.ModuleDetail;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.temporal.ValueRange;
@@ -30,6 +33,9 @@ public class FeedbackValidator {
 
     @Autowired
     IntegrationConfiguration configuration;
+
+    @Autowired
+    private FeedbackRepository feedbackRepository;
 
     public void validateCreateRequest(FeedbackCreationRequest feedbackCreationRequest){
         Map<String, String> errorMap = new HashMap<>();
@@ -52,8 +58,22 @@ public class FeedbackValidator {
             }
         }
         validateTenantIdByMDMS(feedbackCreationRequest.getFeedback().getTenantId(), errorMap, feedbackCreationRequest.getRequestInfo());
+        validateDuplicateFeedbacks(feedbackCreationRequest.getFeedback().getTenantId(),feedbackCreationRequest.getFeedback().getConsumerNo(), feedbackCreationRequest.getFeedback().getModule(), errorMap);
+
         if (!errorMap.isEmpty())
             throw new CustomException(errorMap);
+
+
+    }
+
+    private void validateDuplicateFeedbacks(String tenantId, String consumerNo, String module, Map<String, String> errorMap) {
+
+        FeedbackSearchCriteria feedbackSearchCriteria = FeedbackSearchCriteria.builder()
+                .consumerNo(consumerNo).tenantId(tenantId).module(module).build();
+
+        List<Feedback> feedbacks=feedbackRepository.getFeedbackList(feedbackSearchCriteria);
+        if(!CollectionUtils.isEmpty(feedbacks))
+            errorMap.put("DUPLICATE_CONSUMER_CODE","Consumer Code is duplicate");
     }
 
     public void validateSearchCriteria(FeedbackSearchCriteria criteria,RequestInfo requestInfo){
