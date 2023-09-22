@@ -21,8 +21,14 @@ public class USMOfficcialQueryBuilder {
 
 	public String getUSMOfficialSearchQuery(@Valid USMOfficialSearchCriteria searchCriteria,
 			List<Object> preparedStmtList) {
-		StringBuilder query = new StringBuilder("Select department.id ,department.role, department.category,department.tenantid,department.ward,department.slumcode,department.assigned,department.createdtime,department.createdby,department.lastmodifiedtime,department.lastmodifiedby FROM eg_usm_dept_mapping department ");
+		StringBuilder query = new StringBuilder("SELECT department.id ,department.role, department.category,department.tenantid,department.ward,department.slumcode,department.assigned,department.createdtime,department.createdby,department.lastmodifiedtime,department.lastmodifiedby FROM eg_usm_dept_mapping department ");
 
+		if(!ObjectUtils.isEmpty(searchCriteria.getTicketId())){
+            query.append(" LEFT OUTER JOIN eg_usm_survey_submitted surveysubmitted ON department.tenantid = surveysubmitted.tenantid AND department.ward = surveysubmitted.ward AND department.slumcode = surveysubmitted.slumcode ");
+            query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON surveysubmitted.id = answer.surveysubmittedid ");
+            query.append(" LEFT OUTER JOIN eg_usm_survey_ticket ticket ON answer.id  = ticket.surveyanswerid ");
+        }
+		
 		if (!ObjectUtils.isEmpty(searchCriteria.getTenantId())) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" department.tenantid = ? ");
@@ -46,7 +52,20 @@ public class USMOfficcialQueryBuilder {
 			query.append(" department.role = ? ");
 			preparedStmtList.add(searchCriteria.getRole());
 		}
+		
+		if (!ObjectUtils.isEmpty(searchCriteria.getAssigned())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append(" department.assigned = ? ");
+			preparedStmtList.add(searchCriteria.getAssigned());
+		}
 
+		if(!ObjectUtils.isEmpty(searchCriteria.getTicketId())){
+            addClauseIfRequired(query, preparedStmtList);
+            query.append(" ticket.id = ?");
+            preparedStmtList.add(searchCriteria.getTicketId());
+        }
+		
+		query.append(" ORDER BY department.createdtime DESC ");
 		return query.toString();
 	}
 

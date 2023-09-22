@@ -1,11 +1,20 @@
 package org.egov.usm.validator;
 
+import java.util.Collections;
 import java.util.List;
 
+import javax.validation.Valid;
+
+import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.Role;
 import org.egov.tracer.model.CustomException;
 import org.egov.usm.repository.USMOfficialRepository;
+import org.egov.usm.service.UserService;
+import org.egov.usm.utility.Constants;
 import org.egov.usm.web.model.USMOfficial;
+import org.egov.usm.web.model.USMOfficialRequest;
 import org.egov.usm.web.model.USMOfficialSearchCriteria;
+import org.egov.usm.web.model.user.Citizen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -16,6 +25,9 @@ public class USMOfficialValidator {
 
 	@Autowired
 	private USMOfficialRepository repository;
+	
+	@Autowired
+	private UserService userService;
 
 	/**
 	 * Throw error if member already exists
@@ -25,7 +37,11 @@ public class USMOfficialValidator {
 	public void isOfficialAlreadyExists(USMOfficial usmOfficial) {
 
 		USMOfficialSearchCriteria searchCriteria = USMOfficialSearchCriteria.builder()
-				.tenantId(usmOfficial.getTenant()).ward(usmOfficial.getWard()).slumcode(usmOfficial.getSlumcode())
+				.tenantId(usmOfficial.getTenant())
+				.ward(usmOfficial.getWard())
+				.slumcode(usmOfficial.getSlumcode())
+				.role(usmOfficial.getRole())
+				.assigned(usmOfficial.getAssigned())
 				.build();
 
 		List<USMOfficial> usmOfficials = repository.getOfficialRequests(searchCriteria);
@@ -53,6 +69,33 @@ public class USMOfficialValidator {
 					"The survey entity provided in update request does not exist.");
 
 		return usmOfficials.get(0);
+	}
+
+	public void validateUSMOfficialRequest(@Valid USMOfficialRequest usmOfficialRequest) {
+		RequestInfo requestInfo = usmOfficialRequest.getRequestInfo();
+		
+		// Check User isUserPresent
+		List<Citizen> citizens = userService.getUserByUuid(Collections.singletonList(usmOfficialRequest.getUsmOffcial().getAssigned()), requestInfo);
+
+		if(CollectionUtils.isEmpty(citizens)) {
+			throw new CustomException("ID ERROR", "Official id is not present");
+		} 
+		
+		Boolean isEmployee = false;
+		Boolean isOfficer = false;
+		for(Role role :  citizens.get(0).getRoles()){
+			if(role.getCode().equalsIgnoreCase(Constants.ROLE_EMPLOYEE))
+				isEmployee = true;
+			
+			if(role.getCode().equalsIgnoreCase(usmOfficialRequest.getUsmOffcial().getRole()))
+				isOfficer = true;
+		}
+		
+		if(!isEmployee)
+			throw new CustomException("INVALID USER ERROR", "Official id is unauthorized Employee Type");
+		
+		if(!isOfficer)
+			throw new CustomException("INVALID USER ERROR", "Official id is unauthorized " + usmOfficialRequest.getUsmOffcial().getRole() + " Type");
 	}
 
 }

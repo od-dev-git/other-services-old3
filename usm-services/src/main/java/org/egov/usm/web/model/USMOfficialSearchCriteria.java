@@ -33,6 +33,9 @@ public class USMOfficialSearchCriteria {
 	@JsonProperty("role")
 	private String role;
 	
+	@JsonProperty("assigned")
+	private String assigned;
+	
 	@JsonProperty("ticketId")
 	private String ticketId;
 	

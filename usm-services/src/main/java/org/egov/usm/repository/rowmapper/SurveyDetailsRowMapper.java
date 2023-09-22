@@ -96,6 +96,7 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
                 .id(rs.getString("id"))
                 .surveyId(rs.getString("surveyid"))
                 .questionStatement(rs.getString("questionstatement"))
+                .questionStatementOdia(rs.getString("questionstatement_odia"))
                 .category(rs.getString("category"))
                 .status(Status.fromValue(rs.getString("status")))
                 .required(rs.getBoolean("required"))
