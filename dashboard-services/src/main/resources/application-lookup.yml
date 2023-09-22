@@ -125,7 +125,7 @@ masterdata:
     od.bhubaneswar: eg_dss_response_bhubaneswar
     od.bhubaneswardevelopmentauthority: eg_dss_response_bhubaneswardevelopmentauthority
     od.remuna: eg_dss_response_remuna
-        
+            
   sparitulbs:
     od.anandapur
     od.aska
@@ -221,4 +221,7 @@ masterdata:
     od.tusura
     od.udala
     od.umerkote
-    
+        
+  urculbs:
+    od.puri
+        
