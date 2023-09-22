@@ -19,5 +19,7 @@ public class SystemProperties {
 	private HashMap<String, String> tenantstable;
 	
 	private List<String> sparitulbs;
+	
+	private List<String> urculbs;
 
 }
