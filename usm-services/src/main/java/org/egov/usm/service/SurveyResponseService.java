@@ -98,7 +98,7 @@ public class SurveyResponseService {
 			enrichmentService.enrichUpdateQuestionLookup(surveyDetailsRequest, tickets);
 		}
 		
-		repository.submitSurvey(surveyDetailsRequest);
+//		repository.submitSurvey(surveyDetailsRequest);
 		
 		return surveyDetailsRequest.getSurveyDetails();
 	}

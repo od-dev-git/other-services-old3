@@ -47,9 +47,9 @@ public class SurveyTicketCommentController {
 		log.info("In controller request : ", surveyTicketCommentRequest.toString());
 		SurveyTicketComment ticketComment = ticketCommentService.create(surveyTicketCommentRequest);
 		SurveyTicketCommentResponse response = SurveyTicketCommentResponse.builder()
-				.surveyTicketComments(Collections.singletonList(ticketComment)).responseInfo(responseInfoFactory
+						.surveyTicketComments(Collections.singletonList(ticketComment)).responseInfo(responseInfoFactory
 						.createResponseInfoFromRequestInfo(surveyTicketCommentRequest.getRequestInfo(), true))
-				.build();
+						.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
