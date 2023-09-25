@@ -43,7 +43,7 @@ public class TicketQueryBuilder {
 
 		if (searchCriteria.getIsOfficial() == Boolean.TRUE) {
 			query.append(
-					" JOIN eg_usm_dept_mapping dept ON  submit.tenantid = dept.tenantid and submit.ward = dept.ward and submit.slumcode = dept.slumcode and answer.questioncategory = dept.category");
+					" JOIN eg_usm_dept_mapping dept ON  submit.tenantid = dept.tenantid and submit.ward = dept.ward and submit.slumcode = dept.slumcode and UPPER(answer.questioncategory) = UPPER(dept.category)");
 
 		}
 		if (searchCriteria.getIsEscalateOfficer() == Boolean.TRUE) {
@@ -88,8 +88,8 @@ public class TicketQueryBuilder {
 
 		if (!ObjectUtils.isEmpty(searchCriteria.getCategory())) {
 			addClauseIfRequired(query, preparedStmtList);
-			query.append(" answer.questioncategory  = ? ");
-			preparedStmtList.add(searchCriteria.getCategory());
+			query.append(" UPPER(answer.questioncategory)  = ? ");
+			preparedStmtList.add(searchCriteria.getCategory().toUpperCase());
 		}
 
 		if (!ObjectUtils.isEmpty(searchCriteria.getCreatedBy())) {
