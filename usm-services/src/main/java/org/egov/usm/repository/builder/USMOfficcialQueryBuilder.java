@@ -51,6 +51,11 @@ public class USMOfficcialQueryBuilder {
 			preparedStmtList.add(searchCriteria.getRole());
 		}
 		
+		if (!ObjectUtils.isEmpty(searchCriteria.getCategory())) {
+			query.append(" AND department.category = ? ");
+			preparedStmtList.add(searchCriteria.getCategory());
+		}
+		
 		if (!ObjectUtils.isEmpty(searchCriteria.getAssigned())) {
 			query.append(" AND department.assigned = ? ");
 			preparedStmtList.add(searchCriteria.getAssigned());

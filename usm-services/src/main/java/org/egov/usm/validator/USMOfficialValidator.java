@@ -41,6 +41,7 @@ public class USMOfficialValidator {
 				.ward(usmOfficial.getWard())
 				.slumcode(usmOfficial.getSlumcode())
 				.role(usmOfficial.getRole())
+				.category(usmOfficial.getCategory())
 				.assigned(usmOfficial.getAssigned())
 				.build();
 
