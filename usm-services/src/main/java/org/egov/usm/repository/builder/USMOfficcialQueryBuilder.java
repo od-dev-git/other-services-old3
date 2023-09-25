@@ -75,7 +75,7 @@ public class USMOfficcialQueryBuilder {
 	public String getUuidOfUSMOfficials(@Valid USMOfficialSearchCriteria searchCriteria, List<Object> preparedStmtList) {
 		StringBuilder query = new StringBuilder("SELECT dept.assigned FROM eg_usm_dept_mapping dept "
 				+ "JOIN eg_usm_survey_submitted survey ON dept.tenantid = survey.tenantid AND dept.ward = survey.ward AND dept.slumcode = survey.slumcode "
-				+ "JOIN eg_usm_survey_submitted_answer answer ON survey.id = answer.surveysubmittedid AND dept.category = answer.questioncategory "
+				+ "JOIN eg_usm_survey_submitted_answer answer ON survey.id = answer.surveysubmittedid AND UPPER(dept.category) = UPPER(answer.questioncategory)"
 				+ "JOIN eg_usm_survey_ticket ticket ON answer.id = ticket.surveyanswerid ");
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getTicketId())) {
