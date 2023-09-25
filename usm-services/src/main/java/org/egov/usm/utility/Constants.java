@@ -24,7 +24,9 @@ public class Constants {
 	
 	public static final String EMPTY_STRING = "";
 	
-	public static final String CATEGORY_STREETLIGHT = "STREETLIGHT";
+	public static final String CATEGORY_WATER = "WATER";
+	public static final String CATEGORY_SANITATION= "SANITATION";
+	public static final String CATEGORY_STREETLIGHT = "STREET_LIGHT";
 	public static final int ADD_COMMENT_TIME_IN_HOUR = 48;
 	
 	//notification
