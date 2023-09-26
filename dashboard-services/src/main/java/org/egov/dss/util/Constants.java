@@ -228,6 +228,8 @@ public class Constants {
 		final static String JAlSATHI_ONBOARDED_URC = "jalsathiOnboardedUrc";
 		final static String URC_PROPERTIES_PAID = "urcPropertiesPaid";
 		final static String URC_WATER_CONSUMER_PAID = "urcWaterConsumerPaid";
+		final static String URC_PT_PAYMENT_MODE = "urcPTPaymentmode";
+		final static String URC_WS_PAYMENT_MODE = "urcWSPaymentmode";
 	}
 
 }

@@ -9,6 +9,8 @@ import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.repository.builder.URCQueryBuilder;
+import org.egov.dss.repository.rowmapper.ChartRowMapper;
+import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -65,6 +67,14 @@ public class URCRepository {
         log.info("Query for URC Properties Paid : "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
+	}
+	
+	public HashMap<String, BigDecimal> getMonthWiseCollection(PaymentSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = urcQueryBuilder.getMonthWiseCollection(criteria, preparedStatementValues);
+        log.info(" URC month wise Collection query : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
 	}
 	
 	
