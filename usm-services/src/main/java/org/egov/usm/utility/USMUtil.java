@@ -1,7 +1,10 @@
 package org.egov.usm.utility;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
@@ -52,7 +55,7 @@ public class USMUtil {
 	 * @return true or false 
 	 */
 	public static boolean isAfterTime(String inputTime) {
-		return LocalTime.now().isAfter(LocalTime.parse(inputTime.toUpperCase(), DateTimeFormatter.ofPattern("hh:mm a", Locale.UK)));
+		return LocalTime.now(ZoneId.of(Constants.LOCAL_ZONE_ID)).isAfter(LocalTime.parse(inputTime.toUpperCase(), DateTimeFormatter.ofPattern("hh:mm a", Locale.UK)));
 	}
 	
 	
@@ -63,7 +66,7 @@ public class USMUtil {
 	 * @return true or false 
 	 */
 	public static boolean isBeforeTime(String inputTime) {
-		return LocalTime.now().isBefore(LocalTime.parse(inputTime.toUpperCase(), DateTimeFormatter.ofPattern("hh:mm a", Locale.UK)));
+		return LocalTime.now(ZoneId.of(Constants.LOCAL_ZONE_ID)).isBefore(LocalTime.parse(inputTime.toUpperCase(), DateTimeFormatter.ofPattern("hh:mm a", Locale.UK)));
 	}
 	
 	
@@ -91,7 +94,7 @@ public class USMUtil {
 	public static boolean isAfterTime(Long inputUnixTime) {
 		Instant instant = Instant.ofEpochSecond(inputUnixTime/1000);
 		instant = instant.plus(Constants.ADD_COMMENT_TIME_IN_HOUR, ChronoUnit.HOURS);
-		return Instant.now().isAfter(instant);
+		return LocalDateTime.now(ZoneId.of(Constants.LOCAL_ZONE_ID)).toInstant(ZoneOffset.UTC).isAfter(instant);
 	}
 	
 }

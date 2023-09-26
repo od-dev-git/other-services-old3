@@ -90,7 +90,7 @@ public class MemberEnrichmentService {
 		RequestInfo requestInfo = sdaMembersRequest.getRequestInfo();
 		AuditDetails auditDetails = USMUtil.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
 		
-		sdaMembersRequest.getSdaMember().setUserId(Constants.EMPTY_STRING);
+		sdaMembersRequest.getSdaMember().setUserId(existingSdaMember.getUserId());
 		sdaMembersRequest.getSdaMember().setTenant(existingSdaMember.getTenant());
 		sdaMembersRequest.getSdaMember().setWard(existingSdaMember.getWard());
 		sdaMembersRequest.getSdaMember().setSlumCode(existingSdaMember.getSlumCode());
