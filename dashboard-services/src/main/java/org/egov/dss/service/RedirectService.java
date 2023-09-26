@@ -713,7 +713,13 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_WATER_CONSUMER_PAID.equalsIgnoreCase(visualizationCode)) {
             return urcService.totalWaterConsumerPaid(requestInfoWrapper.getPayloadDetails());
         }
+		if(Constants.VisualizationCodes.URC_WATER_CONSUMER_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.totalWaterConsumerPaid(requestInfoWrapper.getPayloadDetails());
+        }
 		
+		if(Constants.VisualizationCodes.URC_PT_PAYMENT_MODE.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ptPaymentModeData(requestInfoWrapper.getPayloadDetails());
+        }
 		return null;
 
 	}
