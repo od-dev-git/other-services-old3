@@ -1,9 +1,11 @@
 package org.egov.dss.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
@@ -13,8 +15,10 @@ import org.egov.dss.repository.URCRepository;
 import org.egov.dss.util.DashboardUtility;
 import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.Data;
+import org.egov.dss.web.model.Plot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
@@ -27,7 +31,7 @@ public class URCService {
 
 	@Autowired
 	private DashboardUtils dashboardUtils;
-
+	
 	private PaymentSearchCriteria getPaymentSearchCriteria(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = new PaymentSearchCriteria();
 		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
@@ -215,5 +219,105 @@ public class URCService {
         return Arrays.asList(Data.builder().headerValue(waterConsumerPaid).build());
 	}
 	
+	public List<Data> ptPaymentModeData(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		HashMap<String, BigDecimal> monthWiseTotalCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+				paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CARD_PAYMENT));
+		HashMap<String, BigDecimal> monthWiseCardCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ONLINE_PAYMENT));
+		HashMap<String, BigDecimal> monthWiseOnlineCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CHEQUE_PAYMENT));
+		HashMap<String, BigDecimal> monthWiseChequeCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CASH_PAYMENT));
+		HashMap<String, BigDecimal> monthWiseCashCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+
+		HashMap<String, BigDecimal> monthWiseCardPercentage = new HashMap<>();
+		HashMap<String, BigDecimal> monthWiseOnlinePercentage = new HashMap<>();
+		HashMap<String, BigDecimal> monthWiseChequePercentage = new HashMap<>();
+		HashMap<String, BigDecimal> monthWiseCashPercentage = new HashMap<>();
+
+		monthWiseCardCollection.forEach((key, value) -> {
+			BigDecimal collection = monthWiseTotalCollection.get(key) == BigDecimal.ZERO ? BigDecimal.ONE
+					: monthWiseTotalCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			monthWiseCardPercentage.put(key, percentage);
+		});
+		monthWiseOnlineCollection.forEach((key, value) -> {
+			BigDecimal collection = monthWiseTotalCollection.get(key) == BigDecimal.ZERO ? BigDecimal.ONE
+					: monthWiseTotalCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			monthWiseOnlinePercentage.put(key, percentage);
+		});
+		monthWiseChequeCollection.forEach((key, value) -> {
+			BigDecimal collection = monthWiseTotalCollection.get(key) == BigDecimal.ZERO ? BigDecimal.ONE
+					: monthWiseTotalCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			monthWiseChequePercentage.put(key, percentage);
+		});
+		monthWiseCashCollection.forEach((key, value) -> {
+			BigDecimal collection = monthWiseTotalCollection.get(key) == BigDecimal.ZERO ? BigDecimal.ONE
+					: monthWiseTotalCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			monthWiseCashPercentage.put(key, percentage);
+		});
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseCollection : monthWiseTotalCollection.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Months").label(tenantWiseCollection.getKey().toString()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Card Collection")
+					.value(monthWiseCardPercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseCardPercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Online Collection")
+					.value(monthWiseOnlinePercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseOnlinePercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cheque Collection")
+					.value(monthWiseChequePercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseChequePercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cash Collection")
+					.value(monthWiseCashPercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseCashPercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
+
+			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).headerValue(serialNumber).build());
+			
+			serialNumber++;
+
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Months").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Card Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Online Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cheque Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cash Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+		}
+
+		return response;
+	}
+
 	
 }
