@@ -33,6 +33,8 @@ public class Constants {
 	
 	public static final String NOTIFICATION_LOCALE = "en_IN";
 	
+	public static final String LOCAL_ZONE_ID = "Asia/Kolkata";
+	
 	public static final String MODULE = "rainmaker-common";
 	
 	public static final String NOTIFICATION_OWNER_NAME_KEY = "{OWNER_NAME}";
