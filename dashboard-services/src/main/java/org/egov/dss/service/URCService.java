@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.DemandSearchCriteria;
@@ -226,25 +227,25 @@ public class URCService {
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 
-		HashMap<String, BigDecimal> monthWiseTotalCollection = urcRepository
+		LinkedHashMap<String, BigDecimal> monthWiseTotalCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 				paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CARD_PAYMENT));
-		HashMap<String, BigDecimal> monthWiseCardCollection = urcRepository
+		LinkedHashMap<String, BigDecimal> monthWiseCardCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ONLINE_PAYMENT));
-		HashMap<String, BigDecimal> monthWiseOnlineCollection = urcRepository
+		LinkedHashMap<String, BigDecimal> monthWiseOnlineCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CHEQUE_PAYMENT));
-		HashMap<String, BigDecimal> monthWiseChequeCollection = urcRepository
+		LinkedHashMap<String, BigDecimal> monthWiseChequeCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CASH_PAYMENT));
-		HashMap<String, BigDecimal> monthWiseCashCollection = urcRepository
+		LinkedHashMap<String, BigDecimal> monthWiseCashCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 
-		HashMap<String, BigDecimal> monthWiseCardPercentage = new HashMap<>();
-		HashMap<String, BigDecimal> monthWiseOnlinePercentage = new HashMap<>();
-		HashMap<String, BigDecimal> monthWiseChequePercentage = new HashMap<>();
-		HashMap<String, BigDecimal> monthWiseCashPercentage = new HashMap<>();
+		LinkedHashMap<String, BigDecimal> monthWiseCardPercentage = new LinkedHashMap<>();
+		LinkedHashMap<String, BigDecimal> monthWiseOnlinePercentage = new LinkedHashMap<>();
+		LinkedHashMap<String, BigDecimal> monthWiseChequePercentage = new LinkedHashMap<>();
+		LinkedHashMap<String, BigDecimal> monthWiseCashPercentage = new LinkedHashMap<>();
 
 		monthWiseCardCollection.forEach((key, value) -> {
 			BigDecimal collection = monthWiseTotalCollection.get(key) == BigDecimal.ZERO ? BigDecimal.ONE
@@ -279,16 +280,16 @@ public class URCService {
 
 			plots.add(Plot.builder().name("Months").label(tenantWiseCollection.getKey().toString()).symbol("text").build());
 
-			plots.add(Plot.builder().name("Card Collection")
+			plots.add(Plot.builder().name("Card Collection Amount")
 					.value(monthWiseCardPercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseCardPercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
 
-			plots.add(Plot.builder().name("Online Collection")
+			plots.add(Plot.builder().name("Online Collection Amount")
 					.value(monthWiseOnlinePercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseOnlinePercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
 
-			plots.add(Plot.builder().name("Cheque Collection")
+			plots.add(Plot.builder().name("Cheque Collection Amount")
 					.value(monthWiseChequePercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseChequePercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
 
-			plots.add(Plot.builder().name("Cash Collection")
+			plots.add(Plot.builder().name("Cash Collection Amount")
 					.value(monthWiseCashPercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseCashPercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
 
 			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).headerValue(serialNumber).build());
@@ -304,13 +305,13 @@ public class URCService {
 
 			plots.add(Plot.builder().name("Months").label(payloadDetails.getTenantid()).symbol("text").build());
 
-			plots.add(Plot.builder().name("Card Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+			plots.add(Plot.builder().name("Card Collection Amount").value(BigDecimal.ZERO).symbol("percentage").build());
 
-			plots.add(Plot.builder().name("Online Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+			plots.add(Plot.builder().name("Online Collection Amount").value(BigDecimal.ZERO).symbol("percentage").build());
 
-			plots.add(Plot.builder().name("Cheque Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+			plots.add(Plot.builder().name("Cheque Collection Amount").value(BigDecimal.ZERO).symbol("percentage").build());
 
-			plots.add(Plot.builder().name("Cash Collection").value(BigDecimal.ZERO).symbol("percentage").build());
+			plots.add(Plot.builder().name("Cash Collection Amount").value(BigDecimal.ZERO).symbol("percentage").build());
 
 			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
 					.build());
@@ -318,6 +319,106 @@ public class URCService {
 
 		return response;
 	}
+	
+	public List<Data> wsPaymentModeData(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+
+		LinkedHashMap<String, BigDecimal> monthWiseTotalCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+				paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CARD_PAYMENT));
+		LinkedHashMap<String, BigDecimal> monthWiseCardCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.ONLINE_PAYMENT));
+		LinkedHashMap<String, BigDecimal> monthWiseOnlineCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CHEQUE_PAYMENT));
+		LinkedHashMap<String, BigDecimal> monthWiseChequeCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setPaymentModes(Sets.newHashSet(DashboardConstants.CASH_PAYMENT));
+		LinkedHashMap<String, BigDecimal> monthWiseCashCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+
+		LinkedHashMap<String, BigDecimal> monthWiseCardPercentage = new LinkedHashMap<>();
+		LinkedHashMap<String, BigDecimal> monthWiseOnlinePercentage = new LinkedHashMap<>();
+		LinkedHashMap<String, BigDecimal> monthWiseChequePercentage = new LinkedHashMap<>();
+		LinkedHashMap<String, BigDecimal> monthWiseCashPercentage = new LinkedHashMap<>();
+
+		monthWiseCardCollection.forEach((key, value) -> {
+			BigDecimal collection = monthWiseTotalCollection.get(key) == BigDecimal.ZERO ? BigDecimal.ONE
+					: monthWiseTotalCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			monthWiseCardPercentage.put(key, percentage);
+		});
+		monthWiseOnlineCollection.forEach((key, value) -> {
+			BigDecimal collection = monthWiseTotalCollection.get(key) == BigDecimal.ZERO ? BigDecimal.ONE
+					: monthWiseTotalCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			monthWiseOnlinePercentage.put(key, percentage);
+		});
+		monthWiseChequeCollection.forEach((key, value) -> {
+			BigDecimal collection = monthWiseTotalCollection.get(key) == BigDecimal.ZERO ? BigDecimal.ONE
+					: monthWiseTotalCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			monthWiseChequePercentage.put(key, percentage);
+		});
+		monthWiseCashCollection.forEach((key, value) -> {
+			BigDecimal collection = monthWiseTotalCollection.get(key) == BigDecimal.ZERO ? BigDecimal.ONE
+					: monthWiseTotalCollection.get(key);
+			BigDecimal percentage = value.multiply(new BigDecimal(100)).divide(collection, 2, RoundingMode.HALF_UP);
+			monthWiseCashPercentage.put(key, percentage);
+		});
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseCollection : monthWiseTotalCollection.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Months").label(tenantWiseCollection.getKey().toString()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Card Collection Amount")
+					.value(monthWiseCardPercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseCardPercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Online Collection Amount")
+					.value(monthWiseOnlinePercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseOnlinePercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cheque Collection Amount")
+					.value(monthWiseChequePercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseChequePercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cash Collection Amount")
+					.value(monthWiseCashPercentage.get(tenantWiseCollection.getKey()) == null ? BigDecimal.ZERO : monthWiseCashPercentage.get(tenantWiseCollection.getKey())).symbol("percentage").build());
+
+			response.add(Data.builder().headerName(tenantWiseCollection.getKey()).plots(plots).headerValue(serialNumber).build());
+			
+			serialNumber++;
+
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Months").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Card Collection Amount").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Online Collection Amount").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cheque Collection Amount").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			plots.add(Plot.builder().name("Cash Collection Amount").value(BigDecimal.ZERO).symbol("percentage").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+		}
+
+		return response;
+	}	
 
 	
 }
