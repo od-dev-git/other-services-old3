@@ -29,7 +29,7 @@ public class URCQueryBuilder {
 			+ "INNER JOIN egcl_paymentdetail pyd ON pyd.paymentid = py.id ";
 	
 	public static final String URC_MONTH_WISE_COLLECTION_SUB_QUERY = " all_months AS (select generate_series(start_month, end_month, interval '1 month') as month_range FROM months) "
-			+ "SELECT TO_CHAR(am.month_range, 'Mon-YYYY') as tenantid, COALESCE(totalamt, 0) AS totalamt FROM all_months am LEFT JOIN "
+			+ "SELECT TO_CHAR(am.month_range, 'Mon-YYYY') as name, COALESCE(totalamt, 0) AS value FROM all_months am LEFT JOIN "
 			+ "monthly_counts mc ON am.month_range = mc.month_start ";
 	
 	public static final String MONTH_YEAR_QUERY = " WITH  months AS (SELECT "
@@ -72,7 +72,7 @@ public class URCQueryBuilder {
 		addWhereClause(monthQueryModified, preparedStatementValues, paymentSearchCriteria);
 		addGroupByClause(monthQueryModified, " month_start ), ");
 		monthQueryModified.append(URC_MONTH_WISE_COLLECTION_SUB_QUERY);
-		addOrderByClause(monthQueryModified, " am.month_range asc ");
+		addOrderByClause(monthQueryModified, " am.month_range ");
 		return monthQueryModified.toString();
 	}
 

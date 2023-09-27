@@ -2,6 +2,7 @@ package org.egov.dss.repository;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.repository.builder.URCQueryBuilder;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
+import org.egov.dss.repository.rowmapper.URCRevenueRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -69,12 +71,13 @@ public class URCRepository {
         return result.get(0);
 	}
 	
-	public HashMap<String, BigDecimal> getMonthWiseCollection(PaymentSearchCriteria criteria) {
+	public LinkedHashMap<String, BigDecimal> getMonthWiseCollection(PaymentSearchCriteria criteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
-        String query = urcQueryBuilder.getMonthWiseCollection(criteria, preparedStatementValues);
-        log.info(" URC month wise Collection query : "+query);
-        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
-        return result;
+		String query = urcQueryBuilder.getMonthWiseCollection(criteria, preparedStatementValues);
+		log.info(" URC month wise Collection query : " + query);
+		LinkedHashMap<String, BigDecimal> result = (LinkedHashMap<String, BigDecimal>) namedParameterJdbcTemplate
+				.query(query, preparedStatementValues, new URCRevenueRowMapper());
+		return result;
 	}
 	
 	
