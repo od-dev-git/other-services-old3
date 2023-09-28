@@ -11,6 +11,7 @@ import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.repository.URCRepository;
 import org.egov.dss.util.DashboardUtility;
@@ -114,6 +115,35 @@ public class URCService {
 			criteria.setToDate(payloadDetails.getEnddate());
 		}
 
+		return criteria;
+	}
+	
+	private TargetSearchCriteria getTargetSearchCriteria(PayloadDetails payloadDetails) {
+		TargetSearchCriteria criteria = new TargetSearchCriteria();
+
+		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
+			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_URC))
+				criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.MODULE_LEVEL_PT,DashboardConstants.BUSINESS_SERVICE_WS));
+			else
+				criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
+		}
+		
+		if(StringUtils.hasText(payloadDetails.getTenantid())) {
+			criteria.setTenantIds(Sets.newHashSet(payloadDetails.getTenantid()));
+		}
+		
+		if(payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
+			criteria.setFromDate(payloadDetails.getStartdate());
+		}
+		
+		if(payloadDetails.getEnddate() != null && payloadDetails.getEnddate() != 0) {
+			criteria.setToDate(payloadDetails.getEnddate());
+		}
+		
+		if(StringUtils.hasText(payloadDetails.getTimeinterval())) {
+			criteria.setFinancialYear(payloadDetails.getTimeinterval());
+		}
+		
 		return criteria;
 	}
 
@@ -419,6 +449,57 @@ public class URCService {
 
 		return response;
 	}	
+	
+	public List<Data> targetCollection(PayloadDetails payloadDetails) {
+		String temp = payloadDetails.getTimeinterval();
+		if(Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			payloadDetails.setTimeinterval(dashboardUtils.getCurrentFinancialYear());
+		}
+		TargetSearchCriteria targerSearchCriteria = getTargetSearchCriteria(payloadDetails);
+		BigDecimal targetCollection = (BigDecimal) urcRepository.getTargetCollection(targerSearchCriteria);
+		if(temp.equalsIgnoreCase(DashboardConstants.QUARTER)) {
+			targetCollection = targetCollection.divide(new BigDecimal(4), 2, RoundingMode.HALF_UP);
+		}else if(temp.equalsIgnoreCase(DashboardConstants.MONTH)) {
+			targetCollection = targetCollection.divide(new BigDecimal(12), 2, RoundingMode.HALF_UP);
+		}
+		else if(temp.equalsIgnoreCase(DashboardConstants.WEEK)) {
+			targetCollection = targetCollection.divide(new BigDecimal(48), 2, RoundingMode.HALF_UP);
+		}
+		else if(temp.equalsIgnoreCase(DashboardConstants.DAY)) {
+			targetCollection = targetCollection.divide(new BigDecimal(365), 2, RoundingMode.HALF_UP);
+		}
+		return Arrays.asList(Data.builder().headerValue(targetCollection.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+	
+	public List<Data> revenuePTTargetAchievement(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		List<Plot> plots = new ArrayList<Plot>();
+		int serialNumber = 1;
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		BigDecimal targetCollection = (BigDecimal) targetCollection(payloadDetails).get(0).getHeaderValue();
+		plots.add(Plot.builder().name(DashboardConstants.TARGET_COLLECTION).value(targetCollection)
+				.label(String.valueOf(serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_COLLECTION).value(totalCollection)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.PENDING_COLLECTION)
+				.value(targetCollection.subtract(totalCollection)).label(String.valueOf(++serialNumber))
+				.symbol("Amount").build());
+		postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
+		BigDecimal previousTotalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		BigDecimal previousTargetCollection = (BigDecimal) targetCollection(payloadDetails).get(0).getHeaderValue();
+		if (previousTotalCollection == BigDecimal.ZERO)
+			previousTotalCollection = BigDecimal.ONE;
+		BigDecimal previousTargetAchieved = previousTotalCollection.divide(previousTargetCollection, 2, RoundingMode.HALF_UP)
+				.multiply(new BigDecimal(100));
+		plots.add(Plot.builder().name(DashboardConstants.PREVIOUS_ACHIEVEMENT).value(previousTargetAchieved)
+				.label(String.valueOf(++serialNumber)).symbol("Percentage").build());
+		return Arrays.asList(
+				Data.builder().headerName("DSS_URC_PT_TARGET_ACHIEVEMENT").plots(plots).build());
+	}
 
 	
 }

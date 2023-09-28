@@ -230,6 +230,7 @@ public class Constants {
 		final static String URC_WATER_CONSUMER_PAID = "urcWaterConsumerPaid";
 		final static String URC_PT_PAYMENT_MODE = "urcPTPaymentmode";
 		final static String URC_WS_PAYMENT_MODE = "urcWSPaymentmode";
+		final static String URC_REVENUE_PT_TARGET_ACHIEVEMENT = "revenuePTTargetAchievement";
 	}
 
 }
