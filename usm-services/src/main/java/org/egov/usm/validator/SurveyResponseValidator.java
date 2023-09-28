@@ -65,6 +65,21 @@ public class SurveyResponseValidator {
         if(CollectionUtils.isEmpty(surveyExists))
             throw new CustomException("EG_SURVEY_DOES_NOT_EXIST_ERR", "The survey entity provided in update request does not exist or closed for today.");
 
+        SurveySearchCriteria searchCriteria = SurveySearchCriteria.builder()
+        		.surveyId(surveyExists.get(0).getSurveyId())
+        		.status(Constants.ACTIVE)
+                .build();
+		
+		List<Survey> surveys = surveyRepository.getSurveyRequests(searchCriteria);
+		
+		if(!CollectionUtils.isEmpty(surveys)) {
+			if(!ObjectUtils.isEmpty(surveys.get(0).getStartTime()) && !USMUtil.isAfterTime(surveys.get(0).getStartTime())) 
+				throw new CustomException("EG_SY_SURVEY_TIME_ERR", "Submitting " + surveys.get(0).getTitle() + " Survey after " + surveys.get(0).getStartTime() + " is mandatory.");
+	           
+			if(!ObjectUtils.isEmpty(surveys.get(0).getEndTime()) && !USMUtil.isBeforeTime(surveys.get(0).getEndTime()))
+				throw new CustomException("EG_SY_SURVEY_TIME_ERR", "Submitting " + surveys.get(0).getTitle() + " Survey before " + surveys.get(0).getEndTime() + " is mandatory.");
+		}
+		
         surveyDetails.getSubmittedAnswers().forEach(submittedAnswer -> {
 			if(ObjectUtils.isEmpty(submittedAnswer.getId()))
 	            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing answer id is mandatory for submitting surveys");
