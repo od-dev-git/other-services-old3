@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 import java.util.Map;
 
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -35,6 +36,8 @@ public class URCQueryBuilder {
 	public static final String MONTH_YEAR_QUERY = " WITH  months AS (SELECT "
 			+ " DATE_TRUNC('month', MIN(TO_TIMESTAMP(fromdate / 1000 + 19800)  AT TIME ZONE 'UTC')) AS start_month, "
 			+ " DATE_TRUNC('month', MAX(TO_TIMESTAMP(todate / 1000 + 19800) AT TIME ZONE 'UTC')) AS end_month )  ";
+	
+	public static final String TARGET_COLLECTION_QUERY = " select COALESCE (sum(budgetproposedformunicipalcorporation),0) from state.eg_dss_target edt  ";
 	
 	public static String getTotalCollection(PaymentSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -74,6 +77,36 @@ public class URCQueryBuilder {
 		monthQueryModified.append(URC_MONTH_WISE_COLLECTION_SUB_QUERY);
 		addOrderByClause(monthQueryModified, " am.month_range ");
 		return monthQueryModified.toString();
+	}
+	
+	public static String getTargetCollection(TargetSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TARGET_COLLECTION_QUERY);
+		return addWhereClauseForTarget(selectQuery, preparedStatementValues, criteria);
+	}
+	
+	private static String addWhereClauseForTarget(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			TargetSearchCriteria searchCriteria) {
+
+        if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append("  edt.tenantidformunicipalcorporation IN ( :tenantId )");
+			preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
+		}
+
+		if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" edt.businessService IN (:businessService)  ");
+			preparedStatementValues.put("businessService", searchCriteria.getBusinessServices());
+		}
+		
+		if (!StringUtils.isEmpty(searchCriteria.getFinancialYear())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" edt.financialyear = :financialYear  ");
+			preparedStatementValues.put("financialYear", searchCriteria.getFinancialYear());
+		}
+
+		return selectQuery.toString();
+
 	}
 
 	private static void addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,

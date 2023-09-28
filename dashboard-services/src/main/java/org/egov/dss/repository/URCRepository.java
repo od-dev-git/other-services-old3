@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.repository.builder.URCQueryBuilder;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
@@ -78,6 +79,16 @@ public class URCRepository {
 		LinkedHashMap<String, BigDecimal> result = (LinkedHashMap<String, BigDecimal>) namedParameterJdbcTemplate
 				.query(query, preparedStatementValues, new URCRevenueRowMapper());
 		return result;
+	}
+	
+	public Object getTargetCollection(TargetSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = urcQueryBuilder.getTargetCollection(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
 	}
 	
 	
