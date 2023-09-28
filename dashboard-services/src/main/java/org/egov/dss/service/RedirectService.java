@@ -724,6 +724,10 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_WS_PAYMENT_MODE.equalsIgnoreCase(visualizationCode)) {
             return urcService.wsPaymentModeData(requestInfoWrapper.getPayloadDetails());
         }
+		
+		if(Constants.VisualizationCodes.URC_REVENUE_PT_TARGET_ACHIEVEMENT.equalsIgnoreCase(visualizationCode)) {
+            return urcService.revenuePTTargetAchievement(requestInfoWrapper.getPayloadDetails());
+        }
 		return null;
 
 	}
