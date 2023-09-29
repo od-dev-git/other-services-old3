@@ -182,13 +182,11 @@ public class DashboardService {
 				responseData.getData().forEach(data -> data.setHeaderName(chartName));
 			}
 		}
-		if(!(chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString()) || chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {
-			if(DashboardConstants.OBPS_PERFORM_VISULAIZATIONCODE.contains(responseData.getVisualizationCode())) {
-				responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol("number")));
-				responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
-			}else {
+		if (!(chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString())
+				|| chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {
 			responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol(valueType)));
-			}
+		} else {
+			responseData.getData().forEach(data -> data.getPlots().forEach(plot -> plot.setSymbol(plot.getSymbol())));
 		}
 		
 		if((chartType.toString().equalsIgnoreCase(ChartType.TABLE.toString()) || chartType.toString().equalsIgnoreCase(ChartType.XTABLE.toString()))) {
