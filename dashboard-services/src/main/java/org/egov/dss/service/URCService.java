@@ -79,7 +79,13 @@ public class URCService {
 		}
 
 		if (StringUtils.hasText(payloadDetails.getTenantid())) {
-			criteria.setTenantId(payloadDetails.getTenantid());
+			if (urcUlb.contains(payloadDetails.getTenantid())) {
+				criteria.setTenantIds(Sets.newHashSet(payloadDetails.getTenantid()));
+			} else {
+				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
+			}
+		} else {
+			criteria.setTenantIds(Sets.newHashSet(urcUlb));
 		}
 
 		if (StringUtils.hasText(payloadDetails.getTimeinterval())) {
@@ -500,6 +506,73 @@ public class URCService {
 		return Arrays.asList(
 				Data.builder().headerName("DSS_URC_PT_TARGET_ACHIEVEMENT").plots(plots).build());
 	}
+	
+	public BigDecimal totalDemand(PayloadDetails payloadDetails) {
+		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
+		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalDemand = BigDecimal.ZERO;
+		BigDecimal currentDemand = BigDecimal.ZERO;
+		BigDecimal arrearDemand = BigDecimal.ZERO;
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			currentDemand = (BigDecimal) currentDemand(payloadDetails).get(0).getHeaderValue();
+			arrearDemand = (BigDecimal) arrearDemand(payloadDetails).get(0).getHeaderValue();
+		}
+		if (Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			payloadDetails.setTimeinterval(dashboardUtils.getCurrentFinancialYear());
+			currentDemand = (BigDecimal) currentDemand(payloadDetails).get(0).getHeaderValue();
+			arrearDemand = (BigDecimal) arrearDemand(payloadDetails).get(0).getHeaderValue();
+		}
 
+		totalDemand = currentDemand.add(arrearDemand);
+
+		return totalDemand;
+	}
+	
+	public List<Data> currentDemand(PayloadDetails payloadDetails) {
+		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
+		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalDemand = BigDecimal.ZERO;
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			totalDemand = urcRepository.getCurrentDemand(demandSearchCriteria);
+		}
+		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+
+	public List<Data> arrearDemand(PayloadDetails payloadDetails) {
+		DemandSearchCriteria demandSearchCriteria = getDemandSearchCriteria(payloadDetails);
+		demandSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		demandSearchCriteria.setIsArrearDemand(Boolean.TRUE);
+		BigDecimal totalDemand = BigDecimal.ZERO;
+		if (!Sets.newHashSet(DashboardConstants.TIME_INTERVAL).contains(payloadDetails.getTimeinterval())) {
+			totalDemand = urcRepository.getArrearDemand(demandSearchCriteria);
+		}
+		return Arrays.asList(Data.builder().headerValue(totalDemand.setScale(2, RoundingMode.HALF_UP)).build());
+	}
+    
+	public List<Data> ptDemandEfficiency(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = new PaymentSearchCriteria();
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		List<Plot> plots = new ArrayList<Plot>();
+		int serialNumber = 1;
+		BigDecimal totalDemand = totalDemand(payloadDetails);
+		BigDecimal totalCollection = (BigDecimal) ptTotalCollection(payloadDetails);
+		BigDecimal pendingCollection = totalDemand.subtract(totalCollection);
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_DEMAND).value(totalDemand)
+				.label(String.valueOf(serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_COLLECTION).value(totalCollection)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.PENDING_COLLECTION).value(pendingCollection)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+		postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
+		BigDecimal previousTotalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		if (previousTotalCollection == BigDecimal.ZERO)
+			previousTotalCollection = BigDecimal.ONE;
+		BigDecimal previousYearEfficiency = previousTotalCollection.divide(totalDemand, 2, RoundingMode.HALF_UP)
+				.multiply(new BigDecimal(100));
+		plots.add(Plot.builder().name(DashboardConstants.PREVIOUS_EFFICIENCY).value(previousYearEfficiency)
+				.label(String.valueOf(++serialNumber)).symbol("Percentage").build());
+		return Arrays.asList(Data.builder().headerName("DSS_URC_PT_DEMAND_EFFICIENCY").plots(plots).build());
+	}
+    
 	
 }

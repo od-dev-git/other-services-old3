@@ -728,6 +728,10 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_REVENUE_PT_TARGET_ACHIEVEMENT.equalsIgnoreCase(visualizationCode)) {
             return urcService.revenuePTTargetAchievement(requestInfoWrapper.getPayloadDetails());
         }
+		
+		if(Constants.VisualizationCodes.URC_REVENUE_PT_DEMAND_EFFICIENCY.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ptDemandEfficiency(requestInfoWrapper.getPayloadDetails());
+        }
 		return null;
 
 	}
