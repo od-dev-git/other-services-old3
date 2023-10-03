@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.Map;
 
+import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
@@ -38,6 +39,10 @@ public class URCQueryBuilder {
 			+ " DATE_TRUNC('month', MAX(TO_TIMESTAMP(todate / 1000 + 19800) AT TIME ZONE 'UTC')) AS end_month )  ";
 	
 	public static final String TARGET_COLLECTION_QUERY = " select COALESCE (sum(budgetproposedformunicipalcorporation),0) from state.eg_dss_target edt  ";
+	
+    public static final String CURRENT_DEMAND_QUERY = " select coalesce(sum(amount), 0) as amount from state.eg_dss_demand ";
+	
+	public static final String ARREAR_DEMAND_QUERY = " select coalesce(sum(amount), 0) - coalesce(sum(collectionamount), 0) as amount from state.eg_dss_demand ";
 	
 	public static String getTotalCollection(PaymentSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -107,6 +112,18 @@ public class URCQueryBuilder {
 
 		return selectQuery.toString();
 
+	}
+	
+	public static String getCurrentDemand(DemandSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(CURRENT_DEMAND_QUERY);
+		addWhereClauseForDemand(selectQuery, preparedStatementValues, criteria);
+		return selectQuery.toString();
+	}
+	
+	public static String getArrearDemand(DemandSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(ARREAR_DEMAND_QUERY);
+		addWhereClauseForDemand(selectQuery, preparedStatementValues, criteria);
+		return selectQuery.toString();
 	}
 
 	private static void addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
@@ -278,4 +295,38 @@ public class URCQueryBuilder {
     private static void addOrderByClause(StringBuilder query,String columnName) {
     	query.append(" ORDER BY " + columnName);
     }
+    
+	private static void addWhereClauseForDemand(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			DemandSearchCriteria searchCriteria) {
+
+		if (!StringUtils.isEmpty(searchCriteria.getTenantIds())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" tenantId in ( :tenantId s) ");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
+		}
+
+		if (!StringUtils.isEmpty(searchCriteria.getBusinessService())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" businessservice = :businessService ");
+			preparedStatementValues.put("businessService", searchCriteria.getBusinessService());
+		}
+
+		if (!StringUtils.isEmpty(searchCriteria.getFinancialYear())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			if (searchCriteria.getIsArrearDemand() == Boolean.TRUE) {
+				selectQuery.append(" financialyear < :financialYear ");
+			} else {
+				selectQuery.append(" financialyear = :financialYear ");
+			}
+			preparedStatementValues.put("financialYear", searchCriteria.getFinancialYear());
+		}
+
+		if (!StringUtils.isEmpty(searchCriteria.getExcludedTenantId())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" tenantid != :excludedTenant");
+			preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenantId());
+		}
+
+	}
+
 }

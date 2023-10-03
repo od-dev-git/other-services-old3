@@ -223,6 +223,10 @@ public class DashboardConstants {
 	public static final String TARGET_ACHIEVEMENT = "Target Achievement";
 	
 	public static final String PREVIOUS_ACHIEVEMENT = "Previous Achievement";
+	
+	public static final String PREVIOUS_EFFICIENCY = "Previous Efficiency";
+	
+	public static final String TOTAL_DEMAND = "Total Demand";
 
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
