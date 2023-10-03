@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.dss.config.ConfigurationLoader;
+import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
@@ -84,6 +85,26 @@ public class URCRepository {
 	public Object getTargetCollection(TargetSearchCriteria criteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = urcQueryBuilder.getTargetCollection(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
+	}
+	
+	public BigDecimal getCurrentDemand(DemandSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+	    String query = urcQueryBuilder.getCurrentDemand(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
+	}
+	
+	public BigDecimal getArrearDemand(DemandSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+	    String query = urcQueryBuilder.getArrearDemand(criteria, preparedStatementValues);
 		log.info("query: " + query);
 		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(BigDecimal.class));
