@@ -45,8 +45,8 @@ public class TicketSearchCriteria {
 	@JsonProperty("isSatisfied")
 	private Boolean isSatisfied;
 
-	@JsonProperty("isOfficial")
-	private Boolean isOfficial;
+	@JsonProperty("officialRole")
+	private String officialRole;
 
 	@JsonProperty("isNodalOfficer")
 	private Boolean isNodalOfficer;

@@ -41,11 +41,10 @@ public class TicketQueryBuilder {
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted submit ON answer.surveysubmittedid =submit.id");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_ticket_comment comment ON comment.ticketid=ticket.id");
 
-		if (searchCriteria.getIsOfficial() == Boolean.TRUE) {
-			query.append(
-					" JOIN eg_usm_dept_mapping dept ON  submit.tenantid = dept.tenantid and submit.ward = dept.ward and submit.slumcode = dept.slumcode and UPPER(answer.questioncategory) = UPPER(dept.category)");
-
+		if (!ObjectUtils.isEmpty(searchCriteria.getOfficialRole())) {
+			query.append(" JOIN eg_usm_dept_mapping dept ON  submit.tenantid = dept.tenantid and submit.ward = dept.ward and submit.slumcode = dept.slumcode and UPPER(answer.questioncategory) = UPPER(dept.category)");
 		}
+		
 		if (searchCriteria.getIsEscalateOfficer() == Boolean.TRUE) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" ticket.createdtime >=(? - (48 * 3600 * 1000)) and ticket.createdtime <= ?");
@@ -92,7 +91,7 @@ public class TicketQueryBuilder {
 			preparedStmtList.add(searchCriteria.getCategory().toUpperCase());
 		}
 
-		if (!ObjectUtils.isEmpty(searchCriteria.getCreatedBy())) {
+		if (ObjectUtils.isEmpty(searchCriteria.getOfficialRole()) && ObjectUtils.isEmpty(searchCriteria.getCreatedBy())) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" ticket.createdby = ? ");
 			preparedStmtList.add(searchCriteria.getCreatedBy());
@@ -113,6 +112,12 @@ public class TicketQueryBuilder {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" ticket.issatisfied = ? ");
 			preparedStmtList.add(searchCriteria.getIsSatisfied());
+		}
+		if (!ObjectUtils.isEmpty(searchCriteria.getOfficialRole()) && !ObjectUtils.isEmpty(searchCriteria.getCreatedBy())) {
+			addClauseIfRequired(query, preparedStmtList);
+			query.append("dept.role = ? AND  dept.assigned = ? ");
+			preparedStmtList.add(searchCriteria.getOfficialRole());
+			preparedStmtList.add(searchCriteria.getCreatedBy());
 		}
 		query.append(" ORDER BY ticket.createdtime  ");
 

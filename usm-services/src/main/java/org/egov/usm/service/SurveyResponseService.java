@@ -5,9 +5,11 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.usm.repository.SurveyDetailsRepository;
+import org.egov.usm.repository.SurveyRepository;
 import org.egov.usm.validator.SurveyResponseValidator;
 import org.egov.usm.web.model.QuestionDetail;
 import org.egov.usm.web.model.RequestInfoWrapper;
+import org.egov.usm.web.model.Survey;
 import org.egov.usm.web.model.SurveyDetails;
 import org.egov.usm.web.model.SurveyDetailsRequest;
 import org.egov.usm.web.model.SurveySearchCriteria;
@@ -27,13 +29,16 @@ public class SurveyResponseService {
 	
 	private SurveyResponseValidator validator;
 	
+	private SurveyRepository surveyRepository;
+	
 	@Autowired
 	public SurveyResponseService(SurveyDetailsRepository repository, TicketService ticketService,
-			EnrichmentService enrichmentService, SurveyResponseValidator validator) {
+			EnrichmentService enrichmentService, SurveyResponseValidator validator, SurveyRepository surveyRepository) {
 		this.repository = repository;
 		this.ticketService = ticketService;
 		this.enrichmentService = enrichmentService;
 		this.validator = validator;
+		this.surveyRepository = surveyRepository;
 	}
 
 
@@ -59,10 +64,15 @@ public class SurveyResponseService {
 			surveyDetails = surveyResponseForCurrentDate.get(0);
 		}
 		
+		SurveySearchCriteria searchCriteria = SurveySearchCriteria.builder().surveyId(surveyDetailsRequest.getSurveyDetails().getSurveyId()).build();
+		List<Survey> surveys = surveyRepository.getSurveyRequests(searchCriteria);
+		
 		surveyDetails.setSurveyId(surveyDetailsRequest.getSurveyDetails().getSurveyId());
 		surveyDetails.setTenantId(surveyDetailsRequest.getSurveyDetails().getTenantId());
 		surveyDetails.setWard(surveyDetailsRequest.getSurveyDetails().getWard());
 		surveyDetails.setSlumCode(surveyDetailsRequest.getSurveyDetails().getSlumCode());
+		surveyDetails.setSurveyStartTime(surveys.get(0).getStartTime());
+		surveyDetails.setSurveyEndTime(surveys.get(0).getEndTime());
 		
 		return surveyDetails;
 	}

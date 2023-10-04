@@ -150,7 +150,7 @@ public class SurveyResponseQueryBuilder {
 				+ "surveysubmitted.tenantid , surveysubmitted.ward , surveysubmitted.slumcode ,surveysubmitted.surveytime, surveysubmitted.createdtime as surveycreatedtime, "
 				+ "surveysubmitted.createdby as surveycreatedby, surveysubmitted.lastmodifiedtime as surveymodifiedtime, surveysubmitted.lastmodifiedby as surveymodifiedby, "
 				+ "answer.id as answerid, answer.questionid, question.questionstatement, question.questionstatement_odia, answer.questioncategory, answer.answer, answer.createdtime, answer.createdby, lookup.hasopenticket, "
-				+ "answer.lastmodifiedtime, answer.lastmodifiedby from eg_usm_survey_submitted surveysubmitted");
+				+ "answer.lastmodifiedtime, answer.lastmodifiedby, survey.starttime, survey.endtime  from eg_usm_survey_submitted surveysubmitted");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON surveysubmitted.id = answer.surveysubmittedid");
 		query.append(" LEFT OUTER JOIN eg_usm_survey survey ON surveysubmitted.surveyid = survey.id");
 		query.append(" LEFT OUTER JOIN eg_usm_question question ON answer.questionid = question.id");
