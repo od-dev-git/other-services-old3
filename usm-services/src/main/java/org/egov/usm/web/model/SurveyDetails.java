@@ -43,6 +43,12 @@ public class SurveyDetails {
 	@JsonProperty("surveyTime")
 	private Long surveyTime;
 	
+	@JsonProperty("surveyStartTime")
+	private String surveyStartTime;
+	
+	@JsonProperty("surveyEndTime")
+	private String surveyEndTime;
+	
 	@JsonIgnore
 	private Object additionalDetail;
 	
