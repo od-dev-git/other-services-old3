@@ -50,6 +50,8 @@ public class SurveyAnswerDetailsRowMapper implements ResultSetExtractor<List<Sur
                         .ward(rs.getString("ward"))
                         .slumCode(rs.getString("slumcode"))
                         .surveyTime(rs.getLong("surveytime"))
+                        .surveyStartTime(rs.getString("starttime"))
+                        .surveyEndTime(rs.getString("endtime"))
                         .auditDetails(auditdetails)
                         .build();
             }
