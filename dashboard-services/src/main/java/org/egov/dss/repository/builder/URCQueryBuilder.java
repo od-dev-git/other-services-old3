@@ -301,7 +301,7 @@ public class URCQueryBuilder {
 
 		if (!StringUtils.isEmpty(searchCriteria.getTenantIds())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" tenantId in ( :tenantId s) ");
+			selectQuery.append(" tenantId in ( :tenantId ) ");
 			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 		}
 

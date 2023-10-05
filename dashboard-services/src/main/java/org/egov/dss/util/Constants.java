@@ -232,6 +232,7 @@ public class Constants {
 		final static String URC_WS_PAYMENT_MODE = "urcWSPaymentmode";
 		final static String URC_REVENUE_PT_TARGET_ACHIEVEMENT = "revenuePTTargetAchievement";
 		final static String URC_REVENUE_PT_DEMAND_EFFICIENCY = "revenuePTDemandEfficiency";
+		final static String URC_REVENUE_WS_DEMAND_EFFICIENCY = "revenueWSDemandEfficiency";
 	}
 
 }
