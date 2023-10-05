@@ -91,7 +91,7 @@ public class TicketQueryBuilder {
 			preparedStmtList.add(searchCriteria.getCategory().toUpperCase());
 		}
 
-		if (ObjectUtils.isEmpty(searchCriteria.getOfficialRole()) && ObjectUtils.isEmpty(searchCriteria.getCreatedBy())) {
+		if (ObjectUtils.isEmpty(searchCriteria.getOfficialRole()) && !ObjectUtils.isEmpty(searchCriteria.getCreatedBy())) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" ticket.createdby = ? ");
 			preparedStmtList.add(searchCriteria.getCreatedBy());
