@@ -325,5 +325,13 @@ public class DashboardUtils {
 		DecimalFormat decimalFormat = new DecimalFormat("#,##,##0.00");
 		return decimalFormat.format(number);
 	}
-
+	
+	public String getPreviousFY() {
+		String currentFY = getCurrentFinancialYear();
+		Integer previousFY1 = Integer.parseInt(currentFY.split("-")[0]) - 1;
+		Integer previousFY2 = Integer.parseInt(currentFY.split("-")[1]) - 1;
+		String previousFy = String.valueOf(previousFY1).concat("-").concat(String.valueOf(previousFY2));
+		return previousFy;
+	}
+	
 }
