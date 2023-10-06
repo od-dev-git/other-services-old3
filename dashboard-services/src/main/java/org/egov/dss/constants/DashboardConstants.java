@@ -222,9 +222,9 @@ public class DashboardConstants {
 	
 	public static final String TARGET_ACHIEVEMENT = "Target Achievement";
 	
-	public static final String PREVIOUS_ACHIEVEMENT = "Previous Achievement";
+	public static final String PREVIOUS_ACHIEVEMENT = "Previous FY Achievement";
 	
-	public static final String PREVIOUS_EFFICIENCY = "Previous Efficiency";
+	public static final String PREVIOUS_EFFICIENCY = "Previous FY Efficiency";
 	
 	public static final String TOTAL_DEMAND = "Total Demand";
 
