@@ -314,10 +314,10 @@ public class DashboardUtils {
 			return number.toString();
 		} else if (number.compareTo(oneCrore) < 0) {
 			BigDecimal lakhs = number.divide(oneLakh);
-			return formatNumber(lakhs) + " Lakhs";
+			return formatNumber(lakhs) + " Lac";
 		} else {
 			BigDecimal crores = number.divide(oneCrore);
-			return formatNumber(crores) + " Crores";
+			return formatNumber(crores) + " Cr";
 		}
 	}
 
