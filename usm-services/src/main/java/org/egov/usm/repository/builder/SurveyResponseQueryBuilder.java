@@ -28,7 +28,7 @@ public class SurveyResponseQueryBuilder {
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON answer.questionid = question.id");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted surveysubmitted ON surveysubmitted.id = answer.surveysubmittedid");
 		query.append(" LEFT OUTER JOIN eg_usm_slum_question_lookup lookup on answer.questionid = lookup.questionid and surveysubmitted.tenantid = lookup.tenantid and surveysubmitted.slumcode = lookup.slumcode");
-		query.append(" WHERE to_timestamp(surveysubmitted.createdtime/1000) :: date = now() :: date");
+		query.append(" WHERE to_timestamp(surveysubmitted.createdtime/1000) :: date at time zone 'Asia/Kolkata' = now() :: date at time zone 'Asia/Kolkata'");
 
 		if (!ObjectUtils.isEmpty(surveyDetails.getTenantId())) {
 			query.append(" AND surveysubmitted.tenantid = ?");
@@ -113,7 +113,7 @@ public class SurveyResponseQueryBuilder {
 
 	public String isSurveyExistsForToday(@Valid SurveySearchCriteria criteria, List<Object> preparedStmtList) {
 		StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM eg_usm_survey_submitted survey");
-		query.append(" WHERE to_timestamp(survey.createdtime / 1000) :: date = now() :: date");
+		query.append(" WHERE to_timestamp(survey.createdtime / 1000) :: date at time zone 'Asia/Kolkata' = now() :: date at time zone 'Asia/Kolkata'");
 		
 		if (!ObjectUtils.isEmpty(criteria.getSurveySubmittedId())) {
 			query.append(" AND survey.id = ?");
@@ -192,7 +192,7 @@ public class SurveyResponseQueryBuilder {
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getSurveyDate())) {
 			addClauseIfRequired(query, preparedStmtList);
-			query.append(" to_timestamp(surveysubmitted.createdtime / 1000) :: date = to_timestamp(? / 1000) :: date");
+			query.append(" to_timestamp(surveysubmitted.createdtime / 1000) :: date at time zone 'Asia/Kolkata' = to_timestamp(? / 1000) :: date at time zone 'Asia/Kolkata'");
 			preparedStmtList.add(searchCriteria.getSurveyDate());
 		}
 		

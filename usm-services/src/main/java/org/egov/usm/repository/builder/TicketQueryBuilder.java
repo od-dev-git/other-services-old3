@@ -99,7 +99,7 @@ public class TicketQueryBuilder {
 		if (!ObjectUtils.isEmpty(searchCriteria.getTicketDate())
 				&& ObjectUtils.isEmpty(searchCriteria.getIsEscalateOfficer())) {
 			addClauseIfRequired(query, preparedStmtList);
-			query.append(" to_timestamp(ticket.createdtime / 1000) :: date = to_timestamp(? / 1000) :: date");
+			query.append(" to_timestamp(ticket.createdtime / 1000) :: date at time zone 'Asia/Kolkata' = to_timestamp(? / 1000) :: date at time zone 'Asia/Kolkata'");
 			preparedStmtList.add(searchCriteria.getTicketDate());
 		}
 		if (!ObjectUtils.isEmpty(searchCriteria.getUnAttended())) {
