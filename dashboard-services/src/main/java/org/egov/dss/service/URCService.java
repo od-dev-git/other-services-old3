@@ -126,7 +126,8 @@ public class URCService {
 	
 	private TargetSearchCriteria getTargetSearchCriteria(PayloadDetails payloadDetails) {
 		TargetSearchCriteria criteria = new TargetSearchCriteria();
-
+		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
 			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_URC))
 				criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.MODULE_LEVEL_PT,DashboardConstants.BUSINESS_SERVICE_WS));
@@ -134,8 +135,14 @@ public class URCService {
 				criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
 		}
 		
-		if(StringUtils.hasText(payloadDetails.getTenantid())) {
-			criteria.setTenantIds(Sets.newHashSet(payloadDetails.getTenantid()));
+		if (StringUtils.hasText(payloadDetails.getTenantid())) {
+			if (urcUlb.contains(payloadDetails.getTenantid())) {
+				criteria.setTenantIds(Sets.newHashSet(payloadDetails.getTenantid()));
+			} else {
+				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
+			}
+		} else {
+			criteria.setTenantIds(Sets.newHashSet(urcUlb));
 		}
 		
 		if(payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
@@ -550,8 +557,8 @@ public class URCService {
 	}
     
 	public List<Data> ptDemandEfficiency(PayloadDetails payloadDetails) {
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);		
 		List<Plot> plots = new ArrayList<Plot>();
 		int serialNumber = 1;
 		BigDecimal totalDemand = totalDemand(payloadDetails);
@@ -582,8 +589,8 @@ public class URCService {
 	}
 	
 	public List<Data> wsDemandEfficiency(PayloadDetails payloadDetails) {
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
-	    payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);	    
 		List<Plot> plots = new ArrayList<Plot>();
 		int serialNumber = 1;
 		BigDecimal totalDemand = totalDemand(payloadDetails);
