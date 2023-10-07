@@ -86,6 +86,7 @@ public class URCRepository {
         Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = urcQueryBuilder.getTargetCollection(criteria, preparedStatementValues);
 		log.info("query: " + query);
+		log.info("preparedStatementValues: " + preparedStatementValues);
 		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(BigDecimal.class));
 		return result.get(0);
@@ -96,6 +97,7 @@ public class URCRepository {
         Map<String, Object> preparedStatementValues = new HashMap<>();
 	    String query = urcQueryBuilder.getCurrentDemand(criteria, preparedStatementValues);
 		log.info("query: " + query);
+		log.info("preparedStatementValues: " + preparedStatementValues);
 		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(BigDecimal.class));
 		return result.get(0);
@@ -106,6 +108,7 @@ public class URCRepository {
         Map<String, Object> preparedStatementValues = new HashMap<>();
 	    String query = urcQueryBuilder.getArrearDemand(criteria, preparedStatementValues);
 		log.info("query: " + query);
+		log.info("preparedStatementValues: " + preparedStatementValues);
 		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(BigDecimal.class));
 		return result.get(0);
