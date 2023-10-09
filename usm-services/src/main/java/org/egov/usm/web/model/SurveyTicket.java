@@ -46,6 +46,9 @@ public class SurveyTicket {
 
 	@JsonProperty("ticketDescription")
 	private String ticketDescription;
+	
+	@JsonProperty("ticketDescriptionOdia")
+	private String ticketDescriptionOdia;
 
 	@JsonProperty("status")
 	private TicketStatus status;

@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 @Setter
 @Getter
@@ -61,12 +62,15 @@ public class SurveyDetails {
 	@JsonProperty("submittedAnswers")
 	private List<SubmittedAnswer> submittedAnswers;
 	
+	@Default
 	@JsonProperty("surveyTickets")
 	private List<SurveyTicket> surveyTickets = new ArrayList<>();
 	
+	@Default
 	@JsonProperty("saveQuestionLookup")
 	private List<QuestionLookup> saveQuestionLookup = new ArrayList<>();
 	
+	@Default
 	@JsonProperty("updateQuestionLookup")
 	private List<QuestionLookup> updateQuestionLookup = new ArrayList<>();
 	
