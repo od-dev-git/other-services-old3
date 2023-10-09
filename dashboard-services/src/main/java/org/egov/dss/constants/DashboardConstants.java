@@ -212,7 +212,21 @@ public class DashboardConstants {
 
 	public static final String STATUS_ESCALATED_LEVEL_4 = "escaltedlevel4pending";
 	
-	public static final String MODULE_LEVEL_URC = "URC";	
+	public static final String MODULE_LEVEL_URC = "URC";
+	
+	public static final String TOTAL_COLLECTION = "Total Collection";
+	
+	public static final String TARGET_COLLECTION = "Target Collection";
+	
+	public static final String PENDING_COLLECTION = "Pending Collection";
+	
+	public static final String TARGET_ACHIEVEMENT = "Target Achievement";
+	
+	public static final String PREVIOUS_ACHIEVEMENT = "Previous FY Achievement";
+	
+	public static final String PREVIOUS_EFFICIENCY = "Previous FY Efficiency";
+	
+	public static final String TOTAL_DEMAND = "Total Demand";
 
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,

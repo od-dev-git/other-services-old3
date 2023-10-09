@@ -28,6 +28,7 @@ public class SDAMemberValidator {
         		.tenantId(sdaMember.getTenant())
         		.ward(sdaMember.getWard())
         		.slumCode(sdaMember.getSlumCode())
+        		.isActive(Boolean.TRUE)
                 .build();
 		
 		List<SDAMember> sdaMembers = repository.searchSDAMembers(searchCriteria);

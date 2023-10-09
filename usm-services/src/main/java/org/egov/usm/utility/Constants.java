@@ -24,12 +24,16 @@ public class Constants {
 	
 	public static final String EMPTY_STRING = "";
 	
-	public static final String CATEGORY_STREETLIGHT = "STREETLIGHT";
-	public static final int STREETLIGHT_SURVEY_TIME_IN_HOUR = 18;
+	public static final String CATEGORY_WATER = "WATER";
+	public static final String CATEGORY_SANITATION= "SANITATION";
+	public static final String CATEGORY_STREETLIGHT = "STREET_LIGHT";
+	public static final int ADD_COMMENT_TIME_IN_HOUR = 48;
 	
 	//notification
 	
 	public static final String NOTIFICATION_LOCALE = "en_IN";
+	
+	public static final String LOCAL_ZONE_ID = "Asia/Kolkata";
 	
 	public static final String MODULE = "rainmaker-common";
 	

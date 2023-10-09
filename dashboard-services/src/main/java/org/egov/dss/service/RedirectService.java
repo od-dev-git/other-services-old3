@@ -713,7 +713,29 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_WATER_CONSUMER_PAID.equalsIgnoreCase(visualizationCode)) {
             return urcService.totalWaterConsumerPaid(requestInfoWrapper.getPayloadDetails());
         }
+		if(Constants.VisualizationCodes.URC_WATER_CONSUMER_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.totalWaterConsumerPaid(requestInfoWrapper.getPayloadDetails());
+        }
 		
+		if(Constants.VisualizationCodes.URC_PT_PAYMENT_MODE.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ptPaymentModeData(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_WS_PAYMENT_MODE.equalsIgnoreCase(visualizationCode)) {
+            return urcService.wsPaymentModeData(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_REVENUE_PT_TARGET_ACHIEVEMENT.equalsIgnoreCase(visualizationCode)) {
+            return urcService.revenuePTTargetAchievement(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_REVENUE_PT_DEMAND_EFFICIENCY.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ptDemandEfficiency(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_REVENUE_WS_DEMAND_EFFICIENCY.equalsIgnoreCase(visualizationCode)) {
+            return urcService.wsDemandEfficiency(requestInfoWrapper.getPayloadDetails());
+        }
 		return null;
 
 	}

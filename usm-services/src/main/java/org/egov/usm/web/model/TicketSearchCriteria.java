@@ -45,20 +45,23 @@ public class TicketSearchCriteria {
 	@JsonProperty("isSatisfied")
 	private Boolean isSatisfied;
 
-	@JsonProperty("isOfficial")
-	private Boolean isOfficial;
+	@JsonProperty("officialRole")
+	private String officialRole;
 
 	@JsonProperty("isNodalOfficer")
 	private Boolean isNodalOfficer;
 
 	@JsonProperty("isEscalateOfficer")
-	private Boolean isEscalateOfficer;
+	private Boolean isEscalationOfficer;
 
 	@JsonProperty("unAttended")
 	private Boolean unAttended;
 
 	@JsonProperty("createdBy")
 	private String createdBy;
+	
+	@JsonProperty("assigned")
+	private String assigned;
 
 	@JsonProperty("tickDate")
 	private Long ticketDate;

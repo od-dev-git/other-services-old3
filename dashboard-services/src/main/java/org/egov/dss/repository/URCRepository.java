@@ -2,13 +2,19 @@ package org.egov.dss.repository;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.egov.dss.config.ConfigurationLoader;
+import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.repository.builder.URCQueryBuilder;
+import org.egov.dss.repository.rowmapper.ChartRowMapper;
+import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
+import org.egov.dss.repository.rowmapper.URCRevenueRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -65,6 +71,48 @@ public class URCRepository {
         log.info("Query for URC Properties Paid : "+query);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
+	}
+	
+	public LinkedHashMap<String, BigDecimal> getMonthWiseCollection(PaymentSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = urcQueryBuilder.getMonthWiseCollection(criteria, preparedStatementValues);
+		log.info(" URC month wise Collection query : " + query);
+		LinkedHashMap<String, BigDecimal> result = (LinkedHashMap<String, BigDecimal>) namedParameterJdbcTemplate
+				.query(query, preparedStatementValues, new URCRevenueRowMapper());
+		return result;
+	}
+	
+	public Object getTargetCollection(TargetSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = urcQueryBuilder.getTargetCollection(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		log.info("preparedStatementValues: " + preparedStatementValues);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
+	}
+	
+	public BigDecimal getCurrentDemand(DemandSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+	    String query = urcQueryBuilder.getCurrentDemand(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		log.info("preparedStatementValues: " + preparedStatementValues);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
+	}
+	
+	public BigDecimal getArrearDemand(DemandSearchCriteria criteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+	    String query = urcQueryBuilder.getArrearDemand(criteria, preparedStatementValues);
+		log.info("query: " + query);
+		log.info("preparedStatementValues: " + preparedStatementValues);
+		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(BigDecimal.class));
+		return result.get(0);
+
 	}
 	
 	

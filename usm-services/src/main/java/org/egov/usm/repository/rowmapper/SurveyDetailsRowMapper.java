@@ -138,6 +138,7 @@ public class SurveyDetailsRowMapper implements ResultSetExtractor<List<SurveyDet
 				.surveySubmittedId(surveySubmittedId)
 				.questionId(rs.getString("questionid"))
 				.questionStatement(rs.getString("questionstatement"))
+				.questionStatementOdia(rs.getString("questionstatement_odia"))
 				.questionCategory(rs.getString("category"))
 				.answer(SurveyAnswer.fromValue(rs.getString("answer")))
 				.hasOpenTicket(rs.getBoolean("hasopenticket"))

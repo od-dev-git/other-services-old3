@@ -7,10 +7,12 @@ import org.egov.tracer.model.CustomException;
 import org.egov.usm.model.enums.SurveyAnswer;
 import org.egov.usm.repository.SDAMemberRepository;
 import org.egov.usm.repository.SurveyDetailsRepository;
+import org.egov.usm.repository.SurveyRepository;
 import org.egov.usm.utility.Constants;
 import org.egov.usm.utility.USMUtil;
 import org.egov.usm.web.model.MemberSearchCriteria;
 import org.egov.usm.web.model.SDAMember;
+import org.egov.usm.web.model.Survey;
 import org.egov.usm.web.model.SurveyDetails;
 import org.egov.usm.web.model.SurveyDetailsRequest;
 import org.egov.usm.web.model.SurveySearchCriteria;
@@ -24,6 +26,9 @@ public class SurveyResponseValidator {
 	
 	@Autowired
 	private SurveyDetailsRepository repository;
+	
+	@Autowired
+	private SurveyRepository surveyRepository;
 	
 	@Autowired
 	private SDAMemberRepository sdaMemberRepository;
@@ -60,6 +65,21 @@ public class SurveyResponseValidator {
         if(CollectionUtils.isEmpty(surveyExists))
             throw new CustomException("EG_SURVEY_DOES_NOT_EXIST_ERR", "The survey entity provided in update request does not exist or closed for today.");
 
+        SurveySearchCriteria searchCriteria = SurveySearchCriteria.builder()
+        		.surveyId(surveyExists.get(0).getSurveyId())
+        		.status(Constants.ACTIVE)
+                .build();
+		
+		List<Survey> surveys = surveyRepository.getSurveyRequests(searchCriteria);
+		
+		if(!CollectionUtils.isEmpty(surveys)) {
+			if(!ObjectUtils.isEmpty(surveys.get(0).getStartTime()) && !USMUtil.isAfterTime(surveys.get(0).getStartTime())) 
+				throw new CustomException("EG_SY_SURVEY_TIME_ERR", "Submitting " + surveys.get(0).getTitle() + " Survey after " + surveys.get(0).getStartTime() + " is mandatory.");
+	           
+			if(!ObjectUtils.isEmpty(surveys.get(0).getEndTime()) && !USMUtil.isBeforeTime(surveys.get(0).getEndTime()))
+				throw new CustomException("EG_SY_SURVEY_TIME_ERR", "Submitting " + surveys.get(0).getTitle() + " Survey before " + surveys.get(0).getEndTime() + " is mandatory.");
+		}
+		
         surveyDetails.getSubmittedAnswers().forEach(submittedAnswer -> {
 			if(ObjectUtils.isEmpty(submittedAnswer.getId()))
 	            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing answer id is mandatory for submitting surveys");
@@ -100,6 +120,23 @@ public class SurveyResponseValidator {
 		if(ObjectUtils.isEmpty(surveyDetails.getSlumCode()))
             throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing slumCode is mandatory for submitting surveys");
 
+		SurveySearchCriteria searchCriteria = SurveySearchCriteria.builder()
+        		.surveyId(surveyDetails.getSurveyId())
+        		.status(Constants.ACTIVE)
+                .build();
+		
+		List<Survey> surveys = surveyRepository.getSurveyRequests(searchCriteria);
+		
+		if(CollectionUtils.isEmpty(surveys)) {
+			throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Valid surveyId is mandatory for submitting surveys");
+		} else {
+			
+			if(!ObjectUtils.isEmpty(surveys.get(0).getStartTime()) && !USMUtil.isAfterTime(surveys.get(0).getStartTime())) 
+				throw new CustomException("EG_SY_SURVEY_TIME_ERR", "Submitting " + surveys.get(0).getTitle() + " Survey after " + surveys.get(0).getStartTime() + " is mandatory.");
+	           
+			if(!ObjectUtils.isEmpty(surveys.get(0).getEndTime()) && !USMUtil.isBeforeTime(surveys.get(0).getEndTime()))
+				throw new CustomException("EG_SY_SURVEY_TIME_ERR", "Submitting " + surveys.get(0).getTitle() + " Survey before " + surveys.get(0).getEndTime() + " is mandatory.");
+		}
 
 		//Validate SDA with slum access
 		validateSDAMemberHasAccess(requestInfo.getUserInfo().getUuid(), surveyDetails.getTenantId(), surveyDetails.getWard(), surveyDetails.getSlumCode());
@@ -110,9 +147,6 @@ public class SurveyResponseValidator {
 			
 			if(ObjectUtils.isEmpty(answer.getAnswer()))
 	            throw new CustomException("EG_SY_FIELD_NOT_PROVIDED_ERR", "Providing all questions valid answer is mandatory for submitting surveys");
-
-			if(Constants.CATEGORY_STREETLIGHT.equalsIgnoreCase(answer.getQuestionCategory()) && !USMUtil.isGreaterTime(Constants.STREETLIGHT_SURVEY_TIME_IN_HOUR))
-	            throw new CustomException("EG_SY_SURVEY_NOT_VALID_ERR", "Providing StreetLight Survey after 6PM is mandatory for submitting surveys");
 
 		});
 		

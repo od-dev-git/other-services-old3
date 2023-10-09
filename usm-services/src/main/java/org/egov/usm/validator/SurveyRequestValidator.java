@@ -28,7 +28,10 @@ public class SurveyRequestValidator {
 	public Survey validateSurveyExistence(Survey survey) {
 		if(ObjectUtils.isEmpty(survey.getId()))
             throw new CustomException("EG_SY_UUID_NOT_PROVIDED_ERR", "Providing survey id is mandatory for updating and deleting surveys");
-
+		
+		USMUtil.validateInputTimeFormat(survey.getStartTime());
+		USMUtil.validateInputTimeFormat(survey.getEndTime());
+		
         SurveySearchCriteria criteria = SurveySearchCriteria.builder()
         		.surveyId(survey.getId())
                 .build();
@@ -52,6 +55,8 @@ public class SurveyRequestValidator {
 		surveyRequest.getSurvey().setPostedBy(surveyRequest.getRequestInfo().getUserInfo().getName());
 		surveyRequest.getSurvey().setCollectCitizenInfo(Boolean.TRUE);
 		
+		USMUtil.validateInputTimeFormat(surveyRequest.getSurvey().getStartTime());
+		USMUtil.validateInputTimeFormat(surveyRequest.getSurvey().getEndTime());
 		
 		surveyRequest.getSurvey().getQuestionDetails().forEach(question -> {
 			question.setId(USMUtil.generateUUID());
