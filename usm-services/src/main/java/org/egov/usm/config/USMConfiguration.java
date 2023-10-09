@@ -141,4 +141,11 @@ public class USMConfiguration {
     @Value("${text.for.subject.email.notification}")
     private String emailSubject;
 
+    
+    //Ticket Time Limit
+    @Value("${usm.ticket.time.limit.nodalofficer}")
+    private Long ticketTimeLimitNodalOfficer;
+    
+    @Value("${usm.ticket.time.limit.escalationofficer}")
+    private Long ticketTimeLimitEscalationOfficer;
 }

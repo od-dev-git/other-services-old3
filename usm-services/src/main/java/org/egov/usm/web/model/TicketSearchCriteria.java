@@ -52,13 +52,16 @@ public class TicketSearchCriteria {
 	private Boolean isNodalOfficer;
 
 	@JsonProperty("isEscalateOfficer")
-	private Boolean isEscalateOfficer;
+	private Boolean isEscalationOfficer;
 
 	@JsonProperty("unAttended")
 	private Boolean unAttended;
 
 	@JsonProperty("createdBy")
 	private String createdBy;
+	
+	@JsonProperty("assigned")
+	private String assigned;
 
 	@JsonProperty("tickDate")
 	private Long ticketDate;
