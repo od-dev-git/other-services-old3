@@ -43,6 +43,7 @@ public class TicketRowMapper implements ResultSetExtractor<List<SurveyTicket>> {
 				ticket = SurveyTicket.builder().id(rs.getString("id")).tenantId(rs.getString("tenantid"))
 						.ticketNo(rs.getString("ticketno")).surveyAnswerId(rs.getString("surveyanswerid"))
 						.questionId(rs.getString("questionid")).ticketDescription(rs.getString("ticketdescription"))
+						.ticketDescriptionOdia(rs.getString("questionstatement_odia"))
 						.status(TicketStatus.fromValue(rs.getString("status")))
 						.ticketCreatedTime(rs.getLong("ticketcreatedtime"))
 						.ticketClosedTime(rs.getLong("ticketclosedtime")).ward(rs.getString("ward"))
