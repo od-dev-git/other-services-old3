@@ -86,6 +86,12 @@ public class ConfigurationLoader {
     @Value("${egov.analytics.endpoint}")
     private String analyticsEndpoint;
     
+    @Value("${egov.user.host}")
+	private String userHost;
+
+	@Value("${egov.user.search.path}")
+	private String userSearchEndpoint;
+    
     // private static final String RESOURCE_LOCATION = "file://home/darshan/Tarento/DataPlatform/analytics2/analytics/src/main/resources/schema/*.json";
     public static final String ROLE_DASHBOARD_CONFIG = "RoleDashboardMappingsConf.json";
     public static final String MASTER_DASHBOARD_CONFIG = "MasterDashboardConfig.json";
