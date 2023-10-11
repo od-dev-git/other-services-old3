@@ -4,20 +4,29 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
+import org.egov.dss.model.UserSearchCriteria;
 import org.egov.dss.repository.URCRepository;
 import org.egov.dss.util.DashboardUtility;
 import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
+import org.egov.dss.web.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -25,6 +34,9 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class URCService {
 
@@ -34,6 +46,7 @@ public class URCService {
 	@Autowired
 	private DashboardUtils dashboardUtils;
 	
+		
 	private PaymentSearchCriteria getPaymentSearchCriteria(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = new PaymentSearchCriteria();
 		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
@@ -619,5 +632,90 @@ public class URCService {
 				.label(String.valueOf(++serialNumber)).symbol("Percentage").build());
 		return Arrays.asList(Data.builder().headerName("DSS_URC_PT_DEMAND_EFFICIENCY").plots(plots).build());
 	}
+	
+	public List<Data> topJalSathiPTCollection(PayloadDetails payloadDetails) {
+		RequestInfo requestInfo = new RequestInfo();
+		List<Data> response = new ArrayList<>();
+		List<User> usersInfo = new ArrayList<User>();	
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		HashMap<String, BigDecimal> jalSathiWiseCollection = urcRepository
+				.jalSathiWiseCollection(paymentSearchCriteria);
+		Set<String> uuids = jalSathiWiseCollection.keySet();
+		log.info("uuids : " + uuids);
+		if(!CollectionUtils.isEmpty(uuids) && uuids != null) {
+			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().uuid(uuids).build();
+			usersInfo = urcRepository.getUserDetails(userSearchCriteria, requestInfo);		
+			}	
+		log.info("usersInfo : " + usersInfo);
+		Map<String, String> jalSathiNameUuid = new HashMap<String, String>();
+		usersInfo.forEach(user -> jalSathiNameUuid.put(user.getUuid(), user.getName()));
+		Map<String, BigDecimal> resultMap = jalSathiNameUuid.entrySet().stream()
+				.filter(entry -> jalSathiWiseCollection.containsKey(entry.getKey()))
+				.collect(Collectors.toMap(entry -> entry.getValue().toString(), // Convert the key to String
+						entry -> jalSathiWiseCollection.get(entry.getKey())));
+
+		Map<String, BigDecimal> sortedMap = resultMap.entrySet().stream()
+				.sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		resultMap.forEach((key, value) -> log.info(key + ": " + value));
+		int rank = 0;
+		for (Map.Entry<String, BigDecimal> tenantWisePercent : sortedMap.entrySet()) {
+			rank++;
+			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf(rank)).name(tenantWisePercent.getKey())
+					.value(tenantWisePercent.getValue()).symbol("Amount").build());
+			response.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+		
+		return response;
+
+	}
+	
+	public List<Data> topJalSathiWSCollection(PayloadDetails payloadDetails) {
+		RequestInfo requestInfo = new RequestInfo();
+		List<Data> response = new ArrayList<>();
+		List<User> usersInfo = new ArrayList<User>();				
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		HashMap<String, BigDecimal> jalSathiWiseCollection = urcRepository
+				.jalSathiWiseCollection(paymentSearchCriteria);
+		Set<String> uuids = jalSathiWiseCollection.keySet();
+		log.info("uuids : " + uuids);
+		if(!CollectionUtils.isEmpty(uuids) && uuids != null) {
+		UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().uuid(uuids).build();
+		usersInfo = urcRepository.getUserDetails(userSearchCriteria, requestInfo);		
+		}	
+		log.info("usersInfo : " + usersInfo);
+		Map<String, String> jalSathiNameUuid = new HashMap<String, String>();
+		usersInfo.forEach(user -> jalSathiNameUuid.put(user.getUuid(), user.getName()));
+		Map<String, BigDecimal> resultMap = jalSathiNameUuid.entrySet().stream()
+				.filter(entry -> jalSathiWiseCollection.containsKey(entry.getKey()))
+				.collect(Collectors.toMap(entry -> entry.getValue().toString(), // Convert the key to String
+						entry -> jalSathiWiseCollection.get(entry.getKey())));
+
+		Map<String, BigDecimal> sortedMap = resultMap.entrySet().stream()
+				.sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		resultMap.forEach((key, value) -> log.info(key + ": " + value));
+		int rank = 0;
+		for (Map.Entry<String, BigDecimal> tenantWisePercent : sortedMap.entrySet()) {
+			rank++;
+			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf(rank)).name(tenantWisePercent.getKey())
+					.value(tenantWisePercent.getValue()).symbol("Amount").build());
+			response.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+		
+		return response;
+
+	}
+	
+	
+	
 	
 }
