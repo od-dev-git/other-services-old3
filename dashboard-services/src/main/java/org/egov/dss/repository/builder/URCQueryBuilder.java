@@ -45,7 +45,7 @@ public class URCQueryBuilder {
 	
 	public static final String ARREAR_DEMAND_QUERY = " select coalesce(sum(amount), 0) - coalesce(sum(collectionamount), 0) as amount from state.eg_dss_demand ";
 	
-	public static final String JALSATHI_WISE_COLLECTION = " select usr.uuid,COALESCE(sum(py.totalamountpaid),0) from egcl_payment py "
+	public static final String JALSATHI_WISE_COLLECTION = " select usr.uuid as name,COALESCE(sum(py.totalamountpaid),0) as value from egcl_payment py "
 			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
 			+ "inner join eg_hrms_employee hrms on py.createdby = hrms.id:: character varying "
 			+ "inner join eg_user usr on hrms.uuid = usr.uuid ";
