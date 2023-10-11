@@ -19,6 +19,7 @@ import java.util.Map;
 
 @RestController
 @Slf4j
+@RequestMapping("/scheduler")
 public class JobSchedulerController {
 
     @Autowired
@@ -31,7 +32,7 @@ public class JobSchedulerController {
      *
      * @return
      */
-    @PostMapping("/scheduledJobs")
+    @PostMapping("/_scheduledJobs")
     public ResponseEntity<JobSchedulerResponse> getScheduledJobs(@RequestBody RequestInfoWrapper requestInfoWrapper){
 
         List<Job> jobs= schedulerService.getScheduledJobs(requestInfoWrapper);
@@ -45,7 +46,7 @@ public class JobSchedulerController {
      *
      * @param jobId
      */
-    @DeleteMapping("/deleteJob/{jobId}")
+    @DeleteMapping("/_deleteJob/{jobId}")
     public void deleteScheduledJob(@PathVariable String jobId){
         schedulerService.deleteScheduledJob(jobId);
     }
