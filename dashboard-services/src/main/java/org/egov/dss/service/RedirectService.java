@@ -736,6 +736,14 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_REVENUE_WS_DEMAND_EFFICIENCY.equalsIgnoreCase(visualizationCode)) {
             return urcService.wsDemandEfficiency(requestInfoWrapper.getPayloadDetails());
         }
+		
+		if(Constants.VisualizationCodes.URC_TOP_JALSATHI_PT_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.topJalSathiPTCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_TOP_JALSATHI_WS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.topJalSathiWSCollection(requestInfoWrapper.getPayloadDetails());
+        }
 		return null;
 
 	}
