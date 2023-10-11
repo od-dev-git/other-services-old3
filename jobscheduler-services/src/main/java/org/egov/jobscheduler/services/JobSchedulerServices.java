@@ -128,7 +128,10 @@ public class JobSchedulerServices {
 			Job job = Job.builder().jobName(linkedHashMap.get("jobName").toString())
 					.url(linkedHashMap.get("url").toString())
 					.cron(linkedHashMap.get("cron").toString())
-					.lastExecutionTime(linkedHashMap.get("lastExecutionTime").toString()).build();
+					.build();
+			if(linkedHashMap.containsKey("lastExecutionTime")){
+				job.setLastExecutionTime(linkedHashMap.get("lastExecutionTime").toString());
+			}
 			jobs.add(job);
 		}
 		return jobs;
