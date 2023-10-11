@@ -2,6 +2,7 @@ package org.egov.dss.repository.builder;
 
 import static java.util.stream.Collectors.toSet;
 
+import java.util.List;
 import java.util.Map;
 
 import org.egov.dss.model.DemandSearchCriteria;
@@ -44,6 +45,13 @@ public class URCQueryBuilder {
 	
 	public static final String ARREAR_DEMAND_QUERY = " select coalesce(sum(amount), 0) - coalesce(sum(collectionamount), 0) as amount from state.eg_dss_demand ";
 	
+	public static final String JALSATHI_WISE_COLLECTION = " select usr.uuid,COALESCE(sum(py.totalamountpaid),0) from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
+			+ "inner join eg_hrms_employee hrms on py.createdby = hrms.id:: character varying "
+			+ "inner join eg_user usr on hrms.uuid = usr.uuid ";
+	
+	private static final String HRMS_QUERY = "select id, tenantid from eg_hrms_employee ";
+
 	public static String getTotalCollection(PaymentSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_COLLECTION_QUERY);
@@ -87,6 +95,46 @@ public class URCQueryBuilder {
 	public static String getTargetCollection(TargetSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TARGET_COLLECTION_QUERY);
 		return addWhereClauseForTarget(selectQuery, preparedStatementValues, criteria);
+	}
+	
+	public static String jalSathiWiseCollection(PaymentSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(JALSATHI_WISE_COLLECTION);
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery," usr.uuid ");
+		return selectQuery.toString();
+	}
+	
+	public String getEmployeeBaseTenantQuery(List<Long> userIds, List<Object> preparedStatement) {
+		StringBuilder builder = new StringBuilder(HRMS_QUERY);
+		String userId = " id in (";
+		addClauseIfRequired(preparedStatement, builder);
+		builder.append(userId).append(createQuery(userIds)).append(" )");
+		addToPreparedStatement(preparedStatement, userIds);
+		return builder.toString();
+	}
+
+	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
+		if (values.isEmpty())
+			queryString.append(" WHERE ");
+		else {
+			queryString.append(" AND");
+		}
+	}
+
+	private String createQuery(List<Long> ids) {
+		StringBuilder builder = new StringBuilder();
+		int length = ids.size();
+		for (int i = 0; i < length; i++) {
+			builder.append(" ?");
+			if (i != length - 1)
+				builder.append(",");
+		}
+		return builder.toString();
+	}
+	
+	private void addToPreparedStatement(List<Object> preparedStatement, List<Long> ids) {
+		preparedStatement.addAll(ids);
 	}
 	
 	private static String addWhereClauseForTarget(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
