@@ -18,6 +18,7 @@ import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.model.UserSearchCriteria;
@@ -134,6 +135,35 @@ public class URCService {
 			criteria.setToDate(payloadDetails.getEnddate());
 		}
 
+		return criteria;
+	}
+	
+	public PropertySerarchCriteria getPropertySearchCriteria(PayloadDetails payloadDetails) {
+		PropertySerarchCriteria criteria = new PropertySerarchCriteria();
+		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+
+		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
+			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
+		}
+		
+		if (StringUtils.hasText(payloadDetails.getTenantid())) {
+			if (urcUlb.contains(payloadDetails.getTenantid())) {
+				criteria.setTenantIds(Sets.newHashSet(payloadDetails.getTenantid()));
+			} else {
+				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
+			}
+		} else {
+			criteria.setTenantIds(Sets.newHashSet(urcUlb));
+		}
+		
+		if(payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
+			criteria.setFromDate(payloadDetails.getStartdate());
+		}
+		
+		if(payloadDetails.getEnddate() != null && payloadDetails.getEnddate() != 0) {
+			criteria.setToDate(payloadDetails.getEnddate());
+		}
+		
 		return criteria;
 	}
 	
@@ -715,7 +745,47 @@ public class URCService {
 
 	}
 	
-	
+	public List<Data> servicePropertiesPaid(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		List<Plot> plots = new ArrayList<Plot>();
+		int serialNumber = 1;
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		PropertySerarchCriteria propertySearchCriteria = getPropertySearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		propertySearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		propertySearchCriteria.setStatus(DashboardConstants.STATUS_ACTIVE);
+		propertySearchCriteria.setFromDate(null);
+		Integer propertiesPaid = (Integer) urcRepository.getUrcPropertiesPaid(paymentSearchCriteria);
+		Integer totalProperties = urcRepository.getTotalPropertiesCount(propertySearchCriteria);
+		Integer enrichTotalProperties = enrichProperties(payloadDetails, totalProperties);
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_PROPERTIES).value(new BigDecimal(enrichTotalProperties))
+				.label(String.valueOf(serialNumber)).symbol("number").build());
+		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_PAID).value(new BigDecimal(propertiesPaid))
+				.label(String.valueOf(++serialNumber)).symbol("number").build());
+		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_NOT_PAID)
+				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
+				.label(String.valueOf(++serialNumber)).symbol("number").build());
+
+		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_PROPERTIES_PAID").plots(plots).build());
+	}
+
+	private Integer enrichProperties(PayloadDetails payloadDetails, Integer totalProperties) {
+		Integer finalTotalProperty = 0;
+		if (payloadDetails.getTimeinterval().equals(DashboardConstants.DAY)) {
+			finalTotalProperty = totalProperties / 365;
+		} else if (payloadDetails.getTimeinterval().equals(DashboardConstants.WEEK)) {
+			finalTotalProperty = totalProperties / 48;
+		} else if (payloadDetails.getTimeinterval().equals(DashboardConstants.MONTH)) {
+			finalTotalProperty = totalProperties / 12;
+		} else if (payloadDetails.getTimeinterval().equals(DashboardConstants.QUARTER)) {
+			finalTotalProperty = totalProperties / 4;
+		} else
+			finalTotalProperty = totalProperties;
+
+		return finalTotalProperty;
+	}
 	
 	
 }

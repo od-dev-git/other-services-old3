@@ -744,6 +744,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_TOP_JALSATHI_WS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
             return urcService.topJalSathiWSCollection(requestInfoWrapper.getPayloadDetails());
         }
+		if(Constants.VisualizationCodes.URC_SERVICE_PROPERTIES_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.servicePropertiesPaid(requestInfoWrapper.getPayloadDetails());
+        }
 		return null;
 
 	}
