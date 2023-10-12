@@ -227,6 +227,12 @@ public class DashboardConstants {
 	public static final String PREVIOUS_EFFICIENCY = "Previous FY Efficiency";
 	
 	public static final String TOTAL_DEMAND = "Total Demand";
+	
+	public static final String TOTAL_PROPERTIES = "Total Properties";
+	
+	public static final String PROPERTIES_PAID = "Properties Paid";
+	
+	public static final String PROPERTIES_NOT_PAID = "Properties not Paid";
 
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,

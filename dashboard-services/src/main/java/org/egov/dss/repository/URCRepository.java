@@ -13,6 +13,7 @@ import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.model.UserSearchCriteria;
@@ -96,6 +97,7 @@ public class URCRepository {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = urcQueryBuilder.urcPropertiesPaid(criteria, preparedStatementValues);
         log.info("Query for URC Properties Paid : "+query);
+        log.info("Params : "+preparedStatementValues);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
 	}
@@ -199,6 +201,15 @@ public class URCRepository {
 			request.setUserType(criteria.getUserType());
 		}
 		return request;
+	}
+	
+	public Integer getTotalPropertiesCount(PropertySerarchCriteria propertySearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = urcQueryBuilder.getTotalPropertiesCountQuery(propertySearchCriteria, preparedStatementValues);
+		log.info("query for total properties: "+ query);
+		log.info("params : "+preparedStatementValues);
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+		return result.get(0);
 	}
 
 }

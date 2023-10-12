@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PaymentSearchCriteria;
+import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.springframework.stereotype.Component;
@@ -51,6 +52,8 @@ public class URCQueryBuilder {
 			+ "inner join eg_user usr on hrms.uuid = usr.uuid ";
 	
 	private static final String HRMS_QUERY = "select id, tenantid from eg_hrms_employee ";
+	
+	public static final String TOTAL_PROPERTIES_SQL = " select count(distinct propertyid) from eg_pt_property epaa ";
 
 	public static String getTotalCollection(PaymentSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -172,6 +175,12 @@ public class URCQueryBuilder {
 		StringBuilder selectQuery = new StringBuilder(ARREAR_DEMAND_QUERY);
 		addWhereClauseForDemand(selectQuery, preparedStatementValues, criteria);
 		return selectQuery.toString();
+	}
+	
+	public String getTotalPropertiesCountQuery(PropertySerarchCriteria propertySearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTIES_SQL);
+		return addWhereClauseForProperty(selectQuery, preparedStatementValues, propertySearchCriteria,true);
 	}
 
 	private static void addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
@@ -375,6 +384,69 @@ public class URCQueryBuilder {
 			preparedStatementValues.put("excludedTenant", searchCriteria.getExcludedTenantId());
 		}
 
+	}
+	
+	private static String addWhereClauseForProperty(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			PropertySerarchCriteria searchCriteria,boolean isULBPerformance) {
+
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.tenantId in ( :tenantIds )");
+			preparedStatementValues.put("tenantIds",searchCriteria.getTenantIds());
+		}
+
+       if (searchCriteria.getFromDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.createdtime >= :fromDate");
+			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+		}
+
+		if (searchCriteria.getToDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			if(isULBPerformance = true) {
+				selectQuery.append(" epaa.lastmodifiedtime <= :toDate");
+			}else {
+				selectQuery.append(" epaa.createdtime <= :toDate");	
+			}
+			preparedStatementValues.put("toDate", searchCriteria.getToDate());
+	    }
+		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.lastmodifiedtime - epaa.createdtime < " + searchCriteria.getSlaThreshold());
+		}
+		
+		if (searchCriteria.getStatus() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.status = :status");
+			preparedStatementValues.put("status", searchCriteria.getStatus());
+	    }
+		
+		if (searchCriteria.getIsPropertyAssessed() == Boolean.TRUE) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.lastmodifiedtime != epaa.createdtime ");			
+	    }
+		
+		if (searchCriteria.getStatusNotIn() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.status not in ( :statusNotIn) ");
+			preparedStatementValues.put("statusNotIn", searchCriteria.getStatusNotIn());
+	    }
+		
+		if (searchCriteria.getExcludedTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.tenantId != :excludedTenantId");
+			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
+	    }
+		
+		if (searchCriteria.getCreationReasons() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" epaa.creationreason = :creationReason");
+			preparedStatementValues.put("creationReason", searchCriteria.getCreationReasons());
+	    }
+		
+		return selectQuery.toString();
+	
 	}
 
 }
