@@ -235,6 +235,7 @@ public class Constants {
 		final static String URC_REVENUE_WS_DEMAND_EFFICIENCY = "revenueWSDemandEfficiency";
 		final static String URC_TOP_JALSATHI_PT_COLLECTION = "topJalSathiPTCollection";
 		final static String URC_TOP_JALSATHI_WS_COLLECTION = "topJalSathiWSCollection";
+		final static String URC_SERVICE_PROPERTIES_PAID = "servicePropertiesPaid";
 	}
 
 }
