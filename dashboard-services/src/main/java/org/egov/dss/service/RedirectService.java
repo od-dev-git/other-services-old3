@@ -747,6 +747,18 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_SERVICE_PROPERTIES_PAID.equalsIgnoreCase(visualizationCode)) {
             return urcService.servicePropertiesPaid(requestInfoWrapper.getPayloadDetails());
         }
+		
+		if(Constants.VisualizationCodes.URC_SERVICE_WATER_CONSUMER_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.serviceWaterConsumerPaid(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_PROPERTIES_COVER_BY_JALSATHI.equalsIgnoreCase(visualizationCode)) {
+            return urcService.propertiesCoverByJalsathi(requestInfoWrapper.getPayloadDetails());
+        }		
+
+		if(Constants.VisualizationCodes.URC_TOP_JALSATHI_UNIFIED_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.topJalSathiUnifiedCollection(requestInfoWrapper.getPayloadDetails());
+        }
 		return null;
 
 	}

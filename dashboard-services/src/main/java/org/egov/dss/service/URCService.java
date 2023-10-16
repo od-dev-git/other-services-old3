@@ -22,6 +22,7 @@ import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.model.UserSearchCriteria;
+import org.egov.dss.model.WaterSearchCriteria;
 import org.egov.dss.repository.URCRepository;
 import org.egov.dss.util.DashboardUtility;
 import org.egov.dss.util.DashboardUtils;
@@ -164,6 +165,35 @@ public class URCService {
 			criteria.setToDate(payloadDetails.getEnddate());
 		}
 		
+		return criteria;
+	}
+	
+	public WaterSearchCriteria getWaterSearchCriteria(PayloadDetails payloadDetails) {
+		WaterSearchCriteria criteria = new WaterSearchCriteria();
+		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+
+		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
+			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
+		}
+
+		if (StringUtils.hasText(payloadDetails.getTenantid())) {
+			if (urcUlb.contains(payloadDetails.getTenantid())) {
+				criteria.setTenantIds(Sets.newHashSet(payloadDetails.getTenantid()));
+			} else {
+				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
+			}
+		} else {
+			criteria.setTenantIds(Sets.newHashSet(urcUlb));
+		}
+
+		if (payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
+			criteria.setFromDate(payloadDetails.getStartdate());
+		}
+
+		if (payloadDetails.getEnddate() != null && payloadDetails.getEnddate() != 0) {
+			criteria.setToDate(payloadDetails.getEnddate());
+		}
+
 		return criteria;
 	}
 	
@@ -770,6 +800,33 @@ public class URCService {
 
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_PROPERTIES_PAID").plots(plots).build());
 	}
+	
+	public List<Data> serviceWaterConsumerPaid(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		List<Plot> plots = new ArrayList<Plot>();
+		int serialNumber = 1;
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		WaterSearchCriteria waterSearchCriteria = getWaterSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		waterSearchCriteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
+		waterSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		waterSearchCriteria.setIsOldApplication(Boolean.FALSE);
+		waterSearchCriteria.setFromDate(null);
+		Integer propertiesPaid = (Integer) urcRepository.getUrcPropertiesPaid(paymentSearchCriteria);
+		Integer activeConnectionCount =  (Integer) urcRepository.getActiveWaterConnectionCount(waterSearchCriteria);
+		Integer enrichTotalProperties = enrichProperties(payloadDetails, activeConnectionCount);
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_CONNECTIONS).value(new BigDecimal(enrichTotalProperties))
+				.label(String.valueOf(serialNumber)).symbol("number").build());
+		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_PAID).value(new BigDecimal(propertiesPaid))
+				.label(String.valueOf(++serialNumber)).symbol("number").build());
+		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_NOT_PAID)
+				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
+				.label(String.valueOf(++serialNumber)).symbol("number").build());
+
+		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_WATER_CONSUMER_PAID").plots(plots).build());
+	}
 
 	private Integer enrichProperties(PayloadDetails payloadDetails, Integer totalProperties) {
 		Integer finalTotalProperty = 0;
@@ -787,5 +844,85 @@ public class URCService {
 		return finalTotalProperty;
 	}
 	
+	public List<Data> propertiesCoverByJalsathi(PayloadDetails payloadDetails) {
+		RequestInfo requestInfo = new RequestInfo();
+		List<Data> response = new ArrayList<>();
+		List<User> usersInfo = new ArrayList<User>();	
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		HashMap<String, BigDecimal> jalSathiWiseCollection = urcRepository
+				.propertiesCoverByJalsathi(paymentSearchCriteria);
+		Set<String> uuids = jalSathiWiseCollection.keySet();
+		log.info("uuids : " + uuids);
+		if(!CollectionUtils.isEmpty(uuids) && uuids != null) {
+			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().uuid(uuids).build();
+			usersInfo = urcRepository.getUserDetails(userSearchCriteria, requestInfo);		
+			}	
+		log.info("usersInfo : " + usersInfo);
+		Map<String, String> jalSathiNameUuid = new HashMap<String, String>();
+		usersInfo.forEach(user -> jalSathiNameUuid.put(user.getUuid(), user.getName()));
+		Map<String, BigDecimal> resultMap = jalSathiNameUuid.entrySet().stream()
+				.filter(entry -> jalSathiWiseCollection.containsKey(entry.getKey()))
+				.collect(Collectors.toMap(entry -> entry.getValue().toString(), // Convert the key to String
+						entry -> jalSathiWiseCollection.get(entry.getKey())));
+
+		Map<String, BigDecimal> sortedMap = resultMap.entrySet().stream()
+				.sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		resultMap.forEach((key, value) -> log.info(key + ": " + value));
+		int rank = 0;
+		for (Map.Entry<String, BigDecimal> tenantWisePercent : sortedMap.entrySet()) {
+			rank++;
+			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf(rank)).name(tenantWisePercent.getKey())
+					.value(tenantWisePercent.getValue()).symbol("Amount").build());
+			response.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+		
+		return response;
+
+	}
+	
+	public List<Data> topJalSathiUnifiedCollection(PayloadDetails payloadDetails) {
+		RequestInfo requestInfo = new RequestInfo();
+		List<Data> response = new ArrayList<>();
+		List<User> usersInfo = new ArrayList<User>();	
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		HashMap<String, BigDecimal> jalSathiWiseCollection = urcRepository
+				.jalSathiWiseCollection(paymentSearchCriteria);
+		Set<String> uuids = jalSathiWiseCollection.keySet();
+		log.info("uuids : " + uuids);
+		if(!CollectionUtils.isEmpty(uuids) && uuids != null) {
+			UserSearchCriteria userSearchCriteria = UserSearchCriteria.builder().uuid(uuids).build();
+			usersInfo = urcRepository.getUserDetails(userSearchCriteria, requestInfo);		
+			}	
+		log.info("usersInfo : " + usersInfo);
+		Map<String, String> jalSathiNameUuid = new HashMap<String, String>();
+		usersInfo.forEach(user -> jalSathiNameUuid.put(user.getUuid(), user.getName()));
+		Map<String, BigDecimal> resultMap = jalSathiNameUuid.entrySet().stream()
+				.filter(entry -> jalSathiWiseCollection.containsKey(entry.getKey()))
+				.collect(Collectors.toMap(entry -> entry.getValue().toString(), // Convert the key to String
+						entry -> jalSathiWiseCollection.get(entry.getKey())));
+
+		Map<String, BigDecimal> sortedMap = resultMap.entrySet().stream()
+				.sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		resultMap.forEach((key, value) -> log.info(key + ": " + value));
+		int rank = 0;
+		for (Map.Entry<String, BigDecimal> tenantWisePercent : sortedMap.entrySet()) {
+			rank++;
+			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf(rank)).name(tenantWisePercent.getKey())
+					.value(tenantWisePercent.getValue()).symbol("Amount").build());
+			response.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+		
+		return response;
+
+	}
 	
 }
