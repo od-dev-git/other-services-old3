@@ -18,6 +18,7 @@ import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
 import org.egov.dss.model.UserSearchCriteria;
 import org.egov.dss.model.UserSearchRequest;
+import org.egov.dss.model.WaterSearchCriteria;
 import org.egov.dss.repository.builder.URCQueryBuilder;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
@@ -154,6 +155,16 @@ public class URCRepository {
 		return result;
 	}
 	
+	public LinkedHashMap<String, BigDecimal> propertiesCoverByJalsathi(PaymentSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = urcQueryBuilder.propertiesCoverByJalsathi(criteria, preparedStatementValues);
+		log.info(" Properties Cover By Jalsathi query : " + query);
+		log.info(" preparedStatementValues : " + preparedStatementValues);
+		LinkedHashMap<String, BigDecimal> result = (LinkedHashMap<String, BigDecimal>) namedParameterJdbcTemplate
+				.query(query, preparedStatementValues, new URCRevenueRowMapper());
+		return result;
+	}
+	
 	public List<User> getEmployeeBaseTenant(List<Long> userIds) {
 		List<Object> prepareStatement = new ArrayList<>();
 		String query = urcQueryBuilder.getEmployeeBaseTenantQuery(userIds, prepareStatement);
@@ -211,5 +222,13 @@ public class URCRepository {
 		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
 		return result.get(0);
 	}
+	
+	public Object getActiveWaterConnectionCount(WaterSearchCriteria waterSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = urcQueryBuilder.getActiveConnectionCount(waterSearchCriteria, preparedStatementValues);
+        log.info("query FOR get Active Water Connection Count : "+query);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+    }
 
 }

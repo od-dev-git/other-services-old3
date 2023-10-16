@@ -233,9 +233,12 @@ public class Constants {
 		final static String URC_REVENUE_PT_TARGET_ACHIEVEMENT = "revenuePTTargetAchievement";
 		final static String URC_REVENUE_PT_DEMAND_EFFICIENCY = "revenuePTDemandEfficiency";
 		final static String URC_REVENUE_WS_DEMAND_EFFICIENCY = "revenueWSDemandEfficiency";
+		final static String URC_SERVICE_PROPERTIES_PAID = "servicePropertiesPaid";
+		final static String URC_SERVICE_WATER_CONSUMER_PAID = "serviceWaterConsumerPaid";
 		final static String URC_TOP_JALSATHI_PT_COLLECTION = "topJalSathiPTCollection";
 		final static String URC_TOP_JALSATHI_WS_COLLECTION = "topJalSathiWSCollection";
-		final static String URC_SERVICE_PROPERTIES_PAID = "servicePropertiesPaid";
+		final static String URC_TOP_JALSATHI_UNIFIED_COLLECTION = "topJalSathiUnifiedCollection";		
+		final static String URC_PROPERTIES_COVER_BY_JALSATHI = "propertiesCoverByJalsathi";
 	}
 
 }

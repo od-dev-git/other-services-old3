@@ -10,6 +10,7 @@ import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
 import org.egov.dss.model.UrcSearchCriteria;
+import org.egov.dss.model.WaterSearchCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -51,9 +52,18 @@ public class URCQueryBuilder {
 			+ "inner join eg_hrms_employee hrms on py.createdby = hrms.id:: character varying "
 			+ "inner join eg_user usr on hrms.uuid = usr.uuid ";
 	
+	public static final String PROPERTIES_COVER_BY_JALSATHI = " select usr.uuid as name,count(bill.consumercode)  as value from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
+			+ "inner join egcl_bill bill on bill.id = pyd.billid "
+			+ "inner join eg_hrms_employee hrms on py.createdby = hrms.id:: character varying "
+			+ "inner join eg_user usr on hrms.uuid = usr.uuid ";
+	
 	private static final String HRMS_QUERY = "select id, tenantid from eg_hrms_employee ";
 	
 	public static final String TOTAL_PROPERTIES_SQL = " select count(distinct propertyid) from eg_pt_property epaa ";
+	
+	public static final String WATER_ACTIVE_CONNECTIONS_COUNT = " select count(*) from eg_ws_connection  conn "
+			+ "inner join eg_ws_service ws on ws.connection_id = conn.id ";
 
 	public static String getTotalCollection(PaymentSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -106,6 +116,20 @@ public class URCQueryBuilder {
 		addWhereClause(selectQuery, preparedStatementValues, criteria);
 		addGroupByClause(selectQuery," usr.uuid ");
 		return selectQuery.toString();
+	}
+	
+	public static String propertiesCoverByJalsathi(PaymentSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PROPERTIES_COVER_BY_JALSATHI);
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery," usr.uuid ");
+		return selectQuery.toString();
+	}
+	
+	public static String getActiveConnectionCount(WaterSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(WATER_ACTIVE_CONNECTIONS_COUNT);
+		return addWhereClauseForWaterService(selectQuery, preparedStatementValues, criteria);
 	}
 	
 	public String getEmployeeBaseTenantQuery(List<Long> userIds, List<Object> preparedStatement) {
@@ -447,6 +471,67 @@ public class URCQueryBuilder {
 		
 		return selectQuery.toString();
 	
+	}
+	
+	private static String addWhereClauseForWaterService(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+			WaterSearchCriteria searchCriteria) {
+		
+		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+		    addClauseIfRequired(preparedStatementValues, selectQuery);
+		    selectQuery.append(" conn.tenantId in (:tenantId)");
+			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
+		}
+
+		if (searchCriteria.getFromDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ws.connectionExecutionDate >= :fromDate");
+			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+		}
+
+		if (searchCriteria.getToDate() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ws.connectionExecutionDate <= :toDate");
+			preparedStatementValues.put("toDate", searchCriteria.getToDate());
+		}
+		
+		if (searchCriteria.getStatus() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" conn.applicationstatus = :status");
+			preparedStatementValues.put("status", searchCriteria.getStatus());
+		}
+		
+		if (searchCriteria.getIsOldApplication() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" conn.isoldapplication = :isoldapplication");
+			preparedStatementValues.put("isoldapplication", searchCriteria.getIsOldApplication());
+		}
+		
+		if (searchCriteria.getSlaThreshold() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" conn.lastmodifiedtime - conn.createdtime < " + searchCriteria.getSlaThreshold());
+			
+		}
+		
+		if (searchCriteria.getExcludedTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" conn.tenantId != :excludedTenantId");
+			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
+		}
+		
+		if (searchCriteria.getConnectionType() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ws.connectiontype = :connectiontype");
+			preparedStatementValues.put("connectiontype", searchCriteria.getConnectionType());
+		}
+
+		if (searchCriteria.getConnectionFacility() != null) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" ws.connectionfacility = :connectionfacility");
+			preparedStatementValues.put("connectionfacility", searchCriteria.getConnectionFacility());
+		}
+		
+		return selectQuery.toString();
+
 	}
 
 }
