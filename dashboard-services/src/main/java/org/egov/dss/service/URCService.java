@@ -925,4 +925,36 @@ public class URCService {
 
 	}
 	
+	public List<Data> connectionPaid(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);	    
+		List<Plot> plots = new ArrayList<Plot>();
+		int serialNumber = 1;
+		BigDecimal totalDemand = totalDemand(payloadDetails);
+		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		BigDecimal pendingCollection = totalDemand.subtract(totalCollection);
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_DEMAND).value(totalDemand)
+				.label(String.valueOf(serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_COLLECTION).value(totalCollection)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.PENDING_COLLECTION).value(pendingCollection)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+		postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
+		BigDecimal previousTotalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		if (totalDemand.compareTo(BigDecimal.ZERO) == 0 || totalDemand.compareTo(new BigDecimal("0.00")) == 0) {
+			totalDemand = BigDecimal.ONE;
+		}
+		payloadDetails.setTimeinterval(dashboardUtils.getPreviousFY());
+		BigDecimal previousYearDemand = totalDemand(payloadDetails);
+		if (previousYearDemand.compareTo(BigDecimal.ZERO) == 0
+				|| previousYearDemand.compareTo(new BigDecimal("0.00")) == 0) {
+			previousYearDemand = BigDecimal.ONE;
+		}
+		BigDecimal previousYearEfficiency = previousTotalCollection.divide(previousYearDemand, 2, RoundingMode.HALF_UP)
+				.multiply(new BigDecimal(100));
+		plots.add(Plot.builder().name(DashboardConstants.PREVIOUS_EFFICIENCY).value(previousYearEfficiency)
+				.label(String.valueOf(++serialNumber)).symbol("Percentage").build());
+		return Arrays.asList(Data.builder().headerName("DSS_URC_PT_DEMAND_EFFICIENCY").plots(plots).build());
+	}
+	
 }
