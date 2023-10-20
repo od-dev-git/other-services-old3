@@ -239,6 +239,17 @@ public class Constants {
 		final static String URC_TOP_JALSATHI_WS_COLLECTION = "topJalSathiWSCollection";
 		final static String URC_TOP_JALSATHI_UNIFIED_COLLECTION = "topJalSathiUnifiedCollection";		
 		final static String URC_PROPERTIES_COVER_BY_JALSATHI = "propertiesCoverByJalsathi";
+
+		final static String USM_TOTAL_FEEDBACK_SUBMITTED = "totalFeedbackSubmitted";
+		final static String USM_TOTAL_SLUM_SUBMITTED_FEEDBACK = "totalSlumSubmittedFeedback";
+		final static String USM_TOTAL_OPEN_ISSUES = "totalOpenIssues";
+		final static String USM_TOTAL_CLOSE_ISSUES = "totalCloseIssues";
+		final static String USM_ISSUE_RESOLUTION_SUMMARY = "issueResolutionSummery";
+		final static String USM_TOP_CATEGORY_ISSUES = "topIssueCatgory";
+		final static String USM_CATEGORY_WISE_ISSUE = "categoryWiseIssuesReported";
+		final static String USM_TOP_ULB = "topPerformingULBS";
+		final static String USM_BOTTOM_ULB = "bottomPerformingULBS";
+		final static String USM_TOTAL_CUMULATIVE = "cumulativeFeedbackSubmitted";
 	}
 
 }
