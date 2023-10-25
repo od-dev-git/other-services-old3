@@ -41,6 +41,8 @@ public class RedirectService {
 	
 	@Autowired
 	private URCService urcService;
+    @Autowired
+	private USMService usmService;
 	
 	public List<Data> redirect(RequestInfoWrapper requestInfoWrapper) {
 		String visualizationCode=requestInfoWrapper.getPayloadDetails().getVisualizationcode();
@@ -759,6 +761,40 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_TOP_JALSATHI_UNIFIED_COLLECTION.equalsIgnoreCase(visualizationCode)) {
             return urcService.topJalSathiUnifiedCollection(requestInfoWrapper.getPayloadDetails());
         }
+		 if (Constants.VisualizationCodes.USM_TOTAL_FEEDBACK_SUBMITTED.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalFeedbackSubmitted(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_SLUM_SUBMITTED_FEEDBACK.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalSlumSubmittedFeedback(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_OPEN_ISSUES.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalOpenIssues(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_CLOSE_ISSUES.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalClosedIssue(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOP_CATEGORY_ISSUES.equalsIgnoreCase(visualizationCode)) {
+			return usmService.topIssueCategory(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_CATEGORY_WISE_ISSUE.equalsIgnoreCase(visualizationCode)) {
+			return usmService.categoryWiseIssue(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_ISSUE_RESOLUTION_SUMMARY.equalsIgnoreCase(visualizationCode)) {
+			return usmService.issueResolutionSummary(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_BOTTOM_ULB.equalsIgnoreCase(visualizationCode)) {
+			return usmService.bottomUlbsByStatus(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOP_ULB.equalsIgnoreCase(visualizationCode)) {
+			return usmService.topUlbsByStatus(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_CUMULATIVE.equalsIgnoreCase(visualizationCode)) {
+			return usmService.cumulativeApplications(requestInfoWrapper.getPayloadDetails());
+		}
+
+
+
+
 		
 		if(Constants.VisualizationCodes.URC_MONTHWISE_UNIFIED_COLLECTION.equalsIgnoreCase(visualizationCode)) {
             return urcService.monthwiseUnifiedCollection(requestInfoWrapper.getPayloadDetails());
