@@ -797,6 +797,10 @@ public class URCService {
 		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_NOT_PAID)
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
+		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_PAID)
+				.value(new BigDecimal(enrichTotalProperties).divide(new BigDecimal(propertiesPaid), 2, RoundingMode.HALF_UP)
+						.multiply(new BigDecimal(100)))
+				.label(String.valueOf(++serialNumber)).symbol("number").build());
 
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_PROPERTIES_PAID").plots(plots).build());
 	}
@@ -823,6 +827,10 @@ public class URCService {
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_NOT_PAID)
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
+				.label(String.valueOf(++serialNumber)).symbol("number").build());
+		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_PAID)
+				.value(new BigDecimal(enrichTotalProperties).divide(new BigDecimal(propertiesPaid), 2, RoundingMode.HALF_UP)
+						.multiply(new BigDecimal(100)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_WATER_CONSUMER_PAID").plots(plots).build());
