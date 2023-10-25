@@ -957,4 +957,99 @@ public class URCService {
 		return Arrays.asList(Data.builder().headerName("DSS_URC_PT_DEMAND_EFFICIENCY").plots(plots).build());
 	}
 	
+	public List<Data> monthwiseUnifiedCollection(PayloadDetails payloadDetails) {
+		RequestInfo requestInfo = new RequestInfo();
+		List<Data> response = new ArrayList<>();
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		LinkedHashMap<String, BigDecimal> monthWisePTCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+// 		Previous FY Collection
+		BigDecimal previousFYPTCollection = getPreviousFYCollection(paymentSearchCriteria, payloadDetails);
+		paymentSearchCriteria.setBusinessServices(Sets.newHashSet(DashboardConstants.WS_REVENUE_ALL_BS));
+		LinkedHashMap<String, BigDecimal> monthWiseWSCollection = urcRepository
+				.getMonthWiseCollection(paymentSearchCriteria);
+		BigDecimal previousFYWSCollection = getPreviousFYCollection(paymentSearchCriteria, payloadDetails);
+		int serialNumber = 1;
+		for (Map.Entry<String, BigDecimal> monthWiseCollection : monthWisePTCollection.entrySet()) {
+			List<Plot> plots = new ArrayList<>();
+			monthWiseCollection.getValue().divide(previousFYWSCollection, 2, BigDecimal.ROUND_HALF_UP)
+					.subtract(BigDecimal.ONE);
+			plots.add(Plot.builder().name(DashboardConstants.PROPERTY_TAX).value(monthWiseCollection.getValue())
+					.symbol("Amount")
+					.strValue(monthWiseCollection.getValue()
+							.divide((previousFYPTCollection == BigDecimal.ZERO ? BigDecimal.ONE
+									: previousFYPTCollection), 2, BigDecimal.ROUND_HALF_UP)
+							.subtract(BigDecimal.ONE).toString())
+					.build());
+			plots.add(Plot.builder().name(DashboardConstants.WATER_SEWARAGE_CHARGES)
+					.value(monthWiseWSCollection.get(monthWiseCollection.getKey())).symbol("Amount")
+					.strValue(monthWiseCollection.getValue()
+							.divide((previousFYWSCollection == BigDecimal.ZERO ? BigDecimal.ONE
+									: previousFYWSCollection), 2, BigDecimal.ROUND_HALF_UP)
+							.subtract(BigDecimal.ONE).toString())
+					.build());
+			plots.add(Plot.builder().name(DashboardConstants.TOTAL_COLLECTION)
+					.value(monthWiseWSCollection.get(monthWiseCollection.getKey()).add(monthWiseCollection.getValue()))
+					.symbol("Amount").build());
+			response.add(Data.builder().headerName(monthWiseCollection.getKey()).plots(plots).headerValue(serialNumber)
+					.headerSymbol("Amount").build());
+			++serialNumber;
+		}
+
+		return response;
+
+	}
+
+	private BigDecimal getPreviousFYCollection(PaymentSearchCriteria paymentSearchCriteria,
+			PayloadDetails payloadDetails) {
+		PaymentSearchCriteria criteria = new PaymentSearchCriteria();
+		String previousFy = dashboardUtils.getPreviousFY();
+		criteria.setFromDate(dashboardUtils.previousFYStartDate(previousFy));
+		criteria.setToDate(dashboardUtils.previousFYEndDate(previousFy));
+		criteria.setTenantIds(paymentSearchCriteria.getTenantIds());
+		criteria.setBusinessServices(paymentSearchCriteria.getBusinessServices());
+		criteria.setExcludedTenant(paymentSearchCriteria.getExcludedTenant());
+		criteria.setStatus(paymentSearchCriteria.getStatus());
+		criteria.setStatusNotIn(paymentSearchCriteria.getStatusNotIn());
+		BigDecimal previousTotalCollection = (BigDecimal) urcRepository.getTotalCollection(criteria);
+		return previousTotalCollection;
+
+	}
+	
+	public List<Data> urcDemandEfficiency(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);		
+		List<Plot> plots = new ArrayList<Plot>();
+		int serialNumber = 1;
+		BigDecimal totalDemand = totalDemand(payloadDetails);
+		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		BigDecimal pendingCollection = totalDemand.subtract(totalCollection);
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_DEMAND).value(totalDemand)
+				.label(String.valueOf(serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_COLLECTION).value(totalCollection)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.PENDING_COLLECTION).value(pendingCollection)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+		postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
+		BigDecimal previousTotalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		if (totalDemand.compareTo(BigDecimal.ZERO) == 0 || totalDemand.compareTo(new BigDecimal("0.00")) == 0) {
+			totalDemand = BigDecimal.ONE;
+		}
+		payloadDetails.setTimeinterval(dashboardUtils.getPreviousFY());
+		BigDecimal previousYearDemand = totalDemand(payloadDetails);
+		if (previousYearDemand.compareTo(BigDecimal.ZERO) == 0
+				|| previousYearDemand.compareTo(new BigDecimal("0.00")) == 0) {
+			previousYearDemand = BigDecimal.ONE;
+		}
+		BigDecimal previousYearEfficiency = previousTotalCollection.divide(previousYearDemand, 2, RoundingMode.HALF_UP)
+				.multiply(new BigDecimal(100));
+		plots.add(Plot.builder().name(DashboardConstants.PREVIOUS_EFFICIENCY).value(previousYearEfficiency)
+				.label(String.valueOf(++serialNumber)).symbol("Percentage").build());
+		return Arrays.asList(Data.builder().headerName("DSS_URC_DEMAND_EFFICIENCY").plots(plots).build());
+	}
+
 }
