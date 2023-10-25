@@ -795,6 +795,14 @@ public class RedirectService {
 
 
 
+		
+		if(Constants.VisualizationCodes.URC_MONTHWISE_UNIFIED_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.monthwiseUnifiedCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_DEMAND_EFFICIENCY.equalsIgnoreCase(visualizationCode)) {
+            return urcService.urcDemandEfficiency(requestInfoWrapper.getPayloadDetails());
+        }
 		return null;
 
 	}

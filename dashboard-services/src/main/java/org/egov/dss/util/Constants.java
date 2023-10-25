@@ -239,6 +239,8 @@ public class Constants {
 		final static String URC_TOP_JALSATHI_WS_COLLECTION = "topJalSathiWSCollection";
 		final static String URC_TOP_JALSATHI_UNIFIED_COLLECTION = "topJalSathiUnifiedCollection";		
 		final static String URC_PROPERTIES_COVER_BY_JALSATHI = "propertiesCoverByJalsathi";
+		final static String URC_MONTHWISE_UNIFIED_COLLECTION = "monthwiseUnifiedCollection";
+		final static String URC_DEMAND_EFFICIENCY = "urcDemandEfficiency";
 
 		final static String USM_TOTAL_FEEDBACK_SUBMITTED = "totalFeedbackSubmitted";
 		final static String USM_TOTAL_SLUM_SUBMITTED_FEEDBACK = "totalSlumSubmittedFeedback";
