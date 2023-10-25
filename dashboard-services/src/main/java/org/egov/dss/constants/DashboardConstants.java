@@ -239,6 +239,10 @@ public class DashboardConstants {
 	public static final String CONNECTIONS_PAID = "Connections Paid";
 	
 	public static final String CONNECTIONS_NOT_PAID = "Connections not Paid";
+	
+	public static final String PROPERTY_TAX = "Property Tax";
+	
+	public static final String WATER_SEWARAGE_CHARGES = "Water & Sewerage Charges";
 
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
