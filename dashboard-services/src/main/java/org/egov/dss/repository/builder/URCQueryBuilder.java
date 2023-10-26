@@ -64,6 +64,25 @@ public class URCQueryBuilder {
 	
 	public static final String WATER_ACTIVE_CONNECTIONS_COUNT = " select count(*) from eg_ws_connection  conn "
 			+ "inner join eg_ws_service ws on ws.connection_id = conn.id ";
+	
+	public static final String ACTIVE_JALSATHI = " select count(distinct hrms.code)  as totalamt from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
+			+ "inner join egcl_bill bill on bill.id = pyd.billid "
+			+ "inner join eg_hrms_employee hrms on py.createdby = hrms.id:: character varying "
+			+ "inner join eg_user usr on hrms.uuid = usr.uuid ";
+	
+	public static final String PROPERTY_COVERED_BY_JALSATHI = " select count(distinct bill.consumercode)  as totalamt from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
+			+ "inner join egcl_bill bill on bill.id = pyd.billid "
+			+ "inner join eg_hrms_employee hrms on py.createdby = hrms.id:: character varying "
+			+ "inner join eg_user usr on hrms.uuid = usr.uuid ";
+	
+	public static final String COLLECTION_BY_JALSATHI = " select COALESCE(sum(py.totalamountpaid),0)  as totalamt from egcl_payment py "
+			+ "inner join egcl_paymentdetail pyd on pyd.paymentid = py.id "
+			+ "inner join egcl_bill bill on bill.id = pyd.billid "
+			+ "inner join eg_hrms_employee hrms on py.createdby = hrms.id:: character varying "
+			+ "inner join eg_user usr on hrms.uuid = usr.uuid ";
+
 
 	public static String getTotalCollection(PaymentSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -87,6 +106,28 @@ public class URCQueryBuilder {
 	public static String urcPropertiesPaid(PaymentSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(URC_PROPERTIES_PAID);
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		return selectQuery.toString();
+	}
+	
+	
+	public static String activeJalsathi(PaymentSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(ACTIVE_JALSATHI);
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		return selectQuery.toString();
+	}
+	
+	public static String propertyCoveredByJalsathi(PaymentSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PROPERTY_COVERED_BY_JALSATHI);
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		return selectQuery.toString();
+	}
+	
+	public static String collectionByJalsathi(PaymentSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(COLLECTION_BY_JALSATHI);
 		addWhereClause(selectQuery, preparedStatementValues, criteria);
 		return selectQuery.toString();
 	}
@@ -309,6 +350,12 @@ public class URCQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" pt.status = :propertyStatus");
 			preparedStatementValues.put("propertyStatus", searchCriteria.getPropertyStatus());
+		}
+		
+		if (searchCriteria.getIsJalSathi() != null && searchCriteria.getIsJalSathi().equals(Boolean.TRUE)) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" hrms.code like (:empcode)");
+			preparedStatementValues.put("empcode", "SUJOG_JAL_%");
 		}
 
 		if (!StringUtils.isEmpty(searchCriteria.getExcludedTenant())) {
