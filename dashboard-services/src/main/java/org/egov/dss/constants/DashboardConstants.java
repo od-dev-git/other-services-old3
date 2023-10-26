@@ -228,17 +228,21 @@ public class DashboardConstants {
 	
 	public static final String TOTAL_DEMAND = "Total Demand";
 	
-	public static final String TOTAL_PROPERTIES = "Total Properties";
+	public static final String TOTAL_PROPERTIES = "Total Properties should have paid";
 	
 	public static final String PROPERTIES_PAID = "Properties Paid";
 	
 	public static final String PROPERTIES_NOT_PAID = "Properties not Paid";
 	
-    public static final String TOTAL_CONNECTIONS = "Total Connections";
+	public static final String TOTAL_CUMULATIVE_PROPERTIES = "Total Properties on Register";
+	
+    public static final String TOTAL_CONNECTIONS = "Total Connections should have paid";
 	
 	public static final String CONNECTIONS_PAID = "Connections Paid";
 	
 	public static final String CONNECTIONS_NOT_PAID = "Connections not Paid";
+	
+	public static final String TOTAL_CUMULATIVE_CONNECTIONS = "Total Cumulative Connections";
 	
 	public static final String PROPERTY_TAX = "Property Tax";
 	

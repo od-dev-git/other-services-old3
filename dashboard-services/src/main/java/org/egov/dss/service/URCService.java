@@ -258,8 +258,10 @@ public class URCService {
 		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
 		postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
 		BigDecimal previousTotalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
-		if(previousTotalCollection == BigDecimal.ZERO)
+		if (previousTotalCollection.compareTo(BigDecimal.ZERO) == 0
+				|| previousTotalCollection.compareTo(new BigDecimal("0.00")) == 0) {
 			previousTotalCollection = BigDecimal.ONE;
+		}
 		BigDecimal changeInCollection = totalCollection.divide(previousTotalCollection, 2, BigDecimal.ROUND_HALF_UP)
 				.subtract(BigDecimal.ONE);
 		return Arrays.asList(Data.builder().headerValue(
@@ -581,8 +583,10 @@ public class URCService {
 		postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
 		BigDecimal previousTotalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
 		BigDecimal previousTargetCollection = (BigDecimal) targetCollection(payloadDetails).get(0).getHeaderValue();
-		if (previousTotalCollection == BigDecimal.ZERO)
-			previousTotalCollection = BigDecimal.ONE;
+		if (previousTargetCollection.compareTo(BigDecimal.ZERO) == 0
+				|| previousTargetCollection.compareTo(new BigDecimal("0.00")) == 0) {
+			previousTargetCollection = BigDecimal.ONE;
+		}
 		BigDecimal previousTargetAchieved = previousTotalCollection.divide(previousTargetCollection, 2, RoundingMode.HALF_UP)
 				.multiply(new BigDecimal(100));
 		plots.add(Plot.builder().name(DashboardConstants.PREVIOUS_ACHIEVEMENT).value(previousTargetAchieved)
@@ -807,9 +811,7 @@ public class URCService {
 		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_NOT_PAID)
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
-		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_PAID)
-				.value(new BigDecimal(enrichTotalProperties).divide(new BigDecimal(propertiesPaid), 2, RoundingMode.HALF_UP)
-						.multiply(new BigDecimal(100)))
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_CUMULATIVE_PROPERTIES).value(new BigDecimal(totalProperties))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_PROPERTIES_PAID").plots(plots).build());
@@ -838,11 +840,8 @@ public class URCService {
 		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_NOT_PAID)
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
-		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_PAID)
-				.value(new BigDecimal(enrichTotalProperties).divide(new BigDecimal(propertiesPaid), 2, RoundingMode.HALF_UP)
-						.multiply(new BigDecimal(100)))
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_CUMULATIVE_CONNECTIONS).value(new BigDecimal(activeConnectionCount))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
-
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_WATER_CONSUMER_PAID").plots(plots).build());
 	}
 
@@ -993,6 +992,10 @@ public class URCService {
 		LinkedHashMap<String, BigDecimal> monthWiseWSCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 		BigDecimal previousFYWSCollection = getPreviousFYCollection(paymentSearchCriteria, payloadDetails);
+		if (previousFYWSCollection.compareTo(BigDecimal.ZERO) == 0
+				|| previousFYWSCollection.compareTo(new BigDecimal("0.00")) == 0) {
+			previousFYWSCollection = BigDecimal.ONE;
+		}
 		int serialNumber = 1;
 		for (Map.Entry<String, BigDecimal> monthWiseCollection : monthWisePTCollection.entrySet()) {
 			List<Plot> plots = new ArrayList<>();
@@ -1114,8 +1117,9 @@ public class URCService {
 		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
 		BigDecimal totalJalSathiCollection = (BigDecimal) urcRepository.colletionByJalSathi(paymentSearchCriteria);
 		// postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
-		if (totalCollection == BigDecimal.ZERO)
+		if (totalCollection.compareTo(BigDecimal.ZERO) == 0 || totalCollection.compareTo(new BigDecimal("0.00")) == 0) {
 			totalCollection = BigDecimal.ONE;
+		}
 		BigDecimal percent = totalJalSathiCollection.divide(totalCollection, 2, BigDecimal.ROUND_HALF_UP)
 				.multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder()
