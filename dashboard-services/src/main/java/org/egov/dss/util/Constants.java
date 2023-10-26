@@ -241,6 +241,11 @@ public class Constants {
 		final static String URC_PROPERTIES_COVER_BY_JALSATHI = "propertiesCoverByJalsathi";
 		final static String URC_MONTHWISE_UNIFIED_COLLECTION = "monthwiseUnifiedCollection";
 		final static String URC_DEMAND_EFFICIENCY = "urcDemandEfficiency";
+		final static String URC_ACTIVE_JALSATHI = "activeJalSathi";
+		final static String URC_PROPERTIES_COVERED_BY_JALSATHI = "propertiesCoveredByJalsathi";
+		final static String URC_JALSATHI_PT_COLLECTION = "jalsathiPTCollection";
+		final static String URC_WATER_COVERED_BY_JALSATHI = "waterConnCoveredByJalsathi";
+
 
 		final static String USM_TOTAL_FEEDBACK_SUBMITTED = "totalFeedbackSubmitted";
 		final static String USM_TOTAL_SLUM_SUBMITTED_FEEDBACK = "totalSlumSubmittedFeedback";

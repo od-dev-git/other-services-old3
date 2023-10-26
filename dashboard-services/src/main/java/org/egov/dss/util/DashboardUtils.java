@@ -334,4 +334,11 @@ public class DashboardUtils {
 		return previousFy;
 	}
 	
+	public Long getLastThirtyDayValue() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, -30);
+		return calendar.getTimeInMillis();
+
+	}
+	
 }

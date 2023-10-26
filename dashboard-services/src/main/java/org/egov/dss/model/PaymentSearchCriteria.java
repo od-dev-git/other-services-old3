@@ -54,5 +54,7 @@ public class PaymentSearchCriteria {
     private String propertyStatus;
     
     private Set<String> statusNotIn;
+    
+    private Boolean isJalSathi;
 
 }

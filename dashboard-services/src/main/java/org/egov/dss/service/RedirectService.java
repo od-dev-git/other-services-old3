@@ -790,12 +790,7 @@ public class RedirectService {
 		}
 		if (Constants.VisualizationCodes.USM_TOTAL_CUMULATIVE.equalsIgnoreCase(visualizationCode)) {
 			return usmService.cumulativeApplications(requestInfoWrapper.getPayloadDetails());
-		}
-
-
-
-
-		
+		}		
 		if(Constants.VisualizationCodes.URC_MONTHWISE_UNIFIED_COLLECTION.equalsIgnoreCase(visualizationCode)) {
             return urcService.monthwiseUnifiedCollection(requestInfoWrapper.getPayloadDetails());
         }
@@ -803,6 +798,23 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_DEMAND_EFFICIENCY.equalsIgnoreCase(visualizationCode)) {
             return urcService.urcDemandEfficiency(requestInfoWrapper.getPayloadDetails());
         }
+		
+		if(Constants.VisualizationCodes.URC_ACTIVE_JALSATHI.equalsIgnoreCase(visualizationCode)) {
+		    return urcService.activeJalSathi(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.URC_PROPERTIES_COVERED_BY_JALSATHI.equalsIgnoreCase(visualizationCode)) {
+		    return urcService.propertiesCoveredByJalsathi(requestInfoWrapper.getPayloadDetails());
+		}
+		        
+		if(Constants.VisualizationCodes.URC_JALSATHI_PT_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+		    return urcService.jalsathiPTCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.URC_WATER_COVERED_BY_JALSATHI.equalsIgnoreCase(visualizationCode)) {
+		    return urcService.waterConnectionCoveredByJalsathi (requestInfoWrapper.getPayloadDetails());
+		}
+
 		return null;
 
 	}
