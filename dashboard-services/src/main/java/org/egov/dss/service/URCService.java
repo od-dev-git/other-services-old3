@@ -258,8 +258,10 @@ public class URCService {
 		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
 		postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
 		BigDecimal previousTotalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
-		if(previousTotalCollection == BigDecimal.ZERO)
+		if (previousTotalCollection.compareTo(BigDecimal.ZERO) == 0
+				|| previousTotalCollection.compareTo(new BigDecimal("0.00")) == 0) {
 			previousTotalCollection = BigDecimal.ONE;
+		}
 		BigDecimal changeInCollection = totalCollection.divide(previousTotalCollection, 2, BigDecimal.ROUND_HALF_UP)
 				.subtract(BigDecimal.ONE);
 		return Arrays.asList(Data.builder().headerValue(
@@ -284,6 +286,10 @@ public class URCService {
 	}
 	
 	private String calculatePercentageValue(String amount, BigDecimal value) {
+		return String.valueOf(amount+"("+value+"%)");
+	}
+	
+	private String concatString(Integer amount, Integer value) {
 		return String.valueOf(amount+"("+value+"%)");
 	}
 
@@ -577,8 +583,10 @@ public class URCService {
 		postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
 		BigDecimal previousTotalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
 		BigDecimal previousTargetCollection = (BigDecimal) targetCollection(payloadDetails).get(0).getHeaderValue();
-		if (previousTotalCollection == BigDecimal.ZERO)
-			previousTotalCollection = BigDecimal.ONE;
+		if (previousTargetCollection.compareTo(BigDecimal.ZERO) == 0
+				|| previousTargetCollection.compareTo(new BigDecimal("0.00")) == 0) {
+			previousTargetCollection = BigDecimal.ONE;
+		}
 		BigDecimal previousTargetAchieved = previousTotalCollection.divide(previousTargetCollection, 2, RoundingMode.HALF_UP)
 				.multiply(new BigDecimal(100));
 		plots.add(Plot.builder().name(DashboardConstants.PREVIOUS_ACHIEVEMENT).value(previousTargetAchieved)
@@ -631,7 +639,9 @@ public class URCService {
     
 	public List<Data> ptDemandEfficiency(PayloadDetails payloadDetails) {
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);		
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);	
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		List<Plot> plots = new ArrayList<Plot>();
 		int serialNumber = 1;
 		BigDecimal totalDemand = totalDemand(payloadDetails);
@@ -663,7 +673,9 @@ public class URCService {
 	
 	public List<Data> wsDemandEfficiency(PayloadDetails payloadDetails) {
 		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);	    
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);	   
+		paymentSearchCriteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
 		List<Plot> plots = new ArrayList<Plot>();
 		int serialNumber = 1;
 		BigDecimal totalDemand = totalDemand(payloadDetails);
@@ -702,6 +714,7 @@ public class URCService {
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
 		HashMap<String, BigDecimal> jalSathiWiseCollection = urcRepository
 				.jalSathiWiseCollection(paymentSearchCriteria);
 		Set<String> uuids = jalSathiWiseCollection.keySet();
@@ -743,6 +756,7 @@ public class URCService {
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
 		HashMap<String, BigDecimal> jalSathiWiseCollection = urcRepository
 				.jalSathiWiseCollection(paymentSearchCriteria);
 		Set<String> uuids = jalSathiWiseCollection.keySet();
@@ -797,9 +811,7 @@ public class URCService {
 		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_NOT_PAID)
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
-		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_PAID)
-				.value(new BigDecimal(enrichTotalProperties).divide(new BigDecimal(propertiesPaid), 2, RoundingMode.HALF_UP)
-						.multiply(new BigDecimal(100)))
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_CUMULATIVE_PROPERTIES).value(new BigDecimal(totalProperties))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_PROPERTIES_PAID").plots(plots).build());
@@ -828,11 +840,8 @@ public class URCService {
 		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_NOT_PAID)
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
-		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_PAID)
-				.value(new BigDecimal(enrichTotalProperties).divide(new BigDecimal(propertiesPaid), 2, RoundingMode.HALF_UP)
-						.multiply(new BigDecimal(100)))
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_CUMULATIVE_CONNECTIONS).value(new BigDecimal(activeConnectionCount))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
-
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_WATER_CONSUMER_PAID").plots(plots).build());
 	}
 
@@ -861,6 +870,7 @@ public class URCService {
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
 		HashMap<String, BigDecimal> jalSathiWiseCollection = urcRepository
 				.propertiesCoverByJalsathi(paymentSearchCriteria);
 		Set<String> uuids = jalSathiWiseCollection.keySet();
@@ -901,6 +911,7 @@ public class URCService {
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
 		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
 		HashMap<String, BigDecimal> jalSathiWiseCollection = urcRepository
 				.jalSathiWiseCollection(paymentSearchCriteria);
 		Set<String> uuids = jalSathiWiseCollection.keySet();
@@ -981,6 +992,10 @@ public class URCService {
 		LinkedHashMap<String, BigDecimal> monthWiseWSCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 		BigDecimal previousFYWSCollection = getPreviousFYCollection(paymentSearchCriteria, payloadDetails);
+		if (previousFYWSCollection.compareTo(BigDecimal.ZERO) == 0
+				|| previousFYWSCollection.compareTo(new BigDecimal("0.00")) == 0) {
+			previousFYWSCollection = BigDecimal.ONE;
+		}
 		int serialNumber = 1;
 		for (Map.Entry<String, BigDecimal> monthWiseCollection : monthWisePTCollection.entrySet()) {
 			List<Plot> plots = new ArrayList<>();
@@ -1059,5 +1074,78 @@ public class URCService {
 				.label(String.valueOf(++serialNumber)).symbol("Percentage").build());
 		return Arrays.asList(Data.builder().headerName("DSS_URC_DEMAND_EFFICIENCY").plots(plots).build());
 	}
+	
+	public List<Data> activeJalSathi(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria criteria = getPaymentSearchCriteria(payloadDetails);
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		criteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		criteria.setFromDate(dashboardUtils.getLastThirtyDayValue());
+		criteria.setToDate(System.currentTimeMillis());		
+		criteria.setIsJalSathi(Boolean.TRUE);
+		Integer propertiesPaid = (Integer) urcRepository.activeJalsathi(criteria);
+        return Arrays.asList(Data.builder().headerValue(propertiesPaid).build());
+	}
+	
+	public List<Data> propertiesCoveredByJalsathi(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+	    PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		PropertySerarchCriteria propertySearchCriteria = getPropertySearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
 
+		propertySearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		propertySearchCriteria.setStatus(DashboardConstants.STATUS_ACTIVE);
+		propertySearchCriteria.setFromDate(null);
+		Integer propertiesPaid = (Integer) urcRepository.propertyCoveredByJalsathi(paymentSearchCriteria);
+		Integer totalProperties = urcRepository.getTotalPropertiesCount(propertySearchCriteria);
+		if (totalProperties == 0)
+			totalProperties = 1;
+		Integer propertyPaidRatio = (propertiesPaid / totalProperties) * 100;
+		return Arrays.asList(Data.builder().headerValue(concatString(propertiesPaid, propertyPaidRatio)).build());
+	}
+
+	public List<Data> jalsathiPTCollection(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
+		BigDecimal totalJalSathiCollection = (BigDecimal) urcRepository.colletionByJalSathi(paymentSearchCriteria);
+		// postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
+		if (totalCollection.compareTo(BigDecimal.ZERO) == 0 || totalCollection.compareTo(new BigDecimal("0.00")) == 0) {
+			totalCollection = BigDecimal.ONE;
+		}
+		BigDecimal percent = totalJalSathiCollection.divide(totalCollection, 2, BigDecimal.ROUND_HALF_UP)
+				.multiply(new BigDecimal(100));
+		return Arrays.asList(Data.builder()
+				.headerValue(
+						calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), percent))
+				.build());
+	}
+	
+	public List<Data> waterConnectionCoveredByJalsathi(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		WaterSearchCriteria waterSearchCriteria = getWaterSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
+
+		waterSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		waterSearchCriteria.setStatus(DashboardConstants.STATUS_ACTIVE);
+		waterSearchCriteria.setFromDate(null);
+		Integer waterConsumerPaid = (Integer) urcRepository.propertyCoveredByJalsathi(paymentSearchCriteria);
+		Integer totalWaterConsumer = (Integer) urcRepository.getActiveWaterConnectionCount(waterSearchCriteria);
+		if (totalWaterConsumer == 0)
+			totalWaterConsumer = 1;
+		Integer waterConsumerRatio = (waterConsumerPaid / totalWaterConsumer) * 100;
+		return Arrays.asList(Data.builder().headerValue(concatString(waterConsumerPaid, totalWaterConsumer)).build());
+	}
+  
 }

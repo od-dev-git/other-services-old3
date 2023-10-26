@@ -103,6 +103,33 @@ public class URCRepository {
         return result.get(0);
 	}
 	
+	public Object activeJalsathi(PaymentSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = urcQueryBuilder.activeJalsathi(criteria, preparedStatementValues);
+        log.info("Query for Active JalSathi : "+query);
+        log.info("Params : "+preparedStatementValues);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+	}
+	
+	public Object propertyCoveredByJalsathi(PaymentSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = urcQueryBuilder.propertyCoveredByJalsathi(criteria, preparedStatementValues);
+        log.info("Query for Proerty Cover By Jalsathi : "+query);
+        log.info("Params : "+preparedStatementValues);
+        List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
+        return result.get(0);
+	}
+	
+	public BigDecimal colletionByJalSathi(PaymentSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = urcQueryBuilder.collectionByJalsathi(criteria, preparedStatementValues);
+        log.info("Query for Collection By Jalsathi : "+query);
+        log.info("Params : "+preparedStatementValues);
+        List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(BigDecimal.class));
+        return result.get(0);
+	}
+	
 	public LinkedHashMap<String, BigDecimal> getMonthWiseCollection(PaymentSearchCriteria criteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = urcQueryBuilder.getMonthWiseCollection(criteria, preparedStatementValues);
