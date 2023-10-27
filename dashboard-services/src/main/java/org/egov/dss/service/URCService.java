@@ -1147,5 +1147,77 @@ public class URCService {
 		Integer waterConsumerRatio = (waterConsumerPaid / totalWaterConsumer) * 100;
 		return Arrays.asList(Data.builder().headerValue(concatString(waterConsumerPaid, totalWaterConsumer)).build());
 	}
+	
+	public List<Data> jalsathiWSCollection(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
+		BigDecimal totalJalSathiCollection = (BigDecimal) urcRepository.colletionByJalSathi(paymentSearchCriteria);
+		// postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
+		if (totalCollection.compareTo(BigDecimal.ZERO) == 0 || totalCollection.compareTo(new BigDecimal("0.00")) == 0) {
+			totalCollection = BigDecimal.ONE;
+		}
+		BigDecimal percent = totalJalSathiCollection.divide(totalCollection, 2, BigDecimal.ROUND_HALF_UP)
+				.multiply(new BigDecimal(100));
+		return Arrays.asList(Data.builder()
+				.headerValue(
+						calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), percent))
+				.build());
+	}
+
+	public List<Data> jalsathiTotalCollection(PayloadDetails payloadDetails) {
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
+		BigDecimal totalJalSathiCollection = (BigDecimal) urcRepository.colletionByJalSathi(paymentSearchCriteria);
+		// postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
+		if (totalCollection.compareTo(BigDecimal.ZERO) == 0 || totalCollection.compareTo(new BigDecimal("0.00")) == 0) {
+			totalCollection = BigDecimal.ONE;
+		}
+		BigDecimal percent = totalJalSathiCollection.divide(totalCollection, 2, BigDecimal.ROUND_HALF_UP)
+				.multiply(new BigDecimal(100));
+		return Arrays.asList(Data.builder()
+				.headerValue(
+						calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), percent))
+				.build());
+	}
+	
+	public List<Data> collectorWiseRevenue(PayloadDetails payloadDetails) {
+		List<Plot> plots = new ArrayList<Plot>();
+		int serialNumber = 1;
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
+		BigDecimal totalJalSathiCollection = (BigDecimal) urcRepository.colletionByJalSathi(paymentSearchCriteria);
+		BigDecimal totalCollectionByOther = totalJalSathiCollection.subtract(totalJalSathiCollection);
+		// postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
+		if (totalCollection.compareTo(BigDecimal.ZERO) == 0 || totalCollection.compareTo(new BigDecimal("0.00")) == 0) {
+			totalCollection = BigDecimal.ONE;
+		}
+		BigDecimal percent = totalJalSathiCollection.divide(totalCollection, 2, BigDecimal.ROUND_HALF_UP)
+				.multiply(new BigDecimal(100));
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_COLLECTION).value(totalCollection)
+				.label(String.valueOf(serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_COLLECTION_BY_JALSATHI).value(totalJalSathiCollection)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.TOTAL_COLLECTION_BY_OTHERS).value(totalCollectionByOther)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+		plots.add(Plot.builder().name(DashboardConstants.JALSATHI_COLLECTION_ACHIEVEMENT).value(percent)
+				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
+
+		return Arrays.asList(Data.builder().headerName("DSS_URC_COLLECTOR_WISE_REVENUE ").plots(plots).build());
+	}
+  
+
   
 }
