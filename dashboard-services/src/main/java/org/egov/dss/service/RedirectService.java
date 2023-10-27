@@ -814,6 +814,18 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.URC_WATER_COVERED_BY_JALSATHI.equalsIgnoreCase(visualizationCode)) {
 		    return urcService.waterConnectionCoveredByJalsathi (requestInfoWrapper.getPayloadDetails());
 		}
+		
+		if(Constants.VisualizationCodes.URC_JALSATHI_WS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.jalsathiWSCollection(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.URC_JALSATHI_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.jalsathiTotalCollection(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.URC_COLLECTOR_WISE_REVENUE.equalsIgnoreCase(visualizationCode)) {
+            return urcService.collectorWiseRevenue(requestInfoWrapper.getPayloadDetails());
+        }
 
 		return null;
 
