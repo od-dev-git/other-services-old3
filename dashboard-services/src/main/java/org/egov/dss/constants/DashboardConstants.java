@@ -247,7 +247,13 @@ public class DashboardConstants {
 	public static final String PROPERTY_TAX = "Property Tax";
 	
 	public static final String WATER_SEWARAGE_CHARGES = "Water & Sewerage Charges";
-
+	
+    public static final String TOTAL_COLLECTION_BY_JALSATHI = "Total Collection By Jalsathi";
+    
+    public static final String TOTAL_COLLECTION_BY_OTHERS = "Total Collection By Others";
+    
+    public static final String JALSATHI_COLLECTION_ACHIEVEMENT = "Jalsathi Collection Achievement";
+    
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
 					BUSINESS_SERVICE_OC_APP_FEE, BUSINESS_SERVICE_OC_SAN_FEE));
