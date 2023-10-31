@@ -1,5 +1,6 @@
 package org.egov.dss.service;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import org.egov.dss.web.model.ResponseData;
 import org.egov.tracer.model.CustomException;
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -117,7 +119,8 @@ public class DashboardService {
 		List<Data> data = redirectService.redirect(requestInfoWrapper);
 		responseData.setData(data);
 		if(data != null && !data.isEmpty()) {
-		setConfiguration(requestInfoWrapper, responseData);
+		//setConfiguration(requestInfoWrapper, responseData);
+		setConfigurationUpdated(requestInfoWrapper, responseData);
 		}else {
 			responseData = setConfigurationForEmptyObject(requestInfoWrapper, responseData);
 		}
@@ -158,7 +161,7 @@ public class DashboardService {
 		responseData.setChartType(chartType.toString());
 		responseData.setVisualizationCode(internalChartId);
 		//responseData.setDrillDownChartId(drillChart);
-		if (chartType.equalsIgnoreCase(DashboardConstants.PERFORM)) {
+				if (chartType.equalsIgnoreCase(DashboardConstants.PERFORM)) {
 			if (Objects.isNull(responseData) && ObjectUtils.isEmpty(responseData)) {
 				List<Data> responseList = new ArrayList<>();
 				List<Plot> plots = Arrays
@@ -313,6 +316,63 @@ public class DashboardService {
 		}
 		
 		return String.valueOf(response);
+	}
+	
+	private void setConfigurationUpdated(RequestInfoWrapper requestInfoWrapper, ResponseData responseData) {
+		String internalChartId = requestInfoWrapper.getPayloadDetails().getVisualizationcode();
+	    String chartType = requestInfoWrapper.getPayloadDetails().getCharttype();
+		String chartName = requestInfoWrapper.getPayloadDetails().getHeadername();
+		String valueType = requestInfoWrapper.getPayloadDetails().getValuetype();
+				
+		responseData.setChartType(chartType.toString());
+		responseData.setVisualizationCode(internalChartId);		
+		switch (chartType) {
+		case "perform":
+			if (Objects.isNull(responseData) && ObjectUtils.isEmpty(responseData)) {
+				List<Data> responseList = new ArrayList<>();
+				List<Plot> plots = Arrays
+						.asList(Plot.builder().symbol("percentage").label("DSS_TARGET_ACHIEVED").build());
+				responseList.add(Data.builder().plots(plots).headerValue(0).build());
+				responseData.setData(responseList);
+			} else {
+				responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
+				responseData.getData().forEach(data -> data.setHeaderName(DashboardConstants.RANK));
+			}
+			break;
+		case "xtable":
+			responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
+			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			responseData.setDrillDownChartId(null);
+			responseData.setFilter(Arrays
+					.asList(Filter.builder().key(String.valueOf("tenantId")).column(String.valueOf("DDRs")).build()));
+			// responseData.getData().forEach(data -> data.getPlots().forEach(plot ->
+			// plot.setSymbol(valueType)));
+			break;
+		case "line":
+			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			break;
+		case "table":
+			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			responseData.getData().stream().forEach(data -> data.setHeaderSymbol(valueType));
+			responseData.setDrillDownChartId(null);
+			responseData.setFilter(Arrays
+					.asList(Filter.builder().key(String.valueOf("tenantId")).column(String.valueOf("DDRs")).build()));
+			break;
+		case "METRIC":
+			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			responseData.getData().forEach(data -> data.setHeaderSymbol(valueType));
+			break;
+		case "pie":
+			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			responseData.getData().forEach(data -> data.setHeaderSymbol(valueType));
+			break;
+		case "bar":
+			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			responseData.getData().forEach(data -> data.setHeaderSymbol(valueType));
+			break;
+		
+		}
+		
 	}
 	
 }
