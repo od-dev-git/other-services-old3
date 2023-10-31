@@ -17,6 +17,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.dss.constants.DashboardConstants;
 import org.egov.dss.model.DemandSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
+import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
@@ -804,6 +805,9 @@ public class URCService {
 		Integer propertiesPaid = (Integer) urcRepository.getUrcPropertiesPaid(paymentSearchCriteria);
 		Integer totalProperties = urcRepository.getTotalPropertiesCount(propertySearchCriteria);
 		Integer enrichTotalProperties = enrichProperties(payloadDetails, totalProperties);
+		if (enrichTotalProperties == 0) {
+			enrichTotalProperties = 1;
+		}
 		plots.add(Plot.builder().name(DashboardConstants.TOTAL_PROPERTIES).value(new BigDecimal(enrichTotalProperties))
 				.label(String.valueOf(serialNumber)).symbol("number").build());
 		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_PAID).value(new BigDecimal(propertiesPaid))
@@ -811,7 +815,10 @@ public class URCService {
 		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_NOT_PAID)
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
-		plots.add(Plot.builder().name(DashboardConstants.TOTAL_CUMULATIVE_PROPERTIES).value(new BigDecimal(totalProperties))
+		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_PAID)
+				.value(new BigDecimal(propertiesPaid)
+						.divide(new BigDecimal(enrichTotalProperties), 2, RoundingMode.HALF_UP)
+						.multiply(new BigDecimal(100)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_PROPERTIES_PAID").plots(plots).build());
@@ -833,6 +840,9 @@ public class URCService {
 		Integer propertiesPaid = (Integer) urcRepository.getUrcPropertiesPaid(paymentSearchCriteria);
 		Integer activeConnectionCount =  (Integer) urcRepository.getActiveWaterConnectionCount(waterSearchCriteria);
 		Integer enrichTotalProperties = enrichProperties(payloadDetails, activeConnectionCount);
+		if (enrichTotalProperties == 0) {
+			enrichTotalProperties = 1;
+		}
 		plots.add(Plot.builder().name(DashboardConstants.TOTAL_CONNECTIONS).value(new BigDecimal(enrichTotalProperties))
 				.label(String.valueOf(serialNumber)).symbol("number").build());
 		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_PAID).value(new BigDecimal(propertiesPaid))
@@ -840,7 +850,10 @@ public class URCService {
 		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_NOT_PAID)
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
-		plots.add(Plot.builder().name(DashboardConstants.TOTAL_CUMULATIVE_CONNECTIONS).value(new BigDecimal(activeConnectionCount))
+		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_PAID)
+				.value(new BigDecimal(propertiesPaid)
+						.divide(new BigDecimal(enrichTotalProperties), 2, RoundingMode.HALF_UP)
+						.multiply(new BigDecimal(100)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_WATER_CONSUMER_PAID").plots(plots).build());
 	}
@@ -1216,8 +1229,6 @@ public class URCService {
 				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
 
 		return Arrays.asList(Data.builder().headerName("DSS_URC_COLLECTOR_WISE_REVENUE ").plots(plots).build());
-	}
-  
-
-  
+	}  
+	
 }
