@@ -12,7 +12,7 @@ pipeline {
                 checkout scm
 
                 // Build the Maven project
-                sh 'mvn -f dashboard-services/pom.xml clean install -DskipTests'
+                sh 'mvn -f dashboard-services/pom.xml clean package -DskipTests'
 
                 // Build Docker
                 sh 'sudo docker build . -t odhub/dashboard-services:master-${BUILD_NUMBER} -f dashboard-services/Dockerfile'
