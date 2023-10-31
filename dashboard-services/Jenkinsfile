@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven' // Use the name defined in the Maven installation configuration
+        // maven 'maven' // Use the name defined in the Maven installation configuration
         jdk 'java-1.8'
     }
     stages {
