@@ -23,6 +23,8 @@ public class DemandSearchCriteria {
     
     private String businessService;
     
+    private Set<String> businessServices;
+    
     private Long taxPeriodFrom;
     
     private Long taxPeriodTo;

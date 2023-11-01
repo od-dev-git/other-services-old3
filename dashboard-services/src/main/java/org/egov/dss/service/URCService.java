@@ -91,7 +91,10 @@ public class URCService {
 		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
-			criteria.setBusinessService(payloadDetails.getModulelevel());
+			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_URC))
+				criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.URC_REVENUE_ALL_BS));
+			else
+				criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
 		}
 
 		if (StringUtils.hasText(payloadDetails.getTenantid())) {
@@ -1057,7 +1060,6 @@ public class URCService {
 	}
 	
 	public List<Data> urcDemandEfficiency(PayloadDetails payloadDetails) {
-		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
 		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);		
 		List<Plot> plots = new ArrayList<Plot>();
 		int serialNumber = 1;
@@ -1228,7 +1230,7 @@ public class URCService {
 		plots.add(Plot.builder().name(DashboardConstants.JALSATHI_COLLECTION_ACHIEVEMENT).value(percent)
 				.label(String.valueOf(++serialNumber)).symbol("Amount").build());
 
-		return Arrays.asList(Data.builder().headerName("DSS_URC_COLLECTOR_WISE_REVENUE ").plots(plots).build());
+		return Arrays.asList(Data.builder().headerName("DSS_URC_COLLECTOR_WISE_REVENUE").plots(plots).build());
 	}  
 	
 }
