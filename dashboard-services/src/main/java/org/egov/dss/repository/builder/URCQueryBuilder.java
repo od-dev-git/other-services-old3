@@ -433,10 +433,10 @@ public class URCQueryBuilder {
 			preparedStatementValues.put("tenantId", searchCriteria.getTenantIds());
 		}
 
-		if (!StringUtils.isEmpty(searchCriteria.getBusinessService())) {
+		if (!CollectionUtils.isEmpty(searchCriteria.getBusinessServices())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" businessservice = :businessService ");
-			preparedStatementValues.put("businessService", searchCriteria.getBusinessService());
+			selectQuery.append(" businessservice in ( :businessService ) ");
+			preparedStatementValues.put("businessService", searchCriteria.getBusinessServices());
 		}
 
 		if (!StringUtils.isEmpty(searchCriteria.getFinancialYear())) {
