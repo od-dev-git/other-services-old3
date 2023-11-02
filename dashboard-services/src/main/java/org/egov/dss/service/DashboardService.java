@@ -374,6 +374,10 @@ public class DashboardService {
 			responseData.getData().forEach(data -> data.setHeaderName(chartName));
 			responseData.getData().forEach(data -> data.setHeaderSymbol(valueType));
 			break;
+		case "scorecard":
+			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			responseData.getData().forEach(data -> data.setHeaderSymbol(valueType));
+			break;
 		
 		}
 		

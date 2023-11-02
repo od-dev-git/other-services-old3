@@ -1,17 +1,23 @@
 package org.egov.dss.repository;
 
+import static java.util.Collections.reverseOrder;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
+import org.egov.dss.model.Bill;
 import org.egov.dss.model.DemandSearchCriteria;
+import org.egov.dss.model.Payment;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
@@ -21,6 +27,7 @@ import org.egov.dss.model.UserSearchRequest;
 import org.egov.dss.model.WaterSearchCriteria;
 import org.egov.dss.repository.builder.URCQueryBuilder;
 import org.egov.dss.repository.rowmapper.ChartRowMapper;
+import org.egov.dss.repository.rowmapper.PaymentRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.egov.dss.repository.rowmapper.URCRevenueRowMapper;
 import org.egov.dss.repository.rowmapper.UserRowMapper;
@@ -34,6 +41,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import org.egov.dss.repository.rowmapper.BillRowMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -63,6 +72,9 @@ public class URCRepository {
 	
 	@Autowired
 	private ObjectMapper mapper;
+	
+	@Autowired
+	private BillRowMapper billRowMapper;
 	
 	public Object getTotalCollection(PaymentSearchCriteria criteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
@@ -257,5 +269,44 @@ public class URCRepository {
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
     }
+	
+	public List<Payment> fetchPayments(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = urcQueryBuilder.getPaymentSearchQuery(paymentSearchCriteria, preparedStatementValues);
+		log.info("Query: " + query);
+		log.info("preparedStatementValues: " + preparedStatementValues);
+		List<Payment> payments = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new PaymentRowMapper());
+		if (!CollectionUtils.isEmpty(payments)) {
+			Set<String> billIds = new HashSet<>();
+			for (Payment payment : payments) {
+				billIds.addAll(payment.getPaymentDetails().stream().map(detail -> detail.getBillId())
+						.collect(Collectors.toSet()));
+			}
+			Map<String, org.egov.dss.model.Bill> billMap = getBills(billIds);
+			for (Payment payment : payments) {
+				payment.getPaymentDetails().forEach(detail -> {
+					detail.setBill(billMap.get(detail.getBillId()));
+				});
+			}
+			payments.sort(reverseOrder(Comparator.comparingLong(Payment::getTransactionDate)));
+		}
+
+		return payments;
+	}
+
+	private Map<String, Bill> getBills(Set<String> ids) {
+		Map<String, Bill> mapOfIdAndBills = new HashMap<>();
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		preparedStatementValues.put("id", ids);
+		String query = urcQueryBuilder.getBillQuery();
+		List<Bill> bills = namedParameterJdbcTemplate.query(query, preparedStatementValues, billRowMapper);
+		bills.forEach(bill -> {
+			mapOfIdAndBills.put(bill.getId(), bill);
+		});
+
+		return mapOfIdAndBills;
+
+	}
 
 }

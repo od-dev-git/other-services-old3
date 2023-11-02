@@ -1,9 +1,11 @@
 package org.egov.dss.service;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,9 +17,12 @@ import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.dss.constants.DashboardConstants;
+import org.egov.dss.model.BillDetail;
 import org.egov.dss.model.DemandSearchCriteria;
+import org.egov.dss.model.IncentiveAnalysis;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.Payment;
+import org.egov.dss.model.PaymentDetail;
 import org.egov.dss.model.PaymentSearchCriteria;
 import org.egov.dss.model.PropertySerarchCriteria;
 import org.egov.dss.model.TargetSearchCriteria;
@@ -48,6 +53,9 @@ public class URCService {
 
 	@Autowired
 	private DashboardUtils dashboardUtils;
+	
+	@Autowired
+	CalculatorService calculatorService;
 	
 		
 	private PaymentSearchCriteria getPaymentSearchCriteria(PayloadDetails payloadDetails) {
@@ -923,7 +931,7 @@ public class URCService {
 		for (Map.Entry<String, BigDecimal> tenantWisePercent : sortedMap.entrySet()) {
 			rank++;
 			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf(rank)).name(tenantWisePercent.getKey())
-					.value(tenantWisePercent.getValue()).symbol("Amount").build());
+					.value(tenantWisePercent.getValue()).symbol("number").build());
 			response.add(Data.builder().plots(plots).headerValue(rank).build());
 		}
 		
@@ -1256,5 +1264,110 @@ public class URCService {
 
 		return Arrays.asList(Data.builder().headerName("DSS_URC_COLLECTOR_WISE_REVENUE").plots(plots).build());
 	}  
+
+	public List<Data> jalsathiPTIncentives(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		BigDecimal totalPtIncentive = BigDecimal.ZERO;
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		Map<String, IncentiveAnalysis> incentiveAnalysis = new HashMap<>();
+		List<Payment> payments = urcRepository.fetchPayments(paymentSearchCriteria);
+		System.out.println("payments : " + payments);
+		prepareCollectionReport(payments, incentiveAnalysis);
+		calculatorService.calculateIncentives(payloadDetails.getModulelevel(), incentiveAnalysis);
+		log.info("incentiveAnalysis : " + incentiveAnalysis);
+		for (Map.Entry<String, IncentiveAnalysis> incentive : incentiveAnalysis.entrySet()) {
+			totalPtIncentive = totalPtIncentive.add(incentive.getValue().getTotalIncentive()).setScale(2,
+					BigDecimal.ROUND_HALF_UP);
+		}
+		log.info("Total PT Incentive : " + totalPtIncentive);
+
+		return Arrays.asList(Data.builder().headerName("DSS_JALSATHI_PT_INCENTIVES").build());
+	}
+
+	public List<Data> jalsathiWSIncentives(PayloadDetails payloadDetails) {
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		BigDecimal totalPtIncentive = BigDecimal.ZERO;
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		Map<String, IncentiveAnalysis> incentiveAnalysis = new HashMap<>();
+		List<Payment> payments = urcRepository.fetchPayments(paymentSearchCriteria);
+		prepareCollectionReport(payments, incentiveAnalysis);
+		calculatorService.calculateIncentives(payloadDetails.getModulelevel(), incentiveAnalysis);
+		log.info("incentiveAnalysis : " + incentiveAnalysis);
+		for (Map.Entry<String, IncentiveAnalysis> incentive : incentiveAnalysis.entrySet()) {
+			totalPtIncentive = totalPtIncentive.add(incentive.getValue().getTotalIncentive()).setScale(2,
+					BigDecimal.ROUND_HALF_UP);
+		}
+		log.info("Total PT Incentive : " + totalPtIncentive);
+		
+		return Arrays.asList(Data.builder().headerName("DSS_JALSATHI_WS_INCENTIVES").build());
+	}
+    
+	private void prepareCollectionReport(List<Payment> payments, Map<String, IncentiveAnalysis> incentiveAnalysis) {
+
+		for (Payment payment : payments) {
+			IncentiveAnalysis incentive = incentiveAnalysis.get(payment.getAuditDetails().getCreatedBy());
+			if (incentive == null) {
+				incentive = IncentiveAnalysis.builder().empId(payment.getAuditDetails().getCreatedBy()).build();
+				incentiveAnalysis.put(payment.getAuditDetails().getCreatedBy(), incentive);
+			}
+			incentive.setTotalNoOfTransaction(incentive.getTotalNoOfTransaction() + 1);
+			incentive.setTotalCollection(incentive.getTotalCollection().add(payment.getTotalAmountPaid()));
+
+			BigDecimal arrearCollected = getColletdArrearAmount(payment);
+			incentive.setCollectionTowardsArrear(incentive.getCollectionTowardsArrear().add(arrearCollected));
+			incentive.setCollectionTowardsCurrent(incentive.getCollectionTowardsCurrent()
+					.add(payment.getTotalAmountPaid().subtract(arrearCollected)));
+		}
+	}
+
+	private BigDecimal getColletdArrearAmount(Payment payment) {
+
+		Comparator<BillDetail> billDetailComparator = (obj1, obj2) -> obj2.getFromPeriod()
+				.compareTo(obj1.getFromPeriod());
+		BigDecimal arrearCollected = BigDecimal.ZERO;
+
+		for (PaymentDetail pd : payment.getPaymentDetails()) {
+			Collections.sort(pd.getBill().getBillDetails(), billDetailComparator);
+			for (int i = 0; i < pd.getBill().getBillDetails().size(); i++) {
+				if (i != 0) {
+					arrearCollected = arrearCollected.add(pd.getBill().getBillDetails().get(i).getAmountPaid());
+				}
+			}
+		}
+
+		return arrearCollected;
+	}
+  
+	public static void main(String[] args) {
+		Map<String, IncentiveAnalysis> incentiveAnalysis = new HashMap<>();
+		BigDecimal totalIncentive = BigDecimal.ZERO;
+		IncentiveAnalysis inct = new IncentiveAnalysis();
+		inct.setEmpName("Prasun Dev");
+		inct.setTotalIncentive(new BigDecimal(500.36));
+		inct.setTotalCollection(new BigDecimal(30336.00));
+		IncentiveAnalysis inct1 = new IncentiveAnalysis();
+		inct1.setEmpName("DD Dev");
+		inct1.setTotalIncentive(new BigDecimal(400.36));
+		inct1.setTotalCollection(new BigDecimal(1000.00));
+		incentiveAnalysis.put("test", inct);
+		incentiveAnalysis.put("test1", inct1);
+		for (Map.Entry<String, IncentiveAnalysis> incentive : incentiveAnalysis.entrySet()) {
+			totalIncentive = totalIncentive.add(incentive.getValue().getTotalIncentive()).setScale(2,
+					BigDecimal.ROUND_HALF_UP);
+			System.out.println(incentive.getValue());
+			System.out.println(incentive.getValue().getTotalIncentive());
+
+		}
+		System.out.println(totalIncentive);
+		;
+	}
+
+
 	
 }
