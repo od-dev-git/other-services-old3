@@ -370,6 +370,10 @@ public class DashboardService {
 			responseData.getData().forEach(data -> data.setHeaderName(chartName));
 			responseData.getData().forEach(data -> data.setHeaderSymbol(valueType));
 			break;
+		case "progressbar":
+			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			responseData.getData().forEach(data -> data.setHeaderSymbol(valueType));
+			break;
 		
 		}
 		
