@@ -254,6 +254,14 @@ public class DashboardConstants {
     
     public static final String JALSATHI_COLLECTION_ACHIEVEMENT = "Jalsathi Collection Achievement";
     
+	public static final String NON_METERED = "Non Metered";
+
+	public static final String PROPERTY_MODULE = "PT";
+	
+	public static final String WATER_MODULE = "WS";
+
+	public static final String ROLE_JALSATHI = "JALSATHI";
+    
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
 					BUSINESS_SERVICE_OC_APP_FEE, BUSINESS_SERVICE_OC_SAN_FEE));

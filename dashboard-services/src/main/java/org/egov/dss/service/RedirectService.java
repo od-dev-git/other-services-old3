@@ -826,6 +826,14 @@ public class RedirectService {
         if(Constants.VisualizationCodes.URC_COLLECTOR_WISE_REVENUE.equalsIgnoreCase(visualizationCode)) {
             return urcService.collectorWiseRevenue(requestInfoWrapper.getPayloadDetails());
         }
+        
+		if (Constants.VisualizationCodes.JALSATHI_PT_INCENTIVES.equalsIgnoreCase(visualizationCode)) {
+			return urcService.jalsathiPTIncentives(requestInfoWrapper.getPayloadDetails());
+		}
+
+		if (Constants.VisualizationCodes.JALSATHI_WS_INCENTIVES.equalsIgnoreCase(visualizationCode)) {
+			return urcService.jalsathiWSIncentives(requestInfoWrapper.getPayloadDetails());
+		}
 
 		return null;
 
