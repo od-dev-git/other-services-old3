@@ -15,18 +15,18 @@ public class USMQueryBuilder {
 			+ "eg_usm_survey_ticket  ticket where submit.id = answer.surveysubmittedid and answer.id = ticket.surveyanswerid";
 
 	public static final String USM_TOTAL_SLUM_SUBMITED_FEEDBACK = "select count(distinct slumcode ) from eg_usm_survey_submitted submit";
-	public static final String USM_TOP_ISSUE_CATEGORY = "select answer.questioncategory as name, count(ticket.status) as value from eg_usm_survey_submitted_answer answer inner join eg_usm_survey_submitted submit on submit.id  = answer.surveysubmittedid   inner join eg_usm_survey_ticket ticket   on answer.id = ticket.surveyanswerid";
+	public static final String USM_TOP_ISSUE_CATEGORY = "select answer.questioncategory as name, count(ticket.id) as value from eg_usm_survey_submitted_answer answer inner join eg_usm_survey_ticket ticket   on answer.id = ticket.surveyanswerid";
 	public static final String USM_TOTAL_FEEDBACK = "SELECT submit.tenantid as tenantid, COUNT(*) as totalamt FROM eg_usm_survey_submitted submit ";
 
 	public static final String USM_TOTAL_OPEN_ISSUES = "SELECT ticket.tenantid as tenantid, SUM(CASE WHEN ticket.status = 'OPEN' THEN 1 ELSE 0 END) as totalamt FROM eg_usm_survey_ticket ticket JOIN eg_usm_survey_submitted_answer answer ON answer.id = ticket.surveyanswerid";
 
 	public static final String USM_TOTAL_CLOSED_ISSUES = "SELECT ticket.tenantid as tenantid, SUM(CASE WHEN ticket.status = 'CLOSED' THEN 1 ELSE 0 END) as totalamt FROM eg_usm_survey_ticket ticket JOIN eg_usm_survey_submitted_answer answer ON answer.id = ticket.surveyanswerid ";
 
-	public static final String MR_CUMULATIVE_APPLICATIONS = "select to_char(monthYear, 'Mon-YYYY') as name, sum(noOffeedback) over (order by monthYear asc rows between unbounded preceding and current row) as value from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear , count(id) noOffeedback from eg_usm_survey_submitted submit";
+	public static final String USM_CUMULATIVE_APPLICATIONS = "select to_char(monthYear, 'Mon-YYYY') as name, sum(noOffeedback) over (order by monthYear asc rows between unbounded preceding and current row) as value from (select to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') monthYear , count(id) noOffeedback from eg_usm_survey_submitted submit";
 
 	public static final String USM_TOTAL_ISSUE_TENANTWISE = "select ticket.tenantid as name , count(*) as value from eg_usm_survey_ticket ticket";
 
-	public static final String USM_TOTAL_CATEGORY_WISE_ISSUE_COUNT = "SELECT answer.questioncategory as name,FLOOR((SUM(CASE WHEN ticket.status = 'CLOSED' THEN 1 ELSE 0 END)::DECIMAL / count(ticket.id)::DECIMAL) * 100) as valuess FROM eg_usm_survey_submitted_answer answer JOIN eg_usm_survey_ticket ticket ON answer.id = ticket.surveyanswerid";
+	public static final String USM_TOTAL_CATEGORY_WISE_ISSUE_COUNT = "SELECT answer.questioncategory as name,FLOOR((SUM(CASE WHEN ticket.status = 'CLOSED' THEN 1 ELSE 0 END)::DECIMAL / count(ticket.id)::DECIMAL) * 100) as value FROM eg_usm_survey_submitted_answer answer JOIN eg_usm_survey_ticket ticket ON answer.id = ticket.surveyanswerid";
 
 	public static String getTotalFeebackSubmitted(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -106,7 +106,7 @@ public class USMQueryBuilder {
 
 	public static String getCumulativeApplications(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
-		StringBuilder selectQuery = new StringBuilder(MR_CUMULATIVE_APPLICATIONS);
+		StringBuilder selectQuery = new StringBuilder(USM_CUMULATIVE_APPLICATIONS);
 		addWhereClause(selectQuery, preparedStatementValues, criteria);
 		addGroupByClause(selectQuery,
 				" to_date(concat('01-',EXTRACT(MONTH FROM to_timestamp(lastmodifiedtime/1000)),'-' ,EXTRACT(YEAR FROM to_timestamp(lastmodifiedtime/1000))),'DD-MM-YYYY') ");
