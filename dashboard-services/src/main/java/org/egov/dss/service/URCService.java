@@ -747,6 +747,12 @@ public class URCService {
 			response.add(Data.builder().plots(plots).headerValue(rank).build());
 		}
 		
+		if (CollectionUtils.isEmpty(response)) {
+			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf("0")).name("N/A")
+					.value(BigDecimal.ZERO).symbol("Amount").build());
+			response.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+		
 		return response;
 
 	}
@@ -786,6 +792,12 @@ public class URCService {
 			rank++;
 			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf(rank)).name(tenantWisePercent.getKey())
 					.value(tenantWisePercent.getValue()).symbol("Amount").build());
+			response.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf("0")).name("N/A")
+					.value(BigDecimal.ZERO).symbol("Amount").build());
 			response.add(Data.builder().plots(plots).headerValue(rank).build());
 		}
 		
@@ -915,6 +927,12 @@ public class URCService {
 			response.add(Data.builder().plots(plots).headerValue(rank).build());
 		}
 		
+		if (CollectionUtils.isEmpty(response)) {
+			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf("0")).name("N/A")
+					.value(BigDecimal.ZERO).symbol("number").build());
+			response.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+		
 		return response;
 
 	}
@@ -953,6 +971,12 @@ public class URCService {
 			rank++;
 			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf(rank)).name(tenantWisePercent.getKey())
 					.value(tenantWisePercent.getValue()).symbol("Amount").build());
+			response.add(Data.builder().plots(plots).headerValue(rank).build());
+		}
+		
+		if (CollectionUtils.isEmpty(response)) {
+			List<Plot> plots = Arrays.asList(Plot.builder().label(String.valueOf("0")).name("N/A")
+					.value(BigDecimal.ZERO).symbol("Amount").build());
 			response.add(Data.builder().plots(plots).headerValue(rank).build());
 		}
 		
