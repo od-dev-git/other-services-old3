@@ -1344,30 +1344,5 @@ public class URCService {
 		return arrearCollected;
 	}
   
-	public static void main(String[] args) {
-		Map<String, IncentiveAnalysis> incentiveAnalysis = new HashMap<>();
-		BigDecimal totalIncentive = BigDecimal.ZERO;
-		IncentiveAnalysis inct = new IncentiveAnalysis();
-		inct.setEmpName("Prasun Dev");
-		inct.setTotalIncentive(new BigDecimal(500.36));
-		inct.setTotalCollection(new BigDecimal(30336.00));
-		IncentiveAnalysis inct1 = new IncentiveAnalysis();
-		inct1.setEmpName("DD Dev");
-		inct1.setTotalIncentive(new BigDecimal(400.36));
-		inct1.setTotalCollection(new BigDecimal(1000.00));
-		incentiveAnalysis.put("test", inct);
-		incentiveAnalysis.put("test1", inct1);
-		for (Map.Entry<String, IncentiveAnalysis> incentive : incentiveAnalysis.entrySet()) {
-			totalIncentive = totalIncentive.add(incentive.getValue().getTotalIncentive()).setScale(2,
-					BigDecimal.ROUND_HALF_UP);
-			System.out.println(incentive.getValue());
-			System.out.println(incentive.getValue().getTotalIncentive());
-
-		}
-		System.out.println(totalIncentive);
-		;
-	}
-
-
 	
 }
