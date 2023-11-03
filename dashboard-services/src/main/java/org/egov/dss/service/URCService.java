@@ -1136,7 +1136,7 @@ public class URCService {
 	
 	public List<Data> propertiesCoveredByJalsathi(PayloadDetails payloadDetails) {
 		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
-	    PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		PropertySerarchCriteria propertySearchCriteria = getPropertySearchCriteria(payloadDetails);
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
@@ -1150,8 +1150,10 @@ public class URCService {
 		Integer totalProperties = urcRepository.getTotalPropertiesCount(propertySearchCriteria);
 		if (totalProperties == 0)
 			totalProperties = 1;
-		Integer propertyPaidRatio = (propertiesPaid / totalProperties) * 100;
-		return Arrays.asList(Data.builder().headerValue(concatString(propertiesPaid, propertyPaidRatio)).build());
+		BigDecimal propertyPaidRatio = BigDecimal.valueOf(propertiesPaid).multiply(BigDecimal.valueOf(100))
+				.divide(BigDecimal.valueOf(totalProperties), 2, BigDecimal.ROUND_HALF_UP);
+		return Arrays.asList(Data.builder()
+				.headerValue(calculatePercentageValue(String.valueOf(propertiesPaid), propertyPaidRatio)).build());
 	}
 
 	public List<Data> jalsathiPTCollection(PayloadDetails payloadDetails) {
@@ -1171,7 +1173,7 @@ public class URCService {
 				.multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder()
 				.headerValue(
-						calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), percent))
+						calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalJalSathiCollection), percent))
 				.build());
 	}
 	
@@ -1191,8 +1193,10 @@ public class URCService {
 		Integer totalWaterConsumer = (Integer) urcRepository.getActiveWaterConnectionCount(waterSearchCriteria);
 		if (totalWaterConsumer == 0)
 			totalWaterConsumer = 1;
-		Integer waterConsumerRatio = (waterConsumerPaid / totalWaterConsumer) * 100;
-		return Arrays.asList(Data.builder().headerValue(concatString(waterConsumerPaid, totalWaterConsumer)).build());
+		BigDecimal propertyPaidRatio = BigDecimal.valueOf(waterConsumerPaid).multiply(BigDecimal.valueOf(100))
+				.divide(BigDecimal.valueOf(totalWaterConsumer), 2, BigDecimal.ROUND_HALF_UP);
+		return Arrays.asList(Data.builder()
+				.headerValue(calculatePercentageValue(String.valueOf(waterConsumerPaid), propertyPaidRatio)).build());
 	}
 	
 	public List<Data> jalsathiWSCollection(PayloadDetails payloadDetails) {
@@ -1212,7 +1216,7 @@ public class URCService {
 				.multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder()
 				.headerValue(
-						calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), percent))
+						calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalJalSathiCollection), percent))
 				.build());
 	}
 
@@ -1232,7 +1236,7 @@ public class URCService {
 				.multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder()
 				.headerValue(
-						calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), percent))
+						calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalJalSathiCollection), percent))
 				.build());
 	}
 	
