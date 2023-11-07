@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 @Getter
 @Component("configurationLoader")
@@ -91,6 +92,9 @@ public class ConfigurationLoader {
 
 	@Value("${egov.user.search.path}")
 	private String userSearchEndpoint;
+	
+	@Value("${app.timezone}")
+    private String timeZone;
     
     // private static final String RESOURCE_LOCATION = "file://home/darshan/Tarento/DataPlatform/analytics2/analytics/src/main/resources/schema/*.json";
     public static final String ROLE_DASHBOARD_CONFIG = "RoleDashboardMappingsConf.json";
