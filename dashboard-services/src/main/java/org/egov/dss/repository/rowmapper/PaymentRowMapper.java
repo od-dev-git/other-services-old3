@@ -31,9 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class PaymentRowMapper implements ResultSetExtractor<List<Payment>> {
 
 
-    @Autowired
-    private ObjectMapper mapper;
-
     @Override
     public List<Payment> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
@@ -265,17 +262,18 @@ public class PaymentRowMapper implements ResultSetExtractor<List<Payment>> {
     }
 
 
-    private JsonNode getJsonValue(PGobject pGobject){
-        try {
-            if(Objects.isNull(pGobject) || Objects.isNull(pGobject.getValue()))
-                return null;
-            else
-                return mapper.readTree( pGobject.getValue());
-        } catch (IOException e) {
-            throw new CustomException("SERVER_ERROR","Exception occurred while parsing the additionalDetail json : "+ e
-                    .getMessage());
-        }
-    }
+	private JsonNode getJsonValue(PGobject pGobject) {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			if (Objects.isNull(pGobject) || Objects.isNull(pGobject.getValue()))
+				return null;
+			else
+				return mapper.readTree(pGobject.getValue());
+		} catch (IOException e) {
+			throw new CustomException("SERVER_ERROR",
+					"Exception occurred while parsing the additionalDetail json : " + e.getMessage());
+		}
+	}
 
 
 
