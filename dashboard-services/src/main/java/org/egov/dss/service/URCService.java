@@ -1288,12 +1288,12 @@ public class URCService {
 		}
 		log.info("Total PT Incentive : " + totalPtIncentive);
 
-		return Arrays.asList(Data.builder().headerName("DSS_JALSATHI_PT_INCENTIVES").build());
+		return Arrays.asList(Data.builder().headerValue(totalPtIncentive).headerName("DSS_JALSATHI_PT_INCENTIVES").build());
 	}
 
 	public List<Data> jalsathiWSIncentives(PayloadDetails payloadDetails) {
 		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
-		BigDecimal totalPtIncentive = BigDecimal.ZERO;
+		BigDecimal totalWSIncentive = BigDecimal.ZERO;
 		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
 		paymentSearchCriteria
 				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
@@ -1304,12 +1304,12 @@ public class URCService {
 		calculatorService.calculateIncentives(payloadDetails.getModulelevel(), incentiveAnalysis);
 		log.info("incentiveAnalysis : " + incentiveAnalysis);
 		for (Map.Entry<String, IncentiveAnalysis> incentive : incentiveAnalysis.entrySet()) {
-			totalPtIncentive = totalPtIncentive.add(incentive.getValue().getTotalIncentive()).setScale(2,
+			totalWSIncentive = totalWSIncentive.add(incentive.getValue().getTotalIncentive()).setScale(2,
 					BigDecimal.ROUND_HALF_UP);
 		}
-		log.info("Total PT Incentive : " + totalPtIncentive);
+		log.info("Total WS Incentive : " + totalWSIncentive);
 		
-		return Arrays.asList(Data.builder().headerName("DSS_JALSATHI_WS_INCENTIVES").build());
+		return Arrays.asList(Data.builder().headerValue(totalWSIncentive).headerName("DSS_JALSATHI_WS_INCENTIVES").build());
 	}
     
 	private void prepareCollectionReport(List<Payment> payments, Map<String, IncentiveAnalysis> incentiveAnalysis) {
