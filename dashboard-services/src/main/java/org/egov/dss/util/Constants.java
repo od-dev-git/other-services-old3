@@ -250,6 +250,8 @@ public class Constants {
 		final static String URC_COLLECTOR_WISE_REVENUE = "collectorWiseRevenue";
 		final static String JALSATHI_PT_INCENTIVES = "jalsathiPTIncentives";
 	    final static String JALSATHI_WS_INCENTIVES = "jalsathiWSIncentives";
+	    final static String JALSATHI_CONTRIBUTION_TO_PT = "jalsathiContributionToPT";
+	    final static String JALSATHI_CONTRIBUTION_TO_WS = "jalsathiContributionToWS";
 
 
 		final static String USM_TOTAL_FEEDBACK_SUBMITTED = "totalFeedbackSubmitted";
