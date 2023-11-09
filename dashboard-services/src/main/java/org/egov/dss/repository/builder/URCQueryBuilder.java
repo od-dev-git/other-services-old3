@@ -33,8 +33,21 @@ public class URCQueryBuilder {
 			+ "FROM egcl_payment py "
 			+ "INNER JOIN egcl_paymentdetail pyd ON pyd.paymentid = py.id ";
 	
+	public static final String URC_MONTH_WISE_JALSATHI_COLLECTION = " WITH months AS (SELECT DATE_TRUNC('month', MIN(TO_TIMESTAMP(fromdate / 1000 + 19800) at TIME zone 'UTC')) as start_month, "
+			+ "DATE_TRUNC('month', MAX(TO_TIMESTAMP(todate / 1000 + 19800) at TIME zone 'UTC')) as end_month),monthly_counts AS ( "
+			+ "SELECT DATE_TRUNC('month', TO_TIMESTAMP(pyd.receiptdate / 1000 + 19800 ) at TIME zone 'UTC') as month_start,COALESCE(SUM(py.totalamountpaid), 0) as totalamt, count(distinct bill.consumercode) as consumercode,count(distinct usr.uuid) as activejalsathi "
+			+ "FROM egcl_payment py "
+			+ "INNER JOIN egcl_paymentdetail pyd ON pyd.paymentid = py.id "
+			+ "INNER JOIN eg_hrms_employee hrms on py.createdby = hrms.id:: character varying "
+			+ "INNER JOIN eg_user usr on hrms.uuid = usr.uuid "
+			+ "INNER JOIN egcl_bill bill on bill.id = pyd.billid";
+	
 	public static final String URC_MONTH_WISE_COLLECTION_SUB_QUERY = " all_months AS (select generate_series(start_month, end_month, interval '1 month') as month_range FROM months) "
 			+ "SELECT TO_CHAR(am.month_range, 'Mon-YYYY') as name, COALESCE(totalamt, 0) AS value FROM all_months am LEFT JOIN "
+			+ "monthly_counts mc ON am.month_range = mc.month_start ";
+	
+	public static final String URC_MONTH_WISE_JALSATHI_COLLECTION_SUB_QUERY = " all_months AS (select generate_series(start_month, end_month, interval '1 month') as month_range FROM months) "
+			+ "SELECT TO_CHAR(am.month_range, 'Mon-YYYY') as name, COALESCE(totalamt, 0) AS value, coalesce(consumercode, 0) as consumercode, coalesce(activejalsathi, 0) as activejalsathi FROM all_months am LEFT JOIN "
 			+ "monthly_counts mc ON am.month_range = mc.month_start ";
 	
 	public static final String MONTH_YEAR_QUERY = " WITH  months AS (SELECT "
@@ -175,6 +188,20 @@ public class URCQueryBuilder {
 		addWhereClause(monthQueryModified, preparedStatementValues, paymentSearchCriteria);
 		addGroupByClause(monthQueryModified, " month_start ), ");
 		monthQueryModified.append(URC_MONTH_WISE_COLLECTION_SUB_QUERY);
+		addOrderByClause(monthQueryModified, " am.month_range ");
+		return monthQueryModified.toString();
+	}	
+	
+	public String getMonthWiseJalsathiCollection(PaymentSearchCriteria paymentSearchCriteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder monthQuery = new StringBuilder(URC_MONTH_WISE_JALSATHI_COLLECTION);
+		String query = monthQuery.toString();
+		query = query.replaceAll("fromdate", paymentSearchCriteria.getFromDate().toString());
+		query = query.replaceAll("todate", paymentSearchCriteria.getToDate().toString());
+		StringBuilder monthQueryModified = new StringBuilder(query);
+		addWhereClause(monthQueryModified, preparedStatementValues, paymentSearchCriteria);
+		addGroupByClause(monthQueryModified, " month_start ), ");
+		monthQueryModified.append(URC_MONTH_WISE_JALSATHI_COLLECTION_SUB_QUERY);
 		addOrderByClause(monthQueryModified, " am.month_range ");
 		return monthQueryModified.toString();
 	}

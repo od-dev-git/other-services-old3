@@ -1347,6 +1347,51 @@ public class URCService {
 
 		return arrearCollected;
 	}
+	
+	public List<Data> jalsathiContributionToPT(PayloadDetails payloadDetails) {
+		List<Data> response = new ArrayList<>();
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		paymentSearchCriteria
+				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
+		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
+		List<HashMap<String, Object>> monthWiseJalsathiContribution = urcRepository
+				.getMonthWiseJalsathiCollection(paymentSearchCriteria);
+		int serailNumber = 0;
+		for (HashMap<String, Object> jalsathiContribution : monthWiseJalsathiContribution) {
+			serailNumber++;
+			String monthName = String.valueOf(jalsathiContribution.get("name"));
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(monthName).name("DDRs").symbol("text").build());
+			BigDecimal activeJalSathi = new BigDecimal(String.valueOf(jalsathiContribution.get("activejalsathi")));
+			if(activeJalSathi.compareTo(BigDecimal.ZERO) == 0)
+				activeJalSathi = BigDecimal.ONE;
+			row.add(Plot.builder().name("Active Jal Saathis")
+					.value(activeJalSathi).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Property Tax collected by Jal Saathis (Rs)")
+					.value(new BigDecimal(String.valueOf(jalsathiContribution.get("value")))).symbol("Amount").build());
+			row.add(Plot.builder().name("Average Property tax collected per Jal Saathi (Rs)")
+					.value(new BigDecimal(String.valueOf(jalsathiContribution.get("value"))).divide(
+							activeJalSathi, 2,
+							BigDecimal.ROUND_HALF_UP))
+					.symbol("Amount").build());
+			row.add(Plot.builder().name("Units Covered by Jal Saathis")
+					.value(new BigDecimal(String.valueOf(jalsathiContribution.get("consumercode")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Average units covered per Jal Saathi")
+					.value(new BigDecimal(String.valueOf(jalsathiContribution.get("consumercode"))).divide(
+							activeJalSathi, 2,
+							BigDecimal.ROUND_HALF_UP)).symbol("number")
+					.build());
+			response.add(
+					Data.builder().headerName(monthName).headerValue(serailNumber).plots(row).insight(null).build());
+		}
+		log.info(monthWiseJalsathiContribution.toString());
+		return response;
+	}
   
 	
 }
