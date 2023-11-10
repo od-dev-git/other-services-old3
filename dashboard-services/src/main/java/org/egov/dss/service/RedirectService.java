@@ -838,6 +838,10 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.JALSATHI_CONTRIBUTION_TO_PT.equalsIgnoreCase(visualizationCode)) {
 			return urcService.jalsathiContributionToPT(requestInfoWrapper.getPayloadDetails());
 		}
+		
+		if (Constants.VisualizationCodes.JALSATHI_CONTRIBUTION_TO_WS.equalsIgnoreCase(visualizationCode)) {
+			return urcService.jalsathiContributionToWS(requestInfoWrapper.getPayloadDetails());
+		}
 
 		return null;
 
