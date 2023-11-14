@@ -26,8 +26,11 @@ public class WSReportValidator {
 			errorMap.put("INVALID_SEARCH_CRITERIA", "Ulb can not be empty/blank");
 		}
 		
-		if(searchCriteria.getCollectionDate()==null || searchCriteria.getCollectionDate()==0) {
-			errorMap.put("INVALID_SEARCH_CRITERIA", "Collection date can not be empty/blank");
+	    if (searchCriteria.getFromDate() == null || searchCriteria.getFromDate() == 0) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "From date can not be empty/blank");
+		}
+		if (searchCriteria.getToDate() == null || searchCriteria.getToDate() == 0) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "To date can not be empty/blank");
 		}
 		
 		createCustomException(errorMap);
