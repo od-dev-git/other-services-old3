@@ -114,8 +114,8 @@ public class WaterService {
 		PaymentSearchCriteria paymentSearchCriteria = PaymentSearchCriteria.builder()
 				.businessServices(Stream.of("WS","WS.ONE_TIME_FEE").collect(Collectors.toSet()))
 				.tenantId(searchCriteria.getTenantId())
-				.fromDate(searchCriteria.getCollectionDate())
-				.toDate(searchCriteria.getCollectionDate())
+				.fromDate(searchCriteria.getFromDate())
+				.toDate(searchCriteria.getToDate())
 				.build();
 		log.info(" Payments Search Criteria : " + paymentSearchCriteria.toString());
 		
