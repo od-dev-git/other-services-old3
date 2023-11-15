@@ -226,6 +226,8 @@ public class DashboardConstants {
 	
 	public static final String PREVIOUS_EFFICIENCY = "Previous FY Efficiency";
 	
+	public static final String PREVIOUS_EFFICIENCY_ACHIEVEMENT = "Previous FY Efficiency/Achievement";
+	
 	public static final String TOTAL_DEMAND = "Total Demand";
 	
 	public static final String TOTAL_PROPERTIES = "Total Properties should have paid";
