@@ -719,9 +719,9 @@ public class URCService {
 		}
 		BigDecimal previousYearEfficiency = previousTotalCollection.divide(previousYearDemand, 2, RoundingMode.HALF_UP)
 				.multiply(new BigDecimal(100));
-		plots.add(Plot.builder().name(DashboardConstants.PREVIOUS_EFFICIENCY).value(previousYearEfficiency)
+		plots.add(Plot.builder().name(DashboardConstants.PREVIOUS_EFFICIENCY_ACHIEVEMENT).value(previousYearEfficiency)
 				.label(String.valueOf(++serialNumber)).symbol("Percentage").build());
-		return Arrays.asList(Data.builder().headerName("DSS_URC_PT_DEMAND_EFFICIENCY").plots(plots).build());
+		return Arrays.asList(Data.builder().headerName("DSS_URC_WS_DEMAND_EFFICIENCY").plots(plots).build());
 	}
 	
 	public List<Data> topJalSathiPTCollection(PayloadDetails payloadDetails) {
@@ -1194,7 +1194,7 @@ public class URCService {
 		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
 
 		waterSearchCriteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
-		waterSearchCriteria.setStatus(DashboardConstants.STATUS_ACTIVE);
+		waterSearchCriteria.setStatus(DashboardConstants.WS_CONNECTION_ACTIVATED);
 		waterSearchCriteria.setFromDate(null);
 		Integer waterConsumerPaid = (Integer) urcRepository.propertyCoveredByJalsathi(paymentSearchCriteria);
 		Integer totalWaterConsumer = (Integer) urcRepository.getActiveWaterConnectionCount(waterSearchCriteria);
@@ -1257,7 +1257,7 @@ public class URCService {
 		BigDecimal totalCollection = (BigDecimal) urcRepository.getTotalCollection(paymentSearchCriteria);
 		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
 		BigDecimal totalJalSathiCollection = (BigDecimal) urcRepository.colletionByJalSathi(paymentSearchCriteria);
-		BigDecimal totalCollectionByOther = totalJalSathiCollection.subtract(totalJalSathiCollection);
+		BigDecimal totalCollectionByOther = totalCollection.subtract(totalJalSathiCollection);
 		// postEnrichmentCollection(payloadDetails, paymentSearchCriteria);
 		if (totalCollection.compareTo(BigDecimal.ZERO) == 0 || totalCollection.compareTo(new BigDecimal("0.00")) == 0) {
 			totalCollection = BigDecimal.ONE;

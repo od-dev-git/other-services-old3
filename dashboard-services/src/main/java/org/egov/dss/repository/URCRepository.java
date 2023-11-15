@@ -278,6 +278,7 @@ public class URCRepository {
         Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = urcQueryBuilder.getActiveConnectionCount(waterSearchCriteria, preparedStatementValues);
         log.info("query FOR get Active Water Connection Count : "+query);
+        log.info("preparedStatementValues : "+preparedStatementValues);
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
     }
