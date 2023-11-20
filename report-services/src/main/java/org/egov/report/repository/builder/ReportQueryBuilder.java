@@ -113,11 +113,11 @@ public class ReportQueryBuilder {
 			+ AS + "demand ";
 	
 	private static final String PROPERTY_DETAILS_SUMMARY_QUERY = SELECT
-			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,eu.uuid,"
+			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,epp.ownershipcategory,eu.uuid,"
 			+ "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
 			+ FROM
 			+ "eg_pt_property epp "
-			+ INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id "
+			+ INNER_JOIN + "eg_pt_owner epo " +  ON  + "epo.propertyid = epp.id and epo.status='ACTIVE' "
 			+ LEFT_OUTER_JOIN + "eg_user eu on eu.uuid = epo.userid "
 			+ INNER_JOIN + "eg_pt_address epa on epa.propertyid = epp.id "
 			+ WHERE + "epp.status <> 'INACTIVE' "
