@@ -1,6 +1,7 @@
 package org.egov.report.repository.rowmapper;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +22,25 @@ List<PropertyDetailsResponse> propertyDetailsResponseList = new ArrayList<>();
 	@Override
 	public List<PropertyDetailsResponse> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
+		ResultSetMetaData  metaData = rs.getMetaData();
 		while(rs.next()) {
 
+			int columnCount = metaData.getColumnCount();
+			Boolean hasOwnershipCategoryColumn = false;
+			
+			for (int i = 1; i <= columnCount ; i++) {
+				String columnName = metaData.getColumnName(i);
+				if(columnName.equalsIgnoreCase("ownershipcategory")) {
+					hasOwnershipCategoryColumn = true;
+					break;
+				}
+			}
+			
 			String tenantId = rs.getString("tenantid");
 			String tenantIdStyled = tenantId.replace("od.", "");
 			tenantIdStyled = tenantIdStyled.substring(0,1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
 			
+
 	         PropertyDetailsResponse propertyDetailsResponse = PropertyDetailsResponse.builder()
 	                 .ulbName(tenantIdStyled)
 	                 .wardNumber(rs.getString("ward"))
@@ -41,6 +55,13 @@ List<PropertyDetailsResponse> propertyDetailsResponseList = new ArrayList<>();
 	                 .build();
 
 			StringBuilder address = getAddress(propertyDetailsResponse);
+			
+			if (hasOwnershipCategoryColumn) {
+				String ownershipCategory = rs.getString("ownershipcategory");
+				String ownershipCategoryStyled = ownershipCategory.replace(".", " : ");
+				propertyDetailsResponse.setOwnershipCategory(ownershipCategoryStyled);
+			}
+			
 			propertyDetailsResponse.setAddress(address.toString());
 
 			propertyDetailsResponseList.add(propertyDetailsResponse);
