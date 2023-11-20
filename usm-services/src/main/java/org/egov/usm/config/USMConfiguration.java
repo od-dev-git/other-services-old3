@@ -48,6 +48,9 @@ public class USMConfiguration {
 
 	@Value("${egov.user.create.path}")
 	private String userCreateEndpoint;
+	
+	@Value("${egov.user.update.path}")
+	private String userUpdateEndpoint;
 
 	@Value("${egov.user.search.path}")
 	private String userSearchEndpoint;
@@ -138,4 +141,11 @@ public class USMConfiguration {
     @Value("${text.for.subject.email.notification}")
     private String emailSubject;
 
+    
+    //Ticket Time Limit
+    @Value("${usm.ticket.time.limit.nodalofficer}")
+    private Long ticketTimeLimitNodalOfficer;
+    
+    @Value("${usm.ticket.time.limit.escalationofficer}")
+    private Long ticketTimeLimitEscalationOfficer;
 }

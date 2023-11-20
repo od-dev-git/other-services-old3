@@ -19,7 +19,11 @@ public class DemandSearchCriteria {
 
     private String tenantId;
     
+    private Set<String> tenantIds;
+    
     private String businessService;
+    
+    private Set<String> businessServices;
     
     private Long taxPeriodFrom;
     

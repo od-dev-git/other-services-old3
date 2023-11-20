@@ -85,4 +85,15 @@ public class SurveyTicketRepository {
 		return surveyRequests;
 	}
 
+	
+	/**
+	 * 
+	 * Repository for updating daily unattended SurveyTicket in db
+	 */
+	public void updateDailyTickets() {
+		log.info("Execute query for update Daily Tickets");
+		String query = queryBuilder.getUpdateDailyTicketQuery();
+		jdbcTemplate.execute(query);
+	}
+
 }

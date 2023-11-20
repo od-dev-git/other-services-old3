@@ -3,8 +3,6 @@ package org.egov.usm.repository.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,22 +44,19 @@ public class SurveyAnswerDetailsRowMapper implements ResultSetExtractor<List<Sur
                 surveyDetails =  SurveyDetails.builder()
                         .surveySubmittedId(rs.getString("surveysubmittedid"))
                         .surveyId(rs.getString("surveyid"))
+                        .surveyTitle(rs.getString("title"))
                         .surveyNo(rs.getString("surveysubmittedno"))
                         .tenantId(rs.getString("tenantid"))
                         .ward(rs.getString("ward"))
                         .slumCode(rs.getString("slumcode"))
                         .surveyTime(rs.getLong("surveytime"))
+                        .surveyStartTime(rs.getString("starttime"))
+                        .surveyEndTime(rs.getString("endtime"))
                         .auditDetails(auditdetails)
                         .build();
             }
             
             addSubmittedAnswersToSurveyDetails(rs, surveyDetails);
-            
-            List<SubmittedAnswer> submittedAnswers = surveyDetails.getSubmittedAnswers();
-            if (!CollectionUtils.isEmpty(submittedAnswers)) {
-            	Collections.sort(surveyDetails.getSubmittedAnswers(),
-                        Comparator.comparing(SubmittedAnswer::getId));
-            }
             surveyDetailsMap.put(surveySubmittedId, surveyDetails);
         }
         
@@ -97,8 +92,10 @@ public class SurveyAnswerDetailsRowMapper implements ResultSetExtractor<List<Sur
 				.surveySubmittedId(surveySubmittedId)
 				.questionId(rs.getString("questionid"))
 				.questionStatement(rs.getString("questionstatement"))
+				.questionStatementOdia(rs.getString("questionstatement_odia"))
 				.questionCategory(rs.getString("questioncategory"))
 				.answer(SurveyAnswer.fromValue(rs.getString("answer")))
+				.hasOpenTicket(rs.getBoolean("hasopenticket"))
 				.auditDetails(auditdetails)
 				.build();
 

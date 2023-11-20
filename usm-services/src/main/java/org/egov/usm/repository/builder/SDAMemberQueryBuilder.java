@@ -16,7 +16,13 @@ public class SDAMemberQueryBuilder {
 	 */
 	public String getMemberSearchQuery(MemberSearchCriteria searchCriteria, List<Object> preparedStmtList) {
 		StringBuilder query = new StringBuilder("SELECT sda.id, sda.userid, sda.tenantid, sda.ward, sda.slumcode, sda.active, sda.createdtime, sda.createdby, sda.lastmodifiedtime, sda.lastmodifiedby FROM eg_usm_sda_mapping sda");
-
+		
+		if(!ObjectUtils.isEmpty(searchCriteria.getTicketId())){
+            query.append(" LEFT OUTER JOIN eg_usm_survey_submitted surveysubmitted ON sda.tenantid = surveysubmitted.tenantid AND sda.ward = surveysubmitted.ward AND sda.slumcode = surveysubmitted.slumcode ");
+            query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer ON surveysubmitted.id = answer.surveysubmittedid ");
+            query.append(" LEFT OUTER JOIN eg_usm_survey_ticket ticket ON answer.id  = ticket.surveyanswerid ");
+        }
+		
         if(!ObjectUtils.isEmpty(searchCriteria.getId())){
             addClauseIfRequired(query, preparedStmtList);
             query.append(" sda.id = ?" );
@@ -51,6 +57,12 @@ public class SDAMemberQueryBuilder {
             addClauseIfRequired(query, preparedStmtList);
             query.append(" sda.active = ?");
             preparedStmtList.add(searchCriteria.getIsActive());
+        }
+        
+        if(!ObjectUtils.isEmpty(searchCriteria.getTicketId())){
+            addClauseIfRequired(query, preparedStmtList);
+            query.append(" ticket.id = ?");
+            preparedStmtList.add(searchCriteria.getTicketId());
         }
         
         query.append(" ORDER BY sda.createdtime DESC ");

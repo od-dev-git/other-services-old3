@@ -211,7 +211,59 @@ public class DashboardConstants {
 	public static final String STATUS_ESCALATED_LEVEL_3 = "escaltedlevel3pending";
 
 	public static final String STATUS_ESCALATED_LEVEL_4 = "escaltedlevel4pending";
+	
+	public static final String MODULE_LEVEL_URC = "URC";
+	
+	public static final String TOTAL_COLLECTION = "Total Collection";
+	
+	public static final String TARGET_COLLECTION = "Target Collection";
+	
+	public static final String PENDING_COLLECTION = "Pending Collection";
+	
+	public static final String TARGET_ACHIEVEMENT = "Target Achievement";
+	
+	public static final String PREVIOUS_ACHIEVEMENT = "Previous FY Achievement";
+	
+	public static final String PREVIOUS_EFFICIENCY = "Previous FY Efficiency";
+	
+	public static final String PREVIOUS_EFFICIENCY_ACHIEVEMENT = "Previous FY Efficiency/Achievement";
+	
+	public static final String TOTAL_DEMAND = "Total Demand";
+	
+	public static final String TOTAL_PROPERTIES = "Total Properties should have paid";
+	
+	public static final String PROPERTIES_PAID = "Properties Paid";
+	
+	public static final String PROPERTIES_NOT_PAID = "Properties not Paid";
+	
+	public static final String TOTAL_CUMULATIVE_PROPERTIES = "Total Properties on Register";
+	
+    public static final String TOTAL_CONNECTIONS = "Total Connections should have paid";
+	
+	public static final String CONNECTIONS_PAID = "Connections Paid";
+	
+	public static final String CONNECTIONS_NOT_PAID = "Connections not Paid";
+	
+	public static final String TOTAL_CUMULATIVE_CONNECTIONS = "Total Cumulative Connections";
+	
+	public static final String PROPERTY_TAX = "Property Tax";
+	
+	public static final String WATER_SEWARAGE_CHARGES = "Water & Sewerage Charges";
+	
+    public static final String TOTAL_COLLECTION_BY_JALSATHI = "Total Collection By Jalsathi";
+    
+    public static final String TOTAL_COLLECTION_BY_OTHERS = "Total Collection By Others";
+    
+    public static final String JALSATHI_COLLECTION_ACHIEVEMENT = "Jalsathi Collection Achievement";
+    
+	public static final String NON_METERED = "Non Metered";
 
+	public static final String PROPERTY_MODULE = "PT";
+	
+	public static final String WATER_MODULE = "WS";
+
+	public static final String ROLE_JALSATHI = "JALSATHI";
+    
 	public static final List<String> OBPS_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_BPA_APP_FEE, BUSINESS_SERVICE_BPA_SAN_FEE,
 					BUSINESS_SERVICE_OC_APP_FEE, BUSINESS_SERVICE_OC_SAN_FEE));
@@ -290,6 +342,9 @@ public class DashboardConstants {
 	
 	public static final List<String> OBPS_PERFORM_VISULAIZATIONCODE = Collections
 			.unmodifiableList(Arrays.asList(OBPS_TOP_PERFORM_VISUALIZATION,OBPS_BOTTOM_PERFORM_VISUALIZATION));
+	
+	public static final List<String> URC_REVENUE_ALL_BS = Collections.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_WS,
+			BUSINESS_SERVICE_SW, BUSINESS_SERVICE_WS_ONE_TIME_FEE, BUSINESS_SERVICE_SW_ONE_TIME_FEE, BUSINESS_SERVICE_PT, BUSINESS_SERVICE_PT_MUTATION));
 
 
 }

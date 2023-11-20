@@ -42,17 +42,26 @@ public class TicketSearchCriteria {
 	@JsonProperty("status")
 	private String status;
 
-	@JsonProperty("isOfficial")
-	private Boolean isOfficial;
+	@JsonProperty("isSatisfied")
+	private Boolean isSatisfied;
 
-	@JsonProperty("isSda")
-	private Boolean isSda;
-	
+	@JsonProperty("officialRole")
+	private String officialRole;
+
+	@JsonProperty("isNodalOfficer")
+	private Boolean isNodalOfficer;
+
+	@JsonProperty("isEscalateOfficer")
+	private Boolean isEscalationOfficer;
+
 	@JsonProperty("unAttended")
 	private Boolean unAttended;
 
 	@JsonProperty("createdBy")
 	private String createdBy;
+	
+	@JsonProperty("assigned")
+	private String assigned;
 
 	@JsonProperty("tickDate")
 	private Long ticketDate;

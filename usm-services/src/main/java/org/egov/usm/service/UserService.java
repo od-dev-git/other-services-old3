@@ -51,9 +51,9 @@ public class UserService {
 	 * @param role
 	 * @return user uuid
 	 */
-	public String isUserPresent(String mobileNumber, RequestInfo requestInfo, String tenantId, String role) {
+	public Citizen isUserPresent(String mobileNumber, RequestInfo requestInfo, String tenantId, String role) {
 
-		UserSearchRequest searchRequest = UserSearchRequest.builder().userName(mobileNumber).tenantId(tenantId)
+		UserSearchRequest searchRequest = UserSearchRequest.builder().userName(mobileNumber).tenantId(getRootTenantId(tenantId))
 				.userType(role).requestInfo(requestInfo).build();
 		StringBuilder url = new StringBuilder(config.getUserHost() + config.getUserSearchEndpoint());
 		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest),
@@ -61,7 +61,7 @@ public class UserService {
 		if (CollectionUtils.isEmpty(res.getUser())) {
 			return null;
 		}
-		return res.getUser().get(0).getUuid().toString();
+		return res.getUser().get(0);
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class UserService {
 		citizen.setUserName(sdaMember.getMobileNumber());
 		citizen.setActive(true);
 		citizen.setMobileNumber(sdaMember.getMobileNumber());
-		citizen.setTenantId(sdaMember.getTenantId());
+		citizen.setTenantId(getRootTenantId(sdaMember.getTenant()));
 		citizen.setType(UserType.CITIZEN);
 		
 		List<Role> userRoles = new ArrayList<>();
@@ -97,8 +97,18 @@ public class UserService {
 	}
 
 	
-	
 	/**
+	 * @param tenantId
+	 * @return Root TenatId e.g. od.cuttack as od
+	 */
+	public static String getRootTenantId(String tenantId) {
+		tenantId = tenantId.split("\\.")[0];
+		return tenantId;
+	}
+	
+
+	/**
+	 * getUserByUuidAndRole
 	 * 
 	 * @param uuid
 	 * @param requestInfo
@@ -108,7 +118,7 @@ public class UserService {
 	 */
 	public Citizen getUserByUuidAndRole(String uuid, RequestInfo requestInfo, String tenantId, String role) {
 		UserSearchRequest searchRequest = UserSearchRequest.builder().uuid(Collections.singletonList(uuid))
-				.tenantId(tenantId).userType(role).requestInfo(requestInfo).build();
+				.tenantId(getRootTenantId(tenantId)).userType(role).requestInfo(requestInfo).build();
 		StringBuilder url = new StringBuilder(config.getUserHost()+config.getUserSearchEndpoint()); 
 		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest), UserResponse.class);
 		
@@ -116,6 +126,53 @@ public class UserService {
 			return null;
 		}
 		return res.getUser().get(0);
+	}
+	
+	/**
+	 * getUserByUuid
+	 * @param uuids
+	 * @param requestInfo
+	 * @return List<Citizen>
+	 */
+	public List<Citizen> getUserByUuid(List<String> uuids, RequestInfo requestInfo) {
+		UserSearchRequest searchRequest = UserSearchRequest.builder().uuid(uuids)
+				.requestInfo(requestInfo).build();
+		StringBuilder url = new StringBuilder(config.getUserHost()+config.getUserSearchEndpoint()); 
+		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest), UserResponse.class);
+		
+		if(CollectionUtils.isEmpty(res.getUser())) {
+			return null;
+		}
+		return res.getUser();
+	}
+
+	
+	/**
+	 * 
+	 * @param citizen
+	 * @param requestInfo
+	 * @param officerRole
+	 * @return uuid
+	 */
+	public String updateUserOfficialRole(Citizen citizen, RequestInfo requestInfo, String officerRole) {
+		//Get all roles
+		List<Role> userRoles = citizen.getRoles();
+		
+		for(Role userRole : userRoles) {
+			if(userRole.getCode().equals(officerRole)) {
+				return citizen.getUuid().toString();
+			}
+		}
+		
+		userRoles.add(Role.builder().code(officerRole).build());
+		citizen.setRoles(userRoles);
+
+		StringBuilder updateUrl = new StringBuilder(config.getUserHost() + config.getUserUpdateEndpoint());
+		CreateUserRequest updateRequest = CreateUserRequest.builder().citizen(citizen).requestInfo(requestInfo).build();
+
+		UserResponse updateResponse = mapper.convertValue(serviceRequestRepository.fetchResult(updateUrl, updateRequest), UserResponse.class);
+		return updateResponse.getUser().get(0).getUuid().toString();
+		
 	}
 
 }

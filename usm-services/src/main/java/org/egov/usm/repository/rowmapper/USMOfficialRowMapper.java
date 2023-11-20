@@ -34,7 +34,7 @@ public class USMOfficialRowMapper implements ResultSetExtractor<List<USMOfficial
 						.lastModifiedTime(lastModifiedTime).build();
 
 				official = USMOfficial.builder().id(rs.getString("id")).role(rs.getString("role"))
-						.category(rs.getString("category")).tenantId(rs.getString("tenantid"))
+						.category(rs.getString("category")).tenant(rs.getString("tenantid"))
 						.ward(rs.getString("ward")).slumcode(rs.getString("slumcode"))
 						.assigned(rs.getString("assigned")).auditDetails(auditdetails).build();
 			}

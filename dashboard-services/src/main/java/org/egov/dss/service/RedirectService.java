@@ -39,6 +39,11 @@ public class RedirectService {
 	@Autowired
 	private CommonService commonService;
 	
+	@Autowired
+	private URCService urcService;
+    @Autowired
+	private USMService usmService;
+	
 	public List<Data> redirect(RequestInfoWrapper requestInfoWrapper) {
 		String visualizationCode=requestInfoWrapper.getPayloadDetails().getVisualizationcode();
 		log.info("Currently Processing :"+visualizationCode+"  Module level: "+requestInfoWrapper.getPayloadDetails().getModulelevel());
@@ -683,6 +688,161 @@ public class RedirectService {
             return pgrService.totalEscalatedComplaints(requestInfoWrapper.getPayloadDetails());
         }
 		
+		if(Constants.VisualizationCodes.REVENUE_URC_TOTALCOLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.urcTotalCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.REVENUE_URC_PTCOLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ptTotalCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.REVENUE_URC_WNSCOLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.wsTotalCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.ULBS_UNDER_URC.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ulbsUnderUrc(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.JAlSATHI_ONBOARDED_URC.equalsIgnoreCase(visualizationCode)) {
+            return urcService.jalsathiOnboarded(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_PROPERTIES_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.totalPropertiesPaid(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_WATER_CONSUMER_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.totalWaterConsumerPaid(requestInfoWrapper.getPayloadDetails());
+        }
+		if(Constants.VisualizationCodes.URC_WATER_CONSUMER_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.totalWaterConsumerPaid(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_PT_PAYMENT_MODE.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ptPaymentModeData(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_WS_PAYMENT_MODE.equalsIgnoreCase(visualizationCode)) {
+            return urcService.wsPaymentModeData(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_REVENUE_PT_TARGET_ACHIEVEMENT.equalsIgnoreCase(visualizationCode)) {
+            return urcService.revenuePTTargetAchievement(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_REVENUE_PT_DEMAND_EFFICIENCY.equalsIgnoreCase(visualizationCode)) {
+            return urcService.ptDemandEfficiency(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_REVENUE_WS_DEMAND_EFFICIENCY.equalsIgnoreCase(visualizationCode)) {
+            return urcService.wsDemandEfficiency(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_TOP_JALSATHI_PT_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.topJalSathiPTCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_TOP_JALSATHI_WS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.topJalSathiWSCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		if(Constants.VisualizationCodes.URC_SERVICE_PROPERTIES_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.servicePropertiesPaid(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_SERVICE_WATER_CONSUMER_PAID.equalsIgnoreCase(visualizationCode)) {
+            return urcService.serviceWaterConsumerPaid(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_PROPERTIES_COVER_BY_JALSATHI.equalsIgnoreCase(visualizationCode)) {
+            return urcService.propertiesCoverByJalsathi(requestInfoWrapper.getPayloadDetails());
+        }		
+
+		if(Constants.VisualizationCodes.URC_TOP_JALSATHI_UNIFIED_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.topJalSathiUnifiedCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		 if (Constants.VisualizationCodes.USM_TOTAL_FEEDBACK_SUBMITTED.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalFeedbackSubmitted(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_SLUM_SUBMITTED_FEEDBACK.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalSlumSubmittedFeedback(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_OPEN_ISSUES.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalOpenIssues(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_CLOSE_ISSUES.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalClosedIssue(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOP_CATEGORY_ISSUES.equalsIgnoreCase(visualizationCode)) {
+			return usmService.topIssueCategory(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_CATEGORY_WISE_ISSUE.equalsIgnoreCase(visualizationCode)) {
+			return usmService.categoryWiseIssue(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_ISSUE_RESOLUTION_SUMMARY.equalsIgnoreCase(visualizationCode)) {
+			return usmService.issueResolutionSummary(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_BOTTOM_ULB.equalsIgnoreCase(visualizationCode)) {
+			return usmService.bottomUlbsByStatus(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOP_ULB.equalsIgnoreCase(visualizationCode)) {
+			return usmService.topUlbsByStatus(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_CUMULATIVE.equalsIgnoreCase(visualizationCode)) {
+			return usmService.cumulativeApplications(requestInfoWrapper.getPayloadDetails());
+		}		
+		if(Constants.VisualizationCodes.URC_MONTHWISE_UNIFIED_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.monthwiseUnifiedCollection(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_DEMAND_EFFICIENCY.equalsIgnoreCase(visualizationCode)) {
+            return urcService.urcDemandEfficiency(requestInfoWrapper.getPayloadDetails());
+        }
+		
+		if(Constants.VisualizationCodes.URC_ACTIVE_JALSATHI.equalsIgnoreCase(visualizationCode)) {
+		    return urcService.activeJalSathi(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.URC_PROPERTIES_COVERED_BY_JALSATHI.equalsIgnoreCase(visualizationCode)) {
+		    return urcService.propertiesCoveredByJalsathi(requestInfoWrapper.getPayloadDetails());
+		}
+		        
+		if(Constants.VisualizationCodes.URC_JALSATHI_PT_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+		    return urcService.jalsathiPTCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.URC_WATER_COVERED_BY_JALSATHI.equalsIgnoreCase(visualizationCode)) {
+		    return urcService.waterConnectionCoveredByJalsathi (requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.URC_JALSATHI_WS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.jalsathiWSCollection(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.URC_JALSATHI_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+            return urcService.jalsathiTotalCollection(requestInfoWrapper.getPayloadDetails());
+        }
+        
+        if(Constants.VisualizationCodes.URC_COLLECTOR_WISE_REVENUE.equalsIgnoreCase(visualizationCode)) {
+            return urcService.collectorWiseRevenue(requestInfoWrapper.getPayloadDetails());
+        }
+        
+		if (Constants.VisualizationCodes.JALSATHI_PT_INCENTIVES.equalsIgnoreCase(visualizationCode)) {
+			return urcService.jalsathiPTIncentives(requestInfoWrapper.getPayloadDetails());
+		}
+
+		if (Constants.VisualizationCodes.JALSATHI_WS_INCENTIVES.equalsIgnoreCase(visualizationCode)) {
+			return urcService.jalsathiWSIncentives(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if (Constants.VisualizationCodes.JALSATHI_CONTRIBUTION_TO_PT.equalsIgnoreCase(visualizationCode)) {
+			return urcService.jalsathiContributionToPT(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if (Constants.VisualizationCodes.JALSATHI_CONTRIBUTION_TO_WS.equalsIgnoreCase(visualizationCode)) {
+			return urcService.jalsathiContributionToWS(requestInfoWrapper.getPayloadDetails());
+		}
+
 		return null;
 
 	}

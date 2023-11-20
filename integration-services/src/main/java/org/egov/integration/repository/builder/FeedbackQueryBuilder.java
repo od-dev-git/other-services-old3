@@ -34,6 +34,12 @@ public class FeedbackQueryBuilder {
             preparedStatement.add(criteria.getTenantId());
         }
 
+        if (!StringUtils.isEmpty(criteria.getConsumerNo())) {
+            addClauseIfRequired(preparedStatement, query);
+            query.append(" euf.consumerNo = ? ");
+            preparedStatement.add(criteria.getConsumerNo());
+        }
+
         if (!StringUtils.isEmpty(criteria.getModule())) {
             addClauseIfRequired(preparedStatement, query);
             query.append(" euf.module = ? ");

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 @Getter
 @Setter
@@ -56,9 +57,11 @@ public class UserSearchRequest {
 	@JsonProperty("pageSize")
 	private int pageSize;
 
+	@Default
 	@JsonProperty("pageNumber")
 	private int pageNumber = 0;
 
+	@Default
 	@JsonProperty("sort")
 	private List<String> sort = Collections.singletonList("name");
 

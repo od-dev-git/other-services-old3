@@ -29,6 +29,9 @@ public class SubmittedAnswer {
 	@JsonProperty("questionStatement")
 	private String questionStatement;
 	
+	@JsonProperty("questionStatementOdia")
+	private String questionStatementOdia;
+	
 	@JsonProperty("questionCategory")
 	private String questionCategory;
 	
@@ -36,7 +39,7 @@ public class SubmittedAnswer {
 	private SurveyAnswer answer;
 	
     @JsonProperty("hasOpenTicket")
-    private Boolean hasOpenTicket = false;
+    private Boolean hasOpenTicket;
 	
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails;

@@ -220,6 +220,50 @@ public class Constants {
 		final static String REVENUE_OVERVIEW_TOP_PERFORMING_ULBS = "topPerformingUlbsOverview";
 		final static String REVENUE_OVERVIEW_BOTTOM_PERFORMING_ULBS = "bottomPerformingUlbsOverview";
 		final static String REVENUE_ALL_PAYMENT_MODE_COLLECTION = "paymentModeCollections";
+		
+		final static String REVENUE_URC_TOTALCOLLECTION = "totalCollections";
+		final static String REVENUE_URC_WNSCOLLECTION = "waterSewerageCollections";
+		final static String REVENUE_URC_PTCOLLECTION = "propertyTaxCollections";
+		final static String ULBS_UNDER_URC = "ulbsUnderUrc";
+		final static String JAlSATHI_ONBOARDED_URC = "jalsathiOnboardedUrc";
+		final static String URC_PROPERTIES_PAID = "urcPropertiesPaid";
+		final static String URC_WATER_CONSUMER_PAID = "urcWaterConsumerPaid";
+		final static String URC_PT_PAYMENT_MODE = "urcPTPaymentmode";
+		final static String URC_WS_PAYMENT_MODE = "urcWSPaymentmode";
+		final static String URC_REVENUE_PT_TARGET_ACHIEVEMENT = "revenuePTTargetAchievement";
+		final static String URC_REVENUE_PT_DEMAND_EFFICIENCY = "revenuePTDemandEfficiency";
+		final static String URC_REVENUE_WS_DEMAND_EFFICIENCY = "revenueWSDemandEfficiency";
+		final static String URC_SERVICE_PROPERTIES_PAID = "servicePropertiesPaid";
+		final static String URC_SERVICE_WATER_CONSUMER_PAID = "serviceWaterConsumerPaid";
+		final static String URC_TOP_JALSATHI_PT_COLLECTION = "topJalSathiPTCollection";
+		final static String URC_TOP_JALSATHI_WS_COLLECTION = "topJalSathiWSCollection";
+		final static String URC_TOP_JALSATHI_UNIFIED_COLLECTION = "topJalSathiUnifiedCollection";		
+		final static String URC_PROPERTIES_COVER_BY_JALSATHI = "propertiesCoverByJalsathi";
+		final static String URC_MONTHWISE_UNIFIED_COLLECTION = "monthwiseUnifiedCollection";
+		final static String URC_DEMAND_EFFICIENCY = "urcDemandEfficiency";
+		final static String URC_ACTIVE_JALSATHI = "activeJalSathi";
+		final static String URC_PROPERTIES_COVERED_BY_JALSATHI = "propertiesCoveredByJalsathi";
+		final static String URC_JALSATHI_PT_COLLECTION = "jalsathiPTCollection";
+		final static String URC_WATER_COVERED_BY_JALSATHI = "waterConnCoveredByJalsathi";
+		final static String URC_JALSATHI_WS_COLLECTION = "jalsathiWSCollection";
+		final static String URC_JALSATHI_TOTAL_COLLECTION = "jalsathiTotalCollection";
+		final static String URC_COLLECTOR_WISE_REVENUE = "collectorWiseRevenue";
+		final static String JALSATHI_PT_INCENTIVES = "jalsathiPTIncentives";
+	    final static String JALSATHI_WS_INCENTIVES = "jalsathiWSIncentives";
+	    final static String JALSATHI_CONTRIBUTION_TO_PT = "jalsathiContributionToPT";
+	    final static String JALSATHI_CONTRIBUTION_TO_WS = "jalsathiContributionToWS";
+
+
+		final static String USM_TOTAL_FEEDBACK_SUBMITTED = "totalFeedbackSubmitted";
+		final static String USM_TOTAL_SLUM_SUBMITTED_FEEDBACK = "totalSlumSubmittedFeedback";
+		final static String USM_TOTAL_OPEN_ISSUES = "totalOpenIssues";
+		final static String USM_TOTAL_CLOSE_ISSUES = "totalCloseIssues";
+		final static String USM_ISSUE_RESOLUTION_SUMMARY = "issueResolutionSummery";
+		final static String USM_TOP_CATEGORY_ISSUES = "topIssueCatgory";
+		final static String USM_CATEGORY_WISE_ISSUE = "categoryWiseIssuesReported";
+		final static String USM_TOP_ULB = "topPerformingULBS";
+		final static String USM_BOTTOM_ULB = "bottomPerformingULBS";
+		final static String USM_TOTAL_CUMULATIVE = "cumulativeFeedbackSubmitted";
 	}
 
 }

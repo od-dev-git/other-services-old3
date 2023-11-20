@@ -40,10 +40,12 @@ public class QuestionDetailRowMapper implements ResultSetExtractor<List<Question
                         .id(rs.getString("id"))
                         .surveyId(rs.getString("surveyid"))
                         .questionStatement(rs.getString("questionstatement"))
+                        .questionStatementOdia(rs.getString("questionstatement_odia"))
                         .category(rs.getString("category"))
                         .status(Status.fromValue(rs.getString("status")))
                         .required(rs.getBoolean("required"))
                         .type(rs.getString("type"))
+                        .questionOrder(rs.getInt("questionorder"))
                         .options(rs.getString("options"))
                         .auditDetails(auditdetails)
                         .build();

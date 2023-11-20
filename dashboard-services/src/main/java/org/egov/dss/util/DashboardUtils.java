@@ -1,11 +1,16 @@
 package org.egov.dss.util;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -223,6 +228,117 @@ public class DashboardUtils {
 		cal.set(Calendar.MILLISECOND, 0);
 		cal.set(Calendar.AM_PM, Calendar.PM);
 		return cal.getTimeInMillis();
+	}
+	
+	public Long previousFYStartDate(String financialYear) {
+		Integer previousFY1 = Integer.parseInt(financialYear.split("-")[0])-1;
+		Integer previousFY2 = Integer.parseInt(financialYear.split("-")[1])-1;
+		Long previousYearStartDate = getStartDateGmt(String.valueOf(previousFY1) + "-" + String.valueOf(previousFY2));
+		return previousYearStartDate;
+	}
+	
+	public long previousFYEndDate(String financialYear) {
+		Integer previousFY1 = Integer.parseInt(financialYear.split("-")[0])-1;
+		Integer previousFY2 = Integer.parseInt(financialYear.split("-")[1])-1;
+		Long previousYearEndDate = getEndDateGmt(String.valueOf(previousFY1) + "-" + String.valueOf(previousFY2));
+		return previousYearEndDate;
+	}
+	
+	public long previousMonthStartDate() {
+		LocalDate currentDate = LocalDate.now();
+		LocalDate firstDayOfPreviousMonth = currentDate.minusMonths(1).withDayOfMonth(1);
+		LocalDate lastDayOfPreviousMonth = currentDate.minusMonths(1)
+				.withDayOfMonth(currentDate.minusMonths(1).lengthOfMonth());
+		return firstDayOfPreviousMonth.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+	}
+
+	public long previousMonthEndDate() {
+		LocalDate currentDate = LocalDate.now();
+		LocalDate lastDayOfPreviousMonth = currentDate.minusMonths(1)
+				.withDayOfMonth(currentDate.minusMonths(1).lengthOfMonth());
+		return lastDayOfPreviousMonth.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+	}
+	
+	public long previousWeekStartDate() {
+		LocalDate currentDate = LocalDate.now();
+		LocalDate previousWeekStartDate = currentDate.minusWeeks(1).with(DayOfWeek.MONDAY);
+		Instant startInstant = previousWeekStartDate.atStartOfDay().toInstant(ZoneOffset.UTC);
+		return startInstant.toEpochMilli();
+	}
+
+	public long previousWeekEndDate() {
+		LocalDate currentDate = LocalDate.now();
+		LocalDate previousWeekEndDate = currentDate.minusWeeks(1).with(DayOfWeek.SUNDAY);
+		Instant endInstant = previousWeekEndDate.atTime(23, 59, 59).toInstant(ZoneOffset.UTC);
+		return endInstant.toEpochMilli();
+	}
+	
+	public long previousQuarterStartDate() {
+		LocalDate currentDate = LocalDate.now();
+		int currentYear = currentDate.getYear();
+		int currentQuarter = (currentDate.getMonthValue() - 1) / 3 + 1;
+		int previousQuarter = currentQuarter - 1;
+		int previousYear = currentYear;
+		if (previousQuarter == 0) {
+			previousQuarter = 4;
+			previousYear--;
+		}
+		LocalDate startDateofQuarter = LocalDate.of(previousYear, Month.of((previousQuarter - 1) * 3 + 1), 1);
+		return startDateofQuarter.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+	}
+	
+	public long previousQuarterEndDate() {
+		LocalDate currentDate = LocalDate.now();
+		int currentYear = currentDate.getYear();
+		int currentQuarter = (currentDate.getMonthValue() - 1) / 3 + 1;
+
+		int previousQuarter = currentQuarter - 1;
+		int previousYear = currentYear;
+
+		if (previousQuarter == 0) {
+			previousQuarter = 4;
+			previousYear--;
+		}
+
+		LocalDate startOfPreviousQuarter = LocalDate.of(previousYear, Month.of((previousQuarter - 1) * 3 + 1), 1);
+		LocalDate endofPreviousQuarter = startOfPreviousQuarter.plusMonths(3).minusDays(1);
+		return endofPreviousQuarter.atTime(23, 59, 59).atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
+	}
+	
+	public String addDenominationForAmount(BigDecimal number) {
+		BigDecimal oneLakh = new BigDecimal("100000");
+		BigDecimal oneCrore = new BigDecimal("10000000");
+
+		if (number.compareTo(oneLakh) < 0) {
+			return number.toString();
+		} else if (number.compareTo(oneCrore) < 0) {
+			BigDecimal lakhs = number.divide(oneLakh);
+			return formatNumber(lakhs) + " Lac";
+		} else {
+			BigDecimal crores = number.divide(oneCrore);
+			return formatNumber(crores) + " Cr";
+		}
+	}
+
+	private String formatNumber(BigDecimal number) {
+		DecimalFormat decimalFormat = new DecimalFormat("#,##,##0.00");
+		return decimalFormat.format(number);
+	}
+	
+	public String getPreviousFY() {
+		String currentFY = getCurrentFinancialYear();
+		Integer previousFY1 = Integer.parseInt(currentFY.split("-")[0]) - 1;
+		Integer previousFY2 = Integer.parseInt(currentFY.split("-")[1]) - 1;
+		String previousFy = String.valueOf(previousFY1).concat("-").concat(String.valueOf(previousFY2));
+		return previousFy;
+	}
+	
+	public Long getLastThirtyDayValue() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, -30);
+		return calendar.getTimeInMillis();
+
 	}
 	
 }

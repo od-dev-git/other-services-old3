@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
-import org.egov.tracer.model.CustomException;
 import org.egov.usm.model.enums.SurveyAnswer;
 import org.egov.usm.model.enums.TicketStatus;
 import org.egov.usm.repository.SurveyTicketRepository;
@@ -87,6 +86,9 @@ public class TicketService {
 			/* Validate the existing ticket */
 			SurveyTicket existingSurveyTickets = surveyTicketRequestValidator
 					.validateSurveyTicketExistence(surveyTicket);
+			
+			//Validate Ticket Request
+			surveyTicketRequestValidator.validateTicketRequest(requestInfo,surveyTicket, existingSurveyTickets);
 
 			/* Update the Audit Details */
 			AuditDetails auditDetails = USMUtil.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
@@ -109,11 +111,6 @@ public class TicketService {
 					&& surveyTicket.getStatus() == TicketStatus.CLOSED) {
 				surveyTicketRequestValidator.validateSurveyTicketClose(existingSurveyTickets);
 				surveyTicket.setHasOpenTicket(Boolean.FALSE);
-
-			} else if (!ObjectUtils.isEmpty(surveyTicket.getStatus())
-					&& !ObjectUtils.isEmpty(surveyTicket.getIsSatisfied())) {
-				throw new CustomException("EG_INPUT_PARAM_ERR",
-						"The reqest parameter in update request does not valid.");
 
 			} else {
 				surveyTicket.setHasOpenTicket(Boolean.TRUE);

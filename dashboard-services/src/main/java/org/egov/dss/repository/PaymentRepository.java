@@ -284,7 +284,8 @@ public class PaymentRepository {
 	public BigDecimal getCurrentCollection(PaymentSearchCriteria paymentSearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = paymentQueryBuilder.getCurrentCollection(paymentSearchCriteria, preparedStatementValues);
-		log.info("query: " + query);
+		log.info("Query for Current Collection : " + query);
+		log.info("preparedStatementValues : " + preparedStatementValues);
 		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(BigDecimal.class));
 		return result.get(0);
@@ -293,7 +294,8 @@ public class PaymentRepository {
 	public BigDecimal getArrearCollection(PaymentSearchCriteria paymentSearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = paymentQueryBuilder.getArrearCollection(paymentSearchCriteria, preparedStatementValues);
-		log.info("query: " + query);
+		log.info("Query for Arrear Collection : " + query);
+		log.info("preparedStatementValues : " + preparedStatementValues);
 		List<BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
 				new SingleColumnRowMapper<>(BigDecimal.class));
 		return result.get(0);

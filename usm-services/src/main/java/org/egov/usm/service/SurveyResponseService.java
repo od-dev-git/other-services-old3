@@ -5,9 +5,11 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.egov.usm.repository.SurveyDetailsRepository;
+import org.egov.usm.repository.SurveyRepository;
 import org.egov.usm.validator.SurveyResponseValidator;
 import org.egov.usm.web.model.QuestionDetail;
 import org.egov.usm.web.model.RequestInfoWrapper;
+import org.egov.usm.web.model.Survey;
 import org.egov.usm.web.model.SurveyDetails;
 import org.egov.usm.web.model.SurveyDetailsRequest;
 import org.egov.usm.web.model.SurveySearchCriteria;
@@ -27,13 +29,16 @@ public class SurveyResponseService {
 	
 	private SurveyResponseValidator validator;
 	
+	private SurveyRepository surveyRepository;
+	
 	@Autowired
 	public SurveyResponseService(SurveyDetailsRepository repository, TicketService ticketService,
-			EnrichmentService enrichmentService, SurveyResponseValidator validator) {
+			EnrichmentService enrichmentService, SurveyResponseValidator validator, SurveyRepository surveyRepository) {
 		this.repository = repository;
 		this.ticketService = ticketService;
 		this.enrichmentService = enrichmentService;
 		this.validator = validator;
+		this.surveyRepository = surveyRepository;
 	}
 
 
@@ -46,16 +51,12 @@ public class SurveyResponseService {
 	public SurveyDetails generateSurvey(SurveyDetailsRequest surveyDetailsRequest) {
 		SurveyDetails surveyDetails = null;
 		
-		validator.validateGenerateSurveyRequest(surveyDetailsRequest.getSurveyDetails());
+		validator.validateGenerateSurveyRequest(surveyDetailsRequest);
 		
 		List<SurveyDetails> surveyResponseForCurrentDate = repository.validateSurveyForCurrentDate(surveyDetailsRequest.getSurveyDetails());
 		
 		if(surveyResponseForCurrentDate.isEmpty()) {
 			List<QuestionDetail> questionsList = repository.getQuestionDetails(surveyDetailsRequest.getSurveyDetails());
-			
-			// Enrich survey details
-			enrichmentService.enrichLookupDetails(surveyDetailsRequest);
-			repository.updateLookupDetails(surveyDetailsRequest);
 			surveyDetails = SurveyDetails.builder()
 								.questionDetails(questionsList)
 								.build();
@@ -63,9 +64,15 @@ public class SurveyResponseService {
 			surveyDetails = surveyResponseForCurrentDate.get(0);
 		}
 		
+		SurveySearchCriteria searchCriteria = SurveySearchCriteria.builder().surveyId(surveyDetailsRequest.getSurveyDetails().getSurveyId()).build();
+		List<Survey> surveys = surveyRepository.getSurveyRequests(searchCriteria);
+		
 		surveyDetails.setSurveyId(surveyDetailsRequest.getSurveyDetails().getSurveyId());
 		surveyDetails.setTenantId(surveyDetailsRequest.getSurveyDetails().getTenantId());
+		surveyDetails.setWard(surveyDetailsRequest.getSurveyDetails().getWard());
 		surveyDetails.setSlumCode(surveyDetailsRequest.getSurveyDetails().getSlumCode());
+		surveyDetails.setSurveyStartTime(surveys.get(0).getStartTime());
+		surveyDetails.setSurveyEndTime(surveys.get(0).getEndTime());
 		
 		return surveyDetails;
 	}
@@ -79,7 +86,7 @@ public class SurveyResponseService {
 	public SurveyDetails submitSurvey(SurveyDetailsRequest surveyDetailsRequest) {
 		
 		// Validate survey existence
-		validator.validateSurveySubmittedForToday(surveyDetailsRequest.getSurveyDetails());
+		validator.validateSurveySubmittedForToday(surveyDetailsRequest);
         
 		// Enrich survey details
 		enrichmentService.enrichSurveySubmitRequest(surveyDetailsRequest);
@@ -90,12 +97,12 @@ public class SurveyResponseService {
 		
 		// If any ticket created, then create or update the lookup table
 		if(! CollectionUtils.isEmpty(tickets)) {
+			
 			//check is present in question lookup
 			List<String> questionIds = repository.searchQuestionInLookup(surveyDetailsRequest.getSurveyDetails());
 			
-			if(CollectionUtils.isEmpty(questionIds) || questionIds.size() != surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers().size()) {
-				enrichmentService.enrichSaveQuestionLookup(surveyDetailsRequest, questionIds);
-			} 
+			//enrich Save Question Lookup
+			enrichmentService.enrichSaveQuestionLookup(surveyDetailsRequest, questionIds);
 			
 			//update question lookup
 			enrichmentService.enrichUpdateQuestionLookup(surveyDetailsRequest, tickets);
@@ -116,7 +123,7 @@ public class SurveyResponseService {
 	public SurveyDetails updateSubmittedSurvey(@Valid SurveyDetailsRequest surveyDetailsRequest) {
 		
 		// Validate survey existence
-        Boolean isSurveyExists = validator.validateSurveyExistsForToday(surveyDetailsRequest.getSurveyDetails());
+        Boolean isSurveyExists = validator.validateSurveyExistsForToday(surveyDetailsRequest);
         if(isSurveyExists) {
         	// Enrich survey details
     		enrichmentService.enrichSurveyUpdateRequest(surveyDetailsRequest);
