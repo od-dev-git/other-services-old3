@@ -164,7 +164,7 @@ public class PropertyService {
                 .toDate(searchCriteria.getEndDate()).build();
 
 		paymentSearchCriteria.setPaymentModes(Stream
-				.of("CASH", "OFFLINE_RTGS", "OFFLINE_NEFT", "POSTAL_ORDER", "CHEQUE").collect(Collectors.toSet()));
+				.of("CASH", "OFFLINE_RTGS", "OFFLINE_NEFT", "POSTAL_ORDER", "CHEQUE","DD","CARD").collect(Collectors.toSet()));
 
 		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
         List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse =  payments.parallelStream().map(payment  ->{
