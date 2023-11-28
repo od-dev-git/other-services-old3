@@ -141,7 +141,6 @@ public class PropertyService {
                     Collection<PropertyDetailsResponse> getAllPropertyDetails = mergeUserDetails(propertyDetailResponse,userMap);
 					 response.addAll(getAllPropertyDetails);
                 }
-                response.addAll(propertyDetailResponse);
             }
             
         }
