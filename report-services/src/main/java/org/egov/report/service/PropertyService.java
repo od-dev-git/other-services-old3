@@ -3,6 +3,7 @@ package org.egov.report.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -137,13 +138,8 @@ public class PropertyService {
                     Map<String, org.egov.report.user.User> userMap = usersInfo.stream()
                             .collect(Collectors.toMap(org.egov.report.user.User::getUuid, Function.identity()));
                     log.info("Setting User Details ");
-                    propertyDetailResponse.stream().forEach(propertyDetail -> {
-                        org.egov.report.user.User user = userMap.get(propertyDetail.getUuid());
-                        if (user != null) {
-                            propertyDetail.setMobileNumber(user.getMobileNumber());
-                            propertyDetail.setName(user.getName());
-                        }
-                    });
+                    Collection<PropertyDetailsResponse> getAllPropertyDetails = mergeUserDetails(propertyDetailResponse,userMap);
+					 response.addAll(getAllPropertyDetails);
                 }
                 response.addAll(propertyDetailResponse);
             }
@@ -151,6 +147,30 @@ public class PropertyService {
         }
         return response;
     }
+
+
+    private Collection<PropertyDetailsResponse> mergeUserDetails(List<PropertyDetailsResponse> propertyDetailResponse,
+			Map<String, org.egov.report.user.User> userMap) {
+		Map<String, PropertyDetailsResponse> propertyResponseDetail = new HashMap<>();
+		propertyDetailResponse.stream().forEach(propertyDetail -> {
+			org.egov.report.user.User user = userMap.get(propertyDetail.getUuid());
+
+			if (user != null) {
+				if (propertyResponseDetail.get(propertyDetail.getPropertyId()) != null) {
+					PropertyDetailsResponse propertyUser = propertyResponseDetail.get(propertyDetail.getPropertyId());
+					propertyUser.setMobileNumber(propertyUser.getMobileNumber() + " , " + user.getMobileNumber());
+					propertyUser.setName(propertyUser.getName() + " , " + user.getName());
+				} else {
+					propertyDetail.setMobileNumber(user.getMobileNumber());
+					propertyDetail.setName(user.getName());
+					propertyResponseDetail.put(propertyDetail.getPropertyId(), propertyDetail);
+				}
+
+			}
+		});
+		return propertyResponseDetail.values();
+	}
+
 
     public List<TaxCollectorWiseCollectionResponse> getTaxCollectorWiseCollections(RequestInfo requestInfo,
             PropertyDetailsSearchCriteria searchCriteria) {
