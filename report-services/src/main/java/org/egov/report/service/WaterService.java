@@ -117,6 +117,16 @@ public class WaterService {
 				.fromDate(searchCriteria.getCollectionDate())
 				.toDate(searchCriteria.getCollectionDate())
 				.build();
+        if (searchCriteria.getCollectionDate() == null || searchCriteria.getCollectionDate() == 0) {
+
+			if (searchCriteria.getFromDate() != null || searchCriteria.getFromDate() != 0) {
+				paymentSearchCriteria.setFromDate(searchCriteria.getFromDate());
+			}
+			if (searchCriteria.getToDate() != null || searchCriteria.getToDate() != 0) {
+				paymentSearchCriteria.setToDate(searchCriteria.getToDate());
+			}
+		}
+
 		log.info(" Payments Search Criteria : " + paymentSearchCriteria.toString());
 		
 		if(StringUtils.hasText(searchCriteria.getPaymentMode())) {
