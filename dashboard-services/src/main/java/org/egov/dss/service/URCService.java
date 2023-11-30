@@ -262,7 +262,7 @@ public class URCService {
 		if(previousTotalCollection == BigDecimal.ZERO)
 			previousTotalCollection = BigDecimal.ONE;
 		BigDecimal changeInCollection = totalCollection.divide(previousTotalCollection, 2, BigDecimal.ROUND_HALF_UP)
-				.subtract(BigDecimal.ONE);
+				.subtract(BigDecimal.ONE).multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder().headerValue(
 				calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), changeInCollection))
 				.build());
@@ -282,7 +282,7 @@ public class URCService {
 			previousTotalCollection = BigDecimal.ONE;
 		}
 		BigDecimal changeInCollection = totalCollection.divide(previousTotalCollection, 2, BigDecimal.ROUND_HALF_UP)
-				.subtract(BigDecimal.ONE);
+				.subtract(BigDecimal.ONE).multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder().headerValue(
 				calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), changeInCollection))
 				.build());
@@ -323,7 +323,7 @@ public class URCService {
 	    if(previousTotalCollection == BigDecimal.ZERO)
 			previousTotalCollection = BigDecimal.ONE;
 		BigDecimal changeInCollection = totalCollection.divide(previousTotalCollection, 2, BigDecimal.ROUND_HALF_UP)
-				.subtract(BigDecimal.ONE);
+				.subtract(BigDecimal.ONE).multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder().headerValue(
 				calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), changeInCollection))
 				.build());
@@ -846,9 +846,8 @@ public class URCService {
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_PAID)
-				.value(new BigDecimal(propertiesPaid)
-						.divide(new BigDecimal(enrichTotalProperties), 2, RoundingMode.HALF_UP)
-						.multiply(new BigDecimal(100)))
+				.value(new BigDecimal(propertiesPaid).multiply(new BigDecimal(100))
+						.divide(new BigDecimal(enrichTotalProperties), RoundingMode.UP))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_PROPERTIES_PAID").plots(plots).build());
@@ -881,9 +880,8 @@ public class URCService {
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_PAID)
-				.value(new BigDecimal(propertiesPaid)
-						.divide(new BigDecimal(enrichTotalProperties), 2, RoundingMode.HALF_UP)
-						.multiply(new BigDecimal(100)))
+				.value(new BigDecimal(propertiesPaid).multiply(new BigDecimal(100))
+						.divide(new BigDecimal(enrichTotalProperties), RoundingMode.UP))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_WATER_CONSUMER_PAID").plots(plots).build());
 	}
@@ -1406,7 +1404,7 @@ public class URCService {
 		LinkedHashMap<String, BigDecimal> monthWiseTotalCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
-		List<HashMap<String, Object>> monthWiseJalsathiContribution = urcRepository
+		List<LinkedHashMap<String, Object>> monthWiseJalsathiContribution = urcRepository
 				.getMonthWiseJalsathiCollection(paymentSearchCriteria);
 		int serailNumber = 0;
 		for (HashMap<String, Object> jalsathiContribution : monthWiseJalsathiContribution) {
@@ -1416,7 +1414,7 @@ public class URCService {
 
 			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
 
-			row.add(Plot.builder().label(monthName).name("DDRs").symbol("text").build());
+			row.add(Plot.builder().label(monthName).name("Months").symbol("text").build());
 
 			BigDecimal activeJalSathi = new BigDecimal(String.valueOf(jalsathiContribution.get("activejalsathi")));
 
@@ -1466,7 +1464,7 @@ public class URCService {
 		LinkedHashMap<String, BigDecimal> monthWiseTotalCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
-		List<HashMap<String, Object>> monthWiseJalsathiContribution = urcRepository
+		List<LinkedHashMap<String, Object>> monthWiseJalsathiContribution = urcRepository
 				.getMonthWiseJalsathiCollection(paymentSearchCriteria);
 		int serailNumber = 0;
 		for (HashMap<String, Object> jalsathiContribution : monthWiseJalsathiContribution) {
@@ -1476,7 +1474,7 @@ public class URCService {
 
 			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
 
-			row.add(Plot.builder().label(monthName).name("DDRs").symbol("text").build());
+			row.add(Plot.builder().label(monthName).name("Months").symbol("text").build());
 
 			BigDecimal activeJalSathi = new BigDecimal(String.valueOf(jalsathiContribution.get("activejalsathi")));
 
