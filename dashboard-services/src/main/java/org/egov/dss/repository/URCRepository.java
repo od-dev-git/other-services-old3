@@ -31,6 +31,7 @@ import org.egov.dss.repository.rowmapper.PaymentRowMapper;
 import org.egov.dss.repository.rowmapper.TableChartRowMapper;
 import org.egov.dss.repository.rowmapper.TenantWiseCollectionRowMapper;
 import org.egov.dss.repository.rowmapper.URCRevenueRowMapper;
+import org.egov.dss.repository.rowmapper.UrcTableChartRowMapper;
 import org.egov.dss.repository.rowmapper.UserRowMapper;
 import org.egov.dss.web.model.User;
 import org.egov.dss.web.model.UserResponse;
@@ -153,13 +154,13 @@ public class URCRepository {
 		return result;
 	}
 	
-	public List<HashMap<String, Object>> getMonthWiseJalsathiCollection(PaymentSearchCriteria criteria) {
+	public List<LinkedHashMap<String, Object>> getMonthWiseJalsathiCollection(PaymentSearchCriteria criteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = urcQueryBuilder.getMonthWiseJalsathiCollection(criteria, preparedStatementValues);
 		log.info(" URC month wise JalSahti Collection query : " + query);
 		log.info(" preparedStatementValues : " + preparedStatementValues);
-		List<HashMap<String, Object>> result = (List<HashMap<String, Object>>) namedParameterJdbcTemplate
-				.query(query, preparedStatementValues, new TableChartRowMapper());
+		List<LinkedHashMap<String, Object>> result = (List<LinkedHashMap<String, Object>>) namedParameterJdbcTemplate
+				.query(query, preparedStatementValues, new UrcTableChartRowMapper());
 		return result;
 	}
 	
