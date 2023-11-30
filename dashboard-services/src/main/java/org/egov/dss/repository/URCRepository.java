@@ -153,12 +153,12 @@ public class URCRepository {
 		return result;
 	}
 	
-	public List<HashMap<String, Object>> getMonthWiseJalsathiCollection(PaymentSearchCriteria criteria) {
+	public List<LinkedHashMap<String, Object>> getMonthWiseJalsathiCollection(PaymentSearchCriteria criteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = urcQueryBuilder.getMonthWiseJalsathiCollection(criteria, preparedStatementValues);
 		log.info(" URC month wise JalSahti Collection query : " + query);
 		log.info(" preparedStatementValues : " + preparedStatementValues);
-		List<HashMap<String, Object>> result = (List<HashMap<String, Object>>) namedParameterJdbcTemplate
+		List<LinkedHashMap<String, Object>> result = (List<LinkedHashMap<String, Object>>) namedParameterJdbcTemplate
 				.query(query, preparedStatementValues, new TableChartRowMapper());
 		return result;
 	}
