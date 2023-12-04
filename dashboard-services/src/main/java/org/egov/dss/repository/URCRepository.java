@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
@@ -321,6 +323,20 @@ public class URCRepository {
 
 		return mapOfIdAndBills;
 
+	}
+	
+	public Long getPaymentsCount(@Valid RequestInfo requestInfo, PaymentSearchCriteria paymentSearchCriteria) {
+
+		return getPaymentsCount(paymentSearchCriteria);
+
+	}
+	
+	public Long getPaymentsCount(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = urcQueryBuilder.getIdCountQuery(paymentSearchCriteria, preparedStatementValues);
+        log.info("query: "+query);
+        log.info("preparedStatementValues: "+preparedStatementValues);
+		return namedParameterJdbcTemplate.queryForObject(query, preparedStatementValues, Long.class);
 	}
 
 }
