@@ -116,6 +116,12 @@ public class URCQueryBuilder {
             + "FROM egcl_bill b LEFT OUTER JOIN egcl_billdetial bd ON b.id = bd.billid AND b.tenantid = bd.tenantid "
             + "LEFT OUTER JOIN egcl_billaccountdetail ad ON bd.id = ad.billdetailid AND bd.tenantid = ad.tenantid "
             + "WHERE b.id IN (:id);";
+    
+    public static final String PAYMENTS_COUNT_QUERY = "SELECT count(DISTINCT py.id) " +
+            " FROM egcl_payment py  " +
+            " INNER JOIN egcl_paymentdetail pyd ON pyd.paymentid = py.id " +
+            " INNER JOIN egcl_bill bill ON bill.id = pyd.billid " +
+            " INNER JOIN egcl_billdetial bd ON bd.billid = bill.id " ;
 
 
 	public static String getPaymentSearchQuery(PaymentSearchCriteria criteria,
@@ -306,6 +312,13 @@ public class URCQueryBuilder {
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(TOTAL_PROPERTIES_SQL);
 		return addWhereClauseForProperty(selectQuery, preparedStatementValues, propertySearchCriteria,true);
+	}
+	
+	public String getIdCountQuery(PaymentSearchCriteria paymentSearchCriteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(PAYMENTS_COUNT_QUERY);
+		addWhereClause(selectQuery, preparedStatementValues, paymentSearchCriteria);
+		//StringBuilder finalQuery = addWrapperQuery(selectQuery);
+		return selectQuery.toString();
 	}
 
 	private static void addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
