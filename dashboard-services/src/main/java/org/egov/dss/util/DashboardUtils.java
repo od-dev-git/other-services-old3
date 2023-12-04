@@ -341,4 +341,24 @@ public class DashboardUtils {
 
 	}
 	
+
+	public Long enrichFormDate(Long fromDate) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+		cal.setTimeInMillis(fromDate);
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 1);
+		return cal.getTimeInMillis();
+	}
+	
+	public Long enrichToDate(Long toDate) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+		cal.setTimeInMillis(toDate);
+		cal.set(Calendar.HOUR, 11);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+		cal.set( Calendar.AM_PM, Calendar.PM);
+		return cal.getTimeInMillis();
+	}
+	
 }
