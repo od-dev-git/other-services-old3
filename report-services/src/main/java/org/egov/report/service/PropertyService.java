@@ -182,8 +182,8 @@ public class PropertyService {
                 .tenantId(searchCriteria.getUlbName()).fromDate(searchCriteria.getStartDate())
                 .toDate(searchCriteria.getEndDate()).build();
 
-		paymentSearchCriteria.setPaymentModes(Stream
-				.of("CASH", "OFFLINE_RTGS", "OFFLINE_NEFT", "POSTAL_ORDER", "CHEQUE","DD","CARD").collect(Collectors.toSet()));
+//		paymentSearchCriteria.setPaymentModes(Stream
+//				.of("CASH", "OFFLINE_RTGS", "OFFLINE_NEFT", "POSTAL_ORDER", "CHEQUE","DD","CARD").collect(Collectors.toSet()));
 
 		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
         List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse =  payments.parallelStream().map(payment  ->{
@@ -215,7 +215,6 @@ public class PropertyService {
             org.egov.report.user.UserSearchCriteria userSearchCriteria = org.egov.report.user.UserSearchCriteria
                     .builder()
                     .tenantId(searchCriteria.getUlbName())
-                    .active(true)
                     .type(UserType.EMPLOYEE)
                     .id(userIds)
                     .build();
@@ -224,29 +223,40 @@ public class PropertyService {
             log.info("User Details Fetched ");
             Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
                     .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
-            log.info("Setting User Details ");
-            taxCollectorWiseCollectionResponse.stream().forEach(collectionResponse -> {
-                org.egov.report.user.User user = userMap.get(Long.valueOf(collectionResponse.getUserid()));
-                if (user != null) {
-                    collectionResponse.setMobilenumber(user.getMobileNumber());
-                    collectionResponse.setName(user.getName());
-                    collectionResponse.setEmployeeid(user.getUsername());
-                    collectionResponse.setType(user.getType().toString());
-                }
-            });
             
             //getting Property Details
             log.info("Fetching Property Details ");
             PropertyDetailsSearchCriteria propertySearchingCriteria = PropertyDetailsSearchCriteria.builder()
                     .ulbName(searchCriteria.getUlbName()).propertyIds(Properties).build();
             HashMap<String , String> propertyMap = pdRepository.getOldPropertyIds(propertySearchingCriteria);
-            log.info("Setting Property Details ");
-            taxCollectorWiseCollectionResponse.parallelStream().forEach(taxCollectorWiseCollection ->{
-                if(StringUtils.hasText(propertyMap.get(taxCollectorWiseCollection.getConsumercode()))){
-                    String oldPropertyId = propertyMap.get(taxCollectorWiseCollection.getConsumercode());
-                    taxCollectorWiseCollection.setOldpropertyid(oldPropertyId);
+            
+            log.info("Setting User Details ");
+            taxCollectorWiseCollectionResponse = taxCollectorWiseCollectionResponse.stream().peek(collectionResponse -> {
+                org.egov.report.user.User user = userMap.get(Long.valueOf(collectionResponse.getUserid()));
+                if (user != null) {
+                    collectionResponse.setMobilenumber(user.getMobileNumber());
+                    collectionResponse.setName(user.getName());
+                    collectionResponse.setEmployeeid(user.getUsername());
+                    collectionResponse.setType(user.getType().toString());
+                    if(StringUtils.hasText(propertyMap.get(collectionResponse.getConsumercode()))){
+                        String oldPropertyId = propertyMap.get(collectionResponse.getConsumercode());
+                        collectionResponse.setOldpropertyid(oldPropertyId);
+                    }
                 }
-            });
+            }).filter(tcwcrUser -> StringUtils.hasText(tcwcrUser.getType())).collect(Collectors.toList());
+            
+//            //getting Property Details
+//            log.info("Fetching Property Details ");
+//            PropertyDetailsSearchCriteria propertySearchingCriteria = PropertyDetailsSearchCriteria.builder()
+//                    .ulbName(searchCriteria.getUlbName()).propertyIds(Properties).build();
+//            HashMap<String , String> propertyMap = pdRepository.getOldPropertyIds(propertySearchingCriteria);
+//            log.info("Setting Property Details ");
+//            taxCollectorWiseCollectionResponse.parallelStream().forEach(taxCollectorWiseCollection ->{
+//                if(StringUtils.hasText(propertyMap.get(taxCollectorWiseCollection.getConsumercode()))){
+//                    String oldPropertyId = propertyMap.get(taxCollectorWiseCollection.getConsumercode());
+//                    taxCollectorWiseCollection.setOldpropertyid(oldPropertyId);
+//                }
+//            });
 
         }
 
