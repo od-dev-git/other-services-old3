@@ -1,7 +1,10 @@
 package org.egov.usm.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -58,10 +61,10 @@ public class TicketService {
 				.searchQuestionsInTicket(surveyDetailsRequest.getSurveyDetails());
 
 		// Filter answers for ticket creation
-		List<SubmittedAnswer> filterSubmittedAnswers = submittedAnswersAsNO.stream()
+		Set<SubmittedAnswer> filterSubmittedAnswers = submittedAnswersAsNO.stream()
 				.filter(answer -> questionsExistsInTicket.stream()
 						.noneMatch(questionId -> questionId.equals(answer.getQuestionId())))
-				.collect(Collectors.toList());
+				.collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SubmittedAnswer::getQuestionId))));
 
 		// If there is no answer as no then return Empty Ticket
 		if (!CollectionUtils.isEmpty(filterSubmittedAnswers)) {
