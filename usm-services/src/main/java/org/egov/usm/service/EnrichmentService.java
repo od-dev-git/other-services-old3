@@ -81,7 +81,7 @@ public class EnrichmentService {
 
 
 
-	public List<SurveyTicket> enrichTickets(List<SubmittedAnswer> filterSubmittedAnswers,
+	public List<SurveyTicket> enrichTickets(Set<SubmittedAnswer> filterSubmittedAnswers,
 			SurveyDetailsRequest surveyDetailsRequest) {
 		List<SurveyTicket> surveyTickets = new ArrayList<>();
 
