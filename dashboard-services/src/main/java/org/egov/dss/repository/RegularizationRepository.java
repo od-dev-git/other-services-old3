@@ -135,6 +135,30 @@ public class RegularizationRepository {
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
 	}
+
+	public HashMap<String, BigDecimal> getTenantWiseRegularizationApplication(RegularizationSearchCriteria regularizationSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = regularizationQueryBuilder.getTenantWiseRegularizationApplicationQuery(regularizationSearchCriteria, preparedStatementValues);
+        log.info("query for Regularization Tenant Wise Application List : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
+	
+	public HashMap<String, BigDecimal> getTenantWiseRegularizationPermitIssued(RegularizationSearchCriteria regularizationSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = regularizationQueryBuilder.getTenantWisePermitIssuedQuery(regularizationSearchCriteria, preparedStatementValues);
+        log.info("query for Regularization Tenant Wise Permit Issued List : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
+	
+	public HashMap<String, BigDecimal> getTenantWiseRegularizationPendingApplication(RegularizationSearchCriteria regularizationSearchCriteria) {
+        Map<String, Object> preparedStatementValues = new HashMap<>();
+        String query = regularizationQueryBuilder.getTenantWiseRegularizationPendingApplication(regularizationSearchCriteria, preparedStatementValues);
+        log.info("query for Regularization Tenant Wise Pending Application List : "+query);
+        HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+        return result;
+    }
    
 
 }

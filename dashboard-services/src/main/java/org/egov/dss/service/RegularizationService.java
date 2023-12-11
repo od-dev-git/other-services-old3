@@ -289,5 +289,103 @@ public class RegularizationService {
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 
+	public HashMap<String,BigDecimal> getTenantWiseRegularizationApplication(PayloadDetails payloadDetails) {
+        RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
+        criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.REGULARIZATION_REJECTED_STATUSES));
+        criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.REGULARIZATION_ALL_BUSINESS_SERVICES));
+        return regularizationRepository.getTenantWiseRegularizationApplication(criteria);
+     }
+    
+    public HashMap<String,BigDecimal> getTenantWisePermitIssued(PayloadDetails payloadDetails) {
+        RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
+        criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+        criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.REGULARIZATION_ALL_BUSINESS_SERVICES));
+        return regularizationRepository.getTenantWiseRegularizationPermitIssued(criteria);
+     }
+    
+    public HashMap<String,BigDecimal> getTenantWiseApplicationPending(PayloadDetails payloadDetails) {
+        RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
+        criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        criteria.setStatusNotIn(Sets.newHashSet(DashboardConstants.REGULARIZATION_REJECTED_STATUS_TOTAL_APPLICATIONS_PENDING));
+        criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.REGULARIZATION_ALL_BUSINESS_SERVICES));
+        criteria.setFromDate(null);
+        criteria.setDeleteStatus(DashboardConstants.STATUS_DELETED);
+        return regularizationRepository.getTenantWiseRegularizationPendingApplication(criteria);
+     }
+    
+    public HashMap<String,BigDecimal> getAvgDaysToIssueCertificate(PayloadDetails payloadDetails) {
+        RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
+        criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
+        criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.REGULARIZATION_ALL_BUSINESS_SERVICES));
+        return regularizationRepository.getTenantWiseAvgDaysPermitIssued(criteria);
+     }
+	
+	public List<Data> regularizationServiceReport(PayloadDetails payloadDetails) {
+		RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
+        criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+        HashMap<String, BigDecimal> totalApplicationSubmitted = getTenantWiseRegularizationApplication(payloadDetails);
+        HashMap<String, BigDecimal> tenantWiseRegularizationPermitIssued = getTenantWisePermitIssued(payloadDetails);
+        HashMap<String, BigDecimal> tenantWiseRegularizationPendingApplication = getTenantWiseApplicationPending(payloadDetails);
+        HashMap<String, BigDecimal> tenantWiseAvgDaysToIssueCertificate = getAvgDaysToIssueCertificate(payloadDetails);
+        
+        List<Data> response = new ArrayList<>();
+        int serialNumber = 1;
+
+        for (HashMap.Entry<String, BigDecimal> tenantWiseRegApplication : totalApplicationSubmitted.entrySet()) {
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+            plots.add(Plot.builder().name("ULBs").label(tenantWiseRegApplication.getKey().toString()).symbol("text")
+                    .build());
+					
+            plots.add(Plot.builder().name("Total Applications Submitted").value(tenantWiseRegApplication.getValue() == null ? BigDecimal.ZERO : tenantWiseRegApplication.getValue())
+                    .symbol("number").build());
+					
+			plots.add(Plot.builder().name("Total Permits Issued")
+                    .value(tenantWiseRegularizationPermitIssued.get(tenantWiseRegApplication.getKey()) == null ? BigDecimal.ZERO : tenantWiseRegularizationPermitIssued.get(tenantWiseRegApplication.getKey())).symbol("number").build());
+
+            plots.add(Plot.builder().name("Total Regularization Application Pending")
+                    .value(tenantWiseRegularizationPendingApplication.get(tenantWiseRegApplication.getKey()) == null ? BigDecimal.ZERO : tenantWiseRegularizationPendingApplication.get(tenantWiseRegApplication.getKey())).symbol("number").build());
+
+            plots.add(Plot.builder().name("Average days to issue Permit")
+                    .value(tenantWiseAvgDaysToIssueCertificate.get(tenantWiseRegApplication.getKey()) == null ? BigDecimal.ZERO : tenantWiseAvgDaysToIssueCertificate.get(tenantWiseRegApplication.getKey()) ).symbol("number").build());
+			
+            response.add(Data.builder().headerName(tenantWiseRegApplication.getKey()).plots(plots)
+                    .headerValue(serialNumber).headerName(tenantWiseRegApplication.getKey()).build());
+
+            serialNumber++;
+
+        }
+        
+		if (CollectionUtils.isEmpty(response)) {
+//			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+			
+			plots.add(Plot.builder().name("Total Applications Submitted").value(BigDecimal.ZERO).symbol("number")
+					.build());
+
+			plots.add(Plot.builder().name("Total Certificates Issued").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Regularization Application Pending").value(BigDecimal.ZERO).symbol("number")
+					.build());
+
+			plots.add(Plot.builder().name("Average days to issue certificate").value(BigDecimal.ZERO).symbol("number")
+					.build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+					
+
+		}
+
+        return response;
+    }
+
 	
 }

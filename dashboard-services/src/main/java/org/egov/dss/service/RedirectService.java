@@ -888,6 +888,26 @@ public class RedirectService {
 			return regularizationService.maxDaysToIssueCertificate(requestInfoWrapper.getPayloadDetails());
 		}
 
+		if(Constants.VisualizationCodes.REVENUE_REGULARIZATION_APP_FEE_COLLECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.regularizationFeeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_REGULARIZATION_SANC_FEE_COLLECTIONS.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.regularizationFeeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_REGULARIZATION_CUMULATIVE_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.getRegCumulativeCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_REGULARIZATION_COLLECTION_REPORT.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.regularizationCollectionReport(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_SERVICE_REPORT.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.regularizationServiceReport(requestInfoWrapper.getPayloadDetails());
+		}
+
 		return null;
 
 	}
