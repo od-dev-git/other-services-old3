@@ -135,6 +135,15 @@ public class RegularizationRepository {
         List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(Integer.class));
         return result.get(0);
 	}
+
+	public List<HashMap<String, Object>> getApplicationsBreakdown(RegularizationSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = regularizationQueryBuilder.getApplicationsBreakdownQuery(criteria, preparedStatementValues);
+		log.info("query for regularization   Applications Breakdown: " + query);
+		List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new TableChartRowMapper());
+		return result;
+	}
    
 
 }

@@ -276,6 +276,7 @@ public class Constants {
 		final static String SERVICE_REGULARIZATION_AVG_DAYS_TO_ISSUE_CERTIFICATE = "regularizationAverageDaysToIssueCertificate";
 		final static String SERVICE_REGULARIZATION_MIN_DAYS_TO_ISSUE_CERTIFICATE = "regularizationMinDaysToIssueCertificate";
 		final static String SERVICE_REGULARIZATION_MAX_DAYS_TO_ISSUE_CERTIFICATE = "regularizationMaxDaysToIssueCertificate";
+		final static String SERVICE_BLR_APPLICATION_BREAKDOWN = "regularizationApplicationsPendingBreakdown";
 
 	}
 
