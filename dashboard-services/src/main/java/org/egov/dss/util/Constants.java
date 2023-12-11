@@ -276,7 +276,16 @@ public class Constants {
 		final static String SERVICE_REGULARIZATION_AVG_DAYS_TO_ISSUE_CERTIFICATE = "regularizationAverageDaysToIssueCertificate";
 		final static String SERVICE_REGULARIZATION_MIN_DAYS_TO_ISSUE_CERTIFICATE = "regularizationMinDaysToIssueCertificate";
 		final static String SERVICE_REGULARIZATION_MAX_DAYS_TO_ISSUE_CERTIFICATE = "regularizationMaxDaysToIssueCertificate";
+
+		final static String REVENUE_REGULARIZATION_APP_FEE_COLLECTIONS = "regularizationApplicationFeesCollection";
+		final static String REVENUE_REGULARIZATION_SANC_FEE_COLLECTIONS = "regularizationSanctionFeesCollection";
+		final static String REVENUE_REGULARIZATION_CUMULATIVE_COLLECTION = "regularizationCumulativeCollections";
+		final static String REVENUE_REGULARIZATION_COLLECTION_REPORT = "regularizationCollectionReport";
+        final static String SERVICE_REGULARIZATION_SERVICE_REPORT = "regularizationServiceReport";
+		
+
 		final static String SERVICE_BLR_APPLICATION_BREAKDOWN = "regularizationApplicationsPendingBreakdown";
+
 
 	}
 
