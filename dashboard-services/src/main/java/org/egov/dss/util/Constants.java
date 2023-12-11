@@ -264,6 +264,14 @@ public class Constants {
 		final static String USM_TOP_ULB = "topPerformingULBS";
 		final static String USM_BOTTOM_ULB = "bottomPerformingULBS";
 		final static String USM_TOTAL_CUMULATIVE = "cumulativeFeedbackSubmitted";
+		
+		final static String SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_RECEIVED = "regularizationTotalApplicationsSubmitted";
+		final static String SERVICE_REGULARIZATION_TOTAL_CERTIFICATE_ISSUED = "regularizationTotalCertificateIssued";
+		final static String SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_REJECTED = "regularizationTotalRejectedApplications";
+		final static String SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_PENDING = "regularizationTotalPendingApplications";
+		final static String SERVICE_REGULARIZATION_AVG_DAYS_TO_ISSUE_CERTIFICATE = "regularizationAverageDaysToIssueCertificate";
+		final static String SERVICE_REGULARIZATION_MIN_DAYS_TO_ISSUE_CERTIFICATE = "regularizationMinDaysToIssueCertificate";
+		final static String SERVICE_REGULARIZATION_MAX_DAYS_TO_ISSUE_CERTIFICATE = "regularizationMaxDaysToIssueCertificate";
 	}
 
 }

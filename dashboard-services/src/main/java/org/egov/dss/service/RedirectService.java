@@ -34,6 +34,9 @@ public class RedirectService {
 	private BPAService bpaService;
 	
 	@Autowired
+	private RegularizationService regularizationService;
+	
+	@Autowired
 	private PGRService pgrService;
 	
 	@Autowired
@@ -841,6 +844,34 @@ public class RedirectService {
 		
 		if (Constants.VisualizationCodes.JALSATHI_CONTRIBUTION_TO_WS.equalsIgnoreCase(visualizationCode)) {
 			return urcService.jalsathiContributionToWS(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_RECEIVED.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.totalApplicationsReceived(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOTAL_CERTIFICATE_ISSUED.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.totalRegularizationCertificateIssued(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_REJECTED.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.totalApplicationsRejected(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_PENDING.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.totalApplicationsPending(requestInfoWrapper.getPayloadDetails());
+		} 
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_AVG_DAYS_TO_ISSUE_CERTIFICATE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.avgDaysToIssueCertificate(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_MIN_DAYS_TO_ISSUE_CERTIFICATE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.minDaysToIssueCertificate(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_MAX_DAYS_TO_ISSUE_CERTIFICATE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.maxDaysToIssueCertificate(requestInfoWrapper.getPayloadDetails());
 		}
 
 		return null;
