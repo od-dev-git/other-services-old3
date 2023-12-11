@@ -830,13 +830,15 @@ public class RedirectService {
             return urcService.collectorWiseRevenue(requestInfoWrapper.getPayloadDetails());
         }
         
-		if (Constants.VisualizationCodes.JALSATHI_PT_INCENTIVES.equalsIgnoreCase(visualizationCode)) {
-			return urcService.jalsathiPTIncentives(requestInfoWrapper.getPayloadDetails());
-		}
-
-		if (Constants.VisualizationCodes.JALSATHI_WS_INCENTIVES.equalsIgnoreCase(visualizationCode)) {
-			return urcService.jalsathiWSIncentives(requestInfoWrapper.getPayloadDetails());
-		}
+		/*
+		 * if (Constants.VisualizationCodes.JALSATHI_PT_INCENTIVES.equalsIgnoreCase(
+		 * visualizationCode)) { return
+		 * urcService.jalsathiPTIncentives(requestInfoWrapper.getPayloadDetails()); }
+		 * 
+		 * if (Constants.VisualizationCodes.JALSATHI_WS_INCENTIVES.equalsIgnoreCase(
+		 * visualizationCode)) { return
+		 * urcService.jalsathiWSIncentives(requestInfoWrapper.getPayloadDetails()); }
+		 */
 		
 		if (Constants.VisualizationCodes.JALSATHI_CONTRIBUTION_TO_PT.equalsIgnoreCase(visualizationCode)) {
 			return urcService.jalsathiContributionToPT(requestInfoWrapper.getPayloadDetails());
