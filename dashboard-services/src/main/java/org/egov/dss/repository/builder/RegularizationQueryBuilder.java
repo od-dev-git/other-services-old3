@@ -32,6 +32,35 @@ public class RegularizationQueryBuilder {
 	public static final String REGULARIZATION_AVG_DAYS = " select avg((approvaldate-applicationdate)/86400000) from eg_bpa_regularization_application ebra  ";
 	public static final String REGULARIZATION_MIN_DAYS = " select min((approvaldate-applicationdate)/86400000) from eg_bpa_regularization_application ebra  ";
 	public static final String REGULARIZATION_MAX_DAYS = " select max((approvaldate-applicationdate)/86400000) from eg_bpa_regularization_application ebra  ";
+
+	public static final String REG_APPL_BREAKDOWN_1 = "select INITCAP(SPLIT_PART(internal.tenantid,'.', 2)) as ulb,sum(case when internal.status = 'Pending at Document Verification' then internal.internalcount else 0 end)\r\n"
+			+ "			 pendingDocVerif,sum(case when internal.status = 'Pending at Field Inspection' then internal.internalcount else 0 end) pendingFieldInspection,\r\n"
+			+ "			 sum(case when internal.status = 'Pending at Planning Assistant' then internal.internalcount else 0 end) pendingAtPlanningAssistant,\r\n"
+			+ "			 sum(case when internal.status = 'Pending at Planning Officer' then internal.internalcount else 0 end) pendingAtPlanningOfficer,\r\n"
+			+ "			 sum(case when internal.status = 'Pending at Planning Member' then internal.internalcount else 0 end) pendingAtPlanningMember,\r\n"
+			+ "			 sum(case when internal.status = 'Pending at DPBP Committee' then internal.internalcount else 0 end) pendingAtDpbp,\r\n"
+			+ "			 sum(case when internal.status = 'Pending for Citizen Action' then internal.internalcount else 0 end) pendingForCitizenAction,\r\n"
+			+ "			 sum(case when internal.status = 'Pending for Permit Fee Payment' then internal.internalcount else 0 end)pendingSancFeePayment,\r\n"
+			+ "			 sum(case when internal.status in ( 'Pending at Document Verification', 'Pending at Field Inspection', 'Pending at Planning Assistant', 'Pending at Planning Officer',\r\n"
+			+ "			 'Pending at Planning Member', 'Pending at DPBP Committee', 'Pending for Citizen Action', 'Pending for Permit Fee Payment') then internal.internalcount else 0 end) totalApplicationReciceved\r\n"
+			+ "			 from(select ebra.tenantid as tenantid,case when ebra.status = 'APPROVED' then 'Approved' when ebra.status = 'REJECTED' then 'Rejected'\r\n"
+			+ "			 when ebra.status = 'DOC_VERIFICATION_INPROGRESS' then 'Pending at Document Verification' when ebra.status = 'FIELDINSPECTION_INPROGRESS' then 'Pending at Field Inspection'\r\n"
+			+ "			 when ebra.status = 'APP_L1_VERIFICATION_INPROGRESS' then 'Pending at Planning Assistant' when ebra.status = 'APPROVAL_INPROGRESS'\r\n"
+			+ "			 and ebra.businessservice in ('LR1', 'BLR1') then 'Pending at Planning Assistant'when ebra.status = 'APP_L2_VERIFICATION_INPROGRESS' then 'Pending at Planning Officer'\r\n"
+			+ "			 when ebra.status = 'APPROVAL_INPROGRESS'and ebra.businessservice in ('LR2', 'BLR3') then 'Pending at Planning Officer'\r\n"
+			+ "			 when ebra.status = 'APP_L3_VERIFICATION_INPROGRESS' then 'Pending at Planning Member'when ebra.status = 'APPROVAL_INPROGRESS'\r\n"
+			+ "			 and ebra.businessservice in ('LR3','BLR3') then 'Pending at Planning Member'when ebra.status = 'APP_L4_VERIFICATION_INPROGRESS' then 'Pending at DPBP Committee'\r\n"
+			+ "			 when ebra.status = 'APPROVAL_INPROGRESS'and ebra.businessservice in ('LR4', 'BLR4') then 'Pending at DPBP Committee'\r\n"
+			+ "			 when ebra.status in ('CITIZEN_ACTION_PENDING_AT_DOC_VERIF', 'CITIZEN_ACTION_PENDING_AT_APP_L1_VERIF', 'CITIZEN_ACTION_PENDING_AT_APP_L2_VERIF',\r\n"
+			+ "			 'CITIZEN_ACTION_PENDING_AT_APP_L3_VERIF', 'CITIZEN_ACTION_PENDING_AT_APPROVAL') then 'Pending for Citizen Action'\r\n"
+			+ "			 when ebra.status = 'PENDING_SANC_FEE_PAYMENT' then 'Pending for Permit Fee Payment'end as status,count(ebra.applicationno) as internalcount\r\n"
+			+ "			 from eg_bpa_regularization_application ebra";
+	public static final String REG_APPL_BREAKDOWN_2 = " group by ebra.status, ebra.tenantid,ebra.businessservice having ebra.businessservice \r\n"
+			+ "			 in ('LR1', 'LR2', 'LR3', 'LR4', 'BLR1', 'BLR2', 'BLR3', 'BLR4')and ebra.status not in('DELETED', 'INITIATED', 'CITIZEN_APPROVAL_INPROCESS',\r\n"
+			+ "			'PENDING_APPL_FEE', 'INPROGRESS', 'PENDING_FORWARD', 'CONSTRUCT_START_INTIMATED', 'PLINTH_VERIFICATION_INPROGRESS', 'GROUNDFLR_VERIFICATION_INPROGRESS',\r\n"
+			+ "			'TOPFLR_VERIFICATION_INPROGRESS', 'TOPFLR_VERIFICATION_COMPLETED') ) internal group by internal.tenantid\r\n"
+			+ "			 " + " ";
+
 	
 	
 	
@@ -304,6 +333,7 @@ public class RegularizationQueryBuilder {
 		return selectQuery.toString();
 	}
 
+
 	public String getTenantWiseRegularizationApplicationQuery(RegularizationSearchCriteria regularizationSearchCriteria,
             Map<String, Object> preparedStatementValues) {
         StringBuilder selectQuery = new StringBuilder(REGULARIZATION_TENANT_WISE_TOTAL_APPLICATIONS);
@@ -338,5 +368,14 @@ public String getTenantWisePermitIssuedQuery(RegularizationSearchCriteria regula
         addGroupByClause(selectQuery,"reg.tenantid ");
         return selectQuery.toString();
     }
+
+	public String getApplicationsBreakdownQuery(RegularizationSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(REG_APPL_BREAKDOWN_1);
+		addWhereClauseforPendingApplication(selectQuery, preparedStatementValues, criteria);
+		selectQuery.append(REG_APPL_BREAKDOWN_2);
+		return selectQuery.toString();
+	}
+
 }
 

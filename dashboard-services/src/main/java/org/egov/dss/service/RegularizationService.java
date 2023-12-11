@@ -289,6 +289,7 @@ public class RegularizationService {
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 
+
 	public HashMap<String,BigDecimal> getTenantWiseRegularizationApplication(PayloadDetails payloadDetails) {
         RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
         criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
@@ -386,6 +387,83 @@ public class RegularizationService {
 
         return response;
     }
+
+
+   /*
+	 * dss for regularization application pending breakdown
+	 */
+
+	public List<Data> regularizationApplicationsPendingBreakdown(PayloadDetails payloadDetails) {
+
+		RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		criteria.setDeleteStatus(DashboardConstants.STATUS_DELETED);
+		List<HashMap<String, Object>> regApplicationPending = regularizationRepository.getApplicationsBreakdown(criteria);
+		List<Data> response = new ArrayList();
+		int serailNumber = 0;
+		for (HashMap<String, Object> regApplication : regApplicationPending) {
+			serailNumber++;
+			String tenantIdStyled = String.valueOf(regApplication.get("ulb"));
+			tenantIdStyled = tenantIdStyled.substring(0, 1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(tenantIdStyled).name("ULBs").symbol("text").build());
+
+			row.add(Plot.builder().name("Pending At Doc Verification")
+					.value(new BigDecimal(String.valueOf(regApplication.get("pendingdocverif")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Pending At Field Inspection")
+					.value(new BigDecimal(String.valueOf(regApplication.get("pendingfieldinspection"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Pending At Planning Assistance")
+					.value(new BigDecimal(String.valueOf(regApplication.get("pendingatplanningassistant"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Pending Approval")
+					.value(new BigDecimal(String.valueOf(regApplication.get("pendingatplanningofficer"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Pending At Planning Member")
+					.value(new BigDecimal(String.valueOf(regApplication.get("pendingatplanningmember"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Pending At DPBP Committee")
+					.value(new BigDecimal(String.valueOf(regApplication.get("pendingatdpbp")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Pending For Citizen Action")
+					.value(new BigDecimal(String.valueOf(regApplication.get("pendingforcitizenaction"))))
+					.symbol("number").build());
+			row.add(Plot.builder().name("Pending Sanction Fee Payment")
+					.value(new BigDecimal(String.valueOf(regApplication.get("pendingsancfeepayment")))).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Total Applications")
+					.value(new BigDecimal(String.valueOf(regApplication.get("totalapplicationreciceved"))))
+					.symbol("number").build());
+
+			response.add(Data.builder().headerName(tenantIdStyled).headerValue(serailNumber).plots(row).insight(null)
+					.build());
+		}
+
+		if (CollectionUtils.isEmpty(response)) {
+			serailNumber++;
+			List<Plot> row = new ArrayList<>();
+			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
+			row.add(Plot.builder().label(payloadDetails.getTenantid()).name("ULBs").symbol("text").build());
+			row.add(Plot.builder().name("Pending At Doc Verification").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Field Inspection").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Planning Assistance").value(BigDecimal.ZERO).symbol("number")
+					.build());
+			row.add(Plot.builder().name("Pending Approval").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At Planning Member").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending At DPBP Committee").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending For Citizen Action").value(BigDecimal.ZERO).symbol("number").build());
+			row.add(Plot.builder().name("Pending Sanction Fee Payment").value(BigDecimal.ZERO).symbol("number")
+					.build());
+
+			row.add(Plot.builder().name("Total Applications").value(BigDecimal.ZERO).symbol("number").build());
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).headerValue(serailNumber).plots(row)
+					.insight(null).build());
+		}
+
+		return response;
+	}
 
 	
 }

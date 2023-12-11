@@ -887,6 +887,9 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_MAX_DAYS_TO_ISSUE_CERTIFICATE.equalsIgnoreCase(visualizationCode)) {
 			return regularizationService.maxDaysToIssueCertificate(requestInfoWrapper.getPayloadDetails());
 		}
+		if (Constants.VisualizationCodes.SERVICE_BLR_APPLICATION_BREAKDOWN.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.regularizationApplicationsPendingBreakdown(requestInfoWrapper.getPayloadDetails());
+		}
 
 		if(Constants.VisualizationCodes.REVENUE_REGULARIZATION_APP_FEE_COLLECTIONS.equalsIgnoreCase(visualizationCode)) {
 			return revenueService.regularizationFeeCollection(requestInfoWrapper.getPayloadDetails());

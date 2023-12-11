@@ -136,6 +136,7 @@ public class RegularizationRepository {
         return result.get(0);
 	}
 
+
 	public HashMap<String, BigDecimal> getTenantWiseRegularizationApplication(RegularizationSearchCriteria regularizationSearchCriteria) {
         Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = regularizationQueryBuilder.getTenantWiseRegularizationApplicationQuery(regularizationSearchCriteria, preparedStatementValues);
@@ -159,6 +160,16 @@ public class RegularizationRepository {
         HashMap<String, BigDecimal> result = namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
         return result;
     }
+
+	public List<HashMap<String, Object>> getApplicationsBreakdown(RegularizationSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = regularizationQueryBuilder.getApplicationsBreakdownQuery(criteria, preparedStatementValues);
+		log.info("query for regularization   Applications Breakdown: " + query);
+		List<HashMap<String, Object>> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new TableChartRowMapper());
+		return result;
+	}
+
    
 
 }
