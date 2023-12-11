@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class DashboardConstants {
-	
+
 	public static  final String COMMON = "COMMON";
 	
 	public static  final String BUSINESS_SERVICE_PT = "PT";
@@ -64,6 +64,23 @@ public class DashboardConstants {
 
 	public static final String BUSINESS_SERICE_BPA10 = "BPA10";
 	
+	public static final String BUSINESS_SERVICE_LR1 = "LR1";
+
+    public static final String BUSINESS_SERVICE_LR2 = "LR2";
+
+    public static final String BUSINESS_SERVICE_LR3 = "LR3";
+
+    public static final String BUSINESS_SERVICE_LR4 = "LR4";
+
+    public static final String BUSINESS_SERVICE_BLR1 = "BLR1";
+
+    public static final String BUSINESS_SERVICE_BLR2 = "BLR2";
+
+    public static final String BUSINESS_SERVICE_BLR3 = "BLR3";
+
+    public static final String BUSINESS_SERVICE_BLR4 = "BLR4";
+
+	
 	public static final String BUSINESS_SERICE_BPAOC1 = "BPA_OC1";
 
 	public static final String BUSINESS_SERICE_BPAOC2 = "BPA_OC2";
@@ -83,8 +100,11 @@ public class DashboardConstants {
 	public static final String BUSINESS_SERICE_BPAOC9 = "BPA_OC9";
 
 	public static final String BUSINESS_SERICE_BPAOC10 = "BPA_OC10";
-	
+		
 	public static final String MODULE_LEVEL_OBPS = "OBPS";
+	
+    public static final String MODULE_LEVEL_REGULARIZATION = "REGULARIZATION";
+
 	
 	public static final String MODULE_LEVEL_PT = "PT"; 
 	
@@ -346,5 +366,20 @@ public class DashboardConstants {
 	public static final List<String> URC_REVENUE_ALL_BS = Collections.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_WS,
 			BUSINESS_SERVICE_SW, BUSINESS_SERVICE_WS_ONE_TIME_FEE, BUSINESS_SERVICE_SW_ONE_TIME_FEE, BUSINESS_SERVICE_PT, BUSINESS_SERVICE_PT_MUTATION));
 
+	public static final List<String> REGULARIZATION_ALL_BUSINESS_SERVICES = Collections
+            .unmodifiableList(Arrays.asList(BUSINESS_SERVICE_LR1,BUSINESS_SERVICE_LR2,BUSINESS_SERVICE_LR3,BUSINESS_SERVICE_LR4,
+                    BUSINESS_SERVICE_BLR1,BUSINESS_SERVICE_BLR2,BUSINESS_SERVICE_BLR3,BUSINESS_SERVICE_BLR4));
+                     
+	public static final List<String> REGULARIZATION_REJECTED_STATUSES = Collections
+	            .unmodifiableList(Arrays.asList(STATUS_INITIATED, STATUS_CITIZEN_APPROVAL_INPROCESS, STATUS_INPROGRESS,
+	                    STATUS_PENDING_APPL_FEE, STATUS_DELETED, STATUS_PENDING_FORWARD, STATUS_CONSTRUCT_START_INTIMATED,
+	                    STATUS_PLINTH_VERIFICATION_INPROGRESS, STATUS_GROUNDFLR_VERIFICATION_INPROGRESS,
+	                    STATUS_TOPFLR_VERIFICATION_INPROGRESS, STATUS_TOPFLR_VERIFICATION_COMPLETED));
+
+	public static final String LAND = "LAND";
+
+	public static final String BUILDING = "BUILDING";
+
+	public static final String LB = "LB";
 
 }

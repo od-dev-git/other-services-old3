@@ -40,6 +40,9 @@ public class RedirectService {
 	private CommonService commonService;
 	
 	@Autowired
+	private RegularizationService regularizationService;
+	
+	@Autowired
 	private URCService urcService;
     @Autowired
 	private USMService usmService;
@@ -842,7 +845,15 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.JALSATHI_CONTRIBUTION_TO_WS.equalsIgnoreCase(visualizationCode)) {
 			return urcService.jalsathiContributionToWS(requestInfoWrapper.getPayloadDetails());
 		}
-
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOP_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.topUlbByPerformance(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_BOTTOM_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.bottomUlbByPerformance(requestInfoWrapper.getPayloadDetails());
+		}
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_SERVICE_SUMMARY.equalsIgnoreCase(visualizationCode)) {
+	        return regularizationService.RegularizationServiceSummary(requestInfoWrapper.getPayloadDetails());
+	        }
 		return null;
 
 	}

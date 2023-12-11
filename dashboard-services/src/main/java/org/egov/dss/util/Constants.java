@@ -264,6 +264,13 @@ public class Constants {
 		final static String USM_TOP_ULB = "topPerformingULBS";
 		final static String USM_BOTTOM_ULB = "bottomPerformingULBS";
 		final static String USM_TOTAL_CUMULATIVE = "cumulativeFeedbackSubmitted";
+		
+		final static String SERVICE_REGULARIZATION_TOP_ULB_BY_PERFORMANCE = "regularizationTopUlbByPerformance";
+		final static String SERVICE_REGULARIZATION_BOTTOM_ULB_BY_PERFORMANCE = "regularizationBottomUlbByPerformance";
+		final static String SERVICE_REGULARIZATION_SERVICE_SUMMARY = "regularizationServiceSummary";
+
+
+
 	}
 
 }
