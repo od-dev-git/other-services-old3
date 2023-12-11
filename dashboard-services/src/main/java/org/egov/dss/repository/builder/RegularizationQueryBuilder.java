@@ -24,10 +24,10 @@ public class RegularizationQueryBuilder {
 			+ "	from\r\n"
 			+ "		eg_bpa_regularization_application ebra\r\n";
 
-	public static final String REGULARIZATION_TENANT_WISE_TOTAL_APPLICATIONS = " select reg.tenantid as tenantid, count(reg.applicationno) as totalamt from eg_bpa_regularization_application reg  ";
+	public static final String REGULARIZATION_TENANT_WISE_TOTAL_APPLICATIONS = " select ebra.tenantid as tenantid, count(ebra.applicationno) as totalamt from eg_bpa_regularization_application ebra  ";
 
 
-	public static final String REGULARIZATION_TOTAL_APPLICATIONS = " select count(reg.applicationno) from eg_bpa_regularization_application reg ";
+	public static final String REGULARIZATION_TOTAL_APPLICATIONS = " select count(ebra.applicationno) from eg_bpa_regularization_application ebra ";
 			
 	public static final String REGULARIZATION_AVG_DAYS = " select avg((approvaldate-applicationdate)/86400000) from eg_bpa_regularization_application ebra  ";
 	public static final String REGULARIZATION_MIN_DAYS = " select min((approvaldate-applicationdate)/86400000) from eg_bpa_regularization_application ebra  ";
@@ -338,7 +338,7 @@ public class RegularizationQueryBuilder {
             Map<String, Object> preparedStatementValues) {
         StringBuilder selectQuery = new StringBuilder(REGULARIZATION_TENANT_WISE_TOTAL_APPLICATIONS);
         addWhereClauseForApplicationReceived(selectQuery, preparedStatementValues, regularizationSearchCriteria);
-        addGroupByClause(selectQuery," reg.tenantid ");
+        addGroupByClause(selectQuery," ebra.tenantid ");
         return selectQuery.toString();
     }
    
@@ -348,7 +348,7 @@ public String getTenantWisePermitIssuedQuery(RegularizationSearchCriteria regula
             Map<String, Object> preparedStatementValues) {
         StringBuilder selectQuery = new StringBuilder(REGULARIZATION_TENANT_WISE_TOTAL_APPLICATIONS);
         addWhereClause(selectQuery, preparedStatementValues, regularizationSearchCriteria);
-        addGroupByClause(selectQuery," reg.tenantid ");
+        addGroupByClause(selectQuery," ebra.tenantid ");
         return selectQuery.toString();
     }
    
@@ -357,7 +357,7 @@ public String getTenantWisePermitIssuedQuery(RegularizationSearchCriteria regula
             Map<String, Object> preparedStatementValues) {
         StringBuilder selectQuery = new StringBuilder(REGULARIZATION_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED);
         addWhereClause(selectQuery, preparedStatementValues, regularizationSearchCriteria);
-        addGroupByClause(selectQuery," reg.tenantid ");
+        addGroupByClause(selectQuery," ebra.tenantid ");
         return selectQuery.toString();
     }
     
@@ -365,7 +365,7 @@ public String getTenantWisePermitIssuedQuery(RegularizationSearchCriteria regula
             Map<String, Object> preparedStatementValues) {
         StringBuilder selectQuery = new StringBuilder(REGULARIZATION_TENANT_WISE_TOTAL_APPLICATIONS);
         addWhereClauseforPendingApplication(selectQuery, preparedStatementValues, regularizationSearchCriteria);
-        addGroupByClause(selectQuery,"reg.tenantid ");
+        addGroupByClause(selectQuery,"ebra.tenantid ");
         return selectQuery.toString();
     }
 
@@ -378,4 +378,3 @@ public String getTenantWisePermitIssuedQuery(RegularizationSearchCriteria regula
 	}
 
 }
-
