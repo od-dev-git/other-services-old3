@@ -44,5 +44,8 @@ public class RegularizationSearchCriteria {
 	private String deleteStatus;
 	
 	private String riskType;
+	
+	private String apptype;
+
 
 }

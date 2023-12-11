@@ -848,6 +848,18 @@ public class RedirectService {
 			return urcService.jalsathiContributionToWS(requestInfoWrapper.getPayloadDetails());
 		}
 		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOP_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.topUlbByPerformance(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_BOTTOM_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.bottomUlbByPerformance(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_SERVICE_SUMMARY.equalsIgnoreCase(visualizationCode)) {
+	        return regularizationService.RegularizationServiceSummary(requestInfoWrapper.getPayloadDetails());
+	    }	
+		
 		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_RECEIVED.equalsIgnoreCase(visualizationCode)) {
 			return regularizationService.totalApplicationsReceived(requestInfoWrapper.getPayloadDetails());
 		}

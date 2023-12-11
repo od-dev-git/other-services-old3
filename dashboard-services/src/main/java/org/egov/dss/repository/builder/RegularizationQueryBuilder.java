@@ -11,140 +11,191 @@ import org.springframework.util.CollectionUtils;
 
 @Component
 public class RegularizationQueryBuilder {
+
+
+	public static final String REGULARIZATION_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED = " select ebra.tenantid as tenantid , avg((ebra.approvaldate-ebra.applicationdate)/86400000) as totalamt from eg_bpa_regularization_application ebra ";
 	
+    public static final String REGULARIZATION_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE = "select apptype  as tenantid,\r\n"
+    		+ "count(ebra.applicationno) as totalamt\r\n"
+    		+ "from\r\n"
+    		+ "		eg_bpa_regularization_application ebra ";
+	public static final String REGULARIZATION_AVG_DAYS_PERMIT_ISSUE_BY_SERVICETYPE = "select apptype as tenantid,\r\n"
+			+ "	avg((ebra.approvaldate-ebra.applicationdate)/ 86400000) as totalamt\r\n"
+			+ "	from\r\n"
+			+ "		eg_bpa_regularization_application ebra\r\n";
+			
 	public static final String REGULARIZATION_TOTAL_APPLICATIONS = " select count(ebra.applicationno) from eg_bpa_regularization_application ebra  ";
 	public static final String REGULARIZATION_AVG_DAYS = " select avg((approvaldate-applicationdate)/86400000) from eg_bpa_regularization_application ebra  ";
 	public static final String REGULARIZATION_MIN_DAYS = " select min((approvaldate-applicationdate)/86400000) from eg_bpa_regularization_application ebra  ";
 	public static final String REGULARIZATION_MAX_DAYS = " select max((approvaldate-applicationdate)/86400000) from eg_bpa_regularization_application ebra  ";
 	
-	private static String addWhereClauseForApplicationReceived(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
-			RegularizationSearchCriteria searchCriteria) {
-        
-
-		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.tenantid IN ( :tenantId )");
-			preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
-		}
-
-		if (searchCriteria.getFromDate() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.applicationdate >= :fromDate");
-			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
-		}
-
-		if (searchCriteria.getToDate() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.applicationdate <= :toDate");
-			preparedStatementValues.put("toDate", searchCriteria.getToDate());
-		}
-		
-		if (searchCriteria.getStatus() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.status IN (:status) ");
-			preparedStatementValues.put("status", searchCriteria.getStatus());
-		}
-		
-		if (searchCriteria.getSlaThreshold() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.lastmodifiedtime - ebra.createdtime < " + searchCriteria.getSlaThreshold());
-		}
-
-		if (searchCriteria.getExcludedTenantId() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.tenantId != :excludedTenantId");
-			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
-		}
-		
-
-		if (searchCriteria.getStatusNotIn() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.status NOT IN (:status) ");
-			preparedStatementValues.put("status", searchCriteria.getStatusNotIn());
-		}
-		
-		if (searchCriteria.getBusinessServices() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.businessservice IN (:businessservice) ");
-			preparedStatementValues.put("businessservice", searchCriteria.getBusinessServices());
-		}
-		
-
-		return selectQuery.toString();
-
-	}
 	
-	private static void addClauseIfRequired(Map<String, Object> values, StringBuilder queryString) {
-		if (values.isEmpty())
-			queryString.append(" WHERE ");
-		else {
-			queryString.append(" AND");
-		}
-	}
+	public String getTenantWiseAvgPermitIssue(RegularizationSearchCriteria regularizationSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(REGULARIZATION_TENANT_WISE_AVG_DAYS_PERMIT_ISSUED);
+	        addWhereClause(selectQuery, preparedStatementValues, regularizationSearchCriteria);
+	        addGroupByClause(selectQuery," ebra.tenantid ");
+	        return selectQuery.toString();
+	    }
+	 
+	public String getTotalApplicationByServiceType(RegularizationSearchCriteria regularizationSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(REGULARIZATION_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE);
+	        addWhereClauseForApplicationReceived(selectQuery, preparedStatementValues, regularizationSearchCriteria);
+	        addGroupByClause(selectQuery," apptype ");
+	        return selectQuery.toString();
+	    }
+	    
+	public String getApprovedApplicationByServiceType(RegularizationSearchCriteria regularizationSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(REGULARIZATION_TOTAL_APPLICATION_RECEIVED_BY_SERVICETYPE);
+	        addWhereClause(selectQuery, preparedStatementValues, regularizationSearchCriteria);
+	        addGroupByClause(selectQuery," apptype ");
+	        return selectQuery.toString();
+	    }
+	    
+	public String getAvgDaysToIssuePermitByServiceType(RegularizationSearchCriteria regularizationSearchCriteria,
+	            Map<String, Object> preparedStatementValues) {
+	        StringBuilder selectQuery = new StringBuilder(REGULARIZATION_AVG_DAYS_PERMIT_ISSUE_BY_SERVICETYPE);
+	        addWhereClause(selectQuery, preparedStatementValues, regularizationSearchCriteria);
+	        addGroupByClause(selectQuery," ebra.apptype ");
+	        return selectQuery.toString();
+	    }
+
 	
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
-			RegularizationSearchCriteria searchCriteria) {
-        
+			 RegularizationSearchCriteria searchCriteria) {
+	        
 
-		if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.tenantid IN ( :tenantId )");
-			preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
-		}
+			if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.tenantid IN ( :tenantId )");
+				preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
+			}
 
-		if (searchCriteria.getFromDate() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.approvaldate >= :fromDate");
-			preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
-		}
+			if (searchCriteria.getFromDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.approvaldate >= :fromDate");
+				preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+			}
 
-		if (searchCriteria.getToDate() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.approvaldate <= :toDate");
-			preparedStatementValues.put("toDate", searchCriteria.getToDate());
-		}
-		
-		if (searchCriteria.getStatus() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.status IN (:status) ");
-			preparedStatementValues.put("status", searchCriteria.getStatus());
-		}
-		
-		if (searchCriteria.getSlaThreshold() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.approvaldate - ebra.applicationdate <= " + searchCriteria.getSlaThreshold());
-		}
+			if (searchCriteria.getToDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.approvaldate <= :toDate");
+				preparedStatementValues.put("toDate", searchCriteria.getToDate());
+			}
+			
+			if (searchCriteria.getStatus() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.status IN (:status) ");
+				preparedStatementValues.put("status", searchCriteria.getStatus());
+			}
+			
+			if (searchCriteria.getSlaThreshold() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.approvaldate - ebra.applicationdate <= " + searchCriteria.getSlaThreshold());
+			}
 
-		if (searchCriteria.getExcludedTenantId() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.tenantId != :excludedTenantId");
-			preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
-		}
-		
+			if (searchCriteria.getExcludedTenantId() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.tenantId != :excludedTenantId");
+				preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
+			}
+			
 
-		if (searchCriteria.getStatusNotIn() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.status NOT IN (:status) ");
-			preparedStatementValues.put("status", searchCriteria.getStatusNotIn());
-		}
-		
-		if (searchCriteria.getBusinessServices() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebra.businessservice IN (:businessservice) ");
-			preparedStatementValues.put("businessservice", searchCriteria.getBusinessServices());
-		}
-		
-		if (searchCriteria.getRiskType() != null) {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ebe.risktype = :riskType ");
-			preparedStatementValues.put("riskType", searchCriteria.getRiskType());
-		}
-		
+			if (searchCriteria.getStatusNotIn() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.status NOT IN (:status) ");
+				preparedStatementValues.put("status", searchCriteria.getStatusNotIn());
+			}
+			
+			if (searchCriteria.getBusinessServices() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.businessservice IN (:businessservice) ");
+				preparedStatementValues.put("businessservice", searchCriteria.getBusinessServices());
+			}
+			
+			if (searchCriteria.getRiskType() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebe.risktype = :riskType ");
+				preparedStatementValues.put("riskType", searchCriteria.getRiskType());
+			}
+			
 
-		return selectQuery.toString();
+			return selectQuery.toString();
 
-	}
-	
+		}
+	 
+	private static void addGroupByClause(StringBuilder demandQueryBuilder,String columnName) {
+	        demandQueryBuilder.append(" GROUP BY " + columnName);
+	    }
+	 
+	private static void addClauseIfRequired(Map<String, Object> values, StringBuilder queryString) {
+			if (values.isEmpty())
+				queryString.append(" WHERE ");
+			else {
+				queryString.append(" AND");
+			}
+		}
+	 
+	private static String addWhereClauseForApplicationReceived(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
+				RegularizationSearchCriteria searchCriteria) {
+	        
+
+			if (searchCriteria.getTenantIds() != null && !CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.tenantid IN ( :tenantId )");
+				preparedStatementValues.put("tenantId",searchCriteria.getTenantIds());
+			}
+
+			if (searchCriteria.getFromDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.applicationdate >= :fromDate");
+				preparedStatementValues.put("fromDate", searchCriteria.getFromDate());
+			}
+
+			if (searchCriteria.getToDate() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.applicationdate <= :toDate");
+				preparedStatementValues.put("toDate", searchCriteria.getToDate());
+			}
+			
+			if (searchCriteria.getStatus() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.status IN (:status) ");
+				preparedStatementValues.put("status", searchCriteria.getStatus());
+			}
+			
+			if (searchCriteria.getSlaThreshold() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.lastmodifiedtime - ebra.createdtime < " + searchCriteria.getSlaThreshold());
+			}
+
+			if (searchCriteria.getExcludedTenantId() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.tenantId != :excludedTenantId");
+				preparedStatementValues.put("excludedTenantId", searchCriteria.getExcludedTenantId());
+			}
+			
+
+			if (searchCriteria.getStatusNotIn() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.status NOT IN (:status) ");
+				preparedStatementValues.put("status", searchCriteria.getStatusNotIn());
+			}
+			
+			if (searchCriteria.getBusinessServices() != null) {
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+				selectQuery.append(" ebra.businessservice IN (:businessservice) ");
+				preparedStatementValues.put("businessservice", searchCriteria.getBusinessServices());
+			}
+			
+			
+
+			return selectQuery.toString();
+
+		}
+	 
 	private static String addWhereClauseforPendingApplication(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			RegularizationSearchCriteria searchCriteria) {
         
