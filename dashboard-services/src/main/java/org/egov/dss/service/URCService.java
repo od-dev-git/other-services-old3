@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.validation.Valid;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.dss.constants.DashboardConstants;
@@ -39,6 +42,7 @@ import org.egov.dss.util.DashboardUtils;
 import org.egov.dss.web.model.Data;
 import org.egov.dss.web.model.Plot;
 import org.egov.dss.web.model.User;
+import org.egov.dss.model.enums.PaymentStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -262,7 +266,7 @@ public class URCService {
 		if(previousTotalCollection == BigDecimal.ZERO)
 			previousTotalCollection = BigDecimal.ONE;
 		BigDecimal changeInCollection = totalCollection.divide(previousTotalCollection, 2, BigDecimal.ROUND_HALF_UP)
-				.subtract(BigDecimal.ONE);
+				.subtract(BigDecimal.ONE).multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder().headerValue(
 				calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), changeInCollection))
 				.build());
@@ -282,7 +286,7 @@ public class URCService {
 			previousTotalCollection = BigDecimal.ONE;
 		}
 		BigDecimal changeInCollection = totalCollection.divide(previousTotalCollection, 2, BigDecimal.ROUND_HALF_UP)
-				.subtract(BigDecimal.ONE);
+				.subtract(BigDecimal.ONE).multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder().headerValue(
 				calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), changeInCollection))
 				.build());
@@ -323,7 +327,7 @@ public class URCService {
 	    if(previousTotalCollection == BigDecimal.ZERO)
 			previousTotalCollection = BigDecimal.ONE;
 		BigDecimal changeInCollection = totalCollection.divide(previousTotalCollection, 2, BigDecimal.ROUND_HALF_UP)
-				.subtract(BigDecimal.ONE);
+				.subtract(BigDecimal.ONE).multiply(new BigDecimal(100));
 		return Arrays.asList(Data.builder().headerValue(
 				calculatePercentageValue(dashboardUtils.addDenominationForAmount(totalCollection), changeInCollection))
 				.build());
@@ -846,9 +850,8 @@ public class URCService {
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 		plots.add(Plot.builder().name(DashboardConstants.PROPERTIES_PAID)
-				.value(new BigDecimal(propertiesPaid)
-						.divide(new BigDecimal(enrichTotalProperties), 2, RoundingMode.HALF_UP)
-						.multiply(new BigDecimal(100)))
+				.value(new BigDecimal(propertiesPaid).multiply(new BigDecimal(100))
+						.divide(new BigDecimal(enrichTotalProperties), RoundingMode.UP))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_PROPERTIES_PAID").plots(plots).build());
@@ -881,9 +884,8 @@ public class URCService {
 				.value(new BigDecimal(enrichTotalProperties).subtract(new BigDecimal(propertiesPaid)))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 		plots.add(Plot.builder().name(DashboardConstants.CONNECTIONS_PAID)
-				.value(new BigDecimal(propertiesPaid)
-						.divide(new BigDecimal(enrichTotalProperties), 2, RoundingMode.HALF_UP)
-						.multiply(new BigDecimal(100)))
+				.value(new BigDecimal(propertiesPaid).multiply(new BigDecimal(100))
+						.divide(new BigDecimal(enrichTotalProperties), RoundingMode.UP))
 				.label(String.valueOf(++serialNumber)).symbol("number").build());
 		return Arrays.asList(Data.builder().headerName("DSS_SERVICE_WATER_CONSUMER_PAID").plots(plots).build());
 	}
@@ -1322,43 +1324,56 @@ public class URCService {
 	
 	*/
 	
-	public List<Data> jalsathiPTIncentives(PayloadDetails payloadDetails) {
-		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
-		paymentSearchCriteria
-				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
-		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
-		setFromAndToDateInIST(paymentSearchCriteria);
-		BigDecimal currentCollection = (BigDecimal) paymentRepository.getCurrentCollection(paymentSearchCriteria);
-		BigDecimal arrearCollection = (BigDecimal) paymentRepository.getArrearCollection(paymentSearchCriteria);
-		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
-		log.info("PT currentCollection: " + currentCollection + " arrearCollection: " + arrearCollection
-				+ " totalCollection: " + totalCollection);
-		BigDecimal totalPropertyIncentive = calculatorService.calculateIncentives(payloadDetails.getModulelevel(),
-				currentCollection, arrearCollection, totalCollection);
-		log.info("Total PT Incentive : " + totalPropertyIncentive);
-		return Arrays.asList(Data.builder().headerName("DSS_JALSATHI_PT_INCENTIVES")
-				.headerValue(dashboardUtils.addDenominationForAmount(totalPropertyIncentive)).build());
-	}
+	/*
+	 * public List<Data> jalsathiPTIncentivesBkp(PayloadDetails payloadDetails) {
+	 * payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+	 * PaymentSearchCriteria paymentSearchCriteria =
+	 * getPaymentSearchCriteria(payloadDetails); paymentSearchCriteria
+	 * .setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED,
+	 * DashboardConstants.STATUS_DISHONOURED));
+	 * paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+	 * setFromAndToDateInIST(paymentSearchCriteria); BigDecimal currentCollection =
+	 * (BigDecimal) paymentRepository.getCurrentCollection(paymentSearchCriteria);
+	 * BigDecimal arrearCollection = (BigDecimal)
+	 * paymentRepository.getArrearCollection(paymentSearchCriteria); BigDecimal
+	 * totalCollection = (BigDecimal)
+	 * paymentRepository.getTotalCollection(paymentSearchCriteria);
+	 * log.info("PT currentCollection: " + currentCollection + " arrearCollection: "
+	 * + arrearCollection + " totalCollection: " + totalCollection); BigDecimal
+	 * totalPropertyIncentive =
+	 * calculatorService.calculateIncentives(payloadDetails.getModulelevel(),
+	 * currentCollection, arrearCollection, totalCollection);
+	 * log.info("Total PT Incentive : " + totalPropertyIncentive); return
+	 * Arrays.asList(Data.builder().headerName("DSS_JALSATHI_PT_INCENTIVES")
+	 * .headerValue(dashboardUtils.addDenominationForAmount(totalPropertyIncentive))
+	 * .build()); }
+	 */
+
 	
-	public List<Data> jalsathiWSIncentives(PayloadDetails payloadDetails) {
-		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
-		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
-		paymentSearchCriteria
-				.setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED, DashboardConstants.STATUS_DISHONOURED));
-		paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
-		setFromAndToDateInIST(paymentSearchCriteria);
-		BigDecimal currentCollection = (BigDecimal) paymentRepository.getCurrentCollection(paymentSearchCriteria);
-		BigDecimal arrearCollection = (BigDecimal) paymentRepository.getArrearCollection(paymentSearchCriteria);
-		BigDecimal totalCollection = (BigDecimal) paymentRepository.getTotalCollection(paymentSearchCriteria);
-		log.info("WS currentCollection: " + currentCollection + " arrearCollection: " + arrearCollection
-				+ " totalCollection: " + totalCollection);
-		BigDecimal totalWSIncentive = calculatorService.calculateIncentives(payloadDetails.getModulelevel(),
-				currentCollection, arrearCollection, totalCollection);
-		log.info("Total WS Incentive : " + totalWSIncentive);
-		return Arrays.asList(Data.builder().headerName("DSS_JALSATHI_WS_INCENTIVES")
-				.headerValue(dashboardUtils.addDenominationForAmount(totalWSIncentive)).build());
-	}
+	/*
+	 * public List<Data> jalsathiWSIncentivesBkp(PayloadDetails payloadDetails) {
+	 * payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+	 * PaymentSearchCriteria paymentSearchCriteria =
+	 * getPaymentSearchCriteria(payloadDetails); paymentSearchCriteria
+	 * .setStatus(Sets.newHashSet(DashboardConstants.STATUS_CANCELLED,
+	 * DashboardConstants.STATUS_DISHONOURED));
+	 * paymentSearchCriteria.setExcludedTenant(DashboardConstants.TESTING_TENANT);
+	 * setFromAndToDateInIST(paymentSearchCriteria); BigDecimal currentCollection =
+	 * (BigDecimal) paymentRepository.getCurrentCollection(paymentSearchCriteria);
+	 * BigDecimal arrearCollection = (BigDecimal)
+	 * paymentRepository.getArrearCollection(paymentSearchCriteria); BigDecimal
+	 * totalCollection = (BigDecimal)
+	 * paymentRepository.getTotalCollection(paymentSearchCriteria);
+	 * log.info("WS currentCollection: " + currentCollection + " arrearCollection: "
+	 * + arrearCollection + " totalCollection: " + totalCollection); BigDecimal
+	 * totalWSIncentive =
+	 * calculatorService.calculateIncentives(payloadDetails.getModulelevel(),
+	 * currentCollection, arrearCollection, totalCollection);
+	 * log.info("Total WS Incentive : " + totalWSIncentive); return
+	 * Arrays.asList(Data.builder().headerName("DSS_JALSATHI_WS_INCENTIVES")
+	 * .headerValue(dashboardUtils.addDenominationForAmount(totalWSIncentive)).build
+	 * ()); }
+	 */
     
 	private void prepareCollectionReport(List<Payment> payments, Map<String, IncentiveAnalysis> incentiveAnalysis) {
 
@@ -1406,7 +1421,7 @@ public class URCService {
 		LinkedHashMap<String, BigDecimal> monthWiseTotalCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
-		List<HashMap<String, Object>> monthWiseJalsathiContribution = urcRepository
+		List<LinkedHashMap<String, Object>> monthWiseJalsathiContribution = urcRepository
 				.getMonthWiseJalsathiCollection(paymentSearchCriteria);
 		int serailNumber = 0;
 		for (HashMap<String, Object> jalsathiContribution : monthWiseJalsathiContribution) {
@@ -1416,7 +1431,7 @@ public class URCService {
 
 			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
 
-			row.add(Plot.builder().label(monthName).name("DDRs").symbol("text").build());
+			row.add(Plot.builder().label(monthName).name("Months").symbol("text").build());
 
 			BigDecimal activeJalSathi = new BigDecimal(String.valueOf(jalsathiContribution.get("activejalsathi")));
 
@@ -1466,7 +1481,7 @@ public class URCService {
 		LinkedHashMap<String, BigDecimal> monthWiseTotalCollection = urcRepository
 				.getMonthWiseCollection(paymentSearchCriteria);
 		paymentSearchCriteria.setIsJalSathi(Boolean.TRUE);
-		List<HashMap<String, Object>> monthWiseJalsathiContribution = urcRepository
+		List<LinkedHashMap<String, Object>> monthWiseJalsathiContribution = urcRepository
 				.getMonthWiseJalsathiCollection(paymentSearchCriteria);
 		int serailNumber = 0;
 		for (HashMap<String, Object> jalsathiContribution : monthWiseJalsathiContribution) {
@@ -1476,7 +1491,7 @@ public class URCService {
 
 			row.add(Plot.builder().label(String.valueOf(serailNumber)).name("S.N.").symbol("text").build());
 
-			row.add(Plot.builder().label(monthName).name("DDRs").symbol("text").build());
+			row.add(Plot.builder().label(monthName).name("Months").symbol("text").build());
 
 			BigDecimal activeJalSathi = new BigDecimal(String.valueOf(jalsathiContribution.get("activejalsathi")));
 
@@ -1524,6 +1539,74 @@ public class URCService {
 		Long endMillisIST = endIST.toInstant().toEpochMilli();
 
 		paymentSearchCriteria.setToDate(endMillisIST);
+	}
+
+	public List<Data> jalsathiPTIncentives(PayloadDetails payloadDetails) {
+		RequestInfo requestInfo = new RequestInfo();
+		BigDecimal totalPtIncentives = BigDecimal.ZERO;
+		payloadDetails.setModulelevel(DashboardConstants.MODULE_LEVEL_PT);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		Long count = urcRepository.getPaymentsCount(requestInfo, paymentSearchCriteria);
+		Integer limit = 10000;
+		Integer offset = 0;
+		Map<String, IncentiveAnalysis> incentiveAnalysis = new HashMap<>();
+		if (count > 0) {
+			while (count > 0) {
+				paymentSearchCriteria.setOffset(offset);
+				paymentSearchCriteria.setLimit(limit);
+				List<Payment> tempPayments = getPayments(requestInfo, paymentSearchCriteria);
+				prepareCollectionReport(tempPayments, incentiveAnalysis);
+				count = count - limit;
+				offset += limit;
+			}
+		}
+		calculatorService.calculateIncentives(DashboardConstants.MODULE_LEVEL_PT, incentiveAnalysis);
+		totalPtIncentives = incentiveAnalysis.values().stream().map(IncentiveAnalysis::getTotalIncentive)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		log.info("Total PT Incentives : "+totalPtIncentives+" for interval :"+payloadDetails.getTimeinterval());
+
+		return Arrays
+				.asList(Data.builder().headerName("DSS_JALSATHI_PT_INCENTIVES").headerValue(totalPtIncentives).build());
+	}
+	
+	public List<Data> jalsathiWSIncentives(PayloadDetails payloadDetails) {
+		RequestInfo requestInfo = new RequestInfo();
+		BigDecimal totalWsIncentives = BigDecimal.ZERO;
+		payloadDetails.setModulelevel(DashboardConstants.BUSINESS_SERVICE_WS);
+		PaymentSearchCriteria paymentSearchCriteria = getPaymentSearchCriteria(payloadDetails);
+		Long count = urcRepository.getPaymentsCount(requestInfo, paymentSearchCriteria);
+		Integer limit = 10000;
+		Integer offset = 0;
+		Map<String, IncentiveAnalysis> incentiveAnalysis = new HashMap<>();
+		if (count > 0) {
+			while (count > 0) {
+				paymentSearchCriteria.setOffset(offset);
+				paymentSearchCriteria.setLimit(limit);
+				List<Payment> tempPayments = getPayments(requestInfo, paymentSearchCriteria);
+				prepareCollectionReport(tempPayments, incentiveAnalysis);
+				count = count - limit;
+				offset += limit;
+			}
+		}
+		calculatorService.calculateIncentives(DashboardConstants.BUSINESS_SERVICE_WS, incentiveAnalysis);
+		totalWsIncentives = incentiveAnalysis.values().stream().map(IncentiveAnalysis::getTotalIncentive)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		log.info("Total WS Incentives : "+totalWsIncentives+" for interval :"+payloadDetails.getTimeinterval());
+
+		return Arrays
+				.asList(Data.builder().headerName("DSS_JALSATHI_WS_INCENTIVES").headerValue(totalWsIncentives).build());
+	}
+
+	public List<Payment> getPayments(@Valid RequestInfo requestInfo, PaymentSearchCriteria paymentSearchCriteria) {
+		if (paymentSearchCriteria.getFromDate() != null && paymentSearchCriteria.getToDate() != null) {
+			paymentSearchCriteria.setFromDate(dashboardUtils.enrichFormDate(paymentSearchCriteria.getFromDate()));
+			paymentSearchCriteria.setToDate(dashboardUtils.enrichToDate(paymentSearchCriteria.getToDate()));
+		}
+
+		List<Payment> payments = urcRepository.fetchPayments(paymentSearchCriteria);
+		payments = payments.stream().filter(payment -> payment.getPaymentStatus() != PaymentStatusEnum.CANCELLED)
+				.collect(Collectors.toList());
+		return payments;
 	}
 	
 }

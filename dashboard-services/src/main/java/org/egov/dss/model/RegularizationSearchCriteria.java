@@ -47,4 +47,5 @@ public class RegularizationSearchCriteria {
 	
 	private String apptype;
 
+
 }

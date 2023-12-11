@@ -34,13 +34,13 @@ public class RedirectService {
 	private BPAService bpaService;
 	
 	@Autowired
+	private RegularizationService regularizationService;
+	
+	@Autowired
 	private PGRService pgrService;
 	
 	@Autowired
 	private CommonService commonService;
-	
-	@Autowired
-	private RegularizationService regularizationService;
 	
 	@Autowired
 	private URCService urcService;
@@ -830,13 +830,15 @@ public class RedirectService {
             return urcService.collectorWiseRevenue(requestInfoWrapper.getPayloadDetails());
         }
         
-		if (Constants.VisualizationCodes.JALSATHI_PT_INCENTIVES.equalsIgnoreCase(visualizationCode)) {
-			return urcService.jalsathiPTIncentives(requestInfoWrapper.getPayloadDetails());
-		}
-
-		if (Constants.VisualizationCodes.JALSATHI_WS_INCENTIVES.equalsIgnoreCase(visualizationCode)) {
-			return urcService.jalsathiWSIncentives(requestInfoWrapper.getPayloadDetails());
-		}
+		/*
+		 * if (Constants.VisualizationCodes.JALSATHI_PT_INCENTIVES.equalsIgnoreCase(
+		 * visualizationCode)) { return
+		 * urcService.jalsathiPTIncentives(requestInfoWrapper.getPayloadDetails()); }
+		 * 
+		 * if (Constants.VisualizationCodes.JALSATHI_WS_INCENTIVES.equalsIgnoreCase(
+		 * visualizationCode)) { return
+		 * urcService.jalsathiWSIncentives(requestInfoWrapper.getPayloadDetails()); }
+		 */
 		
 		if (Constants.VisualizationCodes.JALSATHI_CONTRIBUTION_TO_PT.equalsIgnoreCase(visualizationCode)) {
 			return urcService.jalsathiContributionToPT(requestInfoWrapper.getPayloadDetails());
@@ -845,15 +847,47 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.JALSATHI_CONTRIBUTION_TO_WS.equalsIgnoreCase(visualizationCode)) {
 			return urcService.jalsathiContributionToWS(requestInfoWrapper.getPayloadDetails());
 		}
+		
 		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOP_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
 			return regularizationService.topUlbByPerformance(requestInfoWrapper.getPayloadDetails());
 		}
+		
 		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_BOTTOM_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
 			return regularizationService.bottomUlbByPerformance(requestInfoWrapper.getPayloadDetails());
 		}
+		
 		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_SERVICE_SUMMARY.equalsIgnoreCase(visualizationCode)) {
 	        return regularizationService.RegularizationServiceSummary(requestInfoWrapper.getPayloadDetails());
-	        }
+	    }	
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_RECEIVED.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.totalApplicationsReceived(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOTAL_CERTIFICATE_ISSUED.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.totalRegularizationCertificateIssued(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_REJECTED.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.totalApplicationsRejected(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_PENDING.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.totalApplicationsPending(requestInfoWrapper.getPayloadDetails());
+		} 
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_AVG_DAYS_TO_ISSUE_CERTIFICATE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.avgDaysToIssueCertificate(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_MIN_DAYS_TO_ISSUE_CERTIFICATE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.minDaysToIssueCertificate(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_MAX_DAYS_TO_ISSUE_CERTIFICATE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.maxDaysToIssueCertificate(requestInfoWrapper.getPayloadDetails());
+		}
+
 		return null;
 
 	}

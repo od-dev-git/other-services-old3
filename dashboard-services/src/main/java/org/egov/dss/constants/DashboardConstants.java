@@ -80,7 +80,6 @@ public class DashboardConstants {
 
     public static final String BUSINESS_SERVICE_BLR4 = "BLR4";
 
-	
 	public static final String BUSINESS_SERICE_BPAOC1 = "BPA_OC1";
 
 	public static final String BUSINESS_SERICE_BPAOC2 = "BPA_OC2";
@@ -105,7 +104,6 @@ public class DashboardConstants {
 	
     public static final String MODULE_LEVEL_REGULARIZATION = "REGULARIZATION";
 
-	
 	public static final String MODULE_LEVEL_PT = "PT"; 
 	
 	public static final String MODULE_LEVEL_PGR = "PGR";  
@@ -381,5 +379,8 @@ public class DashboardConstants {
 	public static final String BUILDING = "BUILDING";
 
 	public static final String LB = "LB";
+	
+	public static final List<String> REGULARIZATION_REJECTED_STATUS_TOTAL_APPLICATIONS_PENDING = Collections
+			.unmodifiableList(Arrays.asList(STATUS_INITIATED, STATUS_CITIZEN_APPROVAL_INPROCESS,STATUS_INPROGRESS,STATUS_PENDING_APPL_FEE,STATUS_APPROVED,STATUS_REJECTED));
 
 }
