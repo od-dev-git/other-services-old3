@@ -378,4 +378,3 @@ public String getTenantWisePermitIssuedQuery(RegularizationSearchCriteria regula
 	}
 
 }
-
