@@ -1,7 +1,10 @@
 package org.egov.usm.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -48,13 +51,19 @@ public class EnrichmentService {
 		surveyDetailsRequest.getSurveyDetails().setSurveyTime(auditDetails.getCreatedTime());
 		surveyDetailsRequest.getSurveyDetails().setAuditDetails(auditDetails);
 		
+		// Filter answers for each question
+		Set<SubmittedAnswer> submittedAnswers = surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers().stream()
+				.collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SubmittedAnswer::getQuestionId))));
+
+		
 		//enrich SubmittedAnswer details
-		surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers()
-				.forEach(answer -> {
-					answer.setId(USMUtil.generateUUID());
-					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
-					answer.setAuditDetails(auditDetails);
-				});
+		submittedAnswers .forEach(answer -> {
+			answer.setId(USMUtil.generateUUID());
+			answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
+			answer.setAuditDetails(auditDetails);
+		});
+		
+		surveyDetailsRequest.getSurveyDetails().setSubmittedAnswers(new ArrayList<>(submittedAnswers));
 	}
 
 
@@ -72,7 +81,7 @@ public class EnrichmentService {
 
 
 
-	public List<SurveyTicket> enrichTickets(List<SubmittedAnswer> filterSubmittedAnswers,
+	public List<SurveyTicket> enrichTickets(Set<SubmittedAnswer> filterSubmittedAnswers,
 			SurveyDetailsRequest surveyDetailsRequest) {
 		List<SurveyTicket> surveyTickets = new ArrayList<>();
 
@@ -173,13 +182,17 @@ public class EnrichmentService {
 		surveyDetailsRequest.getSurveyDetails().setSurveyTime(auditDetails.getLastModifiedTime());
 		surveyDetailsRequest.getSurveyDetails().setAuditDetails(auditDetails);
 
-		//enrich SubmittedAnswer details
-		surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers()
-				.forEach(answer -> {
-					answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
-					answer.setAuditDetails(auditDetails);
-				});
+		// Filter answers for each question
+		Set<SubmittedAnswer> submittedAnswers = surveyDetailsRequest.getSurveyDetails().getSubmittedAnswers().stream()
+				.collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SubmittedAnswer::getQuestionId))));
 
+		//enrich updated SubmittedAnswer details
+		submittedAnswers .forEach(answer -> {
+			answer.setSurveySubmittedId(surveyDetailsRequest.getSurveyDetails().getSurveySubmittedId());
+			answer.setAuditDetails(auditDetails);
+		});
+		
+		surveyDetailsRequest.getSurveyDetails().setSubmittedAnswers(new ArrayList<>(submittedAnswers));
 	}
 
 }

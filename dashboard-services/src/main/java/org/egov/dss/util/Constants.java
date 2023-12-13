@@ -264,6 +264,29 @@ public class Constants {
 		final static String USM_TOP_ULB = "topPerformingULBS";
 		final static String USM_BOTTOM_ULB = "bottomPerformingULBS";
 		final static String USM_TOTAL_CUMULATIVE = "cumulativeFeedbackSubmitted";
+		
+
+		final static String SERVICE_REGULARIZATION_TOP_ULB_BY_PERFORMANCE = "regularizationTopUlbByPerformance";
+		final static String SERVICE_REGULARIZATION_BOTTOM_ULB_BY_PERFORMANCE = "regularizationBottomUlbByPerformance";
+		final static String SERVICE_REGULARIZATION_SERVICE_SUMMARY = "regularizationServiceSummary";
+		final static String SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_RECEIVED = "regularizationTotalApplicationsSubmitted";
+		final static String SERVICE_REGULARIZATION_TOTAL_CERTIFICATE_ISSUED = "regularizationTotalCertificateIssued";
+		final static String SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_REJECTED = "regularizationTotalRejectedApplications";
+		final static String SERVICE_REGULARIZATION_TOTAL_APPLICATIONS_PENDING = "regularizationTotalPendingApplications";
+		final static String SERVICE_REGULARIZATION_AVG_DAYS_TO_ISSUE_CERTIFICATE = "regularizationAverageDaysToIssueCertificate";
+		final static String SERVICE_REGULARIZATION_MIN_DAYS_TO_ISSUE_CERTIFICATE = "regularizationMinDaysToIssueCertificate";
+		final static String SERVICE_REGULARIZATION_MAX_DAYS_TO_ISSUE_CERTIFICATE = "regularizationMaxDaysToIssueCertificate";
+
+		final static String REVENUE_REGULARIZATION_APP_FEE_COLLECTIONS = "regularizationApplicationFeesCollection";
+		final static String REVENUE_REGULARIZATION_SANC_FEE_COLLECTIONS = "regularizationSanctionFeesCollection";
+		final static String REVENUE_REGULARIZATION_CUMULATIVE_COLLECTION = "regularizationCumulativeCollections";
+		final static String REVENUE_REGULARIZATION_COLLECTION_REPORT = "regularizationCollectionReport";
+        final static String SERVICE_REGULARIZATION_SERVICE_REPORT = "regularizationServiceReport";
+		
+
+		final static String SERVICE_BLR_APPLICATION_BREAKDOWN = "regularizationApplicationsPendingBreakdown";
+
+
 	}
 
 }
