@@ -910,6 +910,14 @@ public class RedirectService {
 		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_SERVICE_REPORT.equalsIgnoreCase(visualizationCode)) {
 			return regularizationService.regularizationServiceReport(requestInfoWrapper.getPayloadDetails());
 		}
+		
+		if(Constants.VisualizationCodes.REVENUE_REGULARIZATION_TOTAL_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.totalCollection(requestInfoWrapper.getPayloadDetails());
+		}
+		
+		if(Constants.VisualizationCodes.REVENUE_REGULARIZATION_TODAYS_COLLECTION.equalsIgnoreCase(visualizationCode)) {
+			return revenueService.todaysCollection(requestInfoWrapper.getPayloadDetails());
+		}
 
 		return null;
 
