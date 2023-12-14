@@ -23,8 +23,8 @@ public class SRQueryBuilder {
 			ServiceReqSearchCriteria searchCriteria) {
 		if (!StringUtils.isEmpty(searchCriteria.getTenantId())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" sr.tenantid IN ( :tenantId )");
-			preparedStatementValues.put("tenantId",searchCriteria.getTenantId());
+			selectQuery.append(" sr.city IN ( :city )");
+			preparedStatementValues.put("city",searchCriteria.getTenantId());
 		}
 
 		if (!StringUtils.isEmpty(searchCriteria.getServiceRequestId())) {
