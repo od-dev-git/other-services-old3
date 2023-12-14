@@ -29,11 +29,12 @@ public class SRQueryBuilder {
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			SRReportSearchCriteria searchCriteria) {
 		
-		if (!StringUtils.isEmpty(searchCriteria.getTenantId())) {
+		//Remove the comments if TenantId field to be kept in search
+		/*if (!StringUtils.isEmpty(searchCriteria.getTenantId())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" ser.tenantid IN ( :tenantId )");
 			preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
-		}
+		}*/
 		
 		if (!StringUtils.isEmpty(searchCriteria.getCity())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
