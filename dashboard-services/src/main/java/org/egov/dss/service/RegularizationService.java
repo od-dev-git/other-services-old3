@@ -3,6 +3,7 @@ package org.egov.dss.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.egov.dss.config.ConfigurationLoader;
 import org.egov.dss.constants.DashboardConstants;
+import org.egov.dss.model.BpaSearchCriteria;
 import org.egov.dss.model.PayloadDetails;
 import org.egov.dss.model.RegularizationSearchCriteria;
 import org.egov.dss.repository.RegularizationRepository;
@@ -69,69 +71,112 @@ public class RegularizationService {
 	        return regularizationRepository.getTenantWiseAvgDaysPermitIssued(criteria);
 	     }
 	
-    public List<Data> bottomUlbByPerformance(PayloadDetails payloadDetails) {
+	public List<Data> topPerformingUlbsTable(PayloadDetails payloadDetails) {
 		RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		List<Data> response = new ArrayList();
-		HashMap<String, BigDecimal> tenantWiseEbraAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
-		if (!CollectionUtils.isEmpty(tenantWiseEbraAvgDaysPermitIssue)) {
-			Map<String, BigDecimal> tenantWiseSorted = tenantWiseEbraAvgDaysPermitIssue.entrySet().parallelStream()
-					.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toMap(
-							Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-			int Rank = tenantWiseSorted.size();
-			for (Entry<String, BigDecimal> obj : tenantWiseSorted.entrySet()) {
-				response.add(
-						Data.builder().headerName("Rank").headerValue(Rank)
-								.plots(Arrays.asList(Plot.builder().label("AVERAGE_DAYS").name(obj.getKey())
-										.value(obj.getValue()).symbol("number").build()))
-								.headerSymbol("number").build());
-				Rank--;
-			}
-			;
-		} else {
-			response.add(
-					Data.builder().headerName("Rank").headerValue(BigDecimal.ZERO)
-							.plots(Arrays.asList(Plot.builder().label("AVERAGE_DAYS")
-									.name(String.valueOf(payloadDetails.getTenantid())).value(BigDecimal.ZERO)
-									.symbol("number").build()))
-							.headerSymbol("number").build());
+		HashMap<String, BigDecimal> tenantWiseRegularizationAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
+		int serialNumber = 1;
+		// Sort the HashMap in ascending order
+		Map<String, BigDecimal> tenantWiseSorted = tenantWiseRegularizationAvgDaysPermitIssue.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
+						Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+		
+		for (HashMap.Entry<String, BigDecimal> totalApplication : tenantWiseSorted.entrySet()) {
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+            plots.add(Plot.builder().name("Ulb").label(totalApplication.getKey().toString()).symbol("text")
+                    .build());
+
+			plots.add(Plot.builder().name("Rank")
+					.value(BigDecimal.valueOf(serialNumber))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit")
+					.value(totalApplication.getValue() == null ? BigDecimal.ZERO
+							: totalApplication.getValue().setScale(0, BigDecimal.ROUND_UP))
+					.symbol("number").build());
+
+			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
+					.build());
+
+            serialNumber++;
+
+        }
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Rank").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
 		}
 
 		return response;
 	}
 	
-	public List<Data> topUlbByPerformance(PayloadDetails payloadDetails) {
+	public List<Data> bottomPerformingUlbsTable(PayloadDetails payloadDetails) {
 		RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		List<Data> response = new ArrayList();
 		HashMap<String, BigDecimal> tenantWiseRegularizationAvgDaysPermitIssue = getTenantWiseAvgDaysToIssuePermit(payloadDetails);
-		// Sort the HashMap in ascending order
-		if (!CollectionUtils.isEmpty(tenantWiseRegularizationAvgDaysPermitIssue)) {
-			Map<String, BigDecimal> tenantWiseSorted = tenantWiseRegularizationAvgDaysPermitIssue.entrySet().parallelStream()
-					.sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
-							Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-			
-			int Rank = 0;
-			for (Entry<String, BigDecimal> obj : tenantWiseSorted.entrySet()) {
-				Rank++;
-				response.add(
-						Data.builder().headerName("Rank").headerValue(Rank)
-								.plots(Arrays.asList(Plot.builder().label("AVERAGE_DAYS").name(obj.getKey())
-										.value(obj.getValue()).symbol("number").build()))
-								.headerSymbol("number").build());
+		int serialNumber = 1;		
+					
+		Map<String, BigDecimal> tenantWiseSorted = tenantWiseRegularizationAvgDaysPermitIssue.entrySet().parallelStream()
+		        .sorted(Collections.reverseOrder(Map.Entry.comparingByValue())) // Sort in descending order
+		        .collect(Collectors.toMap(
+		                Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+		for (HashMap.Entry<String, BigDecimal> totalApplication : tenantWiseSorted.entrySet()) {
+            List<Plot> plots = new ArrayList();
+            plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+            plots.add(Plot.builder().name("Ulb").label(totalApplication.getKey().toString()).symbol("text")
+                    .build());
+
+			plots.add(Plot.builder().name("Rank")
+					.value(BigDecimal.valueOf(serialNumber))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit")
+					.value(totalApplication.getValue() == null ? BigDecimal.ZERO
+							: totalApplication.getValue().setScale(0, BigDecimal.ROUND_UP))
+					.symbol("number").build());
+
+			response.add(Data.builder().headerName(totalApplication.getKey()).plots(plots).headerValue(serialNumber)
+					.build());
+           
+            serialNumber++;
+
+        }
+		
+		if (CollectionUtils.isEmpty(response)) {
+			serialNumber++;
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("Ulb").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Rank").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Avg. Days to Issue Permit").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+
 			}
-			;
-		} else {
-			response.add(
-					Data.builder().headerName("Rank").headerValue(BigDecimal.ZERO)
-							.plots(Arrays.asList(Plot.builder().label("AVERAGE_DAYS")
-									.name(String.valueOf(payloadDetails.getTenantid())).value(BigDecimal.ZERO)
-									.symbol("number").build()))
-							.headerSymbol("number").build());
-		}
 
 		return response;
 	}
+
 	
 	public List<Data> RegularizationServiceSummary(PayloadDetails payloadDetails) {
 		RegularizationSearchCriteria criteria = getRegularizationSearchCriteria(payloadDetails);
