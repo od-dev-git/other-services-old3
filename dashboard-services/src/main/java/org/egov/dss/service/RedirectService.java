@@ -848,12 +848,11 @@ public class RedirectService {
 			return urcService.jalsathiContributionToWS(requestInfoWrapper.getPayloadDetails());
 		}
 		
-		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_TOP_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
-			return regularizationService.topUlbByPerformance(requestInfoWrapper.getPayloadDetails());
+		if(Constants.VisualizationCodes.REGULARIZATION_OBPS_TOP_PERFORMING_ULBS_TABLE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.topPerformingUlbsTable(requestInfoWrapper.getPayloadDetails());
 		}
-		
-		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_BOTTOM_ULB_BY_PERFORMANCE.equalsIgnoreCase(visualizationCode)) {
-			return regularizationService.bottomUlbByPerformance(requestInfoWrapper.getPayloadDetails());
+		if(Constants.VisualizationCodes.REGULARIZATION_OBPS_BOTTOM_PERFORMING_ULBS_TABLE.equalsIgnoreCase(visualizationCode)) {
+			return regularizationService.bottomPerformingUlbsTable(requestInfoWrapper.getPayloadDetails());
 		}
 		
 		if(Constants.VisualizationCodes.SERVICE_REGULARIZATION_SERVICE_SUMMARY.equalsIgnoreCase(visualizationCode)) {
