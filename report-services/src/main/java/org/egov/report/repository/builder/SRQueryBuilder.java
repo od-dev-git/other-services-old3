@@ -31,8 +31,8 @@ public class SRQueryBuilder {
 		
 		if (!StringUtils.isEmpty(searchCriteria.getTenantId())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" ser.tenantid IN ( :tenantId )");
-			preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
+			selectQuery.append(" ser.city IN ( :city )");
+			preparedStatementValues.put("city", searchCriteria.getTenantId());
 		}
 		
 		if (!StringUtils.isEmpty(searchCriteria.getCity())) {
