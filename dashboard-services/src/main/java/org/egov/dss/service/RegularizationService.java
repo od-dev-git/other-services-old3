@@ -312,7 +312,10 @@ public class RegularizationService {
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
 		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.REGULARIZATION_ALL_BUSINESS_SERVICES));
-		BigDecimal totalApplication = (BigDecimal) regularizationRepository.getAvgDaysToIssueCertificate(criteria);// change it
+		BigDecimal totalApplication = (BigDecimal) regularizationRepository.getAvgDaysToIssueCertificate(criteria);																											// it
+		if (totalApplication == null) {
+			totalApplication = BigDecimal.ZERO;
+		}
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 	
@@ -322,6 +325,9 @@ public class RegularizationService {
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
 		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.REGULARIZATION_ALL_BUSINESS_SERVICES));
 		Integer totalApplication = (Integer) regularizationRepository.getMinDaysToIssueCertificate(criteria);
+		if (totalApplication == null) {
+			totalApplication = 0;
+		}
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 	
@@ -331,6 +337,9 @@ public class RegularizationService {
 		criteria.setStatus(Sets.newHashSet(DashboardConstants.STATUS_APPROVED));
 		criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.REGULARIZATION_ALL_BUSINESS_SERVICES));
 		Integer totalApplication = (Integer) regularizationRepository.getMaxDaysToIssueCertificate(criteria);
+		if (totalApplication == null) {
+			totalApplication = 0;
+		}
 		return Arrays.asList(Data.builder().headerValue(totalApplication).build());
 	}
 
