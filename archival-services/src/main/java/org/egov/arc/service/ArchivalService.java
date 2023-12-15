@@ -75,14 +75,14 @@ public class ArchivalService {
 	@SuppressWarnings("null")
 	public Set<Demand> getArchiveDemands(DemandCriteria demandCriteria, RequestInfo requestInfo) {
 		// Archive the data till last 6 months
-		Long archivaTillDate = util.getArchivalMonthStartDate(archivalConfig.getDemandArchivalMonth());
+		enrichDemandCriteria(demandCriteria);
+		Long archivaTillDate = util.getArchivalMonthStartDate(demandCriteria.getArchiveTillMonth());
 		log.info("Archival Till Date : " + archivaTillDate.toString());
 		List<Demand> demands = new ArrayList<>();
-		Set<Demand> archiveDemands = new HashSet<>();
-		enrichDemandCriteria(demandCriteria, archivaTillDate);
+		Set<Demand> archiveDemands = new HashSet<>();		
 		Long count = archivalRepository.getDemandCount(demandCriteria);
 		log.info("Demand record count :" + count);
-		Integer limit = archivalConfig.getDefaultLimit();
+		Integer limit = demandCriteria.getLimit();		
 		Integer offset = 0;
 		if (count > 0) {
 			while (count > 0) {
@@ -106,11 +106,11 @@ public class ArchivalService {
 			}
 		}
 		List<Demand> distinctDemands = new ArrayList<>();
-		for(Entry<String,Demand> dm : demandMap.entrySet()) {
+		for (Entry<String, Demand> dm : demandMap.entrySet()) {
 			distinctDemands.add(dm.getValue());
-		}	
-		
-        log.info("distinctDemands :"+distinctDemands.toString());
+		}
+
+		log.info("Distinct Demands :" + distinctDemands.toString());
 		Map<String, List<Demand>> demandGroupByBS = ((Collection<Demand>) distinctDemands).stream()
 				.collect(Collectors.groupingBy(Demand::getBusinessService));
 
@@ -177,7 +177,7 @@ public class ArchivalService {
 	/**
 	 * @param demandCriteria
 	 */
-	private void enrichDemandCriteria(DemandCriteria demandCriteria, Long archivalTillDate) {
+	private void enrichDemandCriteria(DemandCriteria demandCriteria) {
 		// demandCriteria.setArchiveTillDate(archivalTillDate);
 		if (archivalConfig.getDemandWsArchival()) {
 			demandCriteria.setBusinessServices(Sets.newHashSet(Constants.WS_ONE_TIME_FEE, Constants.WS));
@@ -190,6 +190,13 @@ public class ArchivalService {
 		} else if (archivalConfig.getDemandBpaArchival()) {
 			demandCriteria.setBusinessServices(Sets.newHashSet(Constants.BPA_NC_APP_FEE, Constants.BPA_NC_SAN_FEE));
 		}
+		if (demandCriteria.getArchiveTillMonth() == 0) {
+			demandCriteria.setArchiveTillMonth(archivalConfig.getDemandArchivalMonth());
+		}
+		if (demandCriteria.getLimit() == 0) {
+			demandCriteria.setLimit(archivalConfig.getDefaultLimit());
+		}
+
 	}
 
 	/**

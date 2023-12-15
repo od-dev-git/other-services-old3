@@ -90,6 +90,8 @@ public class DemandCriteria {
 	
 	private Long archiveTillDate;
 	
+	private int archiveTillMonth;
+	
 	private Integer offset;
 
 	private Integer limit; 
