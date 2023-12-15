@@ -31,7 +31,7 @@ public class ArchivalQueryBuilder {
 			+ "dmdl.createdby AS dlcreatedby,dmdl.lastModifiedby AS dllastModifiedby,"
 			+ "dmdl.createdtime AS dlcreatedtime,dmdl.lastModifiedtime AS dllastModifiedtime,"
 			+ "dmdl.tenantid AS dltenantid,dmdl.additionaldetails as detailadditionaldetails "
-			+ "FROM egbs_demand_v1 dmd " + "INNER JOIN egbs_demanddetail_v1 dmdl ON dmd.id=dmdl.demandid "
+			+ "FROM egbs_demand_v1_bkp dmd " + "INNER JOIN egbs_demanddetail_v1_bkp dmdl ON dmd.id=dmdl.demandid "
 			+ "AND dmd.tenantid=dmdl.tenantid ";
 
 	private final String paginationWrapper = "SELECT * FROM "
@@ -48,11 +48,11 @@ public class ArchivalQueryBuilder {
 			+ "(id, demandid, taxheadcode, taxamount, collectionamount, createdby, createdtime, lastmodifiedby, lastmodifiedtime, tenantid, additionaldetails, archivaltime) "
 			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
-	public static String DELETE_DEMAND_SQL_QUERY = "DELETE FROM egbs_demand_v1 WHERE id in (:demandIds)";
+	public static String DELETE_DEMAND_SQL_QUERY = "DELETE FROM egbs_demand_v1_bkp WHERE id in (:demandIds)";
 
-	public static String DELETE_DEMAND_DETAILS_SQL_QUERY = "DELETE FROM egbs_demanddetail_v1 WHERE demandid in (:demandIds)";
+	public static String DELETE_DEMAND_DETAILS_SQL_QUERY = "DELETE FROM egbs_demanddetail_v1_bkp WHERE demandid in (:demandIds)";
 
-	public static final String GET_DEMAND_COUNT_QUERY = "SELECT count(*) FROM egbs_demand_v1 dmd   INNER JOIN egbs_demanddetail_v1 dmdl ON dmd.id=dmdl.demandid "
+	public static final String GET_DEMAND_COUNT_QUERY = "SELECT count(*) FROM egbs_demand_v1_bkp dmd   INNER JOIN egbs_demanddetail_v1_bkp dmdl ON dmd.id=dmdl.demandid "
 			+ " AND dmd.tenantid=dmdl.tenantid ";
 
 	public String getDemandQuery(DemandCriteria demandCriteria, List<Object> preparedStatementValues) {
