@@ -105,6 +105,8 @@ public class DashboardConstants {
     public static final String MODULE_LEVEL_REGULARIZATION = "REGULARIZATION";
 
 	public static final String MODULE_LEVEL_PT = "PT"; 
+
+	public static final String MODULE_LEVEL_USM = "USM"; 
 	
 	public static final String MODULE_LEVEL_PGR = "PGR";  
 	

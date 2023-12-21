@@ -60,6 +60,42 @@ public class USMRepository {
 		return result.get(0);
 	}
 
+	public Object getTotalClosedSatisfiedIssue(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalClosedSatisfactoryIssue(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(Integer.class));
+		return result.get(0);
+	}
+
+	public Object getTotalUnattendedIssue(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalUnattendedIssue(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(Integer.class));
+		return result.get(0);
+	}
+
+	public Object getTotalEscalatedIssue(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalEscalatedIssue(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(Integer.class));
+		return result.get(0);
+	}
+
+	public Object getTotalRespondedEscalatedIssue(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalEscalatedRespondedIssue(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		List<Integer> result = namedParameterJdbcTemplate.query(query, preparedStatementValues,
+				new SingleColumnRowMapper<>(Integer.class));
+		return result.get(0);
+	}
+
 	public Object getTotalSlumFeedbackSubmitted(UsmSearchCriteria usmSearchCriteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = usmQueryBuilder.getTotalSlumSubmittedFeedback(usmSearchCriteria, preparedStatementValues);
