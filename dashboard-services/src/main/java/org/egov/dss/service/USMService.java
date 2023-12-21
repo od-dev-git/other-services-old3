@@ -51,6 +51,34 @@ public class USMService {
 		return Arrays.asList(Data.builder().headerValue(totalCloseIssues).build());
 	}
 
+	public List<Data> totalClosedWithSatisfactory(PayloadDetails payloadDetails) {
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalCloseIssuesSatisfactory = (Integer) usmRepository.getTotalClosedSatisfiedIssue(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalCloseIssuesSatisfactory).build());
+	}
+
+	public List<Data> totalUnattendedIssue(PayloadDetails payloadDetails) {
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalCloseIssuesSatisfactory = (Integer) usmRepository.getTotalUnattendedIssue(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalCloseIssuesSatisfactory).build());
+	}
+
+	public List<Data> totalEscalatedIssue(PayloadDetails payloadDetails) {
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalCloseIssuesSatisfactory = (Integer) usmRepository.getTotalEscalatedIssue(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalCloseIssuesSatisfactory).build());
+	}
+
+	public List<Data> totalRespondedEscalatedIssue(PayloadDetails payloadDetails) {
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalCloseIssuesSatisfactory = (Integer) usmRepository.getTotalRespondedEscalatedIssue(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalCloseIssuesSatisfactory).build());
+	}
+
 	public List<Data> totalSlumSubmittedFeedback(PayloadDetails payloadDetails) {
 		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
@@ -245,7 +273,7 @@ public class USMService {
 		TargetSearchCriteria criteria = new TargetSearchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
-			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.BS_HOME_REVENUE))
+			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_USM))
 				criteria.setBusinessServices(null);
 			else
 				criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
@@ -274,7 +302,10 @@ public class USMService {
 		UsmSearchCriteria criteria = new UsmSearchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
-			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
+			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_USM))
+				criteria.setBusinessServices(null);
+			else
+				criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
 		}
 
 		if (StringUtils.hasText(payloadDetails.getTenantid())) {
