@@ -918,6 +918,19 @@ public class RedirectService {
 			return revenueService.todaysCollection(requestInfoWrapper.getPayloadDetails());
 		}
 
+		if (Constants.VisualizationCodes.USM_TOTAL_UNATTENDED_ISSUE.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalUnattendedIssue(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_CLOSE_SATISFACTORY_FEEDBACK.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalClosedWithSatisfactory(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_ESCALATED_ISSUE.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalEscalatedIssue(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_TOTAL_ESCALATED_ISSUE_RESPONDED.equalsIgnoreCase(visualizationCode)) {
+			return usmService.totalRespondedEscalatedIssue(requestInfoWrapper.getPayloadDetails());
+		}
+
 		return null;
 
 	}
