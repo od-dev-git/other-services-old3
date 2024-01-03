@@ -35,8 +35,9 @@ public class USMQueryBuilder {
 	public static final String USM_TOTAL_ESCALATED_ISSUE = "select  SUM(CASE WHEN ticket.issatisfied  = false  THEN 1 ELSE 0 END) as totalamt FROM eg_usm_survey_ticket ticket";
 
 	public static final String USM_TOTAL_ESCALATED_RESPONDED_ISSUE = "select count(*) from eg_usm_survey_ticket_comment comm  \r\n"
-			                                                         + "  inner join eg_usm_survey_ticket ticket \r\n"
-			                                                         + " on ticket .id = comm.ticketid";
+			+ "  inner join eg_usm_survey_ticket ticket \r\n" + " on ticket .id = comm.ticketid";
+
+	public static final String USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE = "select submit.tenantid as tenantid ,count(*) as totalamt  from eg_usm_survey_submitted_answer answer left join eg_usm_survey_ticket ticket  on ticket.surveyanswerid  = answer.id left join eg_usm_survey_submitted submit on answer.surveysubmittedid  = submit .id ";
 
 	public static String getTotalFeebackSubmitted(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -147,6 +148,105 @@ public class USMQueryBuilder {
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_ESCALATED_RESPONDED_ISSUE);
 		return addWhereClauseForTicket(selectQuery, preparedStatementValues, criteria);
+	}
+
+	public static String getTotalWaterFeedbackSubmitted(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where answer.questioncategory = 'WATER' ");
+		preparedStatementValues.put("questioncategory", "WATER");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public static String getTotalClosedIssueWater(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where answer.questioncategory = 'WATER' and ticket.status = 'CLOSED' ");
+		preparedStatementValues.put("questioncategory", "'WATER'");
+		preparedStatementValues.put("status", "'CLOSED'");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public static String getTotalNoOfWaterIssue(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where answer.questioncategory = 'WATER' and answer.answer = 'NO'");
+		preparedStatementValues.put("questioncategory", "'WATER'");
+		preparedStatementValues.put("answer", "'NO'");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public static String getTotalStreetlightFeedbackSubmitted(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where answer.questioncategory = 'STREETLIGHT' ");
+		preparedStatementValues.put("questioncategory", "STREETLIGHT");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public static String getTotalClosedIssueStreetlight(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where answer.questioncategory = 'STREETLIGHT' and ticket.status = 'CLOSED' ");
+		preparedStatementValues.put("questioncategory", "'STREETLIGHT'");
+		preparedStatementValues.put("status", "'CLOSED'");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public static String getTotalNoOfStreetlightIssue(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where answer.questioncategory = 'STREETLIGHT' and answer.answer = 'NO'");
+		preparedStatementValues.put("questioncategory", "'STREETLIGHT'");
+		preparedStatementValues.put("answer", "'NO'");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public static String getTotalSanitationFeedbackSubmitted(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where answer.questioncategory = 'SANITATION' ");
+		preparedStatementValues.put("questioncategory", "SANITATION");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public static String getTotalClosedIssueSanitation(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where answer.questioncategory = 'SANITATION' and ticket.status = 'CLOSED' ");
+		preparedStatementValues.put("questioncategory", "'SANITATION'");
+		preparedStatementValues.put("status", "'CLOSED'");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public static String getTotalNoOfSanitationIssue(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where answer.questioncategory = 'SANITATION' and answer.answer = 'NO'");
+		preparedStatementValues.put("questioncategory", "'SANITATION'");
+		preparedStatementValues.put("answer", "'NO'");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
 	}
 
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
