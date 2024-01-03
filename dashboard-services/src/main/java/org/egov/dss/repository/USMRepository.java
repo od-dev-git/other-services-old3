@@ -164,4 +164,70 @@ public class USMRepository {
 		return result;
 	}
 
+	public HashMap<String, BigDecimal> getTotalNoWaterFeedbackSubmitted(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalWaterFeedbackSubmitted(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+
+	}
+
+	public HashMap<String, BigDecimal> getTotalNoClosedIssueForWater(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalClosedIssueWater(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+
+	public HashMap<String, BigDecimal> getTotalIssueForWater(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalNoOfWaterIssue(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+
+	public HashMap<String, BigDecimal> getTotalNoStreetlightFeedbackSubmitted(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalStreetlightFeedbackSubmitted(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+
+	}
+
+	public HashMap<String, BigDecimal> getTotalNoClosedIssueForStreetlight(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalClosedIssueStreetlight(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+
+	public HashMap<String, BigDecimal> getTotalIssueForStreetlight(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalNoOfStreetlightIssue(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+
+	public HashMap<String, BigDecimal> getTotalNoSanitationFeedbackSubmitted(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalSanitationFeedbackSubmitted(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+
+	}
+
+	public HashMap<String, BigDecimal> getTotalNoClosedIssueForSanitation(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalClosedIssueSanitation(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+
+	public HashMap<String, BigDecimal> getTotalIssueForSanitation(UsmSearchCriteria usmSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalNoOfSanitationIssue(usmSearchCriteria, preparedStatementValues);
+		log.info("query: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+
 }

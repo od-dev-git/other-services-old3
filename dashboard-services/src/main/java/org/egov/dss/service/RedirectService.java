@@ -930,6 +930,15 @@ public class RedirectService {
 		if (Constants.VisualizationCodes.USM_TOTAL_ESCALATED_ISSUE_RESPONDED.equalsIgnoreCase(visualizationCode)) {
 			return usmService.totalRespondedEscalatedIssue(requestInfoWrapper.getPayloadDetails());
 		}
+		if (Constants.VisualizationCodes.USM_ISSUE_RESOLUTION_SUMMARY_WATER.equalsIgnoreCase(visualizationCode)) {
+			return usmService.issueResolutionSummaryForWater(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_ISSUE_RESOLUTION_SUMMARY_STREETLIGHT.equalsIgnoreCase(visualizationCode)) {
+			return usmService.issueResolutionSummaryForStreetlight(requestInfoWrapper.getPayloadDetails());
+		}
+		if (Constants.VisualizationCodes.USM_ISSUE_RESOLUTION_SUMMARY_SANITATION.equalsIgnoreCase(visualizationCode)) {
+			return usmService.issueResolutionSummaryForSanitation(requestInfoWrapper.getPayloadDetails());
+		}
 
 		return null;
 
