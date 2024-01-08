@@ -57,6 +57,12 @@ public class PropertyDetailsResponse {
 	
 	@JsonProperty("ownershipCategory")
 	private String ownershipCategory;
+	
+	@JsonProperty("propertyType")
+	private String propertyType;
+	
+	@JsonProperty("usageCategory")
+	private String usageCategory;
 
 
 
