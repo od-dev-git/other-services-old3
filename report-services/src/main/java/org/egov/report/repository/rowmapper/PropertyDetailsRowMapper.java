@@ -46,6 +46,8 @@ List<PropertyDetailsResponse> propertyDetailsResponseList = new ArrayList<>();
 	                 .wardNumber(rs.getString("ward"))
 	                 .oldPropertyId(rs.getString("oldPropertyId"))
 	                 .propertyId(rs.getString("propertyId"))
+	                 .propertyType(rs.getString("propertytype"))
+	                 .usageCategory(rs.getString("usagecategory"))
 	                 .uuid(rs.getString("uuid"))
 	                 .doorNo(rs.getString("doorNo"))
 	                 .buildingName(rs.getString("buildingName"))
