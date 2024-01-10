@@ -1,12 +1,11 @@
 package org.egov.report.util;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -28,10 +27,11 @@ public class PaymetsReportExcelGenerator {
     }
     
     
-    public void generateExcelFile(HttpServletResponse response) throws IOException {
+    public void generateExcelFile(File temporaryfile) throws IOException {
         writeHeader();
         write();
-        ServletOutputStream outputStream = response.getOutputStream();
+        // writing the workbook into the temporary file... 
+        FileOutputStream outputStream = new FileOutputStream(temporaryfile); 
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
@@ -98,5 +98,4 @@ public class PaymetsReportExcelGenerator {
             createCell(row, columnCount++, record.get("receiptno"), style);
         }
     }
-    
 }
