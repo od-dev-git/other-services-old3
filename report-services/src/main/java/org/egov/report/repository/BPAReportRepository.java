@@ -1,9 +1,15 @@
 package org.egov.report.repository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.model.UtilityReportDetails;
+import org.egov.report.producer.KafkaProducer;
+import org.egov.report.repository.rowmapper.UtilityReportDetailsRowMapper;
+import org.egov.report.web.model.UtilityReportRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,6 +22,15 @@ public class BPAReportRepository {
 	
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private KafkaProducer producer;
+	
+	@Autowired
+	private ReportServiceConfiguration config;
+	
+	@Autowired
+	private UtilityReportDetailsRowMapper rowMapper;
 	
 	
 	/**
@@ -101,6 +116,30 @@ public class BPAReportRepository {
 	    if(applicationsDetailsList.isEmpty())
 			return Collections.emptyList();
 		return applicationsDetailsList;
+	}
+
+
+
+	public List<UtilityReportDetails> isReportExist(String reportType) {
+		String query = "SELECT * FROM eg_bpa_utility_reports WHERE reporttype = '" + reportType +"'";
+	    log.info("Query for Applications Report search:", query);
+	    
+	    List<UtilityReportDetails> reportDetailsList =  jdbcTemplate.query(query, rowMapper);
+	    if(reportDetailsList.isEmpty())
+			return new ArrayList<>();
+	    return reportDetailsList;
+	}
+
+
+
+	public void saveReportDetails(UtilityReportRequest utilityReportRequest) {
+		producer.push(config.getSaveUtilityReportTopic(), utilityReportRequest);
+	}
+
+
+
+	public void updateReportDetails(UtilityReportRequest utilityReportRequest) {
+		producer.push(config.getUpdateUtilityReportTopic(), utilityReportRequest);
 	}
 	
 

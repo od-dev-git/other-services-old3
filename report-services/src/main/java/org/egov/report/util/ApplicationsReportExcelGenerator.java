@@ -1,5 +1,7 @@
 package org.egov.report.util;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,10 +30,11 @@ public class ApplicationsReportExcelGenerator {
     }
     
     
-    public void generateExcelFile(HttpServletResponse response) throws IOException {
+    public void generateExcelFile(File temporaryfile) throws IOException {
         writeHeader();
         write();
-        ServletOutputStream outputStream = response.getOutputStream();
+        // writing the workbook into the temporary file... 
+        FileOutputStream outputStream = new FileOutputStream(temporaryfile); 
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
