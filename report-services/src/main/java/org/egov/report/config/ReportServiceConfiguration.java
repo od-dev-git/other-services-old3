@@ -92,10 +92,28 @@ public class ReportServiceConfiguration {
 	@Value("${egov.report.service.connections.limit}")
     private Integer reportConnectionsLimit;
 	
+	
+	@Value("${egov.filestore.host}")
+	private String filestoreHost;
+	
+	@Value("${egov.filestore.path}")
+	private String filestorePath;
+	
+	@Value("${egov.filestore.fetch.path}")
+	private String filestoreFetchPath;
+	
+	@Value("${egov.filestore.upload.path}")
+	private String filestoreUploadPath;
+	
 	@Value("${egov.mdms.host}")
 	private String mdmsHost;
 	
 	@Value("${egov.mdms.search.endpoint}")
 	private String mdmsSearchUrl;
 
+	@Value("${persister.save.utilityreport.topic}")
+	private String saveUtilityReportTopic;
+
+	@Value("${persister.update.utilityreport.topic}")
+	private String updateUtilityReportTopic;
 }
