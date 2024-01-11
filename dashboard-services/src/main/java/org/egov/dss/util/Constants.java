@@ -261,9 +261,16 @@ public class Constants {
 		final static String USM_ISSUE_RESOLUTION_SUMMARY = "issueResolutionSummery";
 		final static String USM_TOP_CATEGORY_ISSUES = "topIssueCatgory";
 		final static String USM_CATEGORY_WISE_ISSUE = "categoryWiseIssuesReported";
-		final static String USM_TOP_ULB = "topPerformingULBS";
-		final static String USM_BOTTOM_ULB = "bottomPerformingULBS";
+		final static String USM_TOP_ULB = "UsmTopPerformingULBS";
+		final static String USM_BOTTOM_ULB = "UsmBottomPerformingULBS";
 		final static String USM_TOTAL_CUMULATIVE = "cumulativeFeedbackSubmitted";
+		final static String USM_TOTAL_UNATTENDED_ISSUE = "totalUnattendedIssue";
+		final static String USM_TOTAL_CLOSE_SATISFACTORY_FEEDBACK = "totalCloseSatisfactoryfeedback";
+		final static String USM_TOTAL_ESCALATED_ISSUE = "totalEscalatedIssue";
+		final static String USM_TOTAL_ESCALATED_ISSUE_RESPONDED = "totalEscalatedIssueResponded";
+		final static String USM_ISSUE_RESOLUTION_SUMMARY_WATER = "issueResolutionSummeryWater";
+		final static String USM_ISSUE_RESOLUTION_SUMMARY_STREETLIGHT = "issueResolutionSummeryStreetlight";
+		final static String USM_ISSUE_RESOLUTION_SUMMARY_SANITATION = "issueResolutionSummerySanitation";
 		
 
 		final static String REGULARIZATION_OBPS_TOP_PERFORMING_ULBS_TABLE = "regularizationtopPerformingUlbsTable";

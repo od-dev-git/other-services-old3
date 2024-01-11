@@ -51,6 +51,34 @@ public class USMService {
 		return Arrays.asList(Data.builder().headerValue(totalCloseIssues).build());
 	}
 
+	public List<Data> totalClosedWithSatisfactory(PayloadDetails payloadDetails) {
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalCloseIssuesSatisfactory = (Integer) usmRepository.getTotalClosedSatisfiedIssue(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalCloseIssuesSatisfactory).build());
+	}
+
+	public List<Data> totalUnattendedIssue(PayloadDetails payloadDetails) {
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalCloseIssuesSatisfactory = (Integer) usmRepository.getTotalUnattendedIssue(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalCloseIssuesSatisfactory).build());
+	}
+
+	public List<Data> totalEscalatedIssue(PayloadDetails payloadDetails) {
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalCloseIssuesSatisfactory = (Integer) usmRepository.getTotalEscalatedIssue(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalCloseIssuesSatisfactory).build());
+	}
+
+	public List<Data> totalRespondedEscalatedIssue(PayloadDetails payloadDetails) {
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		Integer totalCloseIssuesSatisfactory = (Integer) usmRepository.getTotalRespondedEscalatedIssue(criteria);
+		return Arrays.asList(Data.builder().headerValue(totalCloseIssuesSatisfactory).build());
+	}
+
 	public List<Data> totalSlumSubmittedFeedback(PayloadDetails payloadDetails) {
 		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
 		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
@@ -168,6 +196,189 @@ public class USMService {
 		return response;
 	}
 
+	public List<Data> issueResolutionSummaryForWater(PayloadDetails payloadDetails) {
+
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		TargetSearchCriteria targetSearchCriteria = getTargetSearchCriteria(payloadDetails);
+
+		HashMap<String, BigDecimal> tenantWiseFeedback = usmRepository.getTotalNoWaterFeedbackSubmitted(criteria);
+		HashMap<String, BigDecimal> tenantWiseClosedIssue = usmRepository.getTotalNoClosedIssueForWater(criteria);
+		HashMap<String, BigDecimal> tenantWiseTotalIssue = usmRepository.getTotalIssueForWater(criteria);
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseTotalFeedback : tenantWiseFeedback.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(tenantWiseTotalFeedback.getKey().toString()).symbol("text")
+					.build());
+
+			plots.add(Plot.builder().name("Total Feedback").value(tenantWiseTotalFeedback.getValue()).symbol("amount")
+					.build());
+
+			plots.add(
+					Plot.builder().name("Total open issue")
+							.value(tenantWiseTotalIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseTotalIssue.get(tenantWiseTotalFeedback.getKey()))
+							.symbol("number").build());
+
+			plots.add(
+					Plot.builder().name("Total Closed Issue")
+							.value(tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()))
+							.symbol("number").build());
+
+			response.add(Data.builder().headerName(tenantWiseTotalFeedback.getKey()).plots(plots)
+					.headerValue(serialNumber).headerName(tenantWiseTotalFeedback.getKey()).build());
+
+			serialNumber++;
+
+		}
+
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Feedback").value(BigDecimal.ZERO).symbol("amount").build());
+
+			plots.add(Plot.builder().name("Total open issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Closed Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+		}
+
+		return response;
+	}
+
+	public List<Data> issueResolutionSummaryForStreetlight(PayloadDetails payloadDetails) {
+
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		TargetSearchCriteria targetSearchCriteria = getTargetSearchCriteria(payloadDetails);
+
+		HashMap<String, BigDecimal> tenantWiseFeedback = usmRepository.getTotalNoStreetlightFeedbackSubmitted(criteria);
+		HashMap<String, BigDecimal> tenantWiseClosedIssue = usmRepository.getTotalNoClosedIssueForStreetlight(criteria);
+		HashMap<String, BigDecimal> tenantWiseTotalIssue = usmRepository.getTotalIssueForStreetlight(criteria);
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseTotalFeedback : tenantWiseFeedback.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(tenantWiseTotalFeedback.getKey().toString()).symbol("text")
+					.build());
+
+			plots.add(Plot.builder().name("Total Feedback").value(tenantWiseTotalFeedback.getValue()).symbol("amount")
+					.build());
+
+			plots.add(
+					Plot.builder().name("Total open issue")
+							.value(tenantWiseTotalIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseTotalIssue.get(tenantWiseTotalFeedback.getKey()))
+							.symbol("number").build());
+
+			plots.add(
+					Plot.builder().name("Total Closed Issue")
+							.value(tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()))
+							.symbol("number").build());
+
+			response.add(Data.builder().headerName(tenantWiseTotalFeedback.getKey()).plots(plots)
+					.headerValue(serialNumber).headerName(tenantWiseTotalFeedback.getKey()).build());
+
+			serialNumber++;
+
+		}
+
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Feedback").value(BigDecimal.ZERO).symbol("amount").build());
+
+			plots.add(Plot.builder().name("Total open issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Closed Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+		}
+
+		return response;
+	}
+
+	public List<Data> issueResolutionSummaryForSanitation(PayloadDetails payloadDetails) {
+
+		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
+		criteria.setExcludedTenantId(DashboardConstants.TESTING_TENANT);
+		TargetSearchCriteria targetSearchCriteria = getTargetSearchCriteria(payloadDetails);
+
+		HashMap<String, BigDecimal> tenantWiseFeedback = usmRepository.getTotalNoSanitationFeedbackSubmitted(criteria);
+		HashMap<String, BigDecimal> tenantWiseClosedIssue = usmRepository.getTotalNoClosedIssueForSanitation(criteria);
+		HashMap<String, BigDecimal> tenantWiseTotalIssue = usmRepository.getTotalIssueForSanitation(criteria);
+		List<Data> response = new ArrayList<>();
+		int serialNumber = 1;
+
+		for (HashMap.Entry<String, BigDecimal> tenantWiseTotalFeedback : tenantWiseFeedback.entrySet()) {
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(tenantWiseTotalFeedback.getKey().toString()).symbol("text")
+					.build());
+
+			plots.add(Plot.builder().name("Total Feedback").value(tenantWiseTotalFeedback.getValue()).symbol("amount")
+					.build());
+
+			plots.add(
+					Plot.builder().name("Total open issue")
+							.value(tenantWiseTotalIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseTotalIssue.get(tenantWiseTotalFeedback.getKey()))
+							.symbol("number").build());
+
+			plots.add(
+					Plot.builder().name("Total Closed Issue")
+							.value(tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+									: tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()))
+							.symbol("number").build());
+
+			response.add(Data.builder().headerName(tenantWiseTotalFeedback.getKey()).plots(plots)
+					.headerValue(serialNumber).headerName(tenantWiseTotalFeedback.getKey()).build());
+
+			serialNumber++;
+
+		}
+
+		if (CollectionUtils.isEmpty(response)) {
+
+			List<Plot> plots = new ArrayList();
+			plots.add(Plot.builder().name("S.N.").label(String.valueOf(serialNumber)).symbol("text").build());
+
+			plots.add(Plot.builder().name("ULBs").label(payloadDetails.getTenantid()).symbol("text").build());
+
+			plots.add(Plot.builder().name("Total Feedback").value(BigDecimal.ZERO).symbol("amount").build());
+
+			plots.add(Plot.builder().name("Total open issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Closed Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
+					.build());
+		}
+
+		return response;
+	}
+
 	public List<Data> topUlbsByStatus(PayloadDetails payloadDetails) {
 
 		UsmSearchCriteria criteria = getUSMSearchCriteria(payloadDetails);
@@ -245,7 +456,7 @@ public class USMService {
 		TargetSearchCriteria criteria = new TargetSearchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
-			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.BS_HOME_REVENUE))
+			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_USM))
 				criteria.setBusinessServices(null);
 			else
 				criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
@@ -274,7 +485,10 @@ public class USMService {
 		UsmSearchCriteria criteria = new UsmSearchCriteria();
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
-			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
+			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_USM))
+				criteria.setBusinessServices(null);
+			else
+				criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
 		}
 
 		if (StringUtils.hasText(payloadDetails.getTenantid())) {

@@ -10,10 +10,9 @@ import org.egov.mdms.model.MasterDetail;
 import org.egov.mdms.model.MdmsCriteria;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.mdms.model.ModuleDetail;
-import org.egov.report.util.Util;
 import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.model.AuditDetails;
 import org.egov.report.repository.ServiceRepository;
-import org.egov.report.util.Constants;
 import org.egov.tracer.model.CustomException;
 import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,4 +83,21 @@ public class Util {
 		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
 	}
 
+	
+	/**
+	 * Method to return auditDetails for create/update flows
+	 *
+	 * @param by
+	 * @param isCreate
+	 * @return AuditDetails
+	 */
+	public AuditDetails getAuditDetails(String by, Boolean isCreate) {
+		Long time = System.currentTimeMillis();
+		if (isCreate)
+			return AuditDetails.builder().createdBy(by).lastModifiedBy(by).createdTime(time).lastModifiedTime(time)
+					.build();
+		else
+			return AuditDetails.builder().lastModifiedBy(by).lastModifiedTime(time).build();
+	}
+	
 }

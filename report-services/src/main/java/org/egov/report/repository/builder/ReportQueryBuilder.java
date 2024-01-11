@@ -113,7 +113,7 @@ public class ReportQueryBuilder {
 			+ AS + "demand ";
 	
 	private static final String PROPERTY_DETAILS_SUMMARY_QUERY = SELECT
-			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,epp.ownershipcategory,eu.uuid,"
+			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,epp.ownershipcategory,epp.propertytype,epp.usagecategory,eu.uuid,"
 			+ "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
 			+ FROM
 			+ "eg_pt_property epp "
@@ -300,7 +300,7 @@ public class ReportQueryBuilder {
     private static final String PROPERTY_IDS = SELECT + " epp.propertyid " + PROPERTY;
 
     private static final String PROPERTY_DETAILS = SELECT
-            + "epp.propertyid,epp.tenantid,epa.ward,epp.oldpropertyid,eu.uuid,"
+            + "epp.propertyid,epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertytype,epp.usagecategory,eu.uuid,"
             + "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
             + FROM
             + "eg_pt_property epp "
