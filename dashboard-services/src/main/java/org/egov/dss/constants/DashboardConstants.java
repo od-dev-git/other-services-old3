@@ -392,5 +392,8 @@ public class DashboardConstants {
 
 	public static final List<String> REGULARIZATION_REVENUE_ALL_BS = Collections
 			.unmodifiableList(Arrays.asList(BUSINESS_SERVICE_REGULARIZATION_APP_FEE, BUSINESS_SERVICE_REGULARIZATION_SAN_FEE));
-			
+	
+	public static final List<String> URC_ULBS = Collections
+			.unmodifiableList(Arrays.asList("od.puri", "od.jatni","od.khordha"));
+
 }
