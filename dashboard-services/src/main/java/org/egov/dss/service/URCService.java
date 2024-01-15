@@ -340,7 +340,8 @@ public class URCService {
 	}
 	
 	public List<Data> ulbsUnderUrc(PayloadDetails payloadDetails) {
-		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		// List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		List<String> urcUlb = DashboardConstants.URC_ULBS;
 		return Arrays.asList(Data.builder().headerValue(urcUlb.size()).build());
 
 	}
