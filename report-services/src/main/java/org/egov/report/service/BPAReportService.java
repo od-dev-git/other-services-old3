@@ -68,11 +68,12 @@ public class BPAReportService {
 		//Generate report, then upload in filestore and update report details
 		Executor executor = Executors.newSingleThreadExecutor();
 		executor.execute(() -> {
+			log.info("Report Type in Thread Executor : ", reportType);
 			String fileName = generateFileName(reportType);
 			String absolutePath = getAbsolutePath(reportType);
 			File temporaryfile = new File(absolutePath, fileName);
-	        try {
-	        	
+	        
+			try {
 	        	switch (reportType) {
 	    		case "PAYMENTS_REPORT":
 	    			generateAllPaymentsReport(temporaryfile);
@@ -153,7 +154,7 @@ public class BPAReportService {
 	 */
 	public void generateAllPaymentsReport(File temporaryfile) throws IOException {
 		List<Map<String, Object>> paymentDetailsList = repository.getAllPaymentsReport();
-    	
+		log.info("Total Payment Report Fetch : ", paymentDetailsList.size());
     	PaymetsReportExcelGenerator generator = new PaymetsReportExcelGenerator(paymentDetailsList);
     	//Generate into the temporary file... 
     	generator.generateExcelFile(temporaryfile);
@@ -167,7 +168,7 @@ public class BPAReportService {
 	 */
 	public void generateAllApplicationsReport(File temporaryfile) throws IOException {
 		List<Map<String, Object>> applicationsDetailsList = repository.getAllApplicationsReport();
-    	
+		log.info("Total Application Report Fetch : ", applicationsDetailsList.size());
 		ApplicationsReportExcelGenerator generator = new ApplicationsReportExcelGenerator(applicationsDetailsList);
     	//Generate into the temporary file... 
     	generator.generateExcelFile(temporaryfile);
