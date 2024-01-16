@@ -1,5 +1,8 @@
 package org.egov.report.util;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +39,8 @@ public class Util {
     
     @Autowired
     private ServiceRepository repository;
+    
+    public static final String LOCAL_ZONE_ID = "Asia/Kolkata";
     
     public void validateTenantIdForUserType(String tenantId, RequestInfo requestInfo) {
 
@@ -100,4 +105,17 @@ public class Util {
 			return AuditDetails.builder().lastModifiedBy(by).lastModifiedTime(time).build();
 	}
 	
+	
+	/**
+	 * validate time in unix epoch format
+	 * 
+	 * @param inputUnixTime
+	 * @return true or false 
+	 */
+	public boolean isSameDay(Long inputUnixTime) {
+		LocalDate lastModifiedDate = Instant.ofEpochSecond(inputUnixTime/1000)
+			      .atZone(ZoneId.of(LOCAL_ZONE_ID))
+			      .toLocalDate();
+	    return lastModifiedDate.isEqual(LocalDate.now(ZoneId.of(LOCAL_ZONE_ID)));
+	}
 }

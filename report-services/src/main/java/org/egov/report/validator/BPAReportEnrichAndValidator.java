@@ -10,10 +10,14 @@ import org.egov.report.model.AuditDetails;
 import org.egov.report.model.UtilityReportDetails;
 import org.egov.report.util.Util;
 import org.egov.report.web.model.UtilityReportRequest;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class BPAReportEnrichAndValidator {
 	
 	@Autowired
@@ -65,6 +69,30 @@ public class BPAReportEnrichAndValidator {
 		}
 		return filestoreId;
 	}
+
+
+	public void validateRecentReport(List<UtilityReportDetails> reportList) {
+		if(!reportList.isEmpty()) {
+			Long lastModifiedTime = reportList.get(0).getAuditDetails().getLastModifiedTime();
+			log.info("Recent Report >> ", util.isSameDay(lastModifiedTime));
+			if(util.isSameDay(lastModifiedTime)) {
+				throw new CustomException("ALREADY_REPORT_GENERATED", "Report already generated, Please download the Report!!!");
+			}
+		} 
+	}
+	
+	
+	public void validateDownloadReport(List<UtilityReportDetails> reportList, Map<String, Object> response) {
+		if(!reportList.isEmpty()) {
+			Long lastModifiedTime = reportList.get(0).getAuditDetails().getLastModifiedTime();
+			log.info("Download Report >> ", util.isSameDay(lastModifiedTime));
+			if(!util.isSameDay(lastModifiedTime)) {
+				response.put("LATEST_REPORT_IS_INPROGESS", "Kindly wait for sometime, Latest Report not uploaded yet. !!!");
+			}
+		} 
+	}
+	
+	
 	
 }
 

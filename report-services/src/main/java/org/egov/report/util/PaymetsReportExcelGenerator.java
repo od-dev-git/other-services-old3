@@ -23,7 +23,8 @@ public class PaymetsReportExcelGenerator {
 
     public PaymetsReportExcelGenerator(List<Map<String, Object>> paymentDetailsList) {
         this.paymentDetailsList = paymentDetailsList;
-        workbook = new XSSFWorkbook();
+        this.workbook = new XSSFWorkbook();
+        this.sheet = workbook.createSheet("Payments Details");
     }
     
     
@@ -39,7 +40,6 @@ public class PaymetsReportExcelGenerator {
     
     
     private void writeHeader() {
-        sheet = workbook.createSheet("Payments Details");
         Row row = sheet.createRow(0);
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
