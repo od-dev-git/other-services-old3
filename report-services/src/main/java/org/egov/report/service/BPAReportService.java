@@ -68,11 +68,11 @@ public class BPAReportService {
 		//Generate report, then upload in filestore and update report details
 		Executor executor = Executors.newSingleThreadExecutor();
 		executor.execute(() -> {
-			log.info("Report Type in Thread Executor : ", reportType);
+			log.debug("Report Type in Thread Executor : ", reportType);
 			String fileName = generateFileName(reportType);
 			String absolutePath = getAbsolutePath(reportType);
 			File temporaryfile = new File(absolutePath, fileName);
-	        
+			log.debug("Temporary File path in Thread Executor : ", absolutePath);
 			try {
 	        	switch (reportType) {
 	    		case "PAYMENTS_REPORT":
@@ -114,8 +114,10 @@ public class BPAReportService {
 	 * @return absolutePath
 	 */
 	private String getAbsolutePath(String temporaryFolder) {
-		String currentPath = System.getProperty("user.dir");
+		File currentDirFile = new File(".");
+		String currentPath = currentDirFile.getAbsolutePath();
 		String absolutePath = currentPath + File.separator + temporaryFolder;
+		System.out.println("Temporary storage Path : " + absolutePath);
 		File directory = new File(absolutePath);
 		if (directory.exists()) {
 			try {
@@ -154,7 +156,7 @@ public class BPAReportService {
 	 */
 	public void generateAllPaymentsReport(File temporaryfile) throws IOException {
 		List<Map<String, Object>> paymentDetailsList = repository.getAllPaymentsReport();
-		log.info("Total Payment Report Fetch : ", paymentDetailsList.size());
+		log.debug("Total Payment Report Fetch : ", paymentDetailsList.size());
     	PaymetsReportExcelGenerator generator = new PaymetsReportExcelGenerator(paymentDetailsList);
     	//Generate into the temporary file... 
     	generator.generateExcelFile(temporaryfile);
@@ -168,7 +170,7 @@ public class BPAReportService {
 	 */
 	public void generateAllApplicationsReport(File temporaryfile) throws IOException {
 		List<Map<String, Object>> applicationsDetailsList = repository.getAllApplicationsReport();
-		log.info("Total Application Report Fetch : ", applicationsDetailsList.size());
+		log.debug("Total Application Report Fetch : ", applicationsDetailsList.size());
 		ApplicationsReportExcelGenerator generator = new ApplicationsReportExcelGenerator(applicationsDetailsList);
     	//Generate into the temporary file... 
     	generator.generateExcelFile(temporaryfile);
