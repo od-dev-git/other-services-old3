@@ -53,11 +53,10 @@ public class BPAReportService {
 	 */
 	public void generateUtilityReport(RequestInfo requestInfo, UtilityReportSearchCriteria searchCriteria) throws Exception {
 		
-//		String reportType = searchCriteria.getReportType();
-		String reportType = "PAYMENTS_REPORT";
-		
-		
+		String reportType = searchCriteria.getReportType();
 		List<UtilityReportDetails> reportList = repository.isReportExist(reportType);
+		
+//		reportEnrichValidator.validateRecentReport(reportList);
 		
 		//new record inserted for each report type
 		if(reportList.isEmpty()) {
@@ -70,8 +69,7 @@ public class BPAReportService {
 		Executor executor = Executors.newSingleThreadExecutor();
 		executor.execute(() -> {
 			String fileName = generateFileName(reportType);
-			String temporaryFolder = "temporary_upload";
-			String absolutePath = getAbsolutePath(temporaryFolder);
+			String absolutePath = getAbsolutePath(reportType);
 			File temporaryfile = new File(absolutePath, fileName);
 	        try {
 	        	
@@ -106,6 +104,14 @@ public class BPAReportService {
 	}
 
 
+	
+	/**
+	 * Helper method for creating temporary folder in project
+	 * and delete old temporary file from project
+	 * 
+	 * @param temporaryFolder
+	 * @return absolutePath
+	 */
 	private String getAbsolutePath(String temporaryFolder) {
 		String currentPath = System.getProperty("user.dir");
 		String absolutePath = currentPath + File.separator + temporaryFolder;
@@ -135,11 +141,16 @@ public class BPAReportService {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_hhmmss");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
 		String currentDateTime = dateFormat.format(new Date());
-		return fileInitialName+ fileSeparator + currentDateTime + fileFormat;
+		return fileInitialName + fileSeparator + currentDateTime + fileFormat;
 	}
 
 
-
+	/**
+	 * Generate all Payments report and store in excel format
+	 * 
+	 * @param temporaryfile
+	 * @throws IOException
+	 */
 	public void generateAllPaymentsReport(File temporaryfile) throws IOException {
 		List<Map<String, Object>> paymentDetailsList = repository.getAllPaymentsReport();
     	
@@ -164,11 +175,20 @@ public class BPAReportService {
 	
 	
 	
+	/**
+	 * Search and download latest report file from db
+	 * 
+	 * @param requestInfo
+	 * @param searchCriteria
+	 * @return response
+	 */
 	public Map<String, Object> getUtilityReport(RequestInfo requestInfo, @Valid UtilityReportSearchCriteria searchCriteria) {
 		Map<String, Object> response = new HashMap<>();
 		
 		List<UtilityReportDetails> reportList = repository.isReportExist(searchCriteria.getReportType());
 		File reportFile = null;
+		
+		reportEnrichValidator.validateDownloadReport(reportList, response);
 		
 		//new record inserted for each report type
 		if(!reportList.isEmpty()) {
