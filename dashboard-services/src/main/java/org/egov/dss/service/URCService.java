@@ -71,8 +71,9 @@ public class URCService {
 		
 	private PaymentSearchCriteria getPaymentSearchCriteria(PayloadDetails payloadDetails) {
 		PaymentSearchCriteria criteria = new PaymentSearchCriteria();
-		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
-		
+		//List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		Set<String> urcUlb = new HashSet<>(DashboardConstants.URC_ULBS);
+				
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
 			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_URC))
 				criteria.setBusinessServices(Sets.newHashSet(DashboardConstants.URC_REVENUE_ALL_BS));
@@ -91,7 +92,7 @@ public class URCService {
 				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
 			}
 		} else {
-			criteria.setTenantIds(Sets.newHashSet(urcUlb));
+			criteria.setTenantIds(urcUlb);
 		}
 
 		if (payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
@@ -107,7 +108,8 @@ public class URCService {
 
 	private DemandSearchCriteria getDemandSearchCriteria(PayloadDetails payloadDetails) {
 		DemandSearchCriteria criteria = new DemandSearchCriteria();
-		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		//List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		Set<String> urcUlb = new HashSet<>(DashboardConstants.URC_ULBS);
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
 			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_URC))
@@ -123,7 +125,7 @@ public class URCService {
 				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
 			}
 		} else {
-			criteria.setTenantIds(Sets.newHashSet(urcUlb));
+			criteria.setTenantIds(urcUlb);
 		}
 
 		if (StringUtils.hasText(payloadDetails.getTimeinterval())) {
@@ -135,7 +137,8 @@ public class URCService {
 	
 	public UrcSearchCriteria getUrcSearchCriteria(PayloadDetails payloadDetails) {
 		UrcSearchCriteria criteria = new UrcSearchCriteria();
-		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		//List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		Set<String> urcUlb = new HashSet<>(DashboardConstants.URC_ULBS);
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
 			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
@@ -148,7 +151,7 @@ public class URCService {
 				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
 			}
 		} else {
-			criteria.setTenantIds(Sets.newHashSet(urcUlb));
+			criteria.setTenantIds(urcUlb);
 		}
 
 		if (payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
@@ -164,7 +167,8 @@ public class URCService {
 	
 	public PropertySerarchCriteria getPropertySearchCriteria(PayloadDetails payloadDetails) {
 		PropertySerarchCriteria criteria = new PropertySerarchCriteria();
-		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		//List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		Set<String> urcUlb = new HashSet<>(DashboardConstants.URC_ULBS);
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
 			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
@@ -177,7 +181,7 @@ public class URCService {
 				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
 			}
 		} else {
-			criteria.setTenantIds(Sets.newHashSet(urcUlb));
+			criteria.setTenantIds(urcUlb);
 		}
 		
 		if(payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
@@ -193,7 +197,8 @@ public class URCService {
 	
 	public WaterSearchCriteria getWaterSearchCriteria(PayloadDetails payloadDetails) {
 		WaterSearchCriteria criteria = new WaterSearchCriteria();
-		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		//List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		Set<String> urcUlb = new HashSet<>(DashboardConstants.URC_ULBS);
 
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
 			criteria.setBusinessServices(Sets.newHashSet(payloadDetails.getModulelevel()));
@@ -206,7 +211,7 @@ public class URCService {
 				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
 			}
 		} else {
-			criteria.setTenantIds(Sets.newHashSet(urcUlb));
+			criteria.setTenantIds(urcUlb);
 		}
 
 		if (payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
@@ -222,7 +227,8 @@ public class URCService {
 	
 	private TargetSearchCriteria getTargetSearchCriteria(PayloadDetails payloadDetails) {
 		TargetSearchCriteria criteria = new TargetSearchCriteria();
-		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		//List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		Set<String> urcUlb = new HashSet<>(DashboardConstants.URC_ULBS);
 		
 		if (StringUtils.hasText(payloadDetails.getModulelevel())) {
 			if (payloadDetails.getModulelevel().equalsIgnoreCase(DashboardConstants.MODULE_LEVEL_URC))
@@ -238,7 +244,7 @@ public class URCService {
 				criteria.setTenantIds(Sets.newHashSet("od.odisha"));
 			}
 		} else {
-			criteria.setTenantIds(Sets.newHashSet(urcUlb));
+			criteria.setTenantIds(urcUlb);
 		}
 		
 		if(payloadDetails.getStartdate() != null && payloadDetails.getStartdate() != 0) {
@@ -334,7 +340,8 @@ public class URCService {
 	}
 	
 	public List<Data> ulbsUnderUrc(PayloadDetails payloadDetails) {
-		List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		// List<String> urcUlb = DashboardUtility.getSystemProperties().getUrculbs();
+		List<String> urcUlb = DashboardConstants.URC_ULBS;
 		return Arrays.asList(Data.builder().headerValue(urcUlb.size()).build());
 
 	}
@@ -1608,5 +1615,7 @@ public class URCService {
 				.collect(Collectors.toList());
 		return payments;
 	}
+	
+	
 	
 }

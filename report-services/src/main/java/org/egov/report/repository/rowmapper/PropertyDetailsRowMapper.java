@@ -40,12 +40,22 @@ List<PropertyDetailsResponse> propertyDetailsResponseList = new ArrayList<>();
 			String tenantIdStyled = tenantId.replace("od.", "");
 			tenantIdStyled = tenantIdStyled.substring(0,1).toUpperCase() + tenantIdStyled.substring(1).toLowerCase();
 			
+			String propertyType = rs.getString("propertytype");
+			String propertyTypeStyled = extractSecondPart(propertyType);
+		//	propertyTypeStyled = propertyTypeStyled.substring(0,1).toUpperCase() + propertyTypeStyled.substring(1).toLowerCase();
+			
+			String usageCategory = rs.getString("usagecategory");
+			String usageCategoryStyled =  extractSecondPart(usageCategory);
+		//	usageCategoryStyled = usageCategoryStyled.substring(0,1).toUpperCase() + usageCategoryStyled.substring(1).toLowerCase();
+			
 
 	         PropertyDetailsResponse propertyDetailsResponse = PropertyDetailsResponse.builder()
 	                 .ulbName(tenantIdStyled)
 	                 .wardNumber(rs.getString("ward"))
 	                 .oldPropertyId(rs.getString("oldPropertyId"))
 	                 .propertyId(rs.getString("propertyId"))
+	                 .propertyType(propertyTypeStyled)
+	                 .usageCategory(usageCategoryStyled)
 	                 .uuid(rs.getString("uuid"))
 	                 .doorNo(rs.getString("doorNo"))
 	                 .buildingName(rs.getString("buildingName"))
@@ -95,6 +105,14 @@ List<PropertyDetailsResponse> propertyDetailsResponseList = new ArrayList<>();
             address = address.delete(address.length() - 2, address.length());
         }
         return address;
+    }
+    
+    private String extractSecondPart(String input) {
+        if (input.contains(".")) {
+            return input.split("\\.")[1];
+        } else {
+            return input;
+        }
     }
 
 }

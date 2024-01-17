@@ -1,5 +1,8 @@
 package org.egov.report.util;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -10,10 +13,9 @@ import org.egov.mdms.model.MasterDetail;
 import org.egov.mdms.model.MdmsCriteria;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.mdms.model.ModuleDetail;
-import org.egov.report.util.Util;
 import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.model.AuditDetails;
 import org.egov.report.repository.ServiceRepository;
-import org.egov.report.util.Constants;
 import org.egov.tracer.model.CustomException;
 import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,8 @@ public class Util {
     
     @Autowired
     private ServiceRepository repository;
+    
+    public static final String LOCAL_ZONE_ID = "Asia/Kolkata";
     
     public void validateTenantIdForUserType(String tenantId, RequestInfo requestInfo) {
 
@@ -84,4 +88,34 @@ public class Util {
 		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
 	}
 
+	
+	/**
+	 * Method to return auditDetails for create/update flows
+	 *
+	 * @param by
+	 * @param isCreate
+	 * @return AuditDetails
+	 */
+	public AuditDetails getAuditDetails(String by, Boolean isCreate) {
+		Long time = System.currentTimeMillis();
+		if (isCreate)
+			return AuditDetails.builder().createdBy(by).lastModifiedBy(by).createdTime(time).lastModifiedTime(time)
+					.build();
+		else
+			return AuditDetails.builder().lastModifiedBy(by).lastModifiedTime(time).build();
+	}
+	
+	
+	/**
+	 * validate time in unix epoch format
+	 * 
+	 * @param inputUnixTime
+	 * @return true or false 
+	 */
+	public boolean isSameDay(Long inputUnixTime) {
+		LocalDate lastModifiedDate = Instant.ofEpochSecond(inputUnixTime/1000)
+			      .atZone(ZoneId.of(LOCAL_ZONE_ID))
+			      .toLocalDate();
+	    return lastModifiedDate.isEqual(LocalDate.now(ZoneId.of(LOCAL_ZONE_ID)));
+	}
 }
