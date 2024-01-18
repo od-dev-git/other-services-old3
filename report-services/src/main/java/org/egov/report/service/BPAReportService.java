@@ -71,7 +71,7 @@ public class BPAReportService {
 			log.debug("Report Type in Thread Executor : ", reportType);
 			String fileName = generateFileName(reportType);
 			String absolutePath = getAbsolutePath(reportType);
-			File temporaryfile = new File(absolutePath, fileName);
+			File temporaryfile = new File(fileName);
 			log.debug("Temporary File path in Thread Executor : ", absolutePath);
 			try {
 	        	switch (reportType) {
