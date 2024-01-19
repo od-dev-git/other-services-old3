@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -70,17 +71,21 @@ public class BPAReportService {
 		executor.execute(() -> {
 			log.info("Report Type in Thread Executor : " + reportType);
 			String fileName = generateFileName(reportType);
-			String absolutePath = getAbsolutePath(reportType);
-			File temporaryfile = new File(absolutePath, fileName);
-			log.debug("Temporary File path in Thread Executor : " + absolutePath);
+			//Local setup for generate utility report
+//			String absolutePath = getAbsolutePath(reportType);
+//			File temporaryfile = new File(absolutePath, fileName);
+			
+			//For uat and prod
+			File temporaryfile = getTemporaryFile(reportType, fileName);
+			log.debug("Temporary File path in Thread Executor : " + temporaryfile.getAbsolutePath());
 			try {
 	        	switch (reportType) {
 	    		case "PAYMENTS_REPORT":
-	    			generateAllPaymentsReport(temporaryfile);
+	    			generateAllPaymentsReport(temporaryfile, searchCriteria);
 	    			break;
 
 	    		case "APPLICATIONS_REPORT":
-	    			generateAllApplicationsReport(temporaryfile);
+	    			generateAllApplicationsReport(temporaryfile, searchCriteria);
 	    			break;
 
 	    		default:
@@ -105,18 +110,19 @@ public class BPAReportService {
 	}
 
 
-	
 	/**
 	 * Helper method for creating temporary folder in project
 	 * and delete old temporary file from project
 	 * 
-	 * @param temporaryFolder
-	 * @return absolutePath
+	 * @param reportType
+	 * @param fileName
+	 * @return temporaryfile
 	 */
-	private String getAbsolutePath(String temporaryFolder) {
-		File currentDirFile = new File("");
+	private File getTemporaryFile(String reportType, String fileName) {
+		//Temp file location
+		File currentDirFile = new File("/tmp");
 		String currentPath = currentDirFile.getAbsolutePath();
-		String absolutePath = currentPath + File.separator + temporaryFolder;
+		String absolutePath = currentPath + File.separator + reportType;
 		log.info("Temporary storage Path : " + absolutePath);
 		File directory = new File(absolutePath);
 		if (directory.exists()) {
@@ -125,7 +131,43 @@ public class BPAReportService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} 
+		}
+		directory.mkdir();
+		File temporaryfile = new File(absolutePath, fileName);
+		
+		if (!temporaryfile.exists()) {
+			try {
+				temporaryfile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return temporaryfile;
+	}
+
+	
+
+	/**
+	 * Helper method for creating temporary folder in project
+	 * and delete old temporary file from project
+	 * 
+	 * @param temporaryFolder
+	 * @return absolutePath
+	 */
+	private String getAbsolutePath(String temporaryFolder) {
+		File currentDirFile = new File(".");
+		String currentPath = currentDirFile.getAbsolutePath();
+		String monthName = LocalDate.now().getMonth().name();
+		String absolutePath = currentPath + File.separator + temporaryFolder + File.separator + monthName;
+		log.info("Temporary storage Path : " + absolutePath);
+		File directory = new File(absolutePath);
+//		if (directory.exists()) {
+//			try {
+//				FileUtils.deleteDirectory(directory);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
 		directory.mkdir();
 
 		return absolutePath;
@@ -152,10 +194,11 @@ public class BPAReportService {
 	 * Generate all Payments report and store in excel format
 	 * 
 	 * @param temporaryfile
+	 * @param searchCriteria 
 	 * @throws IOException
 	 */
-	public void generateAllPaymentsReport(File temporaryfile) throws IOException {
-		List<Map<String, Object>> paymentDetailsList = repository.getAllPaymentsReport();
+	public void generateAllPaymentsReport(File temporaryfile, UtilityReportSearchCriteria searchCriteria) throws IOException {
+		List<Map<String, Object>> paymentDetailsList = repository.getAllPaymentsReport(searchCriteria);
 		log.info("Total Payment Report Fetch : " + paymentDetailsList.size());
     	PaymetsReportExcelGenerator generator = new PaymetsReportExcelGenerator(paymentDetailsList);
     	//Generate into the temporary file... 
@@ -167,9 +210,10 @@ public class BPAReportService {
 	 * Service layer for get All Applications Report
 	 * 
 	 * @param temporaryfile
+	 * @param searchCriteria 
 	 */
-	public void generateAllApplicationsReport(File temporaryfile) throws IOException {
-		List<Map<String, Object>> applicationsDetailsList = repository.getAllApplicationsReport();
+	public void generateAllApplicationsReport(File temporaryfile, UtilityReportSearchCriteria searchCriteria) throws IOException {
+		List<Map<String, Object>> applicationsDetailsList = repository.getAllApplicationsReport(searchCriteria);
 		log.info("Total Application Report Fetch : " + applicationsDetailsList.size());
 		ApplicationsReportExcelGenerator generator = new ApplicationsReportExcelGenerator(applicationsDetailsList);
     	//Generate into the temporary file... 
