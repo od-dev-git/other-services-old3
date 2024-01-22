@@ -349,7 +349,8 @@ public class DashboardService {
 			// plot.setSymbol(valueType)));
 			break;
 		case "line":
-			responseData.getData().forEach(data -> data.setHeaderName(chartName));
+			responseData.getData().forEach(data -> data.setHeaderName(data.getHeaderName()));
+		//	responseData.getData().forEach(data -> data.setHeaderName(chartName));
 			break;
 		case "table":
 			responseData.getData().forEach(data -> data.setHeaderName(chartName));
