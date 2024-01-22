@@ -17,6 +17,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.UtilityReportDetails;
 import org.egov.report.model.UtilityReportSearchCriteria;
 import org.egov.report.repository.BPAReportRepository;
@@ -43,6 +44,9 @@ public class BPAReportService {
 	
 	@Autowired
 	private FileStoreService fileStoreService;
+	
+	@Autowired
+	private ReportServiceConfiguration config;
 	
 	
 	/**
@@ -120,7 +124,7 @@ public class BPAReportService {
 	 */
 	private File getTemporaryFile(String reportType, String fileName) {
 		//Temp file location
-		File currentDirFile = new File("/tmp");
+		File currentDirFile = new File(config.getReportTemporaryLocation());
 		String currentPath = currentDirFile.getAbsolutePath();
 		String absolutePath = currentPath + File.separator + reportType;
 		log.info("Temporary storage Path : " + absolutePath);
