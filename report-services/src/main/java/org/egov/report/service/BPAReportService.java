@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -26,6 +26,7 @@ import org.egov.report.util.PaymetsReportExcelGenerator;
 import org.egov.report.validator.BPAReportEnrichAndValidator;
 import org.egov.report.web.model.UtilityReportRequest;
 import org.egov.tracer.model.CustomException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -61,7 +62,7 @@ public class BPAReportService {
 		String reportType = searchCriteria.getReportType();
 		List<UtilityReportDetails> reportList = repository.isReportExist(reportType);
 		
-//		reportEnrichValidator.validateRecentReport(reportList);
+		reportEnrichValidator.validateRecentReport(reportList);
 		
 		//new record inserted for each report type
 		if(reportList.isEmpty()) {
@@ -76,9 +77,7 @@ public class BPAReportService {
 			log.info("Report Type in Thread Executor : " + reportType);
 			String fileName = generateFileName(reportType);
 			//Local setup for generate utility report
-//			String absolutePath = getAbsolutePath(reportType);
-//			File temporaryfile = new File(absolutePath, fileName);
-			
+			//create a folder named "tmp" in local drive
 			//For uat and prod
 			File temporaryfile = getTemporaryFile(reportType, fileName);
 			log.debug("Temporary File path in Thread Executor : " + temporaryfile.getAbsolutePath());
@@ -150,33 +149,6 @@ public class BPAReportService {
 	}
 
 	
-
-	/**
-	 * Helper method for creating temporary folder in project
-	 * and delete old temporary file from project
-	 * 
-	 * @param temporaryFolder
-	 * @return absolutePath
-	 */
-	private String getAbsolutePath(String temporaryFolder) {
-		File currentDirFile = new File(".");
-		String currentPath = currentDirFile.getAbsolutePath();
-		String monthName = LocalDate.now().getMonth().name();
-		String absolutePath = currentPath + File.separator + temporaryFolder + File.separator + monthName;
-		log.info("Temporary storage Path : " + absolutePath);
-		File directory = new File(absolutePath);
-//		if (directory.exists()) {
-//			try {
-//				FileUtils.deleteDirectory(directory);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-		directory.mkdir();
-
-		return absolutePath;
-	}
-	
 	
 	/**
 	 * Generate Full File Name using current date time and initial file name
@@ -233,26 +205,26 @@ public class BPAReportService {
 	 * @param searchCriteria
 	 * @return response
 	 */
+	@SuppressWarnings("rawtypes")
 	public Map<String, Object> getUtilityReport(RequestInfo requestInfo, @Valid UtilityReportSearchCriteria searchCriteria) {
 		Map<String, Object> response = new HashMap<>();
-		
+		LinkedHashMap responseMap = null;
 		List<UtilityReportDetails> reportList = repository.isReportExist(searchCriteria.getReportType());
-		File reportFile = null;
 		
 		reportEnrichValidator.validateDownloadReport(reportList, response);
 		
 		//new record inserted for each report type
 		if(!reportList.isEmpty()) {
 			UtilityReportDetails reportDetails = reportList.get(0);
+			response.put("reportsDetails", reportDetails);
 			//fetch file from file store
-			reportFile = fileStoreService.fetch(reportDetails.getFileStoreId(), "BPA", reportDetails.getFileName(), reportDetails.getTenantId());
-			response.put("file", reportFile);
+			responseMap = (LinkedHashMap) fileStoreService.fetch(reportDetails.getFileStoreId(), reportDetails.getTenantId());
+			response.put("responseMap", new JSONObject(responseMap).toString());
 		}  else {
 			response.put("Message", "Kindly wait for sometime, Report not generated yet. !!!");
 			throw new CustomException("INVALID_REPORT_FETCH", "Kindly wait for sometime, Report not generated yet. !!!");
 		}
 		
-		response.put("reportsDetails", reportList);
 		return response;
 	}
 }
