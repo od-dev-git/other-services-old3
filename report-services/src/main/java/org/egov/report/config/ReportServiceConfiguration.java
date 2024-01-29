@@ -116,4 +116,7 @@ public class ReportServiceConfiguration {
 
 	@Value("${persister.update.utilityreport.topic}")
 	private String updateUtilityReportTopic;
+	
+	@Value("${egov.report.temp.location}")
+	private String reportTemporaryLocation;
 }

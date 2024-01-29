@@ -2,12 +2,9 @@ package org.egov.report.service;
 
 import java.io.File;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.Arrays;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,14 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -73,36 +67,22 @@ public class FileStoreService {
 	}
 	
 	
-	public File fetch(String fileStoreId, String moduleName,String localFileName, String tenantId) {
-
+	public Object fetch(String fileStoreId, String tenantId) {
+		Object response = null;
         fileStoreId = normalizeString(fileStoreId);
-        moduleName = normalizeString(moduleName);
 		String urls = config.getFilestoreHost() + config.getFilestoreFetchPath() + "?tenantId=" + tenantId
 				+ "&fileStoreId=" + fileStoreId;
 		log.info(String.format("fetch file from url   %s   ", urls));
-
-        Path path = Paths.get(localFileName);
         try {
-            RequestCallback requestCallback = request -> request.getHeaders()
-                    .setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL));
-            ResponseExtractor<Void> responseExtractor = response -> {
-                Files.copy(response.getBody(), path);
-                return null;
-            };
-            restTemplate.execute(URI.create(urls), HttpMethod.GET, requestCallback, responseExtractor);
+            response = restTemplate.getForObject(URI.create(urls), Map.class);
         } catch (RestClientException e) {
 			log.error("Rest Error occurred while fetching file", e);
-			throw new CustomException("Error while fetching file from filestore",
-					"Error while fetching file from filestore");
 		} catch (Exception ex) {
 			log.error("Error occurred while fetching file", ex);
-			throw new CustomException("Error while fetching file from filestore",
-					"Error while fetching file from filestore");
 		}
 
         log.info("fetch completed....   ");
-        return path.toFile();
-
+        return response;
     }
 	
 	

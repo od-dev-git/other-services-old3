@@ -7,9 +7,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -26,7 +23,8 @@ public class ApplicationsReportExcelGenerator {
 
     public ApplicationsReportExcelGenerator(List<Map<String, Object>> applicationsDetailsList) {
         this.applicationsDetailsList = applicationsDetailsList;
-        workbook = new XSSFWorkbook();
+        this.workbook = new XSSFWorkbook();
+        this.sheet = workbook.createSheet("Applications Details");
     }
     
     
@@ -42,7 +40,6 @@ public class ApplicationsReportExcelGenerator {
     
     
     private void writeHeader() {
-        sheet = workbook.createSheet("Payments Details");
         Row row = sheet.createRow(0);
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
@@ -80,7 +77,6 @@ public class ApplicationsReportExcelGenerator {
 
     
     private void createCell(Row row, int columnCount, Object valueOfCell, CellStyle style) {
-        sheet.autoSizeColumn(columnCount);
         Cell cell = row.createCell(columnCount);
         if (valueOfCell instanceof Integer) {
             cell.setCellValue((Integer) valueOfCell);
