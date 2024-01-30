@@ -10,6 +10,11 @@ import org.springframework.util.StringUtils;
 public class IssueFixValidator {
 	
 	public void validateIssueFixRequest(IssueFix issueFix, HttpHeaders headers) {
+		
+		if (StringUtils.isEmpty(issueFix.getTenantId())) {
+			throw new CustomException("INVALID_REQUEST",
+					"TenantId can not be empty, Kindly provide tenant id to proceed !!");
+		}
 
 		if (StringUtils.isEmpty(issueFix.getIssueName())) {
 			throw new CustomException("INVALID_REQUEST",
