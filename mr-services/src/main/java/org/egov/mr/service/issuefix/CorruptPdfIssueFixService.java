@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.egov.mr.config.MRConfiguration;
 import org.egov.mr.producer.Producer;
+import org.egov.mr.repository.IssueFixRepository;
 import org.egov.mr.service.MarriageRegistrationService;
 import org.egov.mr.web.models.DscDetails;
 import org.egov.mr.web.models.MarriageRegistration;
@@ -23,10 +24,7 @@ import org.springframework.util.StringUtils;
 public class CorruptPdfIssueFixService implements IIssueFixService{
 	
 	@Autowired
-	private MRConfiguration config;
-	
-	@Autowired
-	private Producer producer;
+	IssueFixRepository issueFixRepository;
 	
 	@Autowired
 	MarriageRegistrationService marriageRegistrationService;
@@ -70,10 +68,8 @@ public class CorruptPdfIssueFixService implements IIssueFixService{
 			throw new CustomException("DSC_DETAILS_ERROR", "Certificate is not signed yet !!");
 		}
 		else {
-			dscDetail.setDocumentId(null);
-			dscDetail.setDocumentType(null);
-			producer.push(config.getUpdateDscDetailsTopic(),
-					new MarriageRegistrationRequest(issueFixRequest.getRequestInfo(), marriageRegistrations));
+			//delete the certificate here
+			issueFixRepository.deleteCertificate(mRApplication.getApplicationNumber());
 		}
 		return issueFixRequest.getIssueFix();
     }
