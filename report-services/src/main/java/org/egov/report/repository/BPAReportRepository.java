@@ -149,7 +149,7 @@ public class BPAReportRepository {
 
 
 	public List<UtilityReportDetails> isReportExist(String reportType) {
-		String query = "SELECT * FROM eg_bpa_utility_reports WHERE reporttype = '" + reportType +"'";
+		String query = "SELECT * FROM eg_bpa_utility_reports WHERE reporttype = '" + reportType +"' ORDER BY lastmodifiedtime DESC;";
 	    log.info("Query for Applications Report search:", query);
 	    
 	    List<UtilityReportDetails> reportDetailsList =  jdbcTemplate.query(query, rowMapper);
