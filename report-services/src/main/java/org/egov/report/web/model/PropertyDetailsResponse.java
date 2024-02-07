@@ -64,7 +64,11 @@ public class PropertyDetailsResponse {
 	@JsonProperty("usageCategory")
 	private String usageCategory;
 
+	@JsonProperty("guardianName")
+	private String guardianName;
 
+	@JsonProperty("guardianRelation")
+	private String guardianRelation;
 
 
 }
