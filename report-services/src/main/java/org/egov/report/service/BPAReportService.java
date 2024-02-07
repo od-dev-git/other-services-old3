@@ -6,7 +6,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -26,7 +25,6 @@ import org.egov.report.util.PaymetsReportExcelGenerator;
 import org.egov.report.validator.BPAReportEnrichAndValidator;
 import org.egov.report.web.model.UtilityReportRequest;
 import org.egov.tracer.model.CustomException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -205,10 +203,9 @@ public class BPAReportService {
 	 * @param searchCriteria
 	 * @return response
 	 */
-	@SuppressWarnings("rawtypes")
 	public Map<String, Object> getUtilityReport(RequestInfo requestInfo, @Valid UtilityReportSearchCriteria searchCriteria) {
 		Map<String, Object> response = new HashMap<>();
-		LinkedHashMap responseMap = null;
+		//LinkedHashMap responseMap = null;
 		List<UtilityReportDetails> reportList = repository.isReportExist(searchCriteria.getReportType());
 		
 		reportEnrichValidator.validateDownloadReport(reportList, response);
@@ -218,8 +215,8 @@ public class BPAReportService {
 			UtilityReportDetails reportDetails = reportList.get(0);
 			response.put("reportsDetails", reportDetails);
 			//fetch file from file store
-			responseMap = (LinkedHashMap) fileStoreService.fetch(reportDetails.getFileStoreId(), reportDetails.getTenantId());
-			response.put("responseMap", new JSONObject(responseMap).toString());
+			//responseMap = (LinkedHashMap) fileStoreService.fetch(reportDetails.getFileStoreId(), reportDetails.getTenantId());
+			//response.put("responseMap", new JSONObject(responseMap).toString());
 		}  else {
 			response.put("Message", "Kindly wait for sometime, Report not generated yet. !!!");
 			throw new CustomException("INVALID_REPORT_FETCH", "Kindly wait for sometime, Report not generated yet. !!!");
