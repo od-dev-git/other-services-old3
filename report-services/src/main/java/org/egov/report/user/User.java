@@ -70,6 +70,9 @@ public class User {
     private Long loggedInUserId;
     private boolean otpValidationMandatory;
     private boolean mobileValidationMandatory = true;
+    
+    private String guardian;
+    private String guardianrelation;
 
     public User addAddressItem(Address addressItem) {
         if (this.addresses == null) {
@@ -178,5 +181,15 @@ public class User {
 
     public void setActive(boolean isActive) {
         active = isActive;
+    }
+    
+    @JsonIgnore
+    public boolean isGuardianNameAbsent() {
+        return isEmpty(guardian);
+    }
+    
+    @JsonIgnore
+    public boolean isGuardianRelationAbsent() {
+        return isEmpty(guardianrelation);
     }
 }

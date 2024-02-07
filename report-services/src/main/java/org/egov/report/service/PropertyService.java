@@ -153,15 +153,23 @@ public class PropertyService {
 		Map<String, PropertyDetailsResponse> propertyResponseDetail = new HashMap<>();
 		propertyDetailResponse.stream().forEach(propertyDetail -> {
 			org.egov.report.user.User user = userMap.get(propertyDetail.getUuid());
-
+        log.info("Adiing Use Details for : " + propertyDetail.getPropertyId());
 			if (user != null) {
 				if (propertyResponseDetail.get(propertyDetail.getPropertyId()) != null) {
 					PropertyDetailsResponse propertyUser = propertyResponseDetail.get(propertyDetail.getPropertyId());
 					propertyUser.setMobileNumber(propertyUser.getMobileNumber() + " , " + user.getMobileNumber());
 					propertyUser.setName(propertyUser.getName() + " , " + user.getName());
+					propertyUser.setGuardianName(propertyUser.getGuardianName() + " , " + user.getGuardian());
+					propertyUser.setGuardianRelation(propertyUser.getGuardianRelation() + " , " + user.getGuardianrelation());
 				} else {
 					propertyDetail.setMobileNumber(user.getMobileNumber());
 					propertyDetail.setName(user.getName());
+					if(StringUtils.hasText(user.getGuardian())) {
+						propertyDetail.setGuardianName(user.getGuardian());
+					}
+					if(StringUtils.hasText(user.getGuardian())) {
+						propertyDetail.setGuardianName(user.getGuardian());
+					}
 					propertyResponseDetail.put(propertyDetail.getPropertyId(), propertyDetail);
 				}
 
