@@ -70,7 +70,7 @@ public class USMQueryBuilder {
 	public static String getTopIssueByCategory(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(USM_TOP_ISSUE_CATEGORY);
-		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addWhereClauseForTicket(selectQuery, preparedStatementValues, criteria);
 		addGroupByClause(selectQuery, " name ");
 		return selectQuery.toString();
 	}
