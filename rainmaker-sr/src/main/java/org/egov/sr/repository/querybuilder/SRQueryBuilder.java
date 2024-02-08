@@ -43,6 +43,10 @@ public class SRQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" sr.status IN (:status) ");
 			preparedStatementValues.put("status", searchCriteria.getStatus());
+		} else {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" sr.status IN (:status) ");
+			preparedStatementValues.put("status", "open");
 		}
 		
 		if (!StringUtils.isEmpty(searchCriteria.getAccountId())) {
@@ -65,9 +69,34 @@ public class SRQueryBuilder {
 		
 		selectQuery.append(" order by servicerequestid ");
 		
+		addPaginationWrapper(preparedStatementValues, selectQuery, searchCriteria);
+		
 		return selectQuery.toString();
 	}
-	
+
+	private static void addPaginationWrapper(Map<String, Object> preparedStatementValues, StringBuilder selectQuery,
+			ServiceReqSearchCriteria searchCriteria) {
+
+		if (!StringUtils.isEmpty(searchCriteria.getNoOfRecords())) {
+			selectQuery.append(" limit :limit ");
+			Long limit = searchCriteria.getNoOfRecords();
+			
+			if(limit < 0 || limit > 50) {
+				preparedStatementValues.put("limit", 50);
+			} else {
+				preparedStatementValues.put("limit", searchCriteria.getNoOfRecords());
+			}
+			
+		}
+		
+		if (!StringUtils.isEmpty(searchCriteria.getOffset())) {
+			selectQuery.append(" offset :offset ");
+			preparedStatementValues.put("offset", searchCriteria.getOffset());
+		}
+
+	}
+
+
 	private static void addClauseIfRequired(Map<String, Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
 			queryString.append(" WHERE ");
