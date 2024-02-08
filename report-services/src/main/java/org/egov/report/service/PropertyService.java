@@ -167,8 +167,8 @@ public class PropertyService {
 					if(StringUtils.hasText(user.getGuardian())) {
 						propertyDetail.setGuardianName(user.getGuardian());
 					}
-					if(StringUtils.hasText(user.getGuardian())) {
-						propertyDetail.setGuardianName(user.getGuardian());
+					if(StringUtils.hasText(user.getGuardianrelation())) {
+						propertyDetail.setGuardianRelation(user.getGuardianrelation());
 					}
 					propertyResponseDetail.put(propertyDetail.getPropertyId(), propertyDetail);
 				}
