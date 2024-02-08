@@ -40,7 +40,42 @@
 
 package org.egov.usm.web.model.user;
 
+import org.apache.commons.lang3.ObjectUtils;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Gender {
     //This order should not be interrupted
-    FEMALE, MALE, OTHERS;
+    FEMALE("FEMALE"), MALE("MALE"), OTHERS("OTHERS");
+	
+	private String value;
+
+	Gender(String value) {
+		this.value = value;
+	}
+
+	@Override
+	@JsonValue
+	public String toString() {
+		return name();
+	}
+
+	@JsonCreator
+	public static Gender fromValue(String passedValue) {
+		if(ObjectUtils.isEmpty(passedValue)) {
+			return null;
+		}
+		if (passedValue.toUpperCase().equals("M"))
+			return Gender.MALE;
+		else if (passedValue.toUpperCase().equals("F"))
+			return Gender.FEMALE;
+		else if (passedValue.toUpperCase().equals("O"))
+			return Gender.OTHERS;
+		for (Gender obj : Gender.values())
+			if (String.valueOf(obj.value).equals(passedValue.toUpperCase()))
+				return obj;
+
+		return null;
+	}
 }
