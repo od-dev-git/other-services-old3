@@ -13,6 +13,7 @@ import org.egov.usm.utility.Constants;
 import org.egov.usm.web.model.SDAMember;
 import org.egov.usm.web.model.user.Citizen;
 import org.egov.usm.web.model.user.CreateUserRequest;
+import org.egov.usm.web.model.user.Gender;
 import org.egov.usm.web.model.user.UserResponse;
 import org.egov.usm.web.model.user.UserSearchRequest;
 import org.egov.usm.web.model.user.UserType;
@@ -78,6 +79,7 @@ public class UserService {
 			citizen.setName(Constants.SDA_MEMBER);
 		}
 		citizen.setUserName(sdaMember.getMobileNumber());
+		citizen.setGender(Gender.fromValue(sdaMember.getGender()));
 		citizen.setActive(true);
 		citizen.setMobileNumber(sdaMember.getMobileNumber());
 		citizen.setTenantId(getRootTenantId(sdaMember.getTenant()));

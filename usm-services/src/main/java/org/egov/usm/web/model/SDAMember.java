@@ -23,6 +23,9 @@ public class SDAMember {
 	
 	@JsonProperty("mobileNumber")
 	private String mobileNumber;
+	
+	@JsonProperty("gender")
+	private String gender;
 
 	@JsonProperty("userId")
 	private String userId;
