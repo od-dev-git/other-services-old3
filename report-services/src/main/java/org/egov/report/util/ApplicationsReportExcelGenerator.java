@@ -87,7 +87,7 @@ public class ApplicationsReportExcelGenerator {
         } else if (valueOfCell instanceof BigDecimal) {
             cell.setCellValue(String.valueOf(valueOfCell));
         } else {
-            cell.setCellValue((Boolean) valueOfCell);
+            cell.setCellValue(Boolean.valueOf(String.valueOf(valueOfCell)));
         }
         cell.setCellStyle(style);
     }
