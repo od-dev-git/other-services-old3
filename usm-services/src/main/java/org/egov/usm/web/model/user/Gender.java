@@ -47,7 +47,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Gender {
     //This order should not be interrupted
-    FEMALE("FEMALE"), MALE("MALE"), OTHERS("OTHERS");
+    FEMALE("FEMALE"), MALE("MALE"), OTHERS("OTHERS"), TRANSGENDER("TRANSGENDER");
 	
 	private String value;
 
@@ -72,6 +72,8 @@ public enum Gender {
 			return Gender.FEMALE;
 		else if (passedValue.toUpperCase().equals("O"))
 			return Gender.OTHERS;
+		else if (passedValue.toUpperCase().equals("T"))
+			return Gender.TRANSGENDER;
 		for (Gender obj : Gender.values())
 			if (String.valueOf(obj.value).equals(passedValue.toUpperCase()))
 				return obj;
