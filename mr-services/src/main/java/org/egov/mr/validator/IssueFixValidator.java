@@ -1,9 +1,12 @@
 package org.egov.mr.validator;
 
+import java.util.List;
+
 import org.egov.mr.web.models.issuefix.IssueFix;
 import org.egov.tracer.model.CustomException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Component
@@ -25,6 +28,13 @@ public class IssueFixValidator {
 			throw new CustomException("INVALID_REQUEST",
 					"Application Number or Mr Number Number can not be empty, Kindly provide any one to proceed !!");
 		}
+	}
+	
+	public void validateDscDuplicateIssueFix(List<String> dscList ){
+
+	    if(CollectionUtils.isEmpty(dscList)){
+	        throw new CustomException("INVALID_DATA","DSC details is empty for the given MR Application.");
+	    }
 	}
 
 }
