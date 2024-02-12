@@ -95,6 +95,7 @@ public class SDAMemberService {
 	 * @return List<SDAMember>
 	 */
 	public List<SDAMember> searchMembers(@Valid MemberSearchCriteria searchCriteria) {
+		searchCriteria.setIsActive(Boolean.TRUE);
 		return repository.searchSDAMembers(searchCriteria);
 	}
 }

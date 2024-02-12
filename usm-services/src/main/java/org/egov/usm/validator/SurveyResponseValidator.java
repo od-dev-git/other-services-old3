@@ -193,6 +193,7 @@ public class SurveyResponseValidator {
 													.tenantId(tenantId)
 													.ward(ward)
 													.slumCode(slumCode)
+													.isActive(Boolean.TRUE)
 													.build();
 		List<SDAMember> sdaMembers = sdaMemberRepository.searchSDAMembers(searchCriteria);
 		
