@@ -21,6 +21,13 @@ public class SRQueryBuilder {
 
 	private static String addWhereClause(StringBuilder selectQuery, Map<String, Object> preparedStatementValues,
 			ServiceReqSearchCriteria searchCriteria) {
+		
+		if (!checkIfSearchBasedOnParams(searchCriteria)) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" sr.status NOT IN (:status) ");
+			preparedStatementValues.put("status", "closed");
+		}
+		
 		if (!StringUtils.isEmpty(searchCriteria.getTenantId())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" sr.tenantid IN ( :tenantId )");
@@ -43,11 +50,7 @@ public class SRQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" sr.status IN (:status) ");
 			preparedStatementValues.put("status", searchCriteria.getStatus());
-		} else {
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" sr.status IN (:status) ");
-			preparedStatementValues.put("status", "open");
-		}
+		} 
 		
 		if (!StringUtils.isEmpty(searchCriteria.getAccountId())) {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
@@ -73,6 +76,17 @@ public class SRQueryBuilder {
 		
 		return selectQuery.toString();
 	}
+
+	private static boolean checkIfSearchBasedOnParams(ServiceReqSearchCriteria searchCriteria) {
+		
+		if(StringUtils.isEmpty(searchCriteria.getStatus()) && StringUtils.isEmpty(searchCriteria.getServiceRequestId())
+				&& StringUtils.isEmpty(searchCriteria.getCity()) && StringUtils.isEmpty(searchCriteria.getPhone())
+				&& StringUtils.isEmpty(searchCriteria.getService())) {
+			return false;
+		}	
+		return true;
+	}
+
 
 	private static void addPaginationWrapper(Map<String, Object> preparedStatementValues, StringBuilder selectQuery,
 			ServiceReqSearchCriteria searchCriteria) {
