@@ -6,9 +6,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.mr.config.MRConfiguration;
 import org.egov.mr.repository.ServiceRequestRepository;
 import org.egov.mr.web.models.RequestInfoWrapper;
-import org.egov.mr.web.models.workflow.BusinessService;
-import org.egov.mr.web.models.workflow.BusinessServiceResponse;
-import org.egov.mr.web.models.workflow.State;
+import org.egov.mr.web.models.workflow.*;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,6 +80,35 @@ public class WorkflowService {
                return state.getIsStateUpdatable();
        }
        return null;
+    }
+
+    public List<ProcessInstance> getProcessInstanceForIssueFix(RequestInfo requestInfo, String applicationNo,
+                                                               String tenantId, String businessServiceValue, Boolean history) {
+        StringBuilder url = getProcessInstanceSearchURLIssueFix(tenantId, applicationNo, businessServiceValue,history);
+        RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
+        Object result = serviceRequestRepository.fetchResult(url, requestInfoWrapper);
+        ProcessInstanceResponse response = null;
+        try {
+            response = mapper.convertValue(result, ProcessInstanceResponse.class);
+        } catch (IllegalArgumentException e) {
+            throw new CustomException("PARSING ERROR", "Failed to parse response of process instance");
+        }
+        return response.getProcessInstances();
+    }
+
+    private StringBuilder getProcessInstanceSearchURLIssueFix(String tenantId, String applicationNo, String businessServiceValue, Boolean history) {
+        StringBuilder url = new StringBuilder(config.getWfHost());
+        url.append(config.getWfProcessSearchPath());
+        url.append("?tenantId=");
+        url.append(tenantId);
+        url.append("&businessservices=");
+        url.append(businessServiceValue);
+        url.append("&businessIds=");
+        url.append(applicationNo);
+        url.append("&history=");
+        url.append(history);
+        return url;
+
     }
 
 

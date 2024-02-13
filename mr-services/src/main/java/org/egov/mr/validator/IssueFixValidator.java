@@ -2,7 +2,9 @@ package org.egov.mr.validator;
 
 import java.util.List;
 
+import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.issuefix.IssueFix;
+import org.egov.mr.web.models.workflow.ProcessInstance;
 import org.egov.tracer.model.CustomException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -37,4 +39,23 @@ public class IssueFixValidator {
 	    }
 	}
 
+	public void validateMarriageRegistrationApplicationStatusMismatch(List<MarriageRegistration> marriageRegistrations) {
+		if(CollectionUtils.isEmpty(marriageRegistrations)){
+			throw new CustomException("INVALID_INPUT","No Water connection Data was Found ");
+		}
+		if(marriageRegistrations.size()>=2){
+			throw new CustomException("INVALID_DATA","Multiple Water Connection applications were found");
+		}
+	}
+
+	public void validateProcessInstanceApplicationStatusMismatch(MarriageRegistration marriageRegistration, List<ProcessInstance> processInstance) {
+
+		if(CollectionUtils.isEmpty(processInstance)){
+			throw new CustomException("INVALID_DATA","No Data was found in Process Instances");
+		}
+		ProcessInstance currentProcessInstance = processInstance.get(0);
+		if(currentProcessInstance.getState().getApplicationStatus().equalsIgnoreCase(marriageRegistration.getStatus())){
+			throw new CustomException("INVALID_INPUT","The Application data is having no mismatch");
+		}
+	}
 }

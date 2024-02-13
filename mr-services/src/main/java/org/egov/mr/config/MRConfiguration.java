@@ -147,7 +147,9 @@ public class MRConfiguration {
     @Value("${workflow.businessservice.search.path}")
     private String wfBusinessServiceSearchPath;
 
-    
+    @Value("${workflow.process.search.path}")
+    private String wfProcessSearchPath;
+
     //Allowed Search Parameters
     @Value("${citizen.allowed.search.params}")
     private String allowedCitizenSearchParameters;

@@ -69,4 +69,20 @@ public class IssueFixRepository {
 		});
 	}
 
+	public void updateApplicationStatusMismatch(List<String> id){
+		List<Object> preparedStatementList = new ArrayList<>();
+		String applicationStatusMismatchIssueQuery= issueFixQueryBuilder.getApplicationStatusMismatchIssueQuery(id,preparedStatementList);
+
+		jdbcTemplate.update(applicationStatusMismatchIssueQuery, preparedStatement -> {
+			try {
+				for(int i=0;i<id.size();i++) {
+					preparedStatement.setString(i+1, id.get(i));
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+	}
+
 }
