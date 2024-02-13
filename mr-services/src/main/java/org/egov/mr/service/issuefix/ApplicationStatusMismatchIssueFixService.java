@@ -14,6 +14,7 @@ import org.egov.mr.workflow.WorkflowService;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -22,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
+@Service("applicationStatusMismatchIssueFix")
 public class ApplicationStatusMismatchIssueFixService implements IIssueFixService{
 
     @Autowired
