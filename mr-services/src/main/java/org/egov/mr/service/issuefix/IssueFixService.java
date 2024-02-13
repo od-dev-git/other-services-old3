@@ -21,6 +21,10 @@ public class IssueFixService {
     private IIssueFixService duplicateDscIssueFixService;
 
     @Autowired
+    @Qualifier("applicationStatusMismatchIssueFix")
+    private IIssueFixService applicationStatusMismatchIssueFix;
+
+    @Autowired
     private IssueFixValidator validator;
 
     public IssueFix issueFix(IssueFixRequest issueFixRequest, HttpHeaders headers) {
@@ -35,6 +39,9 @@ public class IssueFixService {
 
             case "DUPLICATE_DSC_ISSUE":
                 return duplicateDscIssueFixService.issueFix(issueFixRequest, headers);
+
+            case "APPLICATION_STATUS_MISMATCH_ISSUE":
+                return applicationStatusMismatchIssueFix.issueFix(issueFixRequest,headers);
 
             default:
                 throw new CustomException("UNKNOWN_ISSUE", "The issue is unknown to the system !!");

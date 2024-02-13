@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.egov.mr.web.models.issuefix.IssueFix;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class IssueFixQueryBuilder {
@@ -22,6 +23,9 @@ public class IssueFixQueryBuilder {
 			+ "(SELECT id FROM CTE where DuplicateCount = 1)";
 
 	private static final String DSC_SEARCH = "select id from eg_mr_dscdetails emd ";
+
+	public static final String DELETE_PROCESS_INSTANCE_RECORD ="delete from public.eg_wf_processinstance_v2 ";
+
 
 	public String searchDscQuery() {
 		return DELETE_DUPLICATE_DSC;
@@ -50,7 +54,33 @@ public class IssueFixQueryBuilder {
 			queryString.append(" AND");
 		}
 	}
-	
-	
+
+	public String getApplicationStatusMismatchIssueQuery(List<String> idList,List<Object> preparedStatementList){
+
+		StringBuilder deleteQuery = new StringBuilder(DELETE_PROCESS_INSTANCE_RECORD);
+
+		if(!CollectionUtils.isEmpty(idList)){
+			addClauseIfRequired(preparedStatementList,deleteQuery);
+			deleteQuery.append("id in (").append(createQuery(idList)).append(")");
+			preparedStatementList.add(idList);
+		}
+
+
+		return deleteQuery.toString();
+	}
+
+
+	private String createQuery(List<String> ids) {
+		StringBuilder builder = new StringBuilder();
+		int length = ids.size();
+		for (int i = 0; i < length; i++) {
+			builder.append(" ?");
+			if (i != length - 1)
+				builder.append(",");
+		}
+		return builder.toString();
+	}
+
+
 
 }
