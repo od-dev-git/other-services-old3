@@ -56,11 +56,11 @@ public class BPAReportRepository {
 		}
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getFromDate())) {
-			query.append(" and to_timestamp(ebb.createdtime / 1000) :: date at time zone 'Asia/Kolkata' = to_timestamp(" + searchCriteria.getFromDate() + "/ 1000) :: date at time zone 'Asia/Kolkata'");
+			query.append(" and to_timestamp(ebb.createdtime / 1000) :: date at time zone 'Asia/Kolkata' >= to_timestamp(" + searchCriteria.getFromDate() + "/ 1000) :: date at time zone 'Asia/Kolkata'");
 		}
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getToDate())) {
-			query.append(" and to_timestamp(ebb.createdtime / 1000) :: date at time zone 'Asia/Kolkata' = to_timestamp(" + searchCriteria.getToDate() + " / 1000) :: date at time zone 'Asia/Kolkata'");
+			query.append(" and to_timestamp(ebb.createdtime / 1000) :: date at time zone 'Asia/Kolkata' < to_timestamp(" + searchCriteria.getToDate() + " / 1000) :: date at time zone 'Asia/Kolkata'");
 		}
 	    log.info("Query for Payment Report search: " + query);
 	    
@@ -131,11 +131,11 @@ public class BPAReportRepository {
 		}
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getFromDate())) {
-			query.append(" and to_timestamp(ebb.createdtime / 1000) :: date at time zone 'Asia/Kolkata' = to_timestamp(" + searchCriteria.getFromDate() + "/ 1000) :: date at time zone 'Asia/Kolkata'");
+			query.append(" and to_timestamp(ebb.createdtime / 1000) :: date at time zone 'Asia/Kolkata' >= to_timestamp(" + searchCriteria.getFromDate() + "/ 1000) :: date at time zone 'Asia/Kolkata'");
 		}
 		
 		if (!ObjectUtils.isEmpty(searchCriteria.getToDate())) {
-			query.append(" and to_timestamp(ebb.createdtime / 1000) :: date at time zone 'Asia/Kolkata' = to_timestamp(" + searchCriteria.getToDate() + " / 1000) :: date at time zone 'Asia/Kolkata'");
+			query.append(" and to_timestamp(ebb.createdtime / 1000) :: date at time zone 'Asia/Kolkata' < to_timestamp(" + searchCriteria.getToDate() + " / 1000) :: date at time zone 'Asia/Kolkata'");
 		}
 		log.info("Query for Applications Report search: " + query);
 		
