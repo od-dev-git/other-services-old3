@@ -2,17 +2,31 @@ package org.egov.mr.repository;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.egov.mr.repository.builder.IssueFixQueryBuilder;
+import org.egov.mr.repository.rowmapper.DemandRowMapper;
+import org.egov.mr.repository.rowmapper.PaymentRowMapper;
+import org.egov.mr.repository.rowmapper.ProcessInstanceRowMapper;
+import org.egov.mr.util.IssueFixConstants;
+import org.egov.mr.web.models.MarriageRegistration;
+import org.egov.mr.web.models.collection.DemandSearchCriteria;
+import org.egov.mr.web.models.collection.Payment;
+import org.egov.mr.web.models.collection.PaymentSearchCriteria;
 import org.egov.mr.web.models.issuefix.IssueFix;
+import org.egov.mr.web.models.workflow.ProcessInstance;
+import org.egov.mr.web.models.workflow.WorkFlowSearchCriteria;
+import org.egov.mrcalculator.web.models.demand.Demand;
+import org.egov.mrcalculator.web.models.demand.DemandDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
+
+import javax.validation.constraints.NotNull;
 
 @Slf4j
 @Repository
@@ -23,6 +37,9 @@ public class IssueFixRepository {
 	
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
 	public void deleteCertificate(String applicationNumber) {
 
@@ -84,5 +101,158 @@ public class IssueFixRepository {
 			}
 		});
 	}
+
+	public List<Payment> getPayments(PaymentSearchCriteria paymentSearchCriteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+
+		String queryForPaymentSearch = issueFixQueryBuilder.getPaymentSearchQuery(paymentSearchCriteria,
+				preparedStatementValues);
+
+		List<Payment> payments = namedParameterJdbcTemplate.query(queryForPaymentSearch, preparedStatementValues,
+				new PaymentRowMapper());
+
+		return payments;
+	}
+
+	public List<ProcessInstance> getProcessInstances(WorkFlowSearchCriteria workFlowSearchCriteria) {
+
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+
+		String queryForWFSearch = issueFixQueryBuilder.getProcessInstancesQuery(workFlowSearchCriteria,
+				preparedStatementValues);
+
+		List<ProcessInstance> processInstances = namedParameterJdbcTemplate.query(queryForWFSearch, preparedStatementValues,
+				new ProcessInstanceRowMapper());
+
+		return processInstances;
+	}
+
+
+	public List<Demand> getDemands(DemandSearchCriteria demandSearchCriteria) {
+
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+
+		String queryForDemandSearch = issueFixQueryBuilder.getDemandSearchQuery(demandSearchCriteria,
+				preparedStatementValues);
+
+		List<Demand> demands = namedParameterJdbcTemplate.query(queryForDemandSearch, preparedStatementValues,
+				new DemandRowMapper());
+
+		return demands;
+	}
+
+
+	public void updateDemandDetail(DemandDetail demandDetail) {
+
+		String updateDemandDetailQuery = issueFixQueryBuilder.getDemandDetailUpdateQuery();
+
+		jdbcTemplate.update(updateDemandDetailQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) {
+				try {
+					ps.setString(1, demandDetail.getId());
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+
+	public void updateDemand(Demand demandToBeUpdated) {
+
+		String updateDemandQuery = issueFixQueryBuilder.getDemandUpdateQuery();
+
+		jdbcTemplate.update(updateDemandQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) {
+				try {
+					ps.setString(1, demandToBeUpdated.getConsumerCode());
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+
+	public void expireBill(@NotNull String consumerCode) {
+
+		String billExpireQuery = issueFixQueryBuilder.getBillExpireQuery();
+
+		jdbcTemplate.update(billExpireQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) {
+				try {
+					ps.setString(1, consumerCode);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+
+	public void updateApplication(MarriageRegistration applicationToBeUpdated, Payment payment) {
+
+		String updateApplicationQuery = issueFixQueryBuilder.getApplicationUpdateQuery();
+
+		jdbcTemplate.update(updateApplicationQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) {
+				try {
+					ps.setString(1, IssueFixConstants.STATUS_PAY_PENDING_SCHEDULE);
+					ps.setLong(2, payment.getAuditDetails().getCreatedTime());
+					ps.setString(3, applicationToBeUpdated.getApplicationNumber());
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+
+	public void updateWorkflow(ProcessInstance processInstance, Payment payment) {
+		String insertWorkFlowQuery = issueFixQueryBuilder.getInsertWorkflowQuery();
+
+		String businessService = processInstance.getBusinessService();
+
+		jdbcTemplate.update(insertWorkFlowQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) {
+				try {
+					ps.setString(1, UUID.randomUUID().toString());
+					ps.setString(2, processInstance.getTenantId());
+					ps.setString(3, businessService);
+					ps.setString(4, processInstance.getBusinessId());
+					if(businessService.equalsIgnoreCase(IssueFixConstants.businessService_MR)) {
+						ps.setString(5, IssueFixConstants.businessService_MR);
+					}else if (businessService.equalsIgnoreCase(IssueFixConstants.businessService_MR_CORRECTION)) {
+						ps.setString(5, IssueFixConstants.businessService_MR_CORRECTION);
+					}
+					ps.setString(6, payment.getPayerId());
+					ps.setString(7, payment.getPayerId());
+					ps.setString(8, payment.getPayerId());
+					ps.setLong(9, payment.getAuditDetails().getCreatedTime());
+					ps.setLong(10, payment.getAuditDetails().getCreatedTime());
+
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+
 
 }
