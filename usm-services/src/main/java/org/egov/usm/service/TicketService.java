@@ -155,20 +155,22 @@ public class TicketService {
 				.map(ticket -> ticket.getAuditDetails().getCreatedBy())
 				.distinct()
 				.collect(Collectors.toList());
-		List<Citizen> citizens = userService.getUserByUuid(sdaUuidList, requestInfo);
-
-		//Set SDA info in to ticket details
-		if(!CollectionUtils.isEmpty(citizens)) {
-			surveyTickets.stream()
-			.forEach(ticket -> {citizens.stream()
-		        .filter(citizen -> citizen.getUuid().equals(ticket.getAuditDetails().getCreatedBy()))
-		        .forEach(citizen -> {
-		        	ticket.setSdaName(citizen.getName());
-		        	ticket.setSdaMobileNo(citizen.getMobileNumber());
-		        });
-		    });
-		} 
 		
+		if(!CollectionUtils.isEmpty(sdaUuidList)) {
+			List<Citizen> citizens = userService.getUserByUuid(sdaUuidList, requestInfo);
+	
+			//Set SDA info in to ticket details
+			if(!CollectionUtils.isEmpty(citizens)) {
+				surveyTickets.stream()
+				.forEach(ticket -> {citizens.stream()
+			        .filter(citizen -> citizen.getUuid().equals(ticket.getAuditDetails().getCreatedBy()))
+			        .forEach(citizen -> {
+			        	ticket.setSdaName(citizen.getName());
+			        	ticket.setSdaMobileNo(citizen.getMobileNumber());
+			        });
+			    });
+			} 
+		}
 		return surveyTickets;
 	}
 
