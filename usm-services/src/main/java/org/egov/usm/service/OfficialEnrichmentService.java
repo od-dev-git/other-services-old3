@@ -28,7 +28,7 @@ public class OfficialEnrichmentService {
 		usmOfficialRequest.getUsmOffcial().setAssigned(usmOfficialRequest.getUsmOffcial().getAssigned());
 		usmOfficialRequest.getUsmOffcial().setTenant(usmOfficialRequest.getUsmOffcial().getTenant());
 		usmOfficialRequest.getUsmOffcial().setSlumcode(usmOfficialRequest.getUsmOffcial().getSlumcode());
-		usmOfficialRequest.getUsmOffcial().setCategory(usmOfficialRequest.getUsmOffcial().getCategory());
+		usmOfficialRequest.getUsmOffcial().setCategory(usmOfficialRequest.getUsmOffcial().getCategory().toUpperCase());
 		usmOfficialRequest.getUsmOffcial().setRole(usmOfficialRequest.getUsmOffcial().getRole());
 		usmOfficialRequest.getUsmOffcial().setAuditDetails(auditDetails);
 	}
@@ -57,7 +57,7 @@ public class OfficialEnrichmentService {
 		usmOfficialRequest.getUsmOffcial().setAssigned(usmOfficialRequest.getUsmOffcial().getAssigned());
 		usmOfficialRequest.getUsmOffcial().setTenant(existingOfficial.getTenant());
 		usmOfficialRequest.getUsmOffcial().setSlumcode(existingOfficial.getSlumcode());
-		usmOfficialRequest.getUsmOffcial().setCategory(existingOfficial.getCategory());
+		usmOfficialRequest.getUsmOffcial().setCategory(existingOfficial.getCategory().toUpperCase());
 		usmOfficialRequest.getUsmOffcial().setWard(existingOfficial.getWard());
 		usmOfficialRequest.getUsmOffcial().setRole(existingOfficial.getRole());
 		usmOfficialRequest.getUsmOffcial().setAuditDetails(auditDetails);
