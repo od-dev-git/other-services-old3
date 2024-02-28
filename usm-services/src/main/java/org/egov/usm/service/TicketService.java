@@ -22,6 +22,7 @@ import org.egov.usm.web.model.SurveyTicket;
 import org.egov.usm.web.model.SurveyTicketListRequest;
 import org.egov.usm.web.model.SurveyTicketRequest;
 import org.egov.usm.web.model.TicketSearchCriteria;
+import org.egov.usm.web.model.user.Citizen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -41,6 +42,9 @@ public class TicketService {
 
 	@Autowired
 	private SurveyTicketRequestValidator surveyTicketRequestValidator;
+	
+	@Autowired
+	private UserService userService;
 
 	/**
 	 * Service layer for create Ticket
@@ -135,14 +139,36 @@ public class TicketService {
 
 	/**
 	 * return List<SurveyTicket> based on search criteria
+	 * @param requestInfo 
 	 * 
 	 * @param searchCriteria
 	 * @return List<SurveyTicket>
 	 */
-	public List<SurveyTicket> searchTicket(TicketSearchCriteria searchCriteria) {
+	public List<SurveyTicket> searchTicket(RequestInfo requestInfo, TicketSearchCriteria searchCriteria) {
 
 		log.info("search: " + searchCriteria.toString());
 		List<SurveyTicket> surveyTickets = repository.getSurveyTicketRequests(searchCriteria);
+		
+		// fetch SDA member information 
+		List<String> sdaUuidList =  surveyTickets.stream()
+				.filter(ticket -> !ObjectUtils.isEmpty(ticket.getAuditDetails().getCreatedBy()))
+				.map(ticket -> ticket.getAuditDetails().getCreatedBy())
+				.distinct()
+				.collect(Collectors.toList());
+		List<Citizen> citizens = userService.getUserByUuid(sdaUuidList, requestInfo);
+
+		//Set SDA info in to ticket details
+		if(!CollectionUtils.isEmpty(citizens)) {
+			surveyTickets.stream()
+			.forEach(ticket -> {citizens.stream()
+		        .filter(citizen -> citizen.getUuid().equals(ticket.getAuditDetails().getCreatedBy()))
+		        .forEach(citizen -> {
+		        	ticket.setSdaName(citizen.getName());
+		        	ticket.setSdaMobileNo(citizen.getMobileNumber());
+		        });
+		    });
+		} 
+		
 		return surveyTickets;
 	}
 

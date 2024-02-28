@@ -71,7 +71,7 @@ public class SurveyTicketController {
 	@PostMapping("/_search")
 	public ResponseEntity<SurveyTicketResponse> search(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
 			@Valid @ModelAttribute TicketSearchCriteria searchCriteria) {
-		List<SurveyTicket> tickets = ticketService.searchTicket(searchCriteria);
+		List<SurveyTicket> tickets = ticketService.searchTicket(requestInfoWrapper.getRequestInfo(), searchCriteria);
 		SurveyTicketResponse response = SurveyTicketResponse.builder().tickets(tickets).responseInfo(
 				responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
 				.build();
