@@ -14,7 +14,7 @@ public class USMQueryBuilder {
 	public static final String USM_TOTAL_ISSUE = "select count(*) from eg_usm_survey_submitted  submit, eg_usm_survey_submitted_answer answer, "
 			+ "eg_usm_survey_ticket  ticket where submit.id = answer.surveysubmittedid and answer.id = ticket.surveyanswerid";
 
-	public static final String USM_TOTAL_SLUM_SUBMITED_FEEDBACK = "select count(distinct slumcode ) from eg_usm_survey_submitted submit";
+	public static final String USM_TOTAL_SLUM_SUBMITED_FEEDBACK = "select count(distinct (tenantid ,slumcode))from eg_usm_survey_submitted submit";
 	public static final String USM_TOP_ISSUE_CATEGORY = "select answer.questioncategory as name, count(ticket.id) as value from eg_usm_survey_submitted_answer answer inner join eg_usm_survey_ticket ticket   on answer.id = ticket.surveyanswerid";
 	public static final String USM_TOTAL_FEEDBACK = "SELECT submit.tenantid as tenantid, COUNT(*) as totalamt FROM eg_usm_survey_submitted submit ";
 
