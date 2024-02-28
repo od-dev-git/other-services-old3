@@ -76,6 +76,12 @@ public class SurveyTicket {
 
 	@JsonProperty("surveyTicketComments")
 	private List<SurveyTicketComment> surveyTicketComments;
+	
+	@JsonProperty("sdaName")
+	private String sdaName;
+	
+	@JsonProperty("sdaMobileNo")
+	private String sdaMobileNo;
 
 	public SurveyTicket addTicketComment(SurveyTicketComment surveyTicketComment) {
 		if (this.surveyTicketComments == null) {
