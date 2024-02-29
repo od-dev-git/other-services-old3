@@ -142,6 +142,27 @@ public class USMRepository {
 		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
 	}
 
+	public HashMap<String, BigDecimal> getTenantWiseUnattendedTicket(UsmSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalUnattendedTicketByTenantWise(criteria, preparedStatementValues);
+		log.info("query for Tenant Wise Open ticket: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+
+	public HashMap<String, BigDecimal> getTenantWiseClosedSatisfacotryTicket(UsmSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalSatisfiedTicketByTenantWise(criteria, preparedStatementValues);
+		log.info("query for Tenant Wise Open ticket: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+
+	public HashMap<String, BigDecimal> getTenantWiseClosedDissatisfacotryTicket(UsmSearchCriteria criteria) {
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+		String query = usmQueryBuilder.getTotalDissatisfiedTicketByTenantWise(criteria, preparedStatementValues);
+		log.info("query for Tenant Wise Open ticket: " + query);
+		return namedParameterJdbcTemplate.query(query, preparedStatementValues, new TenantWiseCollectionRowMapper());
+	}
+
 	public List<Chart> getCategoryWiseCount(UsmSearchCriteria criteria) {
 		Map<String, Object> preparedStatementValues = new HashMap<>();
 		String query = usmQueryBuilder.getCategoryWiseIssueCount(criteria, preparedStatementValues);
