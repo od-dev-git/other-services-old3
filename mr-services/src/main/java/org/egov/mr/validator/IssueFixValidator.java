@@ -2,8 +2,10 @@ package org.egov.mr.validator;
 
 import java.util.List;
 
+import org.egov.mr.util.MRConstants;
 import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.issuefix.IssueFix;
+import org.egov.mr.web.models.issuefix.IssueFixRequest;
 import org.egov.mr.web.models.workflow.ProcessInstance;
 import org.egov.tracer.model.CustomException;
 import org.springframework.http.HttpHeaders;
@@ -41,10 +43,10 @@ public class IssueFixValidator {
 
 	public void validateMarriageRegistrationApplicationStatusMismatch(List<MarriageRegistration> marriageRegistrations) {
 		if(CollectionUtils.isEmpty(marriageRegistrations)){
-			throw new CustomException("INVALID_INPUT","No Water connection Data was Found ");
+			throw new CustomException("INVALID_INPUT","No MR Data was Found ");
 		}
 		if(marriageRegistrations.size()>=2){
-			throw new CustomException("INVALID_DATA","Multiple Water Connection applications were found");
+			throw new CustomException("INVALID_DATA","Multiple MR applications were found");
 		}
 	}
 
@@ -57,5 +59,22 @@ public class IssueFixValidator {
 		if(currentProcessInstance.getState().getApplicationStatus().equalsIgnoreCase(marriageRegistration.getStatus())){
 			throw new CustomException("INVALID_INPUT","The Application data is having no mismatch");
 		}
+	}
+
+	public void validateIssueFixRequestForPaymentIssue(IssueFixRequest issueFixRequest) {
+		if(org.apache.commons.lang.StringUtils.isEmpty(issueFixRequest.getIssueFix().getApplicationNo()) ){
+			throw new CustomException("INVALID_DATA","Application Number passed can't be empty");
+		}
+	}
+
+	public void validateIssueFixForApplicationFeePayment(List<MarriageRegistration> marriageRegistrationList) {
+		// TODO Auto-generated method stub
+		if(marriageRegistrationList.size()==0)
+			throw new CustomException("INVALID_DATA","No TL Applications were found for the given criteria.");
+
+		if(marriageRegistrationList.size()>=2)
+			throw new CustomException("INVALID_DATA","Multiple TL Applications were found for the given criteria.");
+
+
 	}
 }
