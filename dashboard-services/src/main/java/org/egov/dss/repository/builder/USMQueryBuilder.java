@@ -109,9 +109,41 @@ public class USMQueryBuilder {
 	}
 
 	public String getTotalIssueTenantWise(UsmSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
-		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_ISSUE_TENANTWISE);
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_ISSUE);
 		addWhereClauseForTicket(selectQuery, preparedStatementValues, criteria);
 		addGroupByClause(selectQuery, "ticket.tenantid");
+		return selectQuery.toString();
+	}
+
+	public String getTotalUnattendedTicketByTenantWise(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where ticket.unattended = true ");
+		preparedStatementValues.put("unattended", true);
+		addWhereClauseForTicket(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid");
+		return selectQuery.toString();
+	}
+
+	public String getTotalSatisfiedTicketByTenantWise(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where ticket.status = 'CLOSED' and ticket.issatisfied  = true");
+		preparedStatementValues.put("status", "'CLOSED'");
+		preparedStatementValues.put("issatisfied", true);
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+
+	public String getTotalDissatisfiedTicketByTenantWise(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
+		selectQuery.append(" where ticket.status = 'CLOSED' and ticket.issatisfied  = false");
+		preparedStatementValues.put("status", "'CLOSED'");
+		preparedStatementValues.put("issatisfied", false);
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
 		return selectQuery.toString();
 	}
 
@@ -134,7 +166,9 @@ public class USMQueryBuilder {
 
 	public static String getTotalUnattendedIssue(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
-		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_UNATTENDED_ISSUE);
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_ISSUE);
+		selectQuery.append(" AND ticket.status = :status");
+		preparedStatementValues.put("status", "OPEN");
 		return addWhereClauseForTicket(selectQuery, preparedStatementValues, criteria);
 	}
 
@@ -186,9 +220,9 @@ public class USMQueryBuilder {
 	public static String getTotalNoOfUnattendedWaterIssue(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
-		selectQuery.append(" where answer.questioncategory = 'WATER' and ticket.unattended  = true");
+		selectQuery.append(" where answer.questioncategory = 'WATER' and ticket.status  = 'OPEN'");
 		preparedStatementValues.put("questioncategory", "'WATER'");
-		preparedStatementValues.put("unattended", true);
+		preparedStatementValues.put("status", "'OPEN'");
 		addWhereClause(selectQuery, preparedStatementValues, criteria);
 		addGroupByClause(selectQuery, "submit.tenantid ");
 		return selectQuery.toString();
@@ -253,9 +287,9 @@ public class USMQueryBuilder {
 	public static String getTotalNoOfUnattendedstreetlightIssue(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
-		selectQuery.append(" where answer.questioncategory = 'STREETLIGHT' and ticket.unattended  = true");
+		selectQuery.append(" where answer.questioncategory = 'STREETLIGHT' and ticket.status  = 'OPEN'");
 		preparedStatementValues.put("questioncategory", "'STREETLIGHT'");
-		preparedStatementValues.put("unattended", true);
+		preparedStatementValues.put("status", "'OPEN'");
 		addWhereClause(selectQuery, preparedStatementValues, criteria);
 		addGroupByClause(selectQuery, "submit.tenantid ");
 		return selectQuery.toString();
@@ -319,9 +353,9 @@ public class USMQueryBuilder {
 	public static String getTotalNoOfUnattendedSanitationIssue(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
 		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_FEEDBACK_SUBMITTED_CATEGORYWISE);
-		selectQuery.append(" where answer.questioncategory = 'SANITATION' and ticket.unattended = true");
+		selectQuery.append(" where answer.questioncategory = 'SANITATION' and ticket.status  = 'OPEN' ");
 		preparedStatementValues.put("questioncategory", "'SANITATION'");
-		preparedStatementValues.put("unattended", true);
+		preparedStatementValues.put("status", "'OPEN'");
 		addWhereClause(selectQuery, preparedStatementValues, criteria);
 		addGroupByClause(selectQuery, "submit.tenantid ");
 		return selectQuery.toString();
