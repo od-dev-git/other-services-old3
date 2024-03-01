@@ -69,6 +69,14 @@ public class Demand   {
     @JsonProperty("billExpiryTime")
     private Long billExpiryTime;
 
+    @Builder.Default
+    @JsonProperty("isPaymentCompleted")
+    private Boolean isPaymentCompleted = false;
+
+    @JsonProperty("fixedBillExpiryDate")
+    private Long fixedBillExpiryDate;
+
+
     /**
      * Gets or Sets status
      */

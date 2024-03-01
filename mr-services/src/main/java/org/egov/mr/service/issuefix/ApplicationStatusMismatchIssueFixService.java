@@ -44,7 +44,7 @@ public class ApplicationStatusMismatchIssueFixService implements IIssueFixServic
         MarriageRegistrationSearchCriteria searchCriteria = getSearchCriteria(issueFixRequest);
         List<MarriageRegistration> marriageRegistrations = marriageRegistrationService.search(searchCriteria,
                 issueFixRequest.getRequestInfo(), "MR", headers);
-        log.info("@Class: ApplicationStatusMismatchIssueFixService @method:issueFix @message: Water Search Completed");
+        log.info("@Class: ApplicationStatusMismatchIssueFixService @method:issueFix @message: MR Search Completed");
         issueFixValidator.validateMarriageRegistrationApplicationStatusMismatch(marriageRegistrations);
         MarriageRegistration marriageRegistration= marriageRegistrations.get(0);
         List<ProcessInstance> processInstance = workflowService.getProcessInstanceForIssueFix(
@@ -86,18 +86,5 @@ public class ApplicationStatusMismatchIssueFixService implements IIssueFixServic
         }
     }
 
-    private MarriageRegistrationSearchCriteria getSearchCriteria(IssueFixRequest issueFixRequest) {
-        MarriageRegistrationSearchCriteria searchCriteria = MarriageRegistrationSearchCriteria.builder()
-                .tenantId(issueFixRequest.getIssueFix().getTenantId()).build();
 
-        if(!StringUtils.isEmpty(issueFixRequest.getIssueFix().getMrNumber())){
-            searchCriteria.setMrNumbers(Arrays.asList(issueFixRequest.getIssueFix().getMrNumber()));
-        }
-
-        if(!StringUtils.isEmpty(issueFixRequest.getIssueFix().getApplicationNo())){
-            searchCriteria.setApplicationNumber(issueFixRequest.getIssueFix().getApplicationNo());
-        }
-
-        return searchCriteria;
-    }
 }

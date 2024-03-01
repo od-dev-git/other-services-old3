@@ -144,6 +144,12 @@ public class USMService {
 		HashMap<String, BigDecimal> tenantWiseFeedback = usmRepository.getTenantWiseFeedback(criteria);
 		HashMap<String, BigDecimal> tenantWiseClosedIssue = usmRepository.getTenantWiseClosedTicket(criteria);
 		HashMap<String, BigDecimal> tenantWiseOpenIssue = usmRepository.getTenantWiseOpenTicket(criteria);
+		HashMap<String, BigDecimal> tenantWiseUnattendedTicket = usmRepository.getTenantWiseUnattendedTicket(criteria);
+		HashMap<String, BigDecimal> tenantWiseClosedSatisfactory = usmRepository
+				.getTenantWiseClosedSatisfacotryTicket(criteria);
+		HashMap<String, BigDecimal> tenantWiseClosedDissatisfactory = usmRepository
+				.getTenantWiseClosedDissatisfacotryTicket(criteria);
+
 		List<Data> response = new ArrayList<>();
 		int serialNumber = 1;
 
@@ -169,6 +175,22 @@ public class USMService {
 									: tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()))
 							.symbol("number").build());
 
+			plots.add(Plot.builder().name("Total Unattended Issue")
+					.value(tenantWiseUnattendedTicket.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+							: tenantWiseUnattendedTicket.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Satisfactory Feedback")
+					.value(tenantWiseClosedSatisfactory.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+							: tenantWiseClosedSatisfactory.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Dissatisfactory Feedback")
+					.value(tenantWiseClosedDissatisfactory.get(tenantWiseTotalFeedback.getKey()) == null
+							? BigDecimal.ZERO
+							: tenantWiseClosedDissatisfactory.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+
 			response.add(Data.builder().headerName(tenantWiseTotalFeedback.getKey()).plots(plots)
 					.headerValue(serialNumber).headerName(tenantWiseTotalFeedback.getKey()).build());
 
@@ -187,7 +209,15 @@ public class USMService {
 
 			plots.add(Plot.builder().name("Total open issue").value(BigDecimal.ZERO).symbol("number").build());
 
-			plots.add(Plot.builder().name("Total Closed Issu").value(BigDecimal.ZERO).symbol("number").build());
+			plots.add(Plot.builder().name("Total Closed Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Unattended Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(
+					Plot.builder().name("Total Satisfactory Feedback").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Dissatisfactory Feedback").value(BigDecimal.ZERO).symbol("number")
+					.build());
 
 			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
 					.build());
@@ -205,6 +235,12 @@ public class USMService {
 		HashMap<String, BigDecimal> tenantWiseFeedback = usmRepository.getTotalNoWaterFeedbackSubmitted(criteria);
 		HashMap<String, BigDecimal> tenantWiseClosedIssue = usmRepository.getTotalNoClosedIssueForWater(criteria);
 		HashMap<String, BigDecimal> tenantWiseTotalIssue = usmRepository.getTotalIssueForWater(criteria);
+		HashMap<String, BigDecimal> tenantWiseTotalUnattendedIssue = usmRepository
+				.getTotalUnattendedIssueForWater(criteria);
+		HashMap<String, BigDecimal> tenantWiseTotalSatisfactoryIssue = usmRepository
+				.getTotalSatisfactoryIssueForWater(criteria);
+		HashMap<String, BigDecimal> tenantWiseTotalDissatisfactoryIssue = usmRepository
+				.getTotalDissatisfactoryIssueForWater(criteria);
 		List<Data> response = new ArrayList<>();
 		int serialNumber = 1;
 
@@ -230,6 +266,24 @@ public class USMService {
 									: tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()))
 							.symbol("number").build());
 
+			plots.add(Plot.builder().name("Total Unattended Issue")
+					.value(tenantWiseTotalUnattendedIssue.get(tenantWiseTotalFeedback.getKey()) == null
+							? BigDecimal.ZERO
+							: tenantWiseTotalUnattendedIssue.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Satisfactory Feedback")
+					.value(tenantWiseTotalSatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()) == null
+							? BigDecimal.ZERO
+							: tenantWiseTotalSatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Dissatisfactory Feedback")
+					.value(tenantWiseTotalDissatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()) == null
+							? BigDecimal.ZERO
+							: tenantWiseTotalDissatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+
 			response.add(Data.builder().headerName(tenantWiseTotalFeedback.getKey()).plots(plots)
 					.headerValue(serialNumber).headerName(tenantWiseTotalFeedback.getKey()).build());
 
@@ -249,6 +303,14 @@ public class USMService {
 			plots.add(Plot.builder().name("Total open issue").value(BigDecimal.ZERO).symbol("number").build());
 
 			plots.add(Plot.builder().name("Total Closed Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Unattended Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(
+					Plot.builder().name("Total Satisfactory Feedback").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Dissatisfactory Feedback").value(BigDecimal.ZERO).symbol("number")
+					.build());
 
 			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
 					.build());
@@ -266,6 +328,12 @@ public class USMService {
 		HashMap<String, BigDecimal> tenantWiseFeedback = usmRepository.getTotalNoStreetlightFeedbackSubmitted(criteria);
 		HashMap<String, BigDecimal> tenantWiseClosedIssue = usmRepository.getTotalNoClosedIssueForStreetlight(criteria);
 		HashMap<String, BigDecimal> tenantWiseTotalIssue = usmRepository.getTotalIssueForStreetlight(criteria);
+		HashMap<String, BigDecimal> totalUnattendedIssue = usmRepository
+				.getTotalSatisfactoryIssueForStreetlight(criteria);
+		HashMap<String, BigDecimal> totalSatisfactoryIssue = usmRepository
+				.getTotalDissatisfactoryIssueForStreetlight(criteria);
+		HashMap<String, BigDecimal> totalDissatisfactoryIssue = usmRepository
+				.getTotalDissatisfactoryIssueForWater(criteria);
 		List<Data> response = new ArrayList<>();
 		int serialNumber = 1;
 
@@ -290,6 +358,19 @@ public class USMService {
 							.value(tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
 									: tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()))
 							.symbol("number").build());
+			plots.add(
+					Plot.builder().name("Total Unattended Issue")
+							.value(totalUnattendedIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+									: totalUnattendedIssue.get(tenantWiseTotalFeedback.getKey()))
+							.symbol("number").build());
+			plots.add(Plot.builder().name("Total Satisfactory Feedback")
+					.value(totalSatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+							: totalSatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+			plots.add(Plot.builder().name("Total Dissatisfactory Feedback")
+					.value(totalDissatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()) == null ? BigDecimal.ZERO
+							: totalDissatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
 
 			response.add(Data.builder().headerName(tenantWiseTotalFeedback.getKey()).plots(plots)
 					.headerValue(serialNumber).headerName(tenantWiseTotalFeedback.getKey()).build());
@@ -310,6 +391,14 @@ public class USMService {
 			plots.add(Plot.builder().name("Total open issue").value(BigDecimal.ZERO).symbol("number").build());
 
 			plots.add(Plot.builder().name("Total Closed Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Unattended Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(
+					Plot.builder().name("Total Satisfactory Feedback").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Dissatisfactory Feedback").value(BigDecimal.ZERO).symbol("number")
+					.build());
 
 			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
 					.build());
@@ -327,6 +416,12 @@ public class USMService {
 		HashMap<String, BigDecimal> tenantWiseFeedback = usmRepository.getTotalNoSanitationFeedbackSubmitted(criteria);
 		HashMap<String, BigDecimal> tenantWiseClosedIssue = usmRepository.getTotalNoClosedIssueForSanitation(criteria);
 		HashMap<String, BigDecimal> tenantWiseTotalIssue = usmRepository.getTotalIssueForSanitation(criteria);
+		HashMap<String, BigDecimal> tenantWiseTotalUnattendedIssue = usmRepository
+				.getTotalUnattendedIssueForSanitation(criteria);
+		HashMap<String, BigDecimal> tenantWiseTotalSatisfactoryIssue = usmRepository
+				.getTotalSatisfactoryIssueForSanitation(criteria);
+		HashMap<String, BigDecimal> tenantWiseTotalDissatisfactoryIssue = usmRepository
+				.getTotalDissatisfactoryIssueForSanitation(criteria);
 		List<Data> response = new ArrayList<>();
 		int serialNumber = 1;
 
@@ -352,6 +447,24 @@ public class USMService {
 									: tenantWiseClosedIssue.get(tenantWiseTotalFeedback.getKey()))
 							.symbol("number").build());
 
+			plots.add(Plot.builder().name("Total Unattended Issue")
+					.value(tenantWiseTotalUnattendedIssue.get(tenantWiseTotalFeedback.getKey()) == null
+							? BigDecimal.ZERO
+							: tenantWiseTotalUnattendedIssue.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Satisfactory Feedback")
+					.value(tenantWiseTotalSatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()) == null
+							? BigDecimal.ZERO
+							: tenantWiseTotalSatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Dissatisfactory Feedback")
+					.value(tenantWiseTotalDissatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()) == null
+							? BigDecimal.ZERO
+							: tenantWiseTotalDissatisfactoryIssue.get(tenantWiseTotalFeedback.getKey()))
+					.symbol("number").build());
+
 			response.add(Data.builder().headerName(tenantWiseTotalFeedback.getKey()).plots(plots)
 					.headerValue(serialNumber).headerName(tenantWiseTotalFeedback.getKey()).build());
 
@@ -372,6 +485,13 @@ public class USMService {
 
 			plots.add(Plot.builder().name("Total Closed Issue").value(BigDecimal.ZERO).symbol("number").build());
 
+			plots.add(Plot.builder().name("Total Unattended Issue").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(
+					Plot.builder().name("Total Satisfactory Feedback").value(BigDecimal.ZERO).symbol("number").build());
+
+			plots.add(Plot.builder().name("Total Dissatisfactory Feedback").value(BigDecimal.ZERO).symbol("number")
+					.build());
 			response.add(Data.builder().headerName(payloadDetails.getTenantid()).plots(plots).headerValue(serialNumber)
 					.build());
 		}

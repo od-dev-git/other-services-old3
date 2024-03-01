@@ -25,6 +25,10 @@ public class IssueFixService {
     private IIssueFixService applicationStatusMismatchIssueFix;
 
     @Autowired
+    @Qualifier("paymentIssueFixService")
+    private IIssueFixService paymentIssueFixService;
+
+    @Autowired
     private IssueFixValidator validator;
 
     public IssueFix issueFix(IssueFixRequest issueFixRequest, HttpHeaders headers) {
@@ -42,6 +46,9 @@ public class IssueFixService {
 
             case "APPLICATION_STATUS_MISMATCH_ISSUE":
                 return applicationStatusMismatchIssueFix.issueFix(issueFixRequest,headers);
+
+            case "PAYMENT_ISSUE":
+                return paymentIssueFixService.issueFix(issueFixRequest,headers);
 
             default:
                 throw new CustomException("UNKNOWN_ISSUE", "The issue is unknown to the system !!");
