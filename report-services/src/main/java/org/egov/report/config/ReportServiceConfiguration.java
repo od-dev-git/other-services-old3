@@ -119,4 +119,16 @@ public class ReportServiceConfiguration {
 	
 	@Value("${egov.report.temp.location}")
 	private String reportTemporaryLocation;
+	
+	@Value("${egov.billing.host}")
+	private String billingHost;
+	
+	@Value("${egov.billing.fetchbill.endpoint}")
+	private String fetchBillEndpoint;
+	
+	@Value("${egov.pg.host}")
+	private String pgServiceHost;
+	
+	@Value("${egov.pg.updatetransaction.endpoint}")
+	private String updateTransactionEndpoint;
 }
