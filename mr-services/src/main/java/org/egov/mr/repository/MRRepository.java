@@ -76,7 +76,7 @@ public class MRRepository {
             mrIdList =  jdbcTemplate.query(mrIdQuery, mobileNumberList.toArray(), new SingleColumnRowMapper<>(String.class));
             
             if(!mrIdList.isEmpty()) {
-            	criteria.setMrIdList(mrIdList);
+            	criteria.setMrIdList(mrIdList); 
             }
         }
         

@@ -124,7 +124,7 @@ public class MRQueryBuilder {
         } else if(criteria.getAccountId()!=null && (criteria.getMrIdList() != null && !criteria.getMrIdList().isEmpty())){
         	
         	addClauseIfRequired(preparedStmtList,builder);
-        	preparedStmtList.add(criteria.getAccountId());
+        	preparedStmtList.add(criteria.getAccountId()); 
             builder.append(" (mr.accountid = ? OR LOWER(mr.id) in (").append(createQuery(criteria.getMrIdList())).append("))");
             preparedStmtList.addAll(criteria.getMrIdList());
             

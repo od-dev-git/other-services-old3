@@ -69,7 +69,7 @@ public class MarriageRegistrationSearchCriteria {
     private Boolean isInworkflow;
 
     @JsonIgnore
-    private List<String> mrIdList;
+    private List<String> mrIdList; 
 
     public boolean isEmpty() {
         return (this.tenantId == null && this.status == null  && this.applicationType == null && this.ids == null && this.applicationNumber == null
