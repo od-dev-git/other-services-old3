@@ -1,13 +1,13 @@
 package org.egov.mr.repository;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mr.config.MRConfiguration;
 import org.egov.mr.producer.Producer;
@@ -63,7 +63,23 @@ public class MRRepository {
 
 
     public List<MarriageRegistration> getMarriageRegistartions(MarriageRegistrationSearchCriteria criteria) {
+    	
         List<Object> preparedStmtList = new ArrayList<>();
+        List<String> mrIdList = new ArrayList<>();
+        
+        if(StringUtils.isNotBlank(criteria.getMobileNumber())){
+        	
+        	List<Object> mobileNumberList = new ArrayList<>();
+        	mobileNumberList.add(criteria.getMobileNumber());
+        	String mrIdQuery = "select distinct T1.mr_id "
+              		+ "from eg_mr_couple T1 JOIN eg_mr_address T2 on T1.id = T2.mr_couple_id where T2.contact = ? ";
+            mrIdList =  jdbcTemplate.query(mrIdQuery, mobileNumberList.toArray(), new SingleColumnRowMapper<>(String.class));
+            
+            if(!mrIdList.isEmpty()) {
+            	criteria.setMrIdList(mrIdList); 
+            }
+        }
+        
         String query = queryBuilder.getMRSearchQuery(criteria, preparedStmtList);
         List<MarriageRegistration> registrations =  jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
         return registrations;
