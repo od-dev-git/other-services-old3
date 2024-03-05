@@ -1,23 +1,16 @@
 package org.egov.mr.repository.builder;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.egov.mr.config.MRConfiguration;
 import org.egov.mr.util.MRConstants;
-import org.egov.mr.web.models.*;
-import org.egov.tracer.model.CustomException;
-import org.postgresql.util.PGobject;
+import org.egov.mr.web.models.MarriageRegistrationSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -122,13 +115,20 @@ public class MRQueryBuilder {
         addBusinessServiceClause(criteria,preparedStmtList,builder);
 
 
-        if(criteria.getAccountId()!=null){
+        if(criteria.getAccountId()!=null && (criteria.getMrIdList() == null || criteria.getMrIdList().isEmpty())){
+        	
             addClauseIfRequired(preparedStmtList,builder);
             builder.append(" mr.accountid = ? ");
             preparedStmtList.add(criteria.getAccountId());
    
-        }
-        else {
+        } else if(criteria.getAccountId()!=null && (criteria.getMrIdList() != null && !criteria.getMrIdList().isEmpty())){
+        	
+        	addClauseIfRequired(preparedStmtList,builder);
+        	preparedStmtList.add(criteria.getAccountId()); 
+            builder.append(" (mr.accountid = ? OR LOWER(mr.id) in (").append(createQuery(criteria.getMrIdList())).append("))");
+            preparedStmtList.addAll(criteria.getMrIdList());
+            
+        } else {
         	
             if (criteria.getTenantId() != null) {
                 addClauseIfRequired(preparedStmtList, builder);
