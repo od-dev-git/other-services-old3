@@ -259,11 +259,12 @@ public class PaymentRowMapper implements ResultSetExtractor<List<Payment>> {
 
 
     private JsonNode getJsonValue(PGobject pGobject){
+    	ObjectMapper objMapper = new ObjectMapper();
         try {
             if(Objects.isNull(pGobject) || Objects.isNull(pGobject.getValue()))
                 return null;
             else
-                return mapper.readTree( pGobject.getValue());
+                return objMapper.readTree( pGobject.getValue());
         } catch (IOException e) {
             throw new CustomException("SERVER_ERROR","Exception occurred while parsing the additionalDetail json : "+ e
                     .getMessage());
