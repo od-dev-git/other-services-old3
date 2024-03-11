@@ -198,6 +198,17 @@ public class USMQueryBuilder {
 		addGroupByClause(selectQuery, "submit.tenantid ");
 		return selectQuery.toString();
 	}
+	
+	public static String getTotalOpenIssueWater(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_TICKET_CREATED);
+		selectQuery.append(" where upper(answer.questioncategory) = 'WATER' and upper(ticket.status) = 'OPEN' ");
+		preparedStatementValues.put("questioncategory", "'WATER'");
+		preparedStatementValues.put("status", "'OPEN'");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
 
 	public static String getTotalNoOfWaterIssue(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -267,6 +278,16 @@ public class USMQueryBuilder {
 		addGroupByClause(selectQuery, "submit.tenantid ");
 		return selectQuery.toString();
 	}
+	
+	public static String getTotalOpenIssueStreetlight(UsmSearchCriteria criteria, Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_TICKET_CREATED);
+		selectQuery.append(" where upper(answer.questioncategory) = 'STREETLIGHT' and upper(ticket.status) = 'OPEN' ");
+		preparedStatementValues.put("questioncategory", "'STREETLIGHT'");
+		preparedStatementValues.put("status", "'OPEN'");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
 
 	public static String getTotalNoOfStreetlighIssue(UsmSearchCriteria criteria,
 			Map<String, Object> preparedStatementValues) {
@@ -332,6 +353,18 @@ public class USMQueryBuilder {
 		selectQuery.append(" where upper(answer.questioncategory) = 'SANITATION' and ticket.status = 'CLOSED' ");
 		preparedStatementValues.put("questioncategory", "'SANITATION'");
 		preparedStatementValues.put("status", "'CLOSED'");
+		addWhereClause(selectQuery, preparedStatementValues, criteria);
+		addGroupByClause(selectQuery, "submit.tenantid ");
+		return selectQuery.toString();
+	}
+	
+	
+	public String getTotalOpenIssueSanitation(UsmSearchCriteria criteria,
+			Map<String, Object> preparedStatementValues) {
+		StringBuilder selectQuery = new StringBuilder(USM_TOTAL_TICKET_CREATED);
+		selectQuery.append(" where upper(answer.questioncategory) = 'SANITATION' and upper(ticket.status) = 'OPEN'");
+		preparedStatementValues.put("questioncategory", "'SANITATION'");
+		preparedStatementValues.put("status", "'OPEN'");
 		addWhereClause(selectQuery, preparedStatementValues, criteria);
 		addGroupByClause(selectQuery, "submit.tenantid ");
 		return selectQuery.toString();
