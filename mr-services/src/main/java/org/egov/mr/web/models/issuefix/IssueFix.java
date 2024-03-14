@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 public class IssueFix {
 	
-	@JsonProperty("tenantId")
+	@JsonProperty("tenant")
 	private String tenantId;
 
     @JsonProperty("issueName")
