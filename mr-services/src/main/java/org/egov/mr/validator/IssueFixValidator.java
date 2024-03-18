@@ -39,6 +39,10 @@ public class IssueFixValidator {
 	    if(CollectionUtils.isEmpty(dscList)){
 	        throw new CustomException("INVALID_DATA","DSC details is empty for the given MR Application.");
 	    }
+		if (dscList.size() == 1) {
+			throw new CustomException("DSC_DETAILS_ERROR",
+					"Only one DSC Details Exist for the mentioned application, No duplicate entries found !!");
+		}
 	}
 
 	public void validateMarriageRegistrationApplicationStatusMismatch(List<MarriageRegistration> marriageRegistrations) {

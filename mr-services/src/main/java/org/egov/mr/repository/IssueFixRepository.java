@@ -234,11 +234,9 @@ public class IssueFixRepository {
 					ps.setString(2, processInstance.getTenantId());
 					ps.setString(3, businessService);
 					ps.setString(4, processInstance.getBusinessId());
-					if(businessService.equalsIgnoreCase(IssueFixConstants.businessService_MR)) {
-						ps.setString(5, IssueFixConstants.businessService_MR);
-					}else if (businessService.equalsIgnoreCase(IssueFixConstants.businessService_MR_CORRECTION)) {
-						ps.setString(5, IssueFixConstants.businessService_MR_CORRECTION);
-					}
+					
+					ps.setString(5, IssueFixConstants.MR_APPLICATION_STATUS);
+					
 					ps.setString(6, payment.getPayerId());
 					ps.setString(7, payment.getPayerId());
 					ps.setString(8, payment.getPayerId());
