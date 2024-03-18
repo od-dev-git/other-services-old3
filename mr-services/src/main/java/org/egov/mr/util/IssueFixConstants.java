@@ -22,5 +22,7 @@ public class IssueFixConstants {
     public static final String STATUS_PAY_PENDING_SCHEDULE  = "PENDINGSCHEDULE";
 
     public static final List<String> APPLICATION_TYPE= Arrays.asList("NEW","CORRECTION");
+    
+    public static  final String MR_APPLICATION_STATUS = "971a0ac3-d78c-49d3-b802-172fc7539111";
 
 }
