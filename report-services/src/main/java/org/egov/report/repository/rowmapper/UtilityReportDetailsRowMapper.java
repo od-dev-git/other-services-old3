@@ -3,6 +3,7 @@ package org.egov.report.repository.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import org.egov.report.model.UtilityReportDetails;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
+
+import com.google.gson.Gson;
 
 @Component
 public class UtilityReportDetailsRowMapper implements ResultSetExtractor<List<UtilityReportDetails>> {
@@ -35,6 +38,10 @@ public class UtilityReportDetailsRowMapper implements ResultSetExtractor<List<Ut
 						.lastModifiedBy(rs.getString("lastModifiedby"))
 						.lastModifiedTime(lastModifiedTime)
 						.build();
+				
+				Object additionalDetails = new Gson().fromJson(rs.getString("additionalDetails").equals("{}")
+						|| rs.getString("additionalDetails").equals("null") ? null : rs.getString("additionalDetails"),
+						Object.class);
 
 				reportDetails = UtilityReportDetails.builder()
 						.id(id)
@@ -42,6 +49,7 @@ public class UtilityReportDetailsRowMapper implements ResultSetExtractor<List<Ut
 						.reportType(rs.getString("reporttype"))
 						.fileStoreId(rs.getString("filestoreid"))
 						.fileName(rs.getString("filename"))
+						.additionalDetails(additionalDetails)
 						.auditDetails(auditdetails)
 						.build();
 
