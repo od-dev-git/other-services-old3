@@ -11,5 +11,7 @@ public class ReportConstants {
 	
 	public static final String STATE_TENANT = "od";
 	
+	public static final String FY_STRING = "financialYear";
 	
+	public static final String DCB_REPORT_STRING = "PT_DCB_REPORT";
 }

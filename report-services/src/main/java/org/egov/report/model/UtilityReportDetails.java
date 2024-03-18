@@ -35,5 +35,8 @@ public class UtilityReportDetails {
     @Default
     @JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
+    
+    @JsonProperty("additionalDetails")
+	private Object additionalDetails;
 
 }
