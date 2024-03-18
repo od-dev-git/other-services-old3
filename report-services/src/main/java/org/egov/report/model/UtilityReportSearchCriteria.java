@@ -23,5 +23,7 @@ public class UtilityReportSearchCriteria {
     private BigDecimal toDate;
 
     private String reportType;
+    
+    private String financialYear;
 
 }

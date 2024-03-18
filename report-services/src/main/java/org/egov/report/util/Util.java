@@ -2,7 +2,9 @@ package org.egov.report.util;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -117,5 +119,23 @@ public class Util {
 			      .atZone(ZoneId.of(LOCAL_ZONE_ID))
 			      .toLocalDate();
 	    return lastModifiedDate.isEqual(LocalDate.now(ZoneId.of(LOCAL_ZONE_ID)));
+	}
+	
+	public Long getEndingDateOfFinancialYear(String endingYear) {
+
+		int inputYear = Integer.parseInt(endingYear);
+
+		LocalDateTime financialYearEndDate = LocalDateTime.of(inputYear, 3, 31, 23, 59, 59);
+
+		return financialYearEndDate.toInstant(ZoneOffset.UTC).toEpochMilli();
+	}
+
+	public Long getStartingDateOfFinancialYear(String startingYear) {
+
+		int inputYear = Integer.parseInt(startingYear);
+
+		LocalDateTime financialYearStartDate = LocalDateTime.of(inputYear, 4, 1, 0, 0, 0);
+
+		return financialYearStartDate.toInstant(ZoneOffset.UTC).toEpochMilli();
 	}
 }

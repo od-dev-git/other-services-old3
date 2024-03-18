@@ -1,8 +1,11 @@
 package org.egov.report.validator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.egov.report.model.DCBSearchCriteria;
+import org.egov.report.model.UtilityReportDetails;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.tracer.model.CustomException;
 import org.springframework.stereotype.Component;
@@ -55,5 +58,47 @@ Map<String, String> errorMap = new HashMap<>();
 			throw new CustomException(errorMap);
 		
 	}
+	
+	public void validateDCBReport(DCBSearchCriteria dcbSearchCriteria) {
+
+		if (StringUtils.isEmpty(dcbSearchCriteria.getFinancialYear())
+				|| CollectionUtils.isEmpty(dcbSearchCriteria.getTenantIds())) {
+
+			throw new CustomException("INVALID_REQUEST",
+					" Either Financial Year or TenantId is missing ! Kindly provide both to proceed ..");
+
+		}
+	}
+
+	public void validateIfDCBReportAlreadyExists(List<UtilityReportDetails> reportList, String tenantId) {
+
+		if (!reportList.isEmpty()) {
+
+			UtilityReportDetails dcbReport = reportList.get(0);
+
+			if (dcbReport.getTenantId().equalsIgnoreCase(tenantId)) {
+				throw new CustomException("REPORT_EXISTS",
+						"Report For the given criteria already present. Kindly download the same ..");
+			}
+
+		}
+
+	}
+
+	public void validateIfReportGenerationInProcess(List<UtilityReportDetails> reportList, String tenantId) {
+
+		if (!reportList.isEmpty()) {
+
+			UtilityReportDetails dcbReport = reportList.get(0);
+
+			if (dcbReport.getTenantId().equalsIgnoreCase(tenantId) && StringUtils.isEmpty(dcbReport.getFileStoreId())) {
+				throw new CustomException("REPORT_GENERATION_INPROCESS",
+						"Report Generation is currently in process. Kindly wait ..");
+			}
+
+		}
+
+	}
+
 }
 

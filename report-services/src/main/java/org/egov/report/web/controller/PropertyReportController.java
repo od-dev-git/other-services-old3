@@ -1,9 +1,14 @@
 package org.egov.report.web.controller;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.egov.report.model.DCBSearchCriteria;
+import org.egov.report.model.UtilityReportSearchCriteria;
+import org.egov.report.service.DCBReportService;
 import org.egov.report.service.PropertyService;
 import org.egov.report.util.ResponseInfoFactory;
 import org.egov.report.web.model.PropertyDetailsResponse;
@@ -14,6 +19,7 @@ import org.egov.report.web.model.ReportResponse;
 import org.egov.report.web.model.RequestInfoWrapper;
 import org.egov.report.web.model.TaxCollectorWiseCollectionResponse;
 import org.egov.report.web.model.ULBWiseTaxCollectionResponse;
+import org.egov.report.web.model.UtilityReportResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +38,9 @@ public class PropertyReportController {
 
 	@Autowired
 	private PropertyService propertyService;
+	
+	@Autowired
+	private DCBReportService dcbReportService;
 
 	@PostMapping("/propertyDetails")
 	public ResponseEntity<ReportResponse> propertyDetails(@ModelAttribute PropertyDetailsSearchCriteria searchCriteria,
@@ -89,5 +98,24 @@ public class PropertyReportController {
 				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true)).build();
 		
 		return new ResponseEntity<ReportResponse>(response,HttpStatus.OK);
+	}
+	
+	@PostMapping("/_generateDCBReport")
+	public void generateDCBReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+			@Valid @ModelAttribute DCBSearchCriteria dcbSearchCriteria) {
+		
+		dcbReportService.generateDCBReport(requestInfoWrapper, dcbSearchCriteria);
+	}
+	
+	@PostMapping(value = "/_getDCBReport")
+	public ResponseEntity<UtilityReportResponse> getDCBReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+			@Valid @ModelAttribute UtilityReportSearchCriteria searchCriteria) throws IOException {
+		Map<String, Object> responseMap = dcbReportService.getDCBReport(requestInfoWrapper.getRequestInfo(), searchCriteria);
+		
+		UtilityReportResponse response = UtilityReportResponse.builder()
+				.response(responseMap)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }
