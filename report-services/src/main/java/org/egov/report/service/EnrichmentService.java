@@ -29,14 +29,10 @@ public class EnrichmentService {
 			String tenantId) {
 
 		AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-
-		//Set financial Year Values in Additional details here
-		Map<String, String> additionalDetails = new HashMap<>();
-		additionalDetails.put(ReportConstants.FY_STRING, financialYear);
 		
 		UtilityReportDetails reportDetails = UtilityReportDetails.builder().id(UUID.randomUUID().toString())
-				.tenantId(tenantId).reportType(reportType).fileStoreId("").fileName("").auditDetails(auditDetails)
-				.additionalDetails(additionalDetails).build();
+				.tenantId(tenantId).reportType(reportType).auditDetails(auditDetails)
+				.financialYear(financialYear).build();
 
 		return reportDetails;
 	}

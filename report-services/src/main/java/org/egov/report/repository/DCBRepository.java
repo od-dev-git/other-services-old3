@@ -101,8 +101,8 @@ public class DCBRepository {
 	
 	public List<UtilityReportDetails> isReportExist(String reportType, String financialYear, String tenantId) {
 		String query = "SELECT * FROM eg_bpa_utility_reports WHERE reporttype = '" + reportType
-				+ "' and additionaldetails ->> 'financialYear' = '" + financialYear + "' and tenantid = '" 
-				+ tenantId + "' ORDER BY lastmodifiedtime DESC;";
+				+ "' and financialyear = '" + financialYear + "' and tenantid = '" + tenantId
+				+ "' ORDER BY lastmodifiedtime DESC;";
 		log.info("Query for DCB Report search:", query);
 
 		List<UtilityReportDetails> reportDetailsList = jdbcTemplate.query(query, new UtilityReportDetailsRowMapper());
