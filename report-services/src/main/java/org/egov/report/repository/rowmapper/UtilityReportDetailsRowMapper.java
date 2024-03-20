@@ -49,6 +49,7 @@ public class UtilityReportDetailsRowMapper implements ResultSetExtractor<List<Ut
 						.reportType(rs.getString("reporttype"))
 						.fileStoreId(rs.getString("filestoreid"))
 						.fileName(rs.getString("filename"))
+						.financialYear(rs.getString("financialyear"))
 						.additionalDetails(additionalDetails)
 						.auditDetails(auditdetails)
 						.build();

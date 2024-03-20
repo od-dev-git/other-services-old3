@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
@@ -40,6 +41,7 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -84,7 +86,10 @@ public class DCBReportService {
 
 			List<UtilityReportDetails> reportList = repository.isReportExist(reportType, financialYear, tenantId);
 
-			validator.validateIfDCBReportAlreadyExists(reportList, tenantId);
+			if(validator.validateIfDCBReportAlreadyExists(reportList, tenantId)) {
+				log.info("Skipping... Report already present for tenantid: "+ tenantId);
+				continue;
+			}
 
 			String[] fyParts = Arrays.stream(financialYear.split("-")).toArray(String[]::new);
 
@@ -135,11 +140,12 @@ public class DCBReportService {
 			RequestInfo requestInfo, List<UtilityReportDetails> reportList, String reportType, String financialYear) {
 
 		// new record inserted for each report
-		UtilityReportDetails reportDetails = enrichmentService.enrichSaveReport(requestInfo, reportType, financialYear,
-				tenantId);
-		repository.saveReportDetails(new UtilityReportRequest(requestInfo, reportDetails));
-		reportList.add(reportDetails);
-		
+		if (CollectionUtils.isEmpty(reportList)) {
+			UtilityReportDetails reportDetails = enrichmentService.enrichSaveReport(requestInfo, reportType,
+					financialYear, tenantId);
+			repository.saveReportDetails(new UtilityReportRequest(requestInfo, reportDetails));
+			reportList.add(reportDetails);
+		}
 
 		Map<String, DCBProperty> propertiesDetails = repository.getPropertyDetails(tenantId);
 
@@ -224,7 +230,7 @@ public class DCBReportService {
 		UtilityReportRequest reportDetailsRequest = enrichmentService.enrichUpdateReport(requestInfo, reportList,
 				fileName, filestoreDetails);
 		repository.updateReportDetails(reportDetailsRequest);
-		reportList.remove(reportDetails);
+		
 	}
 	
 	private String generateFileName(String fileInitialName, String tenantId, String financialYear) {
@@ -233,8 +239,8 @@ public class DCBReportService {
 //		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_hhmmss");
 //		dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
 //		String currentDateTime = dateFormat.format(new Date());
-		
-		return fileInitialName + fileSeparator + tenantId + fileSeparator + financialYear + fileFormat;
+		String ulbName = StringUtils.capitalize(tenantId.substring(3));
+		return fileInitialName + fileSeparator + ulbName + fileSeparator + financialYear + fileFormat;
 	}
 	
 	private File getTemporaryFile(String reportType, String fileName) {
@@ -270,7 +276,7 @@ public class DCBReportService {
 		
 		String reportType = ReportConstants.DCB_REPORT_STRING;
 
-		String tenantId = searchCriteria.getTenantId();
+		String tenantId = searchCriteria.getTenant();
 		
 		String financialYear = searchCriteria.getFinancialYear();
 

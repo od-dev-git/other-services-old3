@@ -25,5 +25,7 @@ public class UtilityReportSearchCriteria {
     private String reportType;
     
     private String financialYear;
+    
+    private String tenant;
 
 }

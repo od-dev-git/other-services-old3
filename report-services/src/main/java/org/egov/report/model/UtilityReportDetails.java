@@ -29,8 +29,9 @@ public class UtilityReportDetails {
     @JsonProperty("fileStoreId")
     private String fileStoreId = null;
     
+    @Default
     @JsonProperty("fileName")
-    private String fileName;
+    private String fileName= null;
 
     @Default
     @JsonProperty("auditDetails")
@@ -38,5 +39,8 @@ public class UtilityReportDetails {
     
     @JsonProperty("additionalDetails")
 	private Object additionalDetails;
+    
+    @JsonProperty("financialYear")
+    private String financialYear;
 
 }

@@ -4,16 +4,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.DCBSearchCriteria;
 import org.egov.report.model.UtilityReportDetails;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.tracer.model.CustomException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Component
 public class PropertyReportValidator {
+	
+	@Autowired
+	private ReportServiceConfiguration config;
 	
 	public void validatePropertyDetailsSearchCriteria(PropertyDetailsSearchCriteria searchCriteria) {
 		// TODO Auto-generated method stub
@@ -70,19 +75,20 @@ Map<String, String> errorMap = new HashMap<>();
 		}
 	}
 
-	public void validateIfDCBReportAlreadyExists(List<UtilityReportDetails> reportList, String tenantId) {
+	public boolean validateIfDCBReportAlreadyExists(List<UtilityReportDetails> reportList, String tenantId) {
 
 		if (!reportList.isEmpty()) {
 
 			UtilityReportDetails dcbReport = reportList.get(0);
 
-			if (dcbReport.getTenantId().equalsIgnoreCase(tenantId)) {
-				throw new CustomException("REPORT_EXISTS",
-						"Report For the given criteria already present. Kindly download the same ..");
+			if (dcbReport.getTenantId().equalsIgnoreCase(tenantId)
+					&& !StringUtils.isEmpty(dcbReport.getFileStoreId())) {
+				return true;
+			} else {
+				return checkIfEligibleForAnotherRequest(dcbReport, tenantId);
 			}
-
 		}
-
+		return false;
 	}
 
 	public void validateIfReportGenerationInProcess(List<UtilityReportDetails> reportList, String tenantId) {
@@ -98,6 +104,20 @@ Map<String, String> errorMap = new HashMap<>();
 
 		}
 
+	}
+	
+	private boolean checkIfEligibleForAnotherRequest(UtilityReportDetails dcbReport, String tenantId) {
+		
+		Long requestGap = config.getRequestGap();
+		
+		Long createdTime = dcbReport.getAuditDetails().getCreatedTime();
+		
+		Long currentTime = System.currentTimeMillis();
+		
+		if(currentTime >= createdTime + requestGap) {
+			return false;
+		}
+		return true;
 	}
 
 }
