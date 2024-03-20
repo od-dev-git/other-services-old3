@@ -131,4 +131,7 @@ public class ReportServiceConfiguration {
 	
 	@Value("${egov.pg.updatetransaction.endpoint}")
 	private String updateTransactionEndpoint;
+	
+	@Value("${dcb.report.request.gap}")
+	private Long requestGap;
 }
