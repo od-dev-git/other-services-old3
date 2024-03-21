@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.model.Advance;
 import org.egov.report.model.DCBArrearDue;
 import org.egov.report.model.DCBDemand;
 import org.egov.report.model.DCBPayment;
@@ -13,6 +14,7 @@ import org.egov.report.model.DCBProperty;
 import org.egov.report.model.UtilityReportDetails;
 import org.egov.report.producer.KafkaProducer;
 import org.egov.report.repository.builder.DCBQueryBuilder;
+import org.egov.report.repository.rowmapper.AdvanceRowMapper;
 import org.egov.report.repository.rowmapper.DCBArrearDueRowMapper;
 import org.egov.report.repository.rowmapper.DCBDemandRowMapper;
 import org.egov.report.repository.rowmapper.DCBPaymentRowMapper;
@@ -119,6 +121,19 @@ public class DCBRepository {
 
 	public void updateReportDetails(UtilityReportRequest utilityReportRequest) {
 		producer.push(config.getUpdateUtilityReportTopic(), utilityReportRequest);
+	}
+
+	public Map<String, Advance> getTotalAdvanceAmount(String tenantId) {
+
+		Map<String, Object> preparedStatementValues = new HashMap<>();
+
+		String advanceQuery = queryBuilder.getTotalAdvanceQuery(tenantId, preparedStatementValues);
+
+		Map<String, Advance> advanceAmounts = namedParameterJdbcTemplate.query(advanceQuery, preparedStatementValues,
+				new AdvanceRowMapper());
+
+		return advanceAmounts;
+
 	}
 
 }

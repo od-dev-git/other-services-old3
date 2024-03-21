@@ -21,6 +21,9 @@ public class DCBQueryBuilder {
 	public static final String ARREAR_DUE_QUERY = " select dmd.consumercode, sum(taxamount) taxamount, sum(collectionamount) collectionamount, sum(taxamount-collectionamount) due from egbs_demand_v1 dmd "
 			+ "inner join egbs_demanddetail_v1 dtl on dtl.demandid=dmd.id ";
 	
+	public static final String ADVANCE_QUERY = "select dmd.consumercode, sum(taxamount) - sum(collectionamount) as totaladvanceamount from egbs_demand_v1 dmd "
+			+ "inner join egbs_demanddetail_v1 dtl on dtl.demandid=dmd.id ";
+	
 	public String getPropertiesDetialsQuery(String tenantId, Map<String, Object> preparedStatementValues) {
 
 		StringBuilder selectQuery = new StringBuilder(QUERY_TO_GET_PROPERTIES);
@@ -155,6 +158,32 @@ public class DCBQueryBuilder {
 		selectQuery.append("group by dmd.consumercode ");
 
 		return selectQuery.toString();
+	}
+
+	public String getTotalAdvanceQuery(String tenantId, Map<String, Object> preparedStatementValues) {
+		
+		StringBuilder selectQuery = new StringBuilder(ADVANCE_QUERY);
+
+		if (!StringUtils.isEmpty(tenantId)) {
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" dmd.tenantid = :tenantId ");
+			preparedStatementValues.put("tenantId", tenantId);
+
+		}
+
+		addClauseIfRequired(preparedStatementValues, selectQuery);
+		selectQuery.append(" dmd.status !='CANCELLED' ");
+
+		addClauseIfRequired(preparedStatementValues, selectQuery);
+		selectQuery.append(" dmd.businessservice='PT' ");
+		
+		addClauseIfRequired(preparedStatementValues, selectQuery);
+		selectQuery.append(" dtl.taxheadcode in ('PT_ADVANCE_CARRYFORWARD') ");
+
+		selectQuery.append("group by dmd.consumercode ");
+
+		return selectQuery.toString();
+		
 	}
 
 }
