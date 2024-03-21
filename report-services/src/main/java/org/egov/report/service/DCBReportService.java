@@ -20,6 +20,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.config.ReportServiceConfiguration;
+import org.egov.report.model.Advance;
 import org.egov.report.model.DCBArrearDue;
 import org.egov.report.model.DCBDemand;
 import org.egov.report.model.DCBPayment;
@@ -154,6 +155,8 @@ public class DCBReportService {
 		Map<String, DCBDemand> currentDemands = repository.getDemands(tenantId, startDate, endDate);
 
 		Map<String, DCBArrearDue> arrearDue = repository.getArrearDue(tenantId, startDate);
+		
+		Map<String, Advance> advanceAmt = repository.getTotalAdvanceAmount(tenantId);
 
 		Map<String, DCBReportModel> dcbReportMap = new HashMap<>();
 
@@ -176,6 +179,7 @@ public class DCBReportService {
 			BigDecimal arrear = BigDecimal.ZERO;
 			BigDecimal arrearDemand = BigDecimal.ZERO;
 			BigDecimal totalDemand = BigDecimal.ZERO;
+			BigDecimal advanceAmount = BigDecimal.ZERO;
 
 			if (currentPayments.containsKey(key)) {
 				DCBPayment currentPaymentObject = currentPayments.get(key);
@@ -192,10 +196,15 @@ public class DCBReportService {
 				DCBArrearDue arrearDueObject = arrearDue.get(key);
 				arrear = arrearDueObject.getDue();
 			}
+			
+			//This is the advance pending for a property id till date
+			if (advanceAmt.containsKey(key)) {
+				Advance advanceObject = advanceAmt.get(key);
+				advanceAmount = advanceObject.getTotalAdvanceAmount().abs();
+			}
 
-			// TO DO : Advance consideration logic to be implemented
-			arrearDemand = currentPayment.subtract(currentCollection).add(arrear).compareTo(BigDecimal.ZERO) > 0
-					? currentPayment.subtract(currentCollection).add(arrear)
+			arrearDemand = currentPayment.subtract(currentCollection).subtract(advanceAmount).add(arrear).compareTo(BigDecimal.ZERO) > 0
+					? currentPayment.subtract(currentCollection).subtract(advanceAmount).add(arrear)
 					: BigDecimal.ZERO;
 
 			totalDemand = arrearDemand.add(currentDemand);
