@@ -54,4 +54,10 @@ public class PropertyDemandResponse {
 	@JsonProperty("collectionamount")
 	private BigDecimal collectionamount;
 
+	@JsonProperty("ddnNo")
+	private String ddnNo;
+
+	@JsonProperty("legacyHoldingNo")
+	private String legacyHoldingNo;
+
 }

@@ -113,7 +113,7 @@ public class ReportQueryBuilder {
 			+ AS + "demand ";
 	
 	private static final String PROPERTY_DETAILS_SUMMARY_QUERY = SELECT
-			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,epp.ownershipcategory,epp.propertytype,epp.usagecategory,eu.uuid,"
+			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,epp.ddnno,epp.legacyholdingno,epp.ownershipcategory,epp.propertytype,epp.usagecategory,eu.uuid,"
 			+ "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
 			+ FROM
 			+ "eg_pt_property epp "
@@ -125,7 +125,7 @@ public class ReportQueryBuilder {
 	
 	private static final String PROPERTY_DEMANDS_QUERY = SELECT 
 			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,eu.uuid,"
-			+ "edv.tenantid ,edv.status,edv2.taxamount ,edv2.collectionamount,epp.oldpropertyid,epa.ward "
+			+ "edv.tenantid ,edv.status,edv2.taxamount ,edv2.collectionamount,epp.oldpropertyid,epp.ddnno,epp.legacyholdingno,epa.ward "
 			+ FROM + " egbs_demand_v1 edv "
 			+ INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid " +  AND + "epp.status = 'ACTIVE' "
 			+ INNER_JOIN +" eg_pt_address epa on epp.id =epa.propertyid "
@@ -300,7 +300,7 @@ public class ReportQueryBuilder {
     private static final String PROPERTY_IDS = SELECT + " epp.propertyid " + PROPERTY;
 
     private static final String PROPERTY_DETAILS = SELECT
-            + "epp.propertyid,epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertytype,epp.usagecategory,eu.uuid,"
+            + "epp.propertyid,epp.tenantid,epa.ward,epp.oldpropertyid,epp.ddnno,epp.legacyholdingno,epp.propertytype,epp.usagecategory,eu.uuid,"
             + "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
             + FROM
             + "eg_pt_property epp "
@@ -478,6 +478,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
 			preparedPropStmtList.add(searchCriteria.getOldPropertyId());
 		}
+
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
+		}
 		
 		if(StringUtils.hasText(searchCriteria.getWardNo())) {
 			query.append(AND_QUERY).append(" epa.ward  = ? ");
@@ -550,6 +560,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		if(StringUtils.hasText(searchCriteria.getOldPropertyId())) {
 			query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
 			preparedPropStmtList.add(searchCriteria.getOldPropertyId());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
 		}
 		
 		addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedPropStmtList);
