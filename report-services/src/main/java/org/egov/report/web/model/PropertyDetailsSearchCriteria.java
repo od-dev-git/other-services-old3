@@ -45,4 +45,10 @@ public class PropertyDetailsSearchCriteria {
 	@JsonProperty("collectionMode")
 	private String collectionMode ;
 
+	@JsonProperty("ddnNo")
+	private String ddnNo;
+
+	@JsonProperty("legacyHoldingNo")
+	private String legacyHoldingNo;
+
 }

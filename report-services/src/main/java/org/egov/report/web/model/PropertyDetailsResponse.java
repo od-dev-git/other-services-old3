@@ -1,7 +1,5 @@
 package org.egov.report.web.model;
 
-import java.math.BigDecimal;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -69,6 +67,12 @@ public class PropertyDetailsResponse {
 
 	@JsonProperty("guardianRelation")
 	private String guardianRelation;
+
+	@JsonProperty("ddnNo")
+	private String ddnNo;
+
+	@JsonProperty("legacyHoldingNo")
+	private String legacyHoldingNo;
 
 
 }
