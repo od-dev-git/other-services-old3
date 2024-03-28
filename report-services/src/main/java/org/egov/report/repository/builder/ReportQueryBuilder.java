@@ -310,7 +310,7 @@ public class ReportQueryBuilder {
             + WHERE + "epp.status <> 'INACTIVE' ";
     
     private static final String OLDPROPERTY_IDS_DETAILS = SELECT
-            + " epp.propertyid,epp.oldpropertyid "
+            + " epp.propertyid,epp.oldpropertyid,epp.ddnno,epp.legacyholdingno "
             + FROM
             + "eg_pt_property epp "
             + WHERE + "epp.status <> 'INACTIVE' ";
@@ -882,6 +882,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
            preparedPropStmtList.add(searchCriteria.getOldPropertyId());
        }
 
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
+		}
+
        return query.toString();
     }
     
@@ -916,6 +926,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
            query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
            preparedPropStmtList.add(searchCriteria.getOldPropertyId());
        }
+
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
+		}
 
        return query.toString();
     }
@@ -976,6 +996,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
             query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
             preparedPropStmtList.add(searchCriteria.getOldPropertyId());
         }
+
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
+		}
         
         return query.toString();
     }

@@ -34,6 +34,12 @@ public class TaxCollectorWiseCollectionResponse {
 
     @JsonProperty("oldPropertyId")
     private String oldpropertyid ;
+
+    @JsonProperty("ddnNo")
+    private String ddnNo;
+
+    @JsonProperty("legacyHoldingNo")
+    private String legacyHoldingNo;
     
     @JsonProperty("collectorEmployeeId")
     private String employeeid ;

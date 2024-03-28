@@ -112,7 +112,7 @@ public class PropertyDetailsReportRepository {
         return jdbcTemplate.queryForList(query, preparedPropStmtList.toArray(), String.class);
     }
 
-    public HashMap<String, String> getOldPropertyIds(PropertyDetailsSearchCriteria searchCriteria) {
+    public HashMap<String, PropertyDetailsResponse> getOldPropertyIds(PropertyDetailsSearchCriteria searchCriteria) {
         List<Object> preparedPropStmtList = new ArrayList<>();
         String query = queryBuilder.getOldPropertyIdsQuery(searchCriteria, preparedPropStmtList);
         return jdbcTemplate.query(query,preparedPropStmtList.toArray(),new OldPropertyIdRowMapper());
