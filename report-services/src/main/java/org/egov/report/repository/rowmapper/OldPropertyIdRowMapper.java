@@ -2,34 +2,39 @@ package org.egov.report.repository.rowmapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-import org.egov.report.web.model.PropertyDemandResponse;
+import org.egov.report.web.model.PropertyDetailsResponse;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.util.StringUtils;
 
-public class OldPropertyIdRowMapper implements ResultSetExtractor<HashMap<String, String>> {
+public class OldPropertyIdRowMapper implements ResultSetExtractor<HashMap<String, PropertyDetailsResponse>> {
 
-    HashMap<String, String> oldPropertyIdMap = new HashMap<String, String>();
+    HashMap<String, PropertyDetailsResponse> responseMap = new HashMap<String, PropertyDetailsResponse>();
 
     @Override
-    public HashMap<String, String> extractData(ResultSet rs)
+    public HashMap<String, PropertyDetailsResponse> extractData(ResultSet rs)
             throws SQLException, DataAccessException {
 
         while (rs.next()) {
 
-            String key = rs.getString("propertyid");
-            String value = rs.getString("oldpropertyid");
+            String propertyid = rs.getString("propertyid");
+            String oldpropertyid = rs.getString("oldpropertyid");
+            String ddnno = rs.getString("ddnno");
+            String legacyholdingno= rs.getString("legacyholdingno");
+            PropertyDetailsResponse propertyDetailsResponse= PropertyDetailsResponse
+                    .builder()
+                    .oldPropertyId(oldpropertyid)
+                    .propertyId(propertyid)
+                    .ddnNo(ddnno)
+                    .legacyHoldingNo(legacyholdingno).build();
+            if(!this.responseMap.containsKey(propertyid)) {
 
-            if(!oldPropertyIdMap.containsKey(key)) {
-                oldPropertyIdMap.put(key, value);                
+                this.responseMap.put(propertyid, propertyDetailsResponse);
             }
         }
 
-        return oldPropertyIdMap;
+        return this.responseMap;
 
     }
 
