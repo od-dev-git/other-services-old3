@@ -26,6 +26,12 @@ public class ULBWiseTaxCollectionResponse {
     @JsonProperty("oldPropertyId")
     private String oldpropertyid ;
 
+    @JsonProperty("ddnNo")
+    private String ddnNo;
+
+    @JsonProperty("legacyHoldingNo")
+    private String legacyHoldingNo;
+
     @JsonProperty("ward")
     private String ward ;
     

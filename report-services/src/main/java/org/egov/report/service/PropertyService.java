@@ -236,7 +236,7 @@ public class PropertyService {
             log.info("Fetching Property Details ");
             PropertyDetailsSearchCriteria propertySearchingCriteria = PropertyDetailsSearchCriteria.builder()
                     .ulbName(searchCriteria.getUlbName()).propertyIds(Properties).build();
-            HashMap<String , String> propertyMap = pdRepository.getOldPropertyIds(propertySearchingCriteria);
+            HashMap<String , PropertyDetailsResponse> propertyMap = pdRepository.getOldPropertyIds(propertySearchingCriteria);
             
             log.info("Setting User Details ");
             taxCollectorWiseCollectionResponse = taxCollectorWiseCollectionResponse.stream().peek(collectionResponse -> {
@@ -246,9 +246,10 @@ public class PropertyService {
                     collectionResponse.setName(user.getName());
                     collectionResponse.setEmployeeid(user.getUsername());
                     collectionResponse.setType(user.getType().toString());
-                    if(StringUtils.hasText(propertyMap.get(collectionResponse.getConsumercode()))){
-                        String oldPropertyId = propertyMap.get(collectionResponse.getConsumercode());
-                        collectionResponse.setOldpropertyid(oldPropertyId);
+                    if(StringUtils.hasText(propertyMap.get(collectionResponse.getConsumercode()).getOldPropertyId())){
+                        collectionResponse.setOldpropertyid(propertyMap.get(collectionResponse.getConsumercode()).getOldPropertyId());
+                        collectionResponse.setDdnNo(propertyMap.get(collectionResponse.getConsumercode()).getDdnNo());
+                        collectionResponse.setLegacyHoldingNo(propertyMap.get(collectionResponse.getConsumercode()).getLegacyHoldingNo());
                     }
                 }
             }).filter(tcwcrUser -> StringUtils.hasText(tcwcrUser.getType())).collect(Collectors.toList());
@@ -413,7 +414,8 @@ public class PropertyService {
                                         responsePerConnection
                                                 .setOldpropertyid(propertyDetail.get(0).getOldPropertyId());
                                         responsePerConnection.setWard(propertyDetail.get(0).getWardNumber());
-
+                                        responsePerConnection.setDdnNo(propertyDetail.get(0).getDdnNo());
+                                        responsePerConnection.setLegacyHoldingNo(propertyDetail.get(0).getLegacyHoldingNo());
                                     }
 
                                 }
@@ -544,6 +546,12 @@ public class PropertyService {
                                     }
                                     if (StringUtils.hasText(prop.getWardNumber())) {
                                         item.setWard(prop.getWardNumber());
+                                    }
+                                    if(StringUtils.hasText(prop.getDdnNo())){
+                                        item.setDdnNo(prop.getDdnNo());
+                                    }
+                                    if(StringUtils.hasText(prop.getLegacyHoldingNo())){
+                                        item.setLegacyHoldingNo(prop.getLegacyHoldingNo());
                                     }
                                     uuids.add(prop.getUuid());
                                 }
@@ -752,6 +760,8 @@ public class PropertyService {
             List<PropertyDetailsResponse> propertyDetail = propertyMap.get(response.getConsumercode());
             if (propertyDetail != null) {
                 response.setOldpropertyid(propertyDetail.get(0).getOldPropertyId());
+                response.setDdnNo(propertyDetail.get(0).getDdnNo());
+                response.setLegacyHoldingNo(propertyDetail.get(0).getLegacyHoldingNo());
                 response.setWard(propertyDetail.get(0).getWardNumber());
                 List<String> uuids = propertyDetail.parallelStream()
                         .map(propertyUser -> propertyUser.getUuid()).collect(Collectors.toList());

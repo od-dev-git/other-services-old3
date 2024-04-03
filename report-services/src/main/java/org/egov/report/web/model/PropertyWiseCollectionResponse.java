@@ -22,6 +22,12 @@ public class PropertyWiseCollectionResponse {
  
     @JsonProperty("oldPropertyId")
     private String oldpropertyid ;
+
+    @JsonProperty("ddnNo")
+    private String ddnNo;
+
+    @JsonProperty("legacyHoldingNo")
+    private String legacyHoldingNo;
     
     @JsonProperty("uuid")
     private List<String> uuid ;
@@ -49,8 +55,8 @@ public class PropertyWiseCollectionResponse {
 
     @JsonProperty("receiptDate")
     private String receiptdate ;
-    
-  
+
     @JsonProperty("paymentMode")
     private String paymentMode ;
+
 }
