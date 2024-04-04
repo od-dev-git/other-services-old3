@@ -1,0 +1,53 @@
+
+----------------------	
+Regularization Application Report
+----------------------
+
+
+
+select
+    initcap(split_part(tenantid,'.',2)) as ulb,
+    applicationno,
+    businessservice,
+    case
+        when createdtime >0 then to_timestamp(createdtime / 1000)::date 
+    end as createdtime,
+    case
+        when applicationdate >0 then to_timestamp(applicationdate / 1000)::date
+        ELSE to_timestamp(createdtime / 1000)::date
+    end as applicationdate,
+    status,
+    approvalno,
+    case
+        when approvaldate >0 then to_timestamp(approvaldate / 1000)::date
+    end as approvaldate
+from
+    eg_bpa_regularization_application ebra 
+where tenantid != 'od.testing'  
+and status != 'DELETED';
+
+
+-----------------------------------------------------------------------------------------------------------
+
+-------------------------------------------------
+Regularization Collection Report
+-------------------------------------------------
+
+
+select
+   initcap(split_part(epd.tenantid,'.',2)) as ulb
+    , to_timestamp(epd.receiptdate/1000)::date as receiptdate
+    , epd.receiptnumber
+    , to_timestamp(epd.createdtime/1000)::date as createdtime
+    , eb.consumercode
+    , epd.amountpaid
+    , ep.paymentmode
+    , case
+    when epd.businessservice='BPA.REG_APP_FEE' then 'Regularization Application Fee'
+    when epd.businessservice='BPA.REG_SAN_FEE' then 'Regularization Sanction Fee'
+    end as feeType
+from egcl_paymentdetail epd
+inner join egcl_payment ep on ep.id = epd.paymentid
+left outer join egcl_bill eb on eb.id = epd.billid
+where epd.businessservice in ( 'BPA.REG_APP_FEE','BPA.REG_SAN_FEE')
+and ep.paymentstatus != 'CANCELLED' and ep.tenantid != 'od.testing';
