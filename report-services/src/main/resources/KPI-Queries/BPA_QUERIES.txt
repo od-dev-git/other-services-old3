@@ -45,7 +45,7 @@ select
     when epd.businessservice='BPA.NC_SAN_FEE' then 'BPA Sanction Fee'
     when epd.businessservice='BPA.NC_APP_FEE' then 'BPA Application Fee'
     when epd.businessservice='BPA.NC_OC_SAN_FEE' then 'BPA OC Sanction Fee'
-    when epd.businessservice='BPA.NC_OC_SAN_FEE' then 'BPA OC Application Fee'
+    when epd.businessservice='BPA.NC_OC_APP_FEE' then 'BPA OC Application Fee'
     end as feeType
 from egcl_paymentdetail epd
 inner join egcl_payment ep on ep.id = epd.paymentid
