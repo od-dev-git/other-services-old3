@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.InterruptibleBatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,19 +59,20 @@ public class ArchivalRepository {
 	ArchivalConfig config;
 
 	public List<Demand> getDemands(DemandCriteria demandCriteria) {
-		List<Object> preparedStatementValues = new ArrayList<>();
+		Map<String, Object> preparedStatementValues = new HashMap<>();
 		String searchDemandQuery = archivalQueryBuilder.getDemandQuery(demandCriteria, preparedStatementValues);
-		log.info("Demand Archival Query : " + searchDemandQuery);
+		log.info("Get Demands Query : " + searchDemandQuery);
 		log.info("Params : " + String.valueOf(preparedStatementValues));
-		return jdbcTemplate.query(searchDemandQuery, preparedStatementValues.toArray(), demandRowMapper);
+		return namedParameterJdbcTemplate.query(searchDemandQuery, preparedStatementValues, demandRowMapper);
 	}
 
 	public Long getDemandCount(DemandCriteria demandCriteria) {
-		List<Object> preparedStatementValues = new ArrayList<>();
+		Map<String, Object> preparedStatementValues = new HashMap<>();
 		String getDemndCountQuery = archivalQueryBuilder.getDemandCountQuery(demandCriteria, preparedStatementValues);
 		log.info("Demand Count Query : " + getDemndCountQuery);
 		log.info("Params : " + String.valueOf(preparedStatementValues));
-		return jdbcTemplate.queryForObject(getDemndCountQuery, preparedStatementValues.toArray(), Long.class);
+		List<Long> demandCount = namedParameterJdbcTemplate.query(getDemndCountQuery, preparedStatementValues, new SingleColumnRowMapper<>(Long.class));
+		return demandCount.get(0);
 	}
 
 	@Transactional
@@ -84,21 +87,22 @@ public class ArchivalRepository {
 							ps.setString(1, demand.getId());
 							ps.setString(2, demand.getConsumerCode());
 							ps.setString(3, demand.getConsumerType());
-							ps.setString(4, demand.getPayer().getUuid());
-							ps.setLong(5, demand.getTaxPeriodFrom());
-							ps.setLong(6, Long.valueOf(demand.getTaxPeriodTo()));
-							ps.setString(7, demand.getAuditDetails().getCreatedBy());
-							ps.setLong(8, demand.getAuditDetails().getCreatedTime());
-							ps.setString(9, demand.getAuditDetails().getLastModifiedBy());
-							ps.setLong(10, demand.getAuditDetails().getLastModifiedTime());
-							ps.setString(11, demand.getTenantId());
-							ps.setBigDecimal(12, demand.getMinimumAmountPayable());
-							ps.setString(13, demand.getStatus().name().toString());
-							ps.setObject(14, util.getPGObject(demand.getAdditionalDetails()));
-							ps.setLong(15, demand.getBillExpiryTime());
-							ps.setBoolean(16, demand.getIsPaymentCompleted());
-							ps.setLong(17, demand.getFixedBillExpiryDate());
-							ps.setLong(18, System.currentTimeMillis());
+							ps.setString(4, demand.getBusinessService());
+							ps.setString(5, demand.getPayer().getUuid());
+							ps.setLong(6, demand.getTaxPeriodFrom());
+							ps.setLong(7, demand.getTaxPeriodTo());
+							ps.setString(8, demand.getAuditDetails().getCreatedBy());
+							ps.setLong(9, demand.getAuditDetails().getCreatedTime());
+							ps.setString(10, demand.getAuditDetails().getLastModifiedBy());
+							ps.setLong(11, demand.getAuditDetails().getLastModifiedTime());
+							ps.setString(12, demand.getTenantId());
+							ps.setBigDecimal(13, demand.getMinimumAmountPayable());
+							ps.setString(14, demand.getStatus().name().toString());
+							ps.setObject(15, util.getPGObject(demand.getAdditionalDetails()));
+							ps.setLong(16, demand.getBillExpiryTime());
+							ps.setBoolean(17, demand.getIsPaymentCompleted());
+							ps.setLong(18, demand.getFixedBillExpiryDate());
+							ps.setLong(19, System.currentTimeMillis());
 
 							Set<DemandDetail> demandDetails = demand.getDemandDetails();
 							jdbcTemplate.batchUpdate(archivalQueryBuilder.INSERT_ARCHIVE_DEMAND_DETAILS_QUERY,
