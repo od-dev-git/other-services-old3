@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.catalina.startup.ClassLoaderFactory.Repository;
 import org.egov.arc.config.ArchivalConfig;
 import org.egov.arc.model.Demand;
 import org.egov.arc.model.DemandCriteria;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 import com.jayway.jsonpath.Criteria;
@@ -57,7 +59,8 @@ public class ArchivalService {
 	 * @return
 	 */
 	public Set<Demand> insertArchiveDemands(DemandCriteria demandCriteria, RequestInfo requestInfo) {
-		Set<Demand> archivalDemands = getArchiveDemands(demandCriteria, requestInfo);		
+	//	Set<Demand> archivalDemands = getArchiveDemands(demandCriteria, requestInfo);
+		Set<Demand> archivalDemands = getArchiveDemandsV2(demandCriteria, requestInfo);		
 		Set<Demand> distinctDemand =  archivalDemands.stream().distinct().collect(Collectors.toSet());
 		distinctDemand.forEach(d -> log.info("Demand Id for Archival: " + d));
 		log.info(String.valueOf(distinctDemand.size()));
@@ -190,11 +193,8 @@ public class ArchivalService {
 		} else if (archivalConfig.getDemandBpaArchival()) {
 			demandCriteria.setBusinessServices(Sets.newHashSet(Constants.BPA_NC_APP_FEE, Constants.BPA_NC_SAN_FEE));
 		}
-		if (demandCriteria.getArchiveTillMonth() == 0) {
+		if (StringUtils.isEmpty(demandCriteria.getArchiveTillMonth()) || demandCriteria.getArchiveTillMonth() == 0) {
 			demandCriteria.setArchiveTillMonth(archivalConfig.getDemandArchivalMonth());
-		}
-		if (demandCriteria.getLimit() == 0) {
-			demandCriteria.setLimit(archivalConfig.getDefaultLimit());
 		}
 
 	}
@@ -247,6 +247,91 @@ public class ArchivalService {
 				archiveDemands.add(demand);
 			}
 		}
+	}
+	
+
+	/**
+	 * Search method to fetch demands from DB
+	 * 
+	 * @param demandCriteria
+	 * @param requestInfo
+	 * @return
+	 */
+	@SuppressWarnings("null")
+	public Set<Demand> getArchiveDemandsV2(DemandCriteria demandCriteria, RequestInfo requestInfo) {
+		enrichDemandCriteria(demandCriteria);
+		List<Demand> demands = new ArrayList<>();
+		Set<Demand> archiveDemands = new HashSet<>();
+		Long archivalTillDate = util.getArchivalMonthStartDate(demandCriteria.getArchiveTillMonth());
+		log.info("Archive till date : " + archivalTillDate);
+		demandCriteria.setPeriodTo(archivalTillDate);
+		Long count = archivalRepository.getDemandCount(demandCriteria);
+		log.info("Total Demand record count till archival date:" + count + " Business Service : "
+				+ demandCriteria.getBusinessServices());
+		demands = archivalRepository.getDemands(demandCriteria);
+		HashMap<String, Demand> demandMap = new HashMap<>();
+		if (!CollectionUtils.isEmpty(demands)) {
+			for (Demand d : demands) {
+				DemandDetail demandDetail = new DemandDetail();
+				demandMap.put(d.getId(), d);
+				for (DemandDetail dd : d.getDemandDetails()) {
+					if (dd.getDemandId().equals(d.getId()) && demandMap.keySet().contains(dd.getDemandId()))
+						d.setDemandDetails(Sets.newHashSet(dd));
+				}
+			}
+		}
+		List<Demand> distinctDemands = new ArrayList<>();
+		for (Entry<String, Demand> dm : demandMap.entrySet()) {
+			distinctDemands.add(dm.getValue());
+		}
+
+		log.info("Distinct Demands :" + distinctDemands.toString());
+		Map<String, List<Demand>> demandGroupByBS = ((Collection<Demand>) distinctDemands).stream()
+				.collect(Collectors.groupingBy(Demand::getBusinessService));
+
+		for (Entry<String, List<Demand>> demandByBS : demandGroupByBS.entrySet()) {
+			String businessService = demandByBS.getKey();
+			switch (businessService) {
+			case Constants.WS_ONE_TIME_FEE:
+				if (archivalConfig.getDemandWsArchival()) {
+					wsApplicationFeeDemandArchival(archivalTillDate, archiveDemands, demandByBS);
+				}
+				break;
+
+			case Constants.WS:
+				if (archivalConfig.getDemandWsArchival()) {
+					wsUsageFeeDemandArchival(archivalTillDate, archiveDemands, demandByBS);
+				}
+				break;
+			/*
+			 * case Constants.PT_MUTATION: if (archivalConfig.getDemandPtArchival()) {
+			 * wsApplicationFeeDemandArchival(archivaTillDate, archiveDemands, demandByBS);
+			 * } break;
+			 * 
+			 * case Constants.TL: if (archivalConfig.getDemandTlArchival()) {
+			 * wsApplicationFeeDemandArchival(archivaTillDate, archiveDemands, demandByBS);
+			 * } break;
+			 * 
+			 * case Constants.MR: if (archivalConfig.getDemandMrArchival()) {
+			 * wsApplicationFeeDemandArchival(archivaTillDate, archiveDemands, demandByBS);
+			 * } break;
+			 * 
+			 * case Constants.BPA_NC_APP_FEE: if (archivalConfig.getDemandBpaArchival()) {
+			 * wsApplicationFeeDemandArchival(archivaTillDate, archiveDemands, demandByBS);
+			 * } break;
+			 * 
+			 * case Constants.BPA_NC_SAN_FEE: if (archivalConfig.getDemandBpaArchival()) {
+			 * wsApplicationFeeDemandArchival(archivaTillDate, archiveDemands, demandByBS);
+			 * } break;
+			 */
+
+			default:
+				break;
+			}
+
+		}
+		log.info("List of Archival Demands : " + archiveDemands);
+		return archiveDemands;
 	}
 
 }

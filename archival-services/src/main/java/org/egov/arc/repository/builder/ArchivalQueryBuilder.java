@@ -1,6 +1,8 @@
 package org.egov.arc.repository.builder;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.egov.arc.config.ArchivalConfig;
@@ -52,10 +54,10 @@ public class ArchivalQueryBuilder {
 
 	public static String DELETE_DEMAND_DETAILS_SQL_QUERY = "DELETE FROM egbs_demanddetail_v1_bkp WHERE demandid in (:demandIds)";
 
-	public static final String GET_DEMAND_COUNT_QUERY = "SELECT count(*) FROM egbs_demand_v1_bkp dmd   INNER JOIN egbs_demanddetail_v1_bkp dmdl ON dmd.id=dmdl.demandid "
+	public static final String GET_DEMAND_COUNT_QUERY = "SELECT count(distinct dmd.id) FROM egbs_demand_v1_bkp dmd   INNER JOIN egbs_demanddetail_v1_bkp dmdl ON dmd.id=dmdl.demandid "
 			+ " AND dmd.tenantid=dmdl.tenantid ";
 
-	public String getDemandQuery(DemandCriteria demandCriteria, List<Object> preparedStatementValues) {
+	public String getDemandQuery(DemandCriteria demandCriteria, Map<String,Object> preparedStatementValues) {
 
 		StringBuilder demandQuery = new StringBuilder(BASE_DEMAND_QUERY);
 
@@ -72,96 +74,105 @@ public class ArchivalQueryBuilder {
 
 		if (demandCriteria.getStatus() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.status=?");
-			preparedStatementValues.add(demandCriteria.getStatus());
+			demandQuery.append("dmd.status = :status");
+			preparedStatementValues.put("status",demandCriteria.getStatus());
 		}
 
 		if (demandCriteria.getDemandId() != null && !CollectionUtils.isEmpty(demandCriteria.getDemandId())) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.id IN (" + getIdQueryForStrings(demandCriteria.getDemandId()));
+			demandQuery.append("dmd.id IN (:demandId)");
+			preparedStatementValues.put("demandId",demandCriteria.getDemandId());
 		}
 		if (!CollectionUtils.isEmpty(demandCriteria.getPayer())) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.payer IN (" + getIdQueryForStrings(demandCriteria.getPayer()));
+			demandQuery.append("dmd.payer IN (:payer)");
+			preparedStatementValues.put("payer",demandCriteria.getPayer());
 		}
 		if (!CollectionUtils.isEmpty(demandCriteria.getBusinessServices())) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.businessservice IN (" + getIdQueryForStrings(demandCriteria.getBusinessServices()));
+			demandQuery.append("dmd.businessservice IN (:businessservice)");
+			preparedStatementValues.put("businessservice",demandCriteria.getBusinessServices());
 		}
 
 		if (demandCriteria.getIsPaymentCompleted() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.ispaymentcompleted = ?");
-			preparedStatementValues.add(demandCriteria.getIsPaymentCompleted());
+			demandQuery.append("dmd.ispaymentcompleted = :isPaymentCompleted");
+			preparedStatementValues.put("isPaymentCompleted",demandCriteria.getIsPaymentCompleted());
 		}
 
 		if (demandCriteria.getPeriodFrom() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.taxPeriodFrom >= ?");
-			preparedStatementValues.add(demandCriteria.getPeriodFrom());
+			demandQuery.append("dmd.taxPeriodFrom >= :taxPeriodFrom");
+			preparedStatementValues.put("taxPeriodFrom",demandCriteria.getPeriodFrom());
 		}
 
 		if (demandCriteria.getPeriodTo() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.taxPeriodTo <= ?");
-			preparedStatementValues.add(demandCriteria.getPeriodTo());
+			demandQuery.append("dmd.taxPeriodTo <= :taxPeriodTo");
+			preparedStatementValues.put("taxPeriodTo",demandCriteria.getPeriodTo());
 		}
 
 		if (demandCriteria.getArchiveTillDate() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.taxPeriodFrom <= ?");
-			preparedStatementValues.add(demandCriteria.getArchiveTillDate());
+			demandQuery.append("dmd.taxPeriodFrom <= :archivalTillDate");
+			preparedStatementValues.put("archivalTillDate",demandCriteria.getArchiveTillDate());
 		}
 
 		if (demandCriteria.getConsumerCode() != null && !demandCriteria.getConsumerCode().isEmpty()) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.consumercode IN (" + getIdQueryForStrings(demandCriteria.getConsumerCode()));
+			demandQuery.append("dmd.consumercode IN (:consumerCode)");
+			preparedStatementValues.put("consumerCode",demandCriteria.getConsumerCode());
 		}
 
 		addOrderByClause(demandQuery, DEMAND_QUERY_ORDER_BY_CLAUSE);
-		addPaginationIfRequired(demandQuery, demandCriteria.getLimit(), demandCriteria.getOffset(),
-				preparedStatementValues);
-
 		return demandQuery.toString();
 
 	}
 
-	public String getDemandCountQuery(DemandCriteria demandCriteria, List<Object> preparedStatementValues) {
+	public String getDemandCountQuery(DemandCriteria demandCriteria, Map<String, Object> preparedStatementValues) {
 
 		StringBuilder demandQuery = new StringBuilder(GET_DEMAND_COUNT_QUERY);
 
 		if (!CollectionUtils.isEmpty(demandCriteria.getBusinessServices())) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.businessservice IN (" + getIdQueryForStrings(demandCriteria.getBusinessServices()));
+			demandQuery.append("dmd.businessservice IN (:businessService)" );
+			preparedStatementValues.put("businessService",demandCriteria.getBusinessServices());
 		}
 
 		if (demandCriteria.getIsPaymentCompleted() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.ispaymentcompleted = ?");
-			preparedStatementValues.add(demandCriteria.getIsPaymentCompleted());
+			demandQuery.append("dmd.ispaymentcompleted = :ispaymentcompleted");
+			preparedStatementValues.put("ispaymentcompleted",demandCriteria.getIsPaymentCompleted());
 		}
 
 		if (demandCriteria.getPeriodFrom() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.taxPeriodFrom >= ?");
-			preparedStatementValues.add(demandCriteria.getPeriodFrom());
+			demandQuery.append("dmd.taxPeriodFrom >= :taxPeriodFrom");
+			preparedStatementValues.put("taxPeriodFrom",demandCriteria.getPeriodFrom());
 		}
 
 		if (demandCriteria.getPeriodTo() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.taxPeriodTo <= ?");
-			preparedStatementValues.add(demandCriteria.getPeriodTo());
+			demandQuery.append("dmd.taxPeriodTo <= :taxPeriodTo");
+			preparedStatementValues.put("taxPeriodTo",demandCriteria.getPeriodTo());
 		}
 
 		if (demandCriteria.getArchiveTillDate() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.taxPeriodFrom <= ?");
-			preparedStatementValues.add(demandCriteria.getArchiveTillDate());
+			demandQuery.append("dmd.taxPeriodFrom <= :taxPeriodFrom");
+			preparedStatementValues.put("taxPeriodFrom",demandCriteria.getArchiveTillDate());
+		}
+		
+		if (demandCriteria.getArchiveTillDate() != null) {
+			addClauseIfRequired(preparedStatementValues, demandQuery);
+			demandQuery.append("dmd.taxPeriodFrom <= :archivalTillDate");
+			preparedStatementValues.put("archivalTillDate",demandCriteria.getArchiveTillDate());
 		}
 
 		if (demandCriteria.getConsumerCode() != null && !demandCriteria.getConsumerCode().isEmpty()) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
-			demandQuery.append("dmd.consumercode IN (" + getIdQueryForStrings(demandCriteria.getConsumerCode()));
+			demandQuery.append("dmd.consumercode IN (:consumercode) ");
+			preparedStatementValues.put("consumercode",demandCriteria.getConsumerCode());
 		}
 
 		return demandQuery.toString();
@@ -177,26 +188,27 @@ public class ArchivalQueryBuilder {
 		demandQueryBuilder.append(" ORDER BY " + columnName);
 	}
 
-	private static void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
+	private static void addClauseIfRequired(Map<String, Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
 			queryString.append(" WHERE ");
 		else {
-			queryString.append(" AND");
+			queryString.append(" AND ");
 		}
 	}
 
 	private static String getIdQueryForStrings(Set<String> idList) {
+		 StringBuilder query = new StringBuilder();
+		    if (!idList.isEmpty()) {
+		        // Use LinkedHashSet to maintain insertion order
+		        Set<String> linkedHashSet = new LinkedHashSet<>(idList);
 
-		StringBuilder query = new StringBuilder();
-		if (!idList.isEmpty()) {
-
-			String[] list = idList.toArray(new String[idList.size()]);
-			query.append("'" + list[0] + "'");
-			for (int i = 1; i < idList.size(); i++) {
-				query.append("," + "'" + list[i] + "'");
-			}
-		}
-		return query.append(")").toString();
+		        String[] list = linkedHashSet.toArray(new String[linkedHashSet.size()]);
+		        query.append("'" + list[0] + "'");
+		        for (int i = 1; i < list.length; i++) {
+		            query.append("," + "'" + list[i] + "'");
+		        }
+		    }
+		    return query.insert(0, "(").append(")").toString();
 	}
 
 	private void addPaginationIfRequired(StringBuilder demandQuery, Integer limit, Integer offset,
