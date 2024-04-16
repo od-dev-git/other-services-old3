@@ -15,7 +15,7 @@ import lombok.Setter;
 @Builder
 public class IssueFix {
 
-	@JsonProperty("tenantId")
+	@JsonProperty("tenant")
 	private String tenantId=null;
 
     @JsonProperty("issueName")

@@ -1,0 +1,76 @@
+
+=====================================================================
+FSSM Application Report
+=====================================================================
+
+select
+	initcap(split_part(tenantid, '.', 2)) as ulb,
+	applicationno,
+	oldapplicationno,
+	applicationtype,
+	additionaldetails,
+	description,
+	source,
+	sanitationtype,
+	propertyusage,
+	nooftrips,
+	applicationstatus,
+	status,
+	vehicle_id,
+	vehicletype,
+	paymentpreference,
+	vehiclecapacity,
+	advanceamount,
+	case
+		when createdtime >0 then to_timestamp(createdtime / 1000)::date
+	end as createdtime,
+	case
+		when possible_srv_date >0 then to_timestamp(possible_srv_date / 1000)::date
+	end as possiblesrvdate,
+	case
+		when completed_on >0 then to_timestamp(completed_on / 1000)::date
+	end as completedon
+from
+	eg_fsm_application
+where
+	tenantid != 'od.testing'
+	and status is distinct
+from
+	'DELETED';
+
+-------------------------------------------------------------------------------------------------------------------
+
+========================================================
+FSSM Collection Report
+========================================================
+
+select
+    initcap(split_part(epd.tenantid,'.',2)) as ulb
+    , to_timestamp(epd.receiptdate/1000)::date as receiptdate
+    , epd.receiptnumber
+    , to_timestamp(epd.createdtime/1000)::date as createdtime
+    , eb.consumercode
+    , epd.amountpaid
+    , ep.paymentmode
+    , case
+       when epd.businessservice='WS.ONE_TIME_FEE' then 'WS Application Fee'
+       when epd.businessservice='WS' then 'WS Monthly Fee'
+       when epd.businessservice='BPA.NC_SAN_FEE' then 'BPA Sanction Fee'
+       when epd.businessservice='BPA.NC_APP_FEE' then 'BPA Application Fee'
+       when epd.businessservice='PT.MUTATION' then 'PT Mutation Fee'
+       when epd.businessservice='PT' then 'Property Tax'
+       when epd.businessservice='FSM.TRIP_CHARGES' then 'FSSM Trip Charges'
+       when epd.businessservice='Layout.LAYOUT_APP_FEE' then 'Layout Application Fee'
+       when epd.businessservice='Layout.LAYOUT_SAN_FEE' then 'Layout Sanction Fee'
+     end as feeType
+from egcl_paymentdetail epd
+inner join egcl_payment ep on ep.id = epd.paymentid
+left outer join egcl_bill eb on eb.id = epd.billid
+where epd.businessservice in ( 'FSM.TRIP_CHARGES')
+and ep.paymentstatus not in ('CANCELLED', 'DISHONOURED') and ep.tenantid != 'od.testing';
+
+
+
+
+
+
