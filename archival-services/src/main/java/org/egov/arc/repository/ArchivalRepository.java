@@ -102,7 +102,7 @@ public class ArchivalRepository {
 							ps.setLong(16, demand.getBillExpiryTime());
 							ps.setBoolean(17, demand.getIsPaymentCompleted());
 							ps.setLong(18, demand.getFixedBillExpiryDate());
-							ps.setLong(19, System.currentTimeMillis());
+							//ps.setLong(19, System.currentTimeMillis());
 
 							Set<DemandDetail> demandDetails = demand.getDemandDetails();
 							jdbcTemplate.batchUpdate(archivalQueryBuilder.INSERT_ARCHIVE_DEMAND_DETAILS_QUERY,
@@ -123,7 +123,7 @@ public class ArchivalRepository {
 											ps.setLong(9, demandDetail.getAuditDetails().getLastModifiedTime());
 											ps.setString(10, demandDetail.getTenantId());
 											ps.setObject(11, util.getPGObject(demandDetail.getAdditionalDetails()));
-											ps.setLong(12, System.currentTimeMillis());
+											//ps.setLong(12, System.currentTimeMillis());
 
 										}
 
