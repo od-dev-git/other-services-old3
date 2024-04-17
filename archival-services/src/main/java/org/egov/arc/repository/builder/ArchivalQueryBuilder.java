@@ -43,12 +43,12 @@ public class ArchivalQueryBuilder {
 	public static final String DEMAND_QUERY_ORDER_BY_CLAUSE = "dmd.taxperiodfrom";
 
 	public static String INSERT_ARCHIVE_DEMANDS_QUERY = " INSERT INTO public.egbs_demand_v1_archive "
-			+ "(id, consumercode, consumertype, businessservice, payer, taxperiodfrom, taxperiodto, createdby, createdtime, lastmodifiedby, lastmodifiedtime, tenantid, minimumamountpayable, status, additionaldetails, billexpirytime, ispaymentcompleted, fixedbillexpirydate, archivaltime) "
-			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+			+ "(id, consumercode, consumertype, businessservice, payer, taxperiodfrom, taxperiodto, createdby, createdtime, lastmodifiedby, lastmodifiedtime, tenantid, minimumamountpayable, status, additionaldetails, billexpirytime, ispaymentcompleted, fixedbillexpirydate) "
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
 	public static String INSERT_ARCHIVE_DEMAND_DETAILS_QUERY = " INSERT INTO public.egbs_demanddetail_v1_archive "
-			+ "(id, demandid, taxheadcode, taxamount, collectionamount, createdby, createdtime, lastmodifiedby, lastmodifiedtime, tenantid, additionaldetails, archivaltime) "
-			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+			+ "(id, demandid, taxheadcode, taxamount, collectionamount, createdby, createdtime, lastmodifiedby, lastmodifiedtime, tenantid, additionaldetails) "
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
 	public static String DELETE_DEMAND_SQL_QUERY = "DELETE FROM egbs_demand_v1_bkp WHERE id in (:demandIds)";
 
@@ -60,17 +60,13 @@ public class ArchivalQueryBuilder {
 	public String getDemandQuery(DemandCriteria demandCriteria, Map<String,Object> preparedStatementValues) {
 
 		StringBuilder demandQuery = new StringBuilder(BASE_DEMAND_QUERY);
-
-//		String tenantId = demandCriteria.getTenantId();
-//		String[] tenantIdChunks = tenantId.split("\\.");
-//
-//		if (tenantIdChunks.length == 1) {
-//			demandQuery.append(" dmd.tenantid LIKE ? ");
-//			preparedStatementValues.add(demandCriteria.getTenantId() + '%');
-//		} else {
-//			demandQuery.append(" dmd.tenantid = ? ");
-//			preparedStatementValues.add(demandCriteria.getTenantId());
-//		}
+		
+		if (demandCriteria.getTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, demandQuery);
+			demandQuery.append(" dmd.tenantid = :tenantId ");
+			demandQuery.append(" and dmdl.tenantid = :tenantId ");
+			preparedStatementValues.put("tenantId",demandCriteria.getTenantId());
+		}
 
 		if (demandCriteria.getStatus() != null) {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
@@ -173,6 +169,12 @@ public class ArchivalQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, demandQuery);
 			demandQuery.append("dmd.consumercode IN (:consumercode) ");
 			preparedStatementValues.put("consumercode",demandCriteria.getConsumerCode());
+		}
+		
+		if (demandCriteria.getTenantId() != null) {
+			addClauseIfRequired(preparedStatementValues, demandQuery);
+			demandQuery.append(" dmd.tenantid = :tenantId ");
+			preparedStatementValues.put("tenantId",demandCriteria.getTenantId());
 		}
 
 		return demandQuery.toString();
