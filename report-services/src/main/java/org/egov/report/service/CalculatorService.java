@@ -18,6 +18,7 @@ public class CalculatorService {
 	public static final BigDecimal Percentage3 = BigDecimal.valueOf(0.03);
 	public static final BigDecimal Percentage4 = BigDecimal.valueOf(0.04);
 	public static final BigDecimal Percentage5 = BigDecimal.valueOf(0.05);
+	public static final BigDecimal Percentage7_5 = BigDecimal.valueOf(0.075);
 	
 	public void calculateIncentives(String module, Map<String, IncentiveAnalysis> incentiveAnalysis) {
 		
@@ -75,7 +76,7 @@ public class CalculatorService {
 
 	private void calculateWaterIncentive(Map<String, IncentiveAnalysis> incentiveAnalysis) {
 		incentiveAnalysis.values().stream().forEach(incentive -> {
-			incentive.setTotalIncentive(incentive.getTotalCollection().multiply(Percentage5).setScale(2, RoundingMode.UP));
+			incentive.setTotalIncentive(incentive.getTotalCollection().multiply(Percentage7_5).setScale(2, RoundingMode.UP));
 		});
 	}
 
