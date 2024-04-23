@@ -43,12 +43,12 @@ public class ArchivalQueryBuilder {
 	public static final String DEMAND_QUERY_ORDER_BY_CLAUSE = "dmd.taxperiodfrom";
 
 	public static String INSERT_ARCHIVE_DEMANDS_QUERY = " INSERT INTO public.egbs_demand_v1_archive "
-			+ "(id, consumercode, consumertype, businessservice, payer, taxperiodfrom, taxperiodto, createdby, createdtime, lastmodifiedby, lastmodifiedtime, tenantid, minimumamountpayable, status, additionaldetails, billexpirytime, ispaymentcompleted, fixedbillexpirydate) "
-			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+			+ "(id, consumercode, consumertype, businessservice, payer, taxperiodfrom, taxperiodto, createdby, createdtime, lastmodifiedby, lastmodifiedtime, tenantid, minimumamountpayable, status, additionaldetails, billexpirytime, ispaymentcompleted, fixedbillexpirydate,archivaltime) "
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
 	public static String INSERT_ARCHIVE_DEMAND_DETAILS_QUERY = " INSERT INTO public.egbs_demanddetail_v1_archive "
-			+ "(id, demandid, taxheadcode, taxamount, collectionamount, createdby, createdtime, lastmodifiedby, lastmodifiedtime, tenantid, additionaldetails) "
-			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+			+ "(id, demandid, taxheadcode, taxamount, collectionamount, createdby, createdtime, lastmodifiedby, lastmodifiedtime, tenantid, additionaldetails, archivaltime) "
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
 	public static String DELETE_DEMAND_SQL_QUERY = "DELETE FROM egbs_demand_v1_bkp WHERE id in (:demandIds)";
 
