@@ -58,13 +58,18 @@ public class ArchivalService {
 	 * @return
 	 */
 	public Set<Demand> insertArchiveDemands(DemandCriteria demandCriteria, RequestInfo requestInfo) {
-	//	Set<Demand> archivalDemands = getArchiveDemands(demandCriteria, requestInfo);
-		Set<Demand> archivalDemands = getArchiveDemandsV2(demandCriteria, requestInfo);		
-		Set<Demand> distinctDemand =  archivalDemands.stream().distinct().collect(Collectors.toSet());
-		log.info("Archival Demand Size : "+distinctDemand.size());
-		distinctDemand.forEach(d -> log.info("Demand Id for Archival: " + d));
-		log.info(String.valueOf(distinctDemand.size()));
-		archivalRepository.insertArchiveDemands(distinctDemand);
+		// Set<Demand> archivalDemands = getArchiveDemands(demandCriteria, requestInfo);
+		Set<Demand> archivalDemands = getArchiveDemandsV2(demandCriteria, requestInfo);
+		Set<Demand> distinctDemand = archivalDemands.stream().distinct().collect(Collectors.toSet());
+		if (!CollectionUtils.isEmpty(distinctDemand)) {
+			log.info("Demand Archival process start for tenant: {} Size: {}", demandCriteria.getTenantId(),
+					distinctDemand.size());
+			distinctDemand.forEach(d -> log.info("Demand Id for Archival: {}", d));
+			archivalRepository.insertArchiveDemands(distinctDemand, demandCriteria);
+			log.info("Demand Archival process completed successfully for Tenant: {}", demandCriteria.getTenantId());
+		} else {
+			log.info("No Demand found under the archival criteria for tenant: {}", demandCriteria.getTenantId());
+		}
 		return distinctDemand;
 	}
 
@@ -221,20 +226,23 @@ public class ArchivalService {
 	@SuppressWarnings("null")
 	public Set<Demand> getArchiveDemandsV2(DemandCriteria demandCriteria, RequestInfo requestInfo) {
 		String tenantObj = ArchivalUtility.getSystemProperties().getTenants();
-		List<Object> tenants = Arrays.asList(tenantObj.split("\\s+"));
+		List<Object> tenants = null;
+		if(!CollectionUtils.isEmpty(demandCriteria.getTenantIds())) {
+			tenants = demandCriteria.getTenantIds();
+		}else {
+			 tenants = Arrays.asList(tenantObj.split("\\s+"));
+		}
 		enrichDemandCriteria(demandCriteria);
 		Set<Demand> archiveDemands = new HashSet<>();
 		Long archivalTillDate = util.getArchivalMonthStartDate(demandCriteria.getArchiveTillMonth());
-		log.info("Archive till date : " + archivalTillDate);
+		log.info("Archive till date: {}", archivalTillDate);
 		demandCriteria.setPeriodTo(archivalTillDate);
-		Long count = archivalRepository.getDemandCount(demandCriteria);
-		log.info("Total Demand record count till archival date:" + count + " Business Service : "
-				+ demandCriteria.getBusinessServices());
 		for (Object tenant : tenants) {
 			demandCriteria.setTenantId(String.valueOf(tenant));
 			Long countForTenant = archivalRepository.getDemandCount(demandCriteria);
-			log.info("Total Demand record count till archival date:" + countForTenant + "for tenant :"
-					+ String.valueOf(tenant) + " Business Service : " + demandCriteria.getBusinessServices());
+			log.info("Total Demand record count till archival date: {} for tenant: {} Business Service: {}",
+					countForTenant, tenant, demandCriteria.getBusinessServices());
+			log.info("Fetching Demand Data for tenant: {}", tenant);
 			List<Demand> demands = archivalRepository.getDemands(demandCriteria);
 			if (!CollectionUtils.isEmpty(demands)) {
 				Map<String, List<Demand>> demandGroupByBS = demands.stream().flatMap(demand -> demand.getDemandDetails()
@@ -242,8 +250,6 @@ public class ArchivalService {
 							d1.getDemandDetails().add(d2.getDemandDetails().iterator().next());
 							return d1;
 						})).values().stream()).collect(Collectors.groupingBy(Demand::getBusinessService));
-
-				log.info("Distinct Demands :" + demands.toString());
 
 				for (Entry<String, List<Demand>> demandByBS : demandGroupByBS.entrySet()) {
 					String businessService = demandByBS.getKey();
@@ -266,7 +272,7 @@ public class ArchivalService {
 
 				}
 			} else {
-				log.info("No Demand found for archival criteria...tenant : " + tenant);
+				log.info("No Demand found for archival criteria for tenant : {} ", tenant);
 			}
 		}
 		return archiveDemands;
