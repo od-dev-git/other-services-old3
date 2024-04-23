@@ -76,7 +76,7 @@ public class ArchivalRepository {
 	}
 
 	@Transactional
-	public void insertArchiveDemands(Set<Demand> demands) {
+	public void insertArchiveDemands(Set<Demand> demands, DemandCriteria demandCriteria) {
 
 		try {
 			jdbcTemplate.batchUpdate(archivalQueryBuilder.INSERT_ARCHIVE_DEMANDS_QUERY,
@@ -102,7 +102,8 @@ public class ArchivalRepository {
 							ps.setLong(16, demand.getBillExpiryTime());
 							ps.setBoolean(17, demand.getIsPaymentCompleted());
 							ps.setLong(18, demand.getFixedBillExpiryDate());
-							//ps.setLong(19, System.currentTimeMillis());
+							ps.setLong(19, System.currentTimeMillis());
+							
 
 							Set<DemandDetail> demandDetails = demand.getDemandDetails();
 							jdbcTemplate.batchUpdate(archivalQueryBuilder.INSERT_ARCHIVE_DEMAND_DETAILS_QUERY,
@@ -123,14 +124,14 @@ public class ArchivalRepository {
 											ps.setLong(9, demandDetail.getAuditDetails().getLastModifiedTime());
 											ps.setString(10, demandDetail.getTenantId());
 											ps.setObject(11, util.getPGObject(demandDetail.getAdditionalDetails()));
-											//ps.setLong(12, System.currentTimeMillis());
+											ps.setLong(12, System.currentTimeMillis());
 
 										}
 
 										@Override
 										public int getBatchSize() {
 											// return (demandDetails.size()/config.getInsertBatchSize());
-											 return demandDetails.size();
+											return demandDetails.size();
 										}
 
 										@Override
@@ -144,8 +145,8 @@ public class ArchivalRepository {
 
 						@Override
 						public int getBatchSize() {
-						//	return (demands.size()/config.getInsertBatchSize());
-						 return demands.size();
+							// return (demands.size()/config.getInsertBatchSize());
+							return demands.size();
 						}
 
 						@Override
@@ -158,7 +159,7 @@ public class ArchivalRepository {
 
 			Set<String> archivedDemandIds = new HashSet<>();
 			demands.stream().map(Demand::getId).forEach(archivedDemandIds::add);
-			log.info("Archived Demand Ids : " + archivedDemandIds);
+			log.info("Archived Demand Ids for tenant: {} {}", demandCriteria.getTenantId(), archivedDemandIds);
 
 			if (!demands.isEmpty()) {
 				Set<String> demandIds = new HashSet<>();
@@ -168,7 +169,7 @@ public class ArchivalRepository {
 				String deleteDemandDetailsSql = archivalQueryBuilder.DELETE_DEMAND_DETAILS_SQL_QUERY;
 				namedParameterJdbcTemplate.update(deleteDemandDetailsSql, paramMap);
 				namedParameterJdbcTemplate.update(deleteDemandSql, paramMap);
-				log.info("Deleted Demand ids : " + demandIds);
+				log.info("Deleted Demand Ids for tenant : {} {}", demandCriteria.getTenantId(), demandIds);
 			}
 		} catch (DataAccessException e) {
 			e.printStackTrace();
