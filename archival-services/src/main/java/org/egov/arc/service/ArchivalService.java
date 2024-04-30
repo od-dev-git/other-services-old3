@@ -1,5 +1,6 @@
 package org.egov.arc.service;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -59,6 +60,7 @@ public class ArchivalService {
 	 */
 	public Set<Demand> insertArchiveDemands(DemandCriteria demandCriteria, RequestInfo requestInfo) {
 		// Set<Demand> archivalDemands = getArchiveDemands(demandCriteria, requestInfo);
+		Long archivalStartTime = System.currentTimeMillis();
 		Set<Demand> archivalDemands = getArchiveDemandsV2(demandCriteria, requestInfo);
 		Set<Demand> distinctDemand = archivalDemands.stream().distinct().collect(Collectors.toSet());
 		if (!CollectionUtils.isEmpty(distinctDemand)) {
@@ -67,6 +69,9 @@ public class ArchivalService {
 			distinctDemand.forEach(d -> log.info("Demand Id for Archival: {}", d));
 			archivalRepository.insertArchiveDemands(distinctDemand, demandCriteria);
 			log.info("Demand Archival process completed successfully for Tenant: {}", demandCriteria.getTenantId());
+			Long archivalTimeTaken = System.currentTimeMillis() - archivalStartTime;
+			Duration duration  = Duration.ofMillis(archivalTimeTaken);
+			log.info("Time taken for archival:{} mins, for Tenant: {}", duration.toMinutes(), demandCriteria.getTenantId());
 		} else {
 			log.info("No Demand found under the archival criteria for tenant: {}", demandCriteria.getTenantId());
 		}
