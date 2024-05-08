@@ -282,15 +282,18 @@ public class DataExchangeService {
 						filestore = registration.getDscDetails().get(0).getDocumentId();
 						filestoreid = paymentService
 								.getFilestore(registration.getDscDetails().get(0).getDocumentId(), tenantId);
+						log.info("Filestotre Id fetched: "+filestoreid);
 						break;
 					}
 				}
 
 			}
+			log.info("Before setting data for MRCerificate... ");
 			if (filestoreid != null && !filestoreid.getFilestoreIds().isEmpty()) {
 
 				MrCertificate certificate = new MrCertificate();
 
+				log.info("doctype:"+searchCriteria.getDocType());;
 				if (searchCriteria.getDocType().equals("RMCER")) {
 
 					certificate = populateCertificateForMR(registrations.get(0));
@@ -339,6 +342,7 @@ public class DataExchangeService {
 			XStream xstream, MrCertificate certificate, FileStoreUrlResponse filestoreid, String filestore,
 			MarriageRegistration marriageRegistration)
 			throws MalformedURLException, IOException {
+		log.info("inside createCeritificateFromFilestoreIdForMR");
 		String tenantId = ("od."+searchCriteria.getCity());
 		String pdfPath = filestoreid.getFilestoreIds().get(0).get("url");
 		URL url1 = new URL(pdfPath);
@@ -383,7 +387,8 @@ public class DataExchangeService {
 			persons.add(person);
 			
 			if(model.getClass().equals(PullDocResponse.class)) {
-
+				
+				log.info("pull doc request for MR..");
 				DocDetailsResponse docDetailsResponse = new DocDetailsResponse();
 				docDetailsResponse
 						.setDataContent(Base64.getEncoder().encodeToString(xstream.toXML(certificate).getBytes()));
@@ -392,6 +397,7 @@ public class DataExchangeService {
 				((PullDocResponse) model).setDocDetails(docDetailsResponse);
 			}else {
 				
+				log.info("pull uri request for MR..");
 				DGLRequest dgl = populateDataAfterSuccessResponse(searchCriteria,filestore);
 				String maskedId = dgl.getDglModel().getMaskedId();
 				
@@ -410,7 +416,7 @@ public class DataExchangeService {
 				((PullURIResponse) model).setDocDetails(docDetailsResponse);
 			}
 
-			
+			log.info("exiting createCeritificateFromFilestoreIdForMR");
 		} catch (NullPointerException npe) {
 			log.error(npe.getMessage());
 			log.info("Error Occured", npe.getMessage());
@@ -419,6 +425,7 @@ public class DataExchangeService {
 	}
 
 	private MrCertificate populateCertificateForMR(MarriageRegistration marriageRegistration) {
+		log.info("inside populateCertificateForMR:");
 		MrCertificate certificate = new MrCertificate();
 		certificate.setLanguage("99");
 		certificate.setType("RMCER");
@@ -574,6 +581,7 @@ public class DataExchangeService {
 		
 		certificateData.setMarriageCertificate(marriageCertificate);
 		certificate.setCertificateData(certificateData);
+		log.info("Certificate data set populateCertificateForMR");
 		return certificate;
 	}
 
@@ -1535,7 +1543,9 @@ public class DataExchangeService {
 			area.setApprovedCoveredArea(String.valueOf(totalBUA.get(0)));
 			
 			addressBPA.setType("");
-			addressBPA.setLine1("Plot No: "+plotNo.get(0));
+			if(!CollectionUtils.isEmpty(plotNo)) {
+				addressBPA.setLine1("Plot No: "+plotNo.get(0));
+			}
 			addressBPA.setLine2("Khata No: "+khataNo.get(0));
 			addressBPA.setWardNo("Locality: "+mauza.get(0));
 			addressBPA.setDistrict(district.get(0));
@@ -1639,6 +1649,8 @@ public class DataExchangeService {
 	
 	private DGLRequest populateDataAfterSuccessResponse(SearchCriteria searchCriteria, String filestore) {
 		
+		log.info("before DGL table search");
+		
 		String docType = searchCriteria.getDocType();
 		String tenantId = "od."+searchCriteria.getCity();
 		String consumerCode = "";
@@ -1654,6 +1666,8 @@ public class DataExchangeService {
 		String maskedId = getMaskedIdForFilestore();
 		
 		DGLSearchCriteria criteria = DGLSearchCriteria.builder().consumerCode(consumerCode).build();
+		
+		log.info("criteria for DGL search:"+criteria);
 		
 		DGLModel dglResponse = repository.searchDataForDGL(criteria);
 		
