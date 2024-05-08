@@ -344,7 +344,7 @@ public class DataExchangeService {
 			throws MalformedURLException, IOException {
 		log.info("inside createCeritificateFromFilestoreIdForMR");
 		String tenantId = ("od."+searchCriteria.getCity());
-		String pdfPath = filestoreid.getFilestoreIds().get(0).get("url");
+		String pdfPath = filestoreid.getFilestoreIds().get(0).get("localUrl");
 		URL url1 = new URL(pdfPath);
 		log.info("Url for filestore"+url1);
 		try {
