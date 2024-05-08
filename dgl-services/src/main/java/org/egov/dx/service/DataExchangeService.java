@@ -346,6 +346,7 @@ public class DataExchangeService {
 		String tenantId = ("od."+searchCriteria.getCity());
 		String pdfPath = filestoreid.getFilestoreIds().get(0).get("url");
 		URL url1 = new URL(pdfPath);
+		log.info("Url for filestore"+url1);
 		try {
 
 			// Read the PDF from the URL and save to a local file
@@ -357,6 +358,7 @@ public class DataExchangeService {
 
 			while ((nRead = is1.read(data, 0, data.length)) != -1) {
 				buffer.write(data, 0, nRead);
+				log.info("Loop iterations:"+nRead);
 			}
 			
 			buffer.flush();
