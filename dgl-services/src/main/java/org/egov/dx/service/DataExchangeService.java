@@ -358,7 +358,7 @@ public class DataExchangeService {
 
 			while ((nRead = is1.read(data, 0, data.length)) != -1) {
 				buffer.write(data, 0, nRead);
-				log.info("Loop iterations:"+nRead);
+				//log.info("Loop iterations:"+nRead);
 			}
 			
 			buffer.flush();
@@ -764,7 +764,7 @@ public class DataExchangeService {
 		}
 		
 		if (o != null && !o.getFilestoreIds().isEmpty()) {
-			String pdfPath = o.getFilestoreIds().get(0).get("url");
+			String pdfPath = o.getFilestoreIds().get(0).get("localUrl");
 			URL url1 = new URL(pdfPath);
 			try {
 
@@ -1024,7 +1024,7 @@ public class DataExchangeService {
 			throws IOException, MalformedURLException {
 
 		String tenantId = ("od." + searchCriteria.getCity());
-		String pdfPath = filestoreid.getFilestoreIds().get(0).get("url");
+		String pdfPath = filestoreid.getFilestoreIds().get(0).get("localUrl");
 		URL url1 = new URL(pdfPath);
 		try {
 
@@ -1572,7 +1572,7 @@ public class DataExchangeService {
 			throws MalformedURLException, IOException {
 
 		String tenantId = ("od." + searchCriteria.getCity());
-		String pdfPath = filestoreid.getFilestoreIds().get(0).get("url");
+		String pdfPath = filestoreid.getFilestoreIds().get(0).get("localUrl");
 		URL url1 = new URL(pdfPath);
 		try {
 
