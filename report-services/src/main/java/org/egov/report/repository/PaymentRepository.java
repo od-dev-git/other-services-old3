@@ -49,16 +49,17 @@ public class PaymentRepository {
         if(CollectionUtils.isEmpty(ids))
             return new LinkedList<>();
 
-        String query = paymentQueryBuilder.getPaymentSearchQuery(ids, preparedStatementValues);
+        String query = paymentQueryBuilder.getPaymentSearchQuery(ids, preparedStatementValues, paymentSearchCriteria);
         log.info("Query: " + query);
         log.info("preparedStatementValues: " + preparedStatementValues);
         List<Payment> payments = namedParameterJdbcTemplate.query(query, preparedStatementValues, paymentRowMapper);
         if (!CollectionUtils.isEmpty(payments)) {
             Set<String> billIds = new HashSet<>();
+            String tenantId = payments.get(0).getTenantId();
             for (Payment payment : payments) {
                 billIds.addAll(payment.getPaymentDetails().stream().map(detail -> detail.getBillId()).collect(Collectors.toSet()));
             }
-            Map<String, Bill> billMap = getBills(billIds);
+            Map<String, Bill> billMap = getBills(billIds, tenantId);
             for (Payment payment : payments) {
                 payment.getPaymentDetails().forEach(detail -> {
                     detail.setBill(billMap.get(detail.getBillId()));
@@ -77,11 +78,13 @@ public class PaymentRepository {
         return namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(String.class));
     }
 	
-	private Map<String, Bill> getBills(Set<String> ids){
+	private Map<String, Bill> getBills(Set<String> ids, String tenantId){
     	Map<String, Bill> mapOfIdAndBills = new HashMap<>();
         Map<String, Object> preparedStatementValues = new HashMap<>();
         preparedStatementValues.put("id", ids);
+        preparedStatementValues.put("tenantId", tenantId);
         String query = paymentQueryBuilder.getBillQuery();
+        log.info("query: "+query);
         List<Bill> bills = namedParameterJdbcTemplate.query(query, preparedStatementValues, billRowMapper);
         bills.forEach(bill -> {
         	mapOfIdAndBills.put(bill.getId(), bill);

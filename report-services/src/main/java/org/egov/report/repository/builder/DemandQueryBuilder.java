@@ -123,8 +123,16 @@ public class DemandQueryBuilder {
         if(tenantIdChunks.length == 1){
             demandQuery.append(" dmd.tenantid LIKE ? ");
             preparedStatementValues.add(demandCriteria.getTenantId() + '%');
+            
+            addAndClause(demandQuery);
+            demandQuery.append(" dmdl.tenantid LIKE ? ");
+            preparedStatementValues.add(demandCriteria.getTenantId() + '%');
         }else{
             demandQuery.append(" dmd.tenantid = ? ");
+            preparedStatementValues.add(demandCriteria.getTenantId());
+            
+            addAndClause(demandQuery);
+            demandQuery.append(" dmdl.tenantid = ? ");
             preparedStatementValues.add(demandCriteria.getTenantId());
         }
         

@@ -34,7 +34,7 @@ public class PaymentQueryBuilder {
 			+ "bd.additionaldetails as bd_additionaldetails,  ad.additionaldetails as ad_additionaldetails "
 			+ "FROM egcl_bill b LEFT OUTER JOIN egcl_billdetial bd ON b.id = bd.billid AND b.tenantid = bd.tenantid "
 			+ "LEFT OUTER JOIN egcl_billaccountdetail ad ON bd.id = ad.billdetailid AND bd.tenantid = ad.tenantid "
-			+ "WHERE b.id IN (:id);";
+			+ "WHERE b.id IN (:id) and b.tenantid=:tenantId and bd.tenantid=:tenantId and ad.tenantid=:tenantId;";
 	
 	public static final String ID_QUERY = "SELECT DISTINCT py.id as id,py.transactiondate as date " +
             " FROM egcl_payment py  " +
@@ -48,8 +48,29 @@ public class PaymentQueryBuilder {
             " INNER JOIN egcl_bill bill ON bill.id = pyd.billid " +
             " INNER JOIN egcl_billdetial bd ON bd.billid = bill.id " ;
 
-	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues) {
+	public static String getPaymentSearchQuery(List<String> ids, Map<String, Object> preparedStatementValues,
+			PaymentSearchCriteria searchCriteria) {
 		StringBuilder selectQuery = new StringBuilder(SELECT_PAYMENT_SQL);
+
+		if (StringUtils.isNotBlank(searchCriteria.getTenantId())) {
+            addClauseIfRequired(preparedStatementValues, selectQuery);
+            if(searchCriteria.getTenantId().split("\\.").length > 1) {
+                selectQuery.append(" py.tenantId =:tenantId");
+                preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
+
+                addClauseIfRequired(preparedStatementValues, selectQuery);
+                selectQuery.append(" pyd.tenantId =:tenantId ");
+            }
+            else {
+                selectQuery.append(" py.tenantId LIKE :tenantId");
+                preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
+
+                addClauseIfRequired(preparedStatementValues, selectQuery);
+                selectQuery.append(" pyd.tenantId LIKE :tenantId ");
+            }
+
+        }
+
 		addClauseIfRequired(preparedStatementValues, selectQuery);
 		selectQuery.append(" py.id IN (:id)  ");
 		preparedStatementValues.put("id", ids);
@@ -90,9 +111,24 @@ public class PaymentQueryBuilder {
 			if (searchCriteria.getTenantId().split("\\.").length > 1) {
 				selectQuery.append(" py.tenantId =:tenantId");
 				preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
+				
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+                selectQuery.append(" pyd.tenantId =:tenantId ");
+                addClauseIfRequired(preparedStatementValues, selectQuery);
+                selectQuery.append(" bill.tenantId =:tenantId ");
+                addClauseIfRequired(preparedStatementValues, selectQuery);
+                selectQuery.append(" bd.tenantId =:tenantId ");
+				
 			} else {
 				selectQuery.append(" py.tenantId LIKE :tenantId");
 				preparedStatementValues.put("tenantId", searchCriteria.getTenantId() + "%");
+				
+				addClauseIfRequired(preparedStatementValues, selectQuery);
+                selectQuery.append(" pyd.tenantId LIKE :tenantId ");
+                addClauseIfRequired(preparedStatementValues, selectQuery);
+                selectQuery.append(" bill.tenantId LIKE :tenantId ");
+                addClauseIfRequired(preparedStatementValues, selectQuery);
+                selectQuery.append(" bd.tenantId LIKE :tenantId ");
 			}
 
 		}
@@ -191,6 +227,21 @@ public class PaymentQueryBuilder {
 			selectQuery.append(" pyd.billid in (:billid)");
 			preparedStatementValues.put("billid", searchCriteria.getBillIds());
 		}
+		
+		if (!CollectionUtils.isEmpty(searchCriteria.getTenantIds())) {
+        	addClauseIfRequired(preparedStatementValues, selectQuery);
+
+        	selectQuery.append(" py.tenantId =:tenantId");
+            preparedStatementValues.put("tenantId", searchCriteria.getTenantId());
+
+            addClauseIfRequired(preparedStatementValues, selectQuery);
+            selectQuery.append(" pyd.tenantId =:tenantId ");
+            addClauseIfRequired(preparedStatementValues, selectQuery);
+            selectQuery.append(" bill.tenantId =:tenantId ");
+            addClauseIfRequired(preparedStatementValues, selectQuery);
+            selectQuery.append(" bd.tenantId =:tenantId ");
+
+        }
 
 	}
 	

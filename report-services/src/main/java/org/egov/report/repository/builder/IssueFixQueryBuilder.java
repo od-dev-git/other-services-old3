@@ -15,11 +15,11 @@ public class IssueFixQueryBuilder {
 	
 	private static final String QUERY_TO_UPDATE_BILL_IN_TRANSACTION = "update eg_pg_transactions set bill_id = (select distinct bill.id "
 			+ "from egbs_billdetail_v1 billdtl inner join egbs_bill_v1 bill on bill.id=billdtl.billid where billdtl.consumercode = ? "
-			+ "and bill.status ='ACTIVE'), additional_details = (select jsonb_set((select additional_details from eg_pg_transactions "
+			+ "and bill.status ='ACTIVE' and billdtl.tenantid = ? and bill.tenantid = ?), additional_details = (select jsonb_set((select additional_details from eg_pg_transactions "
 			+ "ept where txn_id = ? ), '{taxAndPayments}', (select jsonb_set((select cast(additional_details ->> 'taxAndPayments' as "
 			+ "jsonb) from eg_pg_transactions ept where txn_id = ? ), '{0,billId}', (select to_jsonb(bll.id) from "
 			+ "(select distinct bill.id from egbs_billdetail_v1 billdtl inner join egbs_bill_v1 bill on bill.id=billdtl.billid where "
-			+ "billdtl.consumercode = ? and bill.status ='ACTIVE') bll))))) where txn_id = ? and txn_status <> 'SUCCESS' ";
+			+ "billdtl.consumercode = ? and bill.status ='ACTIVE' and billdtl.tenantid = ? and bill.tenantid = ?) bll))))) where txn_id = ? and txn_status <> 'SUCCESS' ";
 
 	public String getTransactionsQuery(IssueFix issueFix, List<Object> preparedPropStmtList) {
 
@@ -55,7 +55,7 @@ public class IssueFixQueryBuilder {
 		}
 	}
 
-	public String getBillStatusQuery(String billId, List<Object> preparedPropStmtList) {
+	public String getBillStatusQuery(String billId, List<Object> preparedPropStmtList, String tenantId) {
 
 		StringBuilder query = new StringBuilder(QUERY_FOR_BILL_STATUS);
 
@@ -63,6 +63,12 @@ public class IssueFixQueryBuilder {
 			addClauseIfRequired(preparedPropStmtList, query);
 			query.append(" bill.id = ? ");
 			preparedPropStmtList.add(billId);
+		}
+		
+		if (!StringUtils.isEmpty(tenantId)) {
+			addClauseIfRequired(preparedPropStmtList, query);
+			query.append(" bill.tenantid = ? ");
+			preparedPropStmtList.add(tenantId);
 		}
 
 		return query.toString();

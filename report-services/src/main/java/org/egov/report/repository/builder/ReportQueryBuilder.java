@@ -444,6 +444,15 @@ public class ReportQueryBuilder {
 		query.append(AND_QUERY).append(" d.consumercode = ? ");
 		preparedStmtList.add(criteria.getConsumerCode());
 		
+		if(!StringUtils.isEmpty(criteria.getTenantId())) {
+			
+			query.append(AND_QUERY).append(" d.tenantid = ? ");
+			preparedStmtList.add(criteria.getTenantId());
+			
+			query.append(AND_QUERY).append(" dd.tenantid = ? ");
+			preparedStmtList.add(criteria.getTenantId());
+		}
+		
 		query.append(GROUP_BY).append(demandSelectValues.substring(0,demandSelectValues.length()-1));
 		query.append(ORDER_BY).append(" d.taxperiodto ");
 		
@@ -729,6 +738,9 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			query.append(AND).append(" EWC2.ADDITIONALDETAILS ->> 'ward' = ? ");
 			preparedStatement.add(searchCriteria.getWard());
 		}
+		
+		query.append(AND).append(" edv.tenantid = ? ");
+		preparedStatement.add(searchCriteria.getTenantId());
 		
 		return query.toString();
 	}
