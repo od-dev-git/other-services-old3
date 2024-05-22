@@ -19,6 +19,8 @@ public class DCBReportModel {
 	
 	private String oldPropertyId;
 	
+	private String legacyId;
+	
 	private String ward;
 	
 	private BigDecimal currentDemand;
@@ -28,5 +30,9 @@ public class DCBReportModel {
 	private BigDecimal totalDemand;
 	
 	private BigDecimal currentPayment;
+	
+	private BigDecimal arrearCollection;
+	
+	private BigDecimal currentCollection;
 
 }
