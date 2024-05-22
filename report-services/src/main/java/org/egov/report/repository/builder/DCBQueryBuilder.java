@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 @Component
 public class DCBQueryBuilder {
 	
-	public static final String QUERY_TO_GET_PROPERTIES = " select distinct pt.propertyid, pt.oldpropertyid, pta.ward from eg_pt_property pt "
+	public static final String QUERY_TO_GET_PROPERTIES = " select distinct pt.propertyid, pt.oldpropertyid, pt.legacyholdingno, pta.ward from eg_pt_property pt "
 			+ " inner join eg_pt_address pta on pta.propertyid=pt.id ";
 	
 	public static final String COLLECTIONS_QUERY = " select bill.consumercode, sum(pay.totalamountpaid) totalpaid from egcl_payment pay "
@@ -57,6 +57,12 @@ public class DCBQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" pay.tenantId = :tenantId ");
 			preparedStatementValues.put("tenantId", tenantId);
+			
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" pdtl.tenantId = :tenantId ");
+			
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" bill.tenantId = :tenantId ");
 
 		}
 		
@@ -95,6 +101,9 @@ public class DCBQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" dmd.tenantid = :tenantId ");
 			preparedStatementValues.put("tenantId", tenantId);
+			
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" dtl.tenantid = :tenantId ");
 
 		}
 
@@ -135,6 +144,9 @@ public class DCBQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" dmd.tenantid = :tenantId ");
 			preparedStatementValues.put("tenantId", tenantId);
+			
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" dtl.tenantid = :tenantId ");
 
 		}
 
@@ -169,6 +181,8 @@ public class DCBQueryBuilder {
 			selectQuery.append(" dmd.tenantid = :tenantId ");
 			preparedStatementValues.put("tenantId", tenantId);
 
+			addClauseIfRequired(preparedStatementValues, selectQuery);
+			selectQuery.append(" dtl.tenantid = :tenantId ");
 		}
 
 		addClauseIfRequired(preparedStatementValues, selectQuery);

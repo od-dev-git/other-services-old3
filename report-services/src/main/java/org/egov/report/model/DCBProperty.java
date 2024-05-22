@@ -17,6 +17,8 @@ public class DCBProperty {
 	
 	private String oldPropertyId;
 	
+	private String legacyHoldingNo;
+	
 	private String ward ;
 
 }

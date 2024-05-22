@@ -21,7 +21,8 @@ public class DCBPropertyRowMapper implements ResultSetExtractor<Map<String, DCBP
 		while (rs.next()) {
 
 			DCBProperty property = DCBProperty.builder().propertyId(rs.getString("propertyid"))
-					.oldPropertyId(rs.getString("oldpropertyid")).ward(rs.getString("ward")).build();
+					.oldPropertyId(rs.getString("oldpropertyid")).ward(rs.getString("ward"))
+					.legacyHoldingNo(rs.getString("legacyholdingno")).build();
 
 			properties.put(rs.getString("propertyid"), property);
 		}
