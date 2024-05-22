@@ -104,7 +104,9 @@ public class UpdateTransactionIssue implements IIssueFixService{
 		
 		String billId = transaction.getBillId();
 		
-		String status = repository.getBillStatus(billId);
+		String tenantId = transaction.getTenantId();
+		
+		String status = repository.getBillStatus(billId, tenantId);
 		
 		if (!status.equalsIgnoreCase("EXPIRED")) {
 			throw new CustomException("NO_ISSUES_FOUND",

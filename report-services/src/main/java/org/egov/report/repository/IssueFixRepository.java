@@ -15,6 +15,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.stereotype.Repository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Repository
 public class IssueFixRepository {
 	
@@ -32,10 +35,11 @@ public class IssueFixRepository {
 		
 	}
 
-	public String getBillStatus(String billId) {
+	public String getBillStatus(String billId, String tenantId) {
 		
 		List<Object> preparedPropStmtList = new ArrayList<>();
-		String query = queryBuilder.getBillStatusQuery(billId, preparedPropStmtList);
+		String query = queryBuilder.getBillStatusQuery(billId, preparedPropStmtList, tenantId);
+		log.info("query to get bills: "+query);
 		return jdbcTemplate.queryForObject(query,preparedPropStmtList.toArray(), String.class);
 		
 	}
@@ -46,7 +50,10 @@ public class IssueFixRepository {
 		
 		String txnId = transaction.getTxnId();
 		
+		String tenantId = transaction.getTenantId();
+		
 		String updateBillIdInTransactionQuery = queryBuilder.getUpdateBillIdInTransactionQuery();
+		log.info("query for bill update : "+updateBillIdInTransactionQuery);
 
 		jdbcTemplate.update(updateBillIdInTransactionQuery, new PreparedStatementSetter() {
 
@@ -54,10 +61,14 @@ public class IssueFixRepository {
 			public void setValues(PreparedStatement ps) {
 				try {
 					ps.setString(1, consumerCode);
-					ps.setString(2, txnId);
-					ps.setString(3, txnId);
-					ps.setString(4, consumerCode);
+					ps.setString(2, tenantId);
+					ps.setString(3, tenantId);
+					ps.setString(4, txnId);
 					ps.setString(5, txnId);
+					ps.setString(6, consumerCode);
+					ps.setString(7, tenantId);
+					ps.setString(8, tenantId);
+					ps.setString(9, txnId);
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
