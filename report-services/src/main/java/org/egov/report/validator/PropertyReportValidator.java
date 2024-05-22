@@ -4,9 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.DCBSearchCriteria;
 import org.egov.report.model.UtilityReportDetails;
+import org.egov.report.web.model.PTAssessmentSearchCriteria;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +17,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class PropertyReportValidator {
 	
 	@Autowired
@@ -120,5 +126,31 @@ Map<String, String> errorMap = new HashMap<>();
 		return true;
 	}
 
-}
+	public void validatePTAssessmentReport(@Valid PTAssessmentSearchCriteria ptAssessmentSearchCriteria) {
+		if (StringUtils.isEmpty(ptAssessmentSearchCriteria.getFinancialYear())
+				|| CollectionUtils.isEmpty(ptAssessmentSearchCriteria.getTenantIds())) {
 
+			throw new CustomException("INVALID_REQUEST",
+					" Either Financial Year or TenantId is missing ! Kindly provide both to proceed ..");
+
+		}
+		
+	}
+
+	public boolean validateRecentReport(List<UtilityReportDetails> reportList, String tenantId) {
+
+		if (!reportList.isEmpty()) {
+
+			UtilityReportDetails dcbReport = reportList.get(0);
+
+			if (dcbReport.getTenantId().equalsIgnoreCase(tenantId)
+					&& !StringUtils.isEmpty(dcbReport.getFileStoreId())) {
+				return true;
+			} else {
+				return checkIfEligibleForAnotherRequest(dcbReport, tenantId);
+			}
+		}
+		return false;
+	}
+
+}
