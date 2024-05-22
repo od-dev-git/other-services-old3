@@ -57,12 +57,6 @@ public class DCBQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" pay.tenantId = :tenantId ");
 			preparedStatementValues.put("tenantId", tenantId);
-			
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" pdtl.tenantId = :tenantId ");
-			
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" bill.tenantId = :tenantId ");
 
 		}
 		
@@ -101,9 +95,6 @@ public class DCBQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" dmd.tenantid = :tenantId ");
 			preparedStatementValues.put("tenantId", tenantId);
-			
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" dtl.tenantid = :tenantId ");
 
 		}
 
@@ -144,9 +135,6 @@ public class DCBQueryBuilder {
 			addClauseIfRequired(preparedStatementValues, selectQuery);
 			selectQuery.append(" dmd.tenantid = :tenantId ");
 			preparedStatementValues.put("tenantId", tenantId);
-			
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" dtl.tenantid = :tenantId ");
 
 		}
 
@@ -181,8 +169,6 @@ public class DCBQueryBuilder {
 			selectQuery.append(" dmd.tenantid = :tenantId ");
 			preparedStatementValues.put("tenantId", tenantId);
 
-			addClauseIfRequired(preparedStatementValues, selectQuery);
-			selectQuery.append(" dtl.tenantid = :tenantId ");
 		}
 
 		addClauseIfRequired(preparedStatementValues, selectQuery);
