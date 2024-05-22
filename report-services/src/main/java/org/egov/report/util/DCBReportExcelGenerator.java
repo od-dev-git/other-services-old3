@@ -47,12 +47,15 @@ public class DCBReportExcelGenerator {
         style.setAlignment(HorizontalAlignment.CENTER);
         
         createCell(row, 0, "Sujog Property Id", style);
-        createCell(row, 1, "Holding No.", style);
-        createCell(row, 2, "Tax Ward No.", style);
-        createCell(row, 3, "Current Demand.", style);
-        createCell(row, 4, "Arrear Demand", style);
-        createCell(row, 5, "Total Demand", style);
-        createCell(row, 6, "Current Payment", style);
+        createCell(row, 1, "Old Property Id", style);
+        createCell(row, 2, "Legacy Id", style);
+        createCell(row, 3, "Tax Ward No.", style);
+        createCell(row, 4, "Current Demand.", style);
+        createCell(row, 5, "Arrear Demand", style);
+        createCell(row, 6, "Total Demand", style);
+        createCell(row, 7, "Current Payment", style);
+        createCell(row, 8, "Arrear Demand Collection", style);
+        createCell(row, 9, "Current Demand Collection", style);
     }
 	
 	private void createCell(Row row, int columnCount, Object valueOfCell, CellStyle style) {
@@ -89,11 +92,14 @@ public class DCBReportExcelGenerator {
             int columnCount = 0;
             createCell(row, columnCount++, record.getPropertyId(), style);
             createCell(row, columnCount++, record.getOldPropertyId(), style);
+            createCell(row, columnCount++, record.getLegacyId(), style);
             createCell(row, columnCount++, record.getWard(), style);
             createCell(row, columnCount++, record.getCurrentDemand(), style);
             createCell(row, columnCount++, record.getArrearDemand(), style);
             createCell(row, columnCount++, record.getTotalDemand(), style);
             createCell(row, columnCount++, record.getCurrentPayment(), style);
+            createCell(row, columnCount++, record.getArrearCollection(), style);
+            createCell(row, columnCount++, record.getCurrentCollection(), style);
         }
     }
 }
