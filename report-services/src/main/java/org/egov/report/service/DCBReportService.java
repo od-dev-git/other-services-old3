@@ -101,14 +101,14 @@ public class DCBReportService {
 
 			endDate = utils.getEndingDateOfFinancialYear(endingYear);
 
-			if (isRequestForCurrentFY(startingYear)) {
-				createDCBForCurrentFinancialYear(startDate, endDate, tenantId, requestInfo, reportList, reportType,
-						financialYear);
-
-			} else {
+//			if (isRequestForCurrentFY(startingYear)) {
+//				createDCBForCurrentFinancialYear(startDate, endDate, tenantId, requestInfo, reportList, reportType,
+//						financialYear);
+//
+//			} else {
 				createDCBForPastFY(startDate, endDate, tenantId, requestInfo, reportList, reportType,
 						financialYear);
-			}
+//			}
 		}
 
 	}
@@ -134,7 +134,7 @@ public class DCBReportService {
 		Map<String, DCBArrearDue> arrearDue = repository.getArrearDue(tenantId, startDate);
 		
 		// fetch payments till date 
-		Map<String, DCBPayment> paymentsTillDate = repository.getCollections(tenantId, startDate, null);
+		Map<String, DCBPayment> paymentsTillDate = repository.getCollections(tenantId, null, endDate);
 		
 		// fetch payments for the input FY
 		Map<String, DCBPayment> currentPayments = repository.getCollections(tenantId, startDate, endDate);
@@ -150,7 +150,8 @@ public class DCBReportService {
 		propertiesDetails.forEach((key, property) -> {
 
 			DCBReportModel dcbReportObject = DCBReportModel.builder().oldPropertyId(property.getOldPropertyId())
-					.ward(property.getWard()).propertyId(property.getPropertyId()).build();
+					.ward(property.getWard()).propertyId(property.getPropertyId())
+					.legacyId(property.getLegacyHoldingNo()).build();
 
 			dcbReportMap.put(key, dcbReportObject);
 		});
@@ -166,6 +167,10 @@ public class DCBReportService {
 			BigDecimal arrear = BigDecimal.ZERO;
 			BigDecimal totalDemand = BigDecimal.ZERO;
 			
+			BigDecimal currentDemandCollection = BigDecimal.ZERO;
+			BigDecimal arrearDemandCollection = BigDecimal.ZERO;
+			BigDecimal collectionsBeforeSujog = BigDecimal.ZERO;
+			
 			String key = entry.getKey();
 			DCBReportModel dcbObject = entry.getValue();
 			
@@ -177,6 +182,7 @@ public class DCBReportService {
 			if (currentDemands.containsKey(key)) {
 				DCBDemand currentDemandObject = currentDemands.get(key);
 				currentDemand = currentDemandObject.getTaxAmount();
+				currentDemandCollection = currentDemandObject.getCollectionAmount();
 			}
 			
 			//This is the advance pending for a property id till date
@@ -198,20 +204,39 @@ public class DCBReportService {
 			if(arrearDue.containsKey(key)) {
 				DCBArrearDue arrearDueObject = arrearDue.get(key);
 				arrearDemand = arrearDueObject.getTaxAmount();
+				arrearDemandCollection = arrearDueObject.getCollectionAmount();
 			}
 			
-			arrear = arrearDemand.subtract(collectionsTillDate.subtract(paymentsTillToday).subtract(advanceAmount))
+			collectionsBeforeSujog = collectionsTillDate.subtract(paymentsTillToday).compareTo(BigDecimal.ZERO) > 0
+					? collectionsTillDate.subtract(paymentsTillToday)
+					: BigDecimal.ZERO;
+			
+			/*arrear = arrearDemand.subtract(collectionsTillDate.subtract(paymentsTillToday).subtract(advanceAmount))
 					.compareTo(BigDecimal.ZERO) > 0
 							? arrearDemand
 									.subtract(collectionsTillDate.subtract(paymentsTillToday).subtract(advanceAmount))
-							: BigDecimal.ZERO;
+							: BigDecimal.ZERO;*/
+			
+			arrear = arrearDemand.subtract(collectionsBeforeSujog).compareTo(BigDecimal.ZERO) > 0
+					? arrearDemand.subtract(collectionsBeforeSujog)
+					: BigDecimal.ZERO;
 					
 			totalDemand = arrear.add(currentDemand);
+			
+			currentDemandCollection = currentPayment.subtract(arrear).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
+					? currentPayment.subtract(arrear).subtract(advanceAmount)
+					: BigDecimal.ZERO;
+			
+			arrearDemandCollection = currentPayment.subtract(currentDemandCollection).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
+					? currentPayment.subtract(currentDemandCollection).subtract(advanceAmount)
+					: BigDecimal.ZERO;
 			
 			dcbObject.setCurrentDemand(currentDemand);
 			dcbObject.setCurrentPayment(currentPayment);
 			dcbObject.setTotalDemand(totalDemand);
 			dcbObject.setArrearDemand(arrear);
+			dcbObject.setArrearCollection(arrearDemandCollection);
+			dcbObject.setCurrentCollection(currentDemandCollection);
 		}
 		
 		// Path and filename for the excel file
