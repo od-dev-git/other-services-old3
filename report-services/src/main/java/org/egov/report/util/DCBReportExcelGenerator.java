@@ -53,9 +53,9 @@ public class DCBReportExcelGenerator {
         createCell(row, 4, "Current Demand.", style);
         createCell(row, 5, "Arrear Demand", style);
         createCell(row, 6, "Total Demand", style);
-        createCell(row, 7, "Current Payment", style);
-        createCell(row, 8, "Arrear Demand Collection", style);
-        createCell(row, 9, "Current Demand Collection", style);
+        createCell(row, 7, "Total Payment", style);
+        createCell(row, 8, "Arrear Collection", style);
+        createCell(row, 9, "Current Collection", style);
     }
 	
 	private void createCell(Row row, int columnCount, Object valueOfCell, CellStyle style) {
