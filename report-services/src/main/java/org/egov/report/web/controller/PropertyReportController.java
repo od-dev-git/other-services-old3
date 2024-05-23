@@ -11,6 +11,7 @@ import org.egov.report.model.UtilityReportSearchCriteria;
 import org.egov.report.service.DCBReportService;
 import org.egov.report.service.PropertyService;
 import org.egov.report.util.ResponseInfoFactory;
+import org.egov.report.web.model.PTAssessmentSearchCriteria;
 import org.egov.report.web.model.PropertyDetailsResponse;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.PropertyWiseCollectionResponse;
@@ -111,6 +112,25 @@ public class PropertyReportController {
 	public ResponseEntity<UtilityReportResponse> getDCBReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
 			@Valid @ModelAttribute UtilityReportSearchCriteria searchCriteria) throws IOException {
 		Map<String, Object> responseMap = dcbReportService.getDCBReport(requestInfoWrapper.getRequestInfo(), searchCriteria);
+		
+		UtilityReportResponse response = UtilityReportResponse.builder()
+				.response(responseMap)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@PostMapping("/_generatePTAssessmentReport")
+	public void generatePTAssessmentReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+			@Valid @ModelAttribute PTAssessmentSearchCriteria ptAssessmentSearchCriteria) {
+		
+		propertyService.generatePTAssessmentReport(requestInfoWrapper, ptAssessmentSearchCriteria);
+	}
+	
+	@PostMapping(value = "/_getPTAssessmentReport")
+	public ResponseEntity<UtilityReportResponse> getPTAssessmentReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+			@Valid @ModelAttribute UtilityReportSearchCriteria searchCriteria) throws IOException {
+		Map<String, Object> responseMap = propertyService.getPTAssessmentsReporteport(requestInfoWrapper.getRequestInfo(), searchCriteria);
 		
 		UtilityReportResponse response = UtilityReportResponse.builder()
 				.response(responseMap)

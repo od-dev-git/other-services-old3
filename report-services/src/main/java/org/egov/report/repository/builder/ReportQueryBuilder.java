@@ -6,9 +6,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.WSReportUtils;
 import org.egov.report.web.model.DemandCriteria;
+import org.egov.report.web.model.PTAssessmentSearchCriteria;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,7 +116,7 @@ public class ReportQueryBuilder {
 			+ AS + "demand ";
 	
 	private static final String PROPERTY_DETAILS_SUMMARY_QUERY = SELECT
-			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,epp.ownershipcategory,epp.propertytype,epp.usagecategory,eu.uuid,"
+			+ "epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertyid,epp.ddnno,epp.legacyholdingno,epp.ownershipcategory,epp.propertytype,epp.usagecategory,eu.uuid,"
 			+ "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
 			+ FROM
 			+ "eg_pt_property epp "
@@ -125,7 +128,7 @@ public class ReportQueryBuilder {
 	
 	private static final String PROPERTY_DEMANDS_QUERY = SELECT 
 			+ "consumercode,edv.id,payer ,edv.createdby ,taxperiodfrom ,taxperiodto,eu.uuid,"
-			+ "edv.tenantid ,edv.status,edv2.taxamount ,edv2.collectionamount,epp.oldpropertyid,epa.ward "
+			+ "edv.tenantid ,edv.status,edv2.taxamount ,edv2.collectionamount,epp.oldpropertyid,epp.ddnno,epp.legacyholdingno,epa.ward "
 			+ FROM + " egbs_demand_v1 edv "
 			+ INNER_JOIN + "eg_pt_property epp on edv.consumercode = epp.propertyid " +  AND + "epp.status = 'ACTIVE' "
 			+ INNER_JOIN +" eg_pt_address epa on epp.id =epa.propertyid "
@@ -300,7 +303,7 @@ public class ReportQueryBuilder {
     private static final String PROPERTY_IDS = SELECT + " epp.propertyid " + PROPERTY;
 
     private static final String PROPERTY_DETAILS = SELECT
-            + "epp.propertyid,epp.tenantid,epa.ward,epp.oldpropertyid,epp.propertytype,epp.usagecategory,eu.uuid,"
+            + "epp.propertyid,epp.tenantid,epa.ward,epp.oldpropertyid,epp.ddnno,epp.legacyholdingno,epp.propertytype,epp.usagecategory,eu.uuid,"
             + "epa.doorno,epa.buildingname,epa.street,epa.city,epa.pincode "
             + FROM
             + "eg_pt_property epp "
@@ -310,10 +313,54 @@ public class ReportQueryBuilder {
             + WHERE + "epp.status <> 'INACTIVE' ";
     
     private static final String OLDPROPERTY_IDS_DETAILS = SELECT
-            + " epp.propertyid,epp.oldpropertyid "
+            + " epp.propertyid,epp.oldpropertyid,epp.ddnno,epp.legacyholdingno "
             + FROM
             + "eg_pt_property epp "
             + WHERE + "epp.status <> 'INACTIVE' ";
+    
+    private static final String PT_ASSESSMENT_REPORT_QUERY = "select initcap(split_part(asmt.tenantid, '.', 2)) as ulb , "
+			+ "	asmt.propertyid as propertyid , "
+			+ "	asmt.assessmentnumber as asmtnumber, "
+			+ "	asmt.status as status, "
+			+ "	address.ward as ward, "
+			+ "	address.city as city, "
+			+ "	own.userid as name, "
+			+ "	asmt.financialyear as finyear, "
+			+ "	to_char(to_timestamp(assessmentdate / 1000)::date, 'DD-MM-YYYY') as asmtdate, "
+			+ "	case "
+			+ "		when asmt.status = 'ACTIVE' then to_char(to_timestamp(asmt.lastmodifiedtime / 1000)::date, 'DD-MM-YYYY') "
+			+ "		else null "
+			+ "	end as approvaldate, "
+			+ "	coalesce(asmt.additionaldetails->>'lightTax', '0') as lighttax, "
+			+ "	coalesce(asmt.additionaldetails->>'waterTax', '0') as watertax, "
+			+ "	coalesce(asmt.additionaldetails->>'holdingTax', '0') as holdingtax, "
+			+ "	coalesce(asmt.additionaldetails->>'latrineTax', '0') as latrinetax, "
+			+ "	coalesce(asmt.additionaldetails->>'parkingTax', '0') as parkingtax, "
+			+ "	coalesce(asmt.additionaldetails->>'serviceTax', '0') as servicetax, "
+			+ "	coalesce(asmt.additionaldetails->>'drainageTax', '0') as drainagetax, "
+			+ "	coalesce(asmt.additionaldetails->>'usageExemption', '0') as usageexemption, "
+			+ "	coalesce(asmt.additionaldetails->>'ownershipExemption', '0') as ownershipexemption, "
+			+ "	coalesce(asmt.additionaldetails->>'solidWasteUserCharges', '0') as solidwasteusercharges, "
+			+ "	coalesce(asmt.additionaldetails->>'otherDues', '0') as otherdues, "
+			+ "	case "
+			+ "		when hrms.code is null then 'SYSTEM' "
+			+ "		else 'MANUAL' "
+			+ "	end as triggeredby "
+			+ "from "
+			+ "	eg_pt_asmt_assessment asmt "
+			+ "inner join eg_pt_property prop on "
+			+ "	prop.propertyid = asmt.propertyid "
+			+ "inner join eg_pt_address address on "
+			+ "	address.propertyid = prop.id "
+			+ "	and prop.status = 'ACTIVE' "
+			+ "inner join eg_pt_owner own on "
+			+ "	own.propertyid = prop.id "
+//			+ "inner join eg_user usr on "
+//			+ "	usr.uuid = own.userid "
+			+ "left outer join eg_hrms_employee hrms on "
+			+ "	hrms.uuid = asmt.createdby "
+			+ "where "
+			+ "	1 = 1 ";
 
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -478,6 +525,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
 			preparedPropStmtList.add(searchCriteria.getOldPropertyId());
 		}
+
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
+		}
 		
 		if(StringUtils.hasText(searchCriteria.getWardNo())) {
 			query.append(AND_QUERY).append(" epa.ward  = ? ");
@@ -550,6 +607,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 		if(StringUtils.hasText(searchCriteria.getOldPropertyId())) {
 			query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
 			preparedPropStmtList.add(searchCriteria.getOldPropertyId());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
 		}
 		
 		addPaginationIfRequired(query,searchCriteria.getLimit(),searchCriteria.getOffset(),preparedPropStmtList);
@@ -862,6 +929,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
            preparedPropStmtList.add(searchCriteria.getOldPropertyId());
        }
 
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
+		}
+
        return query.toString();
     }
     
@@ -896,6 +973,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
            query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
            preparedPropStmtList.add(searchCriteria.getOldPropertyId());
        }
+
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
+		}
 
        return query.toString();
     }
@@ -956,6 +1043,16 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
             query.append(AND_QUERY).append(" epp.oldpropertyid = ? ");
             preparedPropStmtList.add(searchCriteria.getOldPropertyId());
         }
+
+		if(StringUtils.hasText(searchCriteria.getDdnNo())){
+			query.append(AND_QUERY).append(" epp.ddnno = ? ");
+			preparedPropStmtList.add(searchCriteria.getDdnNo());
+		}
+
+		if(StringUtils.hasText(searchCriteria.getLegacyHoldingNo())){
+			query.append(AND_QUERY).append(" epp.legacyholdingno = ? ");
+			preparedPropStmtList.add(searchCriteria.getLegacyHoldingNo());
+		}
         
         return query.toString();
     }
@@ -1019,4 +1116,24 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 
         return query.toString();
     }
+
+	public String getCreatePTAssessmentReportQuery(@Valid PTAssessmentSearchCriteria ptAssessmentSearchCriteria,
+			String tenantid) {
+		StringBuilder query =  new StringBuilder(PT_ASSESSMENT_REPORT_QUERY);
+	    
+		if (!StringUtils.isEmpty(tenantid)) {
+			query.append(" and asmt.tenantid = '" + tenantid + "'");
+		}
+		
+		if (!StringUtils.isEmpty(ptAssessmentSearchCriteria.getFinancialYear())) {
+			query.append(" and financialyear = '" + ptAssessmentSearchCriteria.getFinancialYear() + "'");
+		}
+		
+		query.append(" order by asmt.propertyid, assessmentdate desc ");
+
+	    log.info("Query for Payment Report search: " + query);
+	    
+	    return query.toString();
+
+	}
 }

@@ -2,11 +2,7 @@ package org.egov.report.model;
 
 import java.util.List;
 
-import javax.validation.Valid;
-
-import org.egov.report.model.Address;
 import org.egov.report.web.model.OwnerInfo;
-import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -96,6 +92,12 @@ public class Property {
 	
 	@JsonProperty("owners")
 	private List<OwnerInfo> owners;
+
+	@JsonProperty("ddnNo")
+	private String ddnNo;
+
+	@JsonProperty("legacyHoldingNo")
+	private String legacyHoldingNo;
 	
 	
 	

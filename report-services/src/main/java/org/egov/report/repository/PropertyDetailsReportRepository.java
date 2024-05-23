@@ -1,15 +1,19 @@
 package org.egov.report.repository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import org.egov.report.web.model.DemandCriteria;
+import org.egov.report.web.model.PTAssessmentSearchCriteria;
 import org.egov.report.web.model.PropertyDemandResponse;
 import org.egov.report.web.model.PropertyDetailsResponse;
-
+import org.apache.commons.lang.StringUtils;
 import org.egov.report.repository.builder.ReportQueryBuilder;
 import org.egov.report.repository.rowmapper.BillSummaryRowMapper;
 import org.egov.report.repository.rowmapper.DemandsRowMapper;
@@ -24,6 +28,9 @@ import org.springframework.context.expression.MapAccessor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Repository
 public class PropertyDetailsReportRepository {
 
@@ -112,10 +119,24 @@ public class PropertyDetailsReportRepository {
         return jdbcTemplate.queryForList(query, preparedPropStmtList.toArray(), String.class);
     }
 
-    public HashMap<String, String> getOldPropertyIds(PropertyDetailsSearchCriteria searchCriteria) {
+    public HashMap<String, PropertyDetailsResponse> getOldPropertyIds(PropertyDetailsSearchCriteria searchCriteria) {
         List<Object> preparedPropStmtList = new ArrayList<>();
         String query = queryBuilder.getOldPropertyIdsQuery(searchCriteria, preparedPropStmtList);
         return jdbcTemplate.query(query,preparedPropStmtList.toArray(),new OldPropertyIdRowMapper());
     }
+
+	public List<Map<String, Object>> createPTAssessmentReport(
+			@Valid PTAssessmentSearchCriteria ptAssessmentSearchCriteria, String tenantid) {
+		log.info("Search Criteria : " + ptAssessmentSearchCriteria.toString());
+		
+        String query = queryBuilder.getCreatePTAssessmentReportQuery(ptAssessmentSearchCriteria, tenantid);
+	    
+	    List<Map<String, Object>> paymentsDetailsList =  jdbcTemplate.queryForList(query.toString());
+	    
+	    if(paymentsDetailsList.isEmpty())
+			return Collections.emptyList();
+		return paymentsDetailsList;
+	}
+
 
 }

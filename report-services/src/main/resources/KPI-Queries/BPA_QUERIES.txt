@@ -42,16 +42,15 @@ select
     , epd.amountpaid
     , ep.paymentmode
     , case
-    when epd.businessservice='WS.ONE_TIME_FEE' then 'WS Application Fee'
-    when epd.businessservice='WS' then 'WS Monthly Fee'
     when epd.businessservice='BPA.NC_SAN_FEE' then 'BPA Sanction Fee'
     when epd.businessservice='BPA.NC_APP_FEE' then 'BPA Application Fee'
-    when epd.businessservice='PT.MUTATION' then 'PT Mutation Fee'
-    when epd.businessservice='PT' then 'Property Tax'
+    when epd.businessservice='BPA.NC_OC_SAN_FEE' then 'BPA OC Sanction Fee'
+    when epd.businessservice='BPA.NC_OC_APP_FEE' then 'BPA OC Application Fee'
     end as feeType
 from egcl_paymentdetail epd
 inner join egcl_payment ep on ep.id = epd.paymentid
 left outer join egcl_bill eb on eb.id = epd.billid
-where epd.businessservice in ( 'BPA.NC_SAN_FEE','BPA.NC_APP_FEE')
+where epd.businessservice in ( 'BPA.NC_SAN_FEE','BPA.NC_APP_FEE','BPA.NC_OC_APP_FEE','BPA.NC_OC_SAN_FEE')
 and ep.paymentstatus != 'CANCELLED' and ep.tenantid != 'od.testing';
+
 

@@ -101,16 +101,168 @@ public class DCBReportService {
 
 			endDate = utils.getEndingDateOfFinancialYear(endingYear);
 
-			if (isRequestForCurrentFY(startingYear)) {
-				createDCBForCurrentFinancialYear(startDate, endDate, tenantId, requestInfo, reportList, reportType,
+//			if (isRequestForCurrentFY(startingYear)) {
+//				createDCBForCurrentFinancialYear(startDate, endDate, tenantId, requestInfo, reportList, reportType,
+//						financialYear);
+//
+//			} else {
+				createDCBForPastFY(startDate, endDate, tenantId, requestInfo, reportList, reportType,
 						financialYear);
-
-			} else {
-				throw new CustomException("IMPLEMENTATION_INPROGRESS",
-						"Implementation is in progress for other then current financial years");
-			}
+//			}
 		}
 
+	}
+
+	private void createDCBForPastFY(Long startDate, Long endDate, String tenantId, RequestInfo requestInfo,
+			List<UtilityReportDetails> reportList, String reportType, String financialYear) {
+		
+		// new record inserted for each report
+		if (CollectionUtils.isEmpty(reportList)) {
+			UtilityReportDetails reportDetails = enrichmentService.enrichSaveReport(requestInfo, reportType,
+					financialYear, tenantId);
+			repository.saveReportDetails(new UtilityReportRequest(requestInfo, reportDetails));
+			reportList.add(reportDetails);
+		}
+		
+		// fetch properties details here
+		Map<String, DCBProperty> propertiesDetails = repository.getPropertyDetails(tenantId);
+		
+		// fetch tax amount for the input FY
+		Map<String, DCBDemand> currentDemands = repository.getDemands(tenantId, startDate, endDate);
+		
+		// fetch tax amount for all the past FYs 
+		Map<String, DCBArrearDue> arrearDue = repository.getArrearDue(tenantId, startDate);
+		
+		// fetch payments till date 
+		Map<String, DCBPayment> paymentsTillDate = repository.getCollections(tenantId, null, endDate);
+		
+		// fetch payments for the input FY
+		Map<String, DCBPayment> currentPayments = repository.getCollections(tenantId, startDate, endDate);
+		
+		// fetch collection amount till date
+		Map<String, DCBDemand> demandsTillDate = repository.getDemands(tenantId, null, null);
+		
+		// fetch total advance amount till date
+		Map<String, Advance> advanceTillDate = repository.getTotalAdvanceAmount(tenantId);
+		
+		Map<String, DCBReportModel> dcbReportMap = new HashMap<>();
+		
+		propertiesDetails.forEach((key, property) -> {
+
+			DCBReportModel dcbReportObject = DCBReportModel.builder().oldPropertyId(property.getOldPropertyId())
+					.ward(property.getWard()).propertyId(property.getPropertyId())
+					.legacyId(property.getLegacyHoldingNo()).build();
+
+			dcbReportMap.put(key, dcbReportObject);
+		});
+		
+		for (Map.Entry<String, DCBReportModel> entry : dcbReportMap.entrySet()) {
+
+			BigDecimal currentPayment = BigDecimal.ZERO;
+			BigDecimal currentDemand = BigDecimal.ZERO;
+			BigDecimal collectionsTillDate = BigDecimal.ZERO;
+			BigDecimal arrearDemand = BigDecimal.ZERO;
+			BigDecimal paymentsTillToday = BigDecimal.ZERO;
+			BigDecimal advanceAmount = BigDecimal.ZERO;
+			BigDecimal arrear = BigDecimal.ZERO;
+			BigDecimal totalDemand = BigDecimal.ZERO;
+			
+			BigDecimal currentDemandCollection = BigDecimal.ZERO;
+			BigDecimal arrearDemandCollection = BigDecimal.ZERO;
+			BigDecimal collectionsBeforeSujog = BigDecimal.ZERO;
+			
+			String key = entry.getKey();
+			DCBReportModel dcbObject = entry.getValue();
+			
+			if (currentPayments.containsKey(key)) {
+				DCBPayment currentPaymentObject = currentPayments.get(key);
+				currentPayment = currentPaymentObject.getTotalPaid();
+			}
+
+			if (currentDemands.containsKey(key)) {
+				DCBDemand currentDemandObject = currentDemands.get(key);
+				currentDemand = currentDemandObject.getTaxAmount();
+				currentDemandCollection = currentDemandObject.getCollectionAmount();
+			}
+			
+			//This is the advance pending for a property id till date
+			if (advanceTillDate.containsKey(key)) {
+				Advance advanceObject = advanceTillDate.get(key);
+				advanceAmount = advanceObject.getTotalAdvanceAmount().abs();
+			}
+			
+			if (demandsTillDate.containsKey(key)) {
+				DCBDemand demandsTillDateObject = demandsTillDate.get(key);
+				collectionsTillDate = demandsTillDateObject.getCollectionAmount();
+			}
+			
+			if (paymentsTillDate.containsKey(key)) {
+				DCBPayment paymentsTillDateObject = paymentsTillDate.get(key);
+				paymentsTillToday = paymentsTillDateObject.getTotalPaid();
+			}
+			
+			if(arrearDue.containsKey(key)) {
+				DCBArrearDue arrearDueObject = arrearDue.get(key);
+				arrearDemand = arrearDueObject.getTaxAmount();
+				arrearDemandCollection = arrearDueObject.getCollectionAmount();
+			}
+			
+			collectionsBeforeSujog = collectionsTillDate.subtract(paymentsTillToday).compareTo(BigDecimal.ZERO) > 0
+					? collectionsTillDate.subtract(paymentsTillToday)
+					: BigDecimal.ZERO;
+			
+			/*arrear = arrearDemand.subtract(collectionsTillDate.subtract(paymentsTillToday).subtract(advanceAmount))
+					.compareTo(BigDecimal.ZERO) > 0
+							? arrearDemand
+									.subtract(collectionsTillDate.subtract(paymentsTillToday).subtract(advanceAmount))
+							: BigDecimal.ZERO;*/
+			
+			arrear = arrearDemand.subtract(collectionsBeforeSujog).compareTo(BigDecimal.ZERO) > 0
+					? arrearDemand.subtract(collectionsBeforeSujog)
+					: BigDecimal.ZERO;
+					
+			totalDemand = arrear.add(currentDemand);
+			
+			currentDemandCollection = currentPayment.subtract(arrear).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
+					? currentPayment.subtract(arrear).subtract(advanceAmount)
+					: BigDecimal.ZERO;
+			
+			arrearDemandCollection = currentPayment.subtract(currentDemandCollection).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
+					? currentPayment.subtract(currentDemandCollection).subtract(advanceAmount)
+					: BigDecimal.ZERO;
+			
+			dcbObject.setCurrentDemand(currentDemand);
+			dcbObject.setCurrentPayment(currentPayment);
+			dcbObject.setTotalDemand(totalDemand);
+			dcbObject.setArrearDemand(arrear);
+			dcbObject.setArrearCollection(arrearDemandCollection);
+			dcbObject.setCurrentCollection(currentDemandCollection);
+		}
+		
+		// Path and filename for the excel file
+		String fileName = generateFileName("DCB_Report", tenantId, financialYear);
+		File temporaryfile = getTemporaryFile("DCB_Report", fileName);
+
+		DCBReportExcelGenerator excelGenerator = new DCBReportExcelGenerator(dcbReportMap);
+
+		try {
+			excelGenerator.generateExcelFile(temporaryfile);
+		} catch (IOException e) {
+			log.info("Error Occured while writing into excel file...");
+			e.printStackTrace();
+		}
+
+		// push temporary file into file store
+		log.info("uploading file to filestore...");
+		Object filestoreDetails = fileStoreService.upload(temporaryfile, fileName, MediaType.MULTIPART_FORM_DATA_VALUE,
+				"PT", "od");
+		log.info("Uploaded the file to filestore with details: " + filestoreDetails.toString());
+
+		// enrich and update Utility Report Details
+		UtilityReportRequest reportDetailsRequest = enrichmentService.enrichUpdateReport(requestInfo, reportList,
+				fileName, filestoreDetails);
+		repository.updateReportDetails(reportDetailsRequest);
+		
 	}
 
 	private boolean isRequestForCurrentFY(String startingYear) {
