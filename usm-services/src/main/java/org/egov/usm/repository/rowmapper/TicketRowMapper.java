@@ -41,13 +41,18 @@ public class TicketRowMapper implements ResultSetExtractor<List<SurveyTicket>> {
 						.lastModifiedTime(lastModifiedTime).build();
 
 				ticket = SurveyTicket.builder().id(rs.getString("id")).tenantId(rs.getString("tenantid"))
-						.ticketNo(rs.getString("ticketno")).surveyAnswerId(rs.getString("surveyanswerid"))
-						.questionId(rs.getString("questionid")).ticketDescription(rs.getString("ticketdescription"))
+						.ticketNo(rs.getString("ticketno"))
+						.surveyAnswerId(rs.getString("surveyanswerid"))
+						.questionId(rs.getString("questionid"))
+						.ticketDescription(rs.getString("ticketdescription"))
 						.ticketDescriptionOdia(rs.getString("questionstatement_odia"))
 						.status(TicketStatus.fromValue(rs.getString("status")))
 						.ticketCreatedTime(rs.getLong("ticketcreatedtime"))
-						.ticketClosedTime(rs.getLong("ticketclosedtime")).ward(rs.getString("ward"))
-						.slumCode(rs.getString("slumcode")).questionCategory(rs.getString("questioncategory"))
+						.ticketClosedTime(rs.getLong("ticketclosedtime"))
+						.ward(rs.getString("ward"))
+						.slumCode(rs.getString("slumcode"))
+						.questionCategory(rs.getString("questioncategory"))
+						.escalatedId(rs.getString("escalatedid"))
 						.auditDetails(auditdetails).build();
 
 				if (!ObjectUtils.isEmpty(rs.getObject("issatisfied"))) {
@@ -56,6 +61,10 @@ public class TicketRowMapper implements ResultSetExtractor<List<SurveyTicket>> {
 
 				if (!ObjectUtils.isEmpty(rs.getObject("unattended"))) {
 					ticket.setUnAttended(rs.getBoolean("unattended"));
+				}
+				
+				if (!ObjectUtils.isEmpty(rs.getObject("escalatedtime"))) {
+					ticket.setEscalatedTime(rs.getLong("escalatedtime"));
 				}
 			}
 			addCommentToTicket(rs, ticket);

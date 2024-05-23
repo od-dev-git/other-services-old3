@@ -2,6 +2,7 @@ package org.egov.usm.service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -172,6 +173,51 @@ public class TicketService {
 			} 
 		}
 		return surveyTickets;
+	}
+
+	
+	public void updateAutoEscalatedTickets() {
+		Set<SurveyTicket> escalatedTickets = new HashSet<>();
+		TicketSearchCriteria searchCriteria = TicketSearchCriteria.builder()
+				.unAttended(Boolean.TRUE)
+				.isAutoEscalated(Boolean.FALSE)
+				.build();
+		log.info("Search Criteria : " + searchCriteria.toString());
+		List<SurveyTicket> surveyTickets = repository.getSurveyTicketRequests(searchCriteria);
+		
+		for(int i = 0; i < surveyTickets.size()-1; i++) {
+			if(!ObjectUtils.isEmpty(surveyTickets.get(i).getEscalatedId())) {
+				continue;
+			}
+		    for (int j = i + 1; j < surveyTickets.size(); j++) {
+		    	if(!ObjectUtils.isEmpty(surveyTickets.get(j).getEscalatedId())) {
+					continue;
+				}
+		        if (surveyTickets.get(i).getQuestionId().equalsIgnoreCase(surveyTickets.get(j).getQuestionId())
+		        		&& surveyTickets.get(i).getWard().equalsIgnoreCase(surveyTickets.get(j).getWard())
+		        		&& surveyTickets.get(i).getSlumCode().equalsIgnoreCase(surveyTickets.get(j).getSlumCode())){
+		        	if(USMUtil.isConcurrentDay(surveyTickets.get(i).getTicketCreatedTime(), surveyTickets.get(j).getTicketCreatedTime())) {
+			        	String escalatedId = USMUtil.generateUUID();
+			        	Long escalatedTime = System.currentTimeMillis();
+			        	
+			        	surveyTickets.get(i).setEscalatedId(escalatedId);
+			        	surveyTickets.get(i).setEscalatedTime(escalatedTime);
+			        	
+			        	surveyTickets.get(j).setEscalatedId(escalatedId);
+			        	surveyTickets.get(j).setEscalatedTime(escalatedTime);
+			        	
+			        	escalatedTickets.add(surveyTickets.get(i));
+			        	escalatedTickets.add(surveyTickets.get(j)); 
+			        }
+		        }
+		    }
+		}
+	
+		log.info("Escalated Tickets : " + escalatedTickets.toString());
+		escalatedTickets.forEach(escalatedTicket -> {
+			repository.updateAutoEscalatedTickets(escalatedTicket);
+		});
+		
 	}
 
 }
