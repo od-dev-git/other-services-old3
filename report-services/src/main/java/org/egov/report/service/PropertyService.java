@@ -1,6 +1,11 @@
 package org.egov.report.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -12,13 +17,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.Valid;
+
+import org.apache.commons.io.FileUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.service.DemandService;
+import org.egov.report.util.DCBReportExcelGenerator;
+import org.egov.report.util.PTAssessmentsReportExcelGenerator;
 import org.egov.report.util.PaymentUtil;
+import org.egov.report.util.PaymetsReportExcelGenerator;
+import org.egov.report.util.ReportConstants;
+import org.egov.report.util.Util;
 import org.egov.report.model.BillAccountDetail;
 import org.egov.report.model.BillDetail;
 import org.egov.report.model.Demand;
@@ -31,26 +45,33 @@ import org.egov.report.model.Property;
 import org.egov.report.model.PropertyConnectionRequest;
 import org.egov.report.model.PropertySearchingCriteria;
 import org.egov.report.model.UserSearchCriteria;
+import org.egov.report.model.UtilityReportDetails;
+import org.egov.report.model.UtilityReportSearchCriteria;
 import org.egov.report.model.enums.UserType;
+import org.egov.report.repository.DCBRepository;
 import org.egov.report.repository.PropertyDetailsReportRepository;
 import org.egov.report.repository.ServiceRepository;
 import org.egov.report.validator.PropertyReportValidator;
 import org.egov.report.web.model.ConsumerMasterWSReportResponse;
 import org.egov.report.web.model.DemandCriteria;
 import org.egov.report.web.model.OwnerInfo;
+import org.egov.report.web.model.PTAssessmentSearchCriteria;
 import org.egov.report.web.model.PropertyDemandResponse;
 import org.egov.report.web.model.PropertyDetailsResponse;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.PropertyResponse;
 import org.egov.report.web.model.PropertyWiseCollectionResponse;
 import org.egov.report.web.model.PropertyWiseDemandResponse;
+import org.egov.report.web.model.RequestInfoWrapper;
 import org.egov.report.web.model.TaxCollectorWiseCollectionResponse;
 import org.egov.report.web.model.ULBWiseTaxCollectionResponse;
 import org.egov.report.web.model.User;
+import org.egov.report.web.model.UtilityReportRequest;
 import org.egov.report.web.model.WaterConnectionDetails;
 import org.egov.report.web.model.WaterMonthlyDemandResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -89,6 +110,18 @@ public class PropertyService {
 	
 	@Autowired
 	private PaymentUtil paymentUtil;
+	
+	@Autowired
+	private DCBRepository dcbRepository;
+
+	@Autowired
+	private Util utils;
+	
+	@Autowired
+	private FileStoreService fileStoreService;
+	
+	@Autowired
+	private EnrichmentService enrichmentService;
 	
 	public static final List<String> TAXHEADS_NOT_ALLOWED_FOR_DEMAND_REPORT = Collections
 			.unmodifiableList(Arrays.asList("PT_ADVANCE_CARRYFORWARD","PT_PENALTY","PT_INTEREST","PT_TIME_REBATE","PT_TIME_PENALTY"));
@@ -769,5 +802,178 @@ public class PropertyService {
             }
         });
     }
+
+
+	public void generatePTAssessmentReport(@Valid RequestInfoWrapper requestInfoWrapper,
+			@Valid PTAssessmentSearchCriteria ptAssessmentSearchCriteria) {
+
+		RequestInfo requestInfo = requestInfoWrapper.getRequestInfo();
+
+		String reportType = ReportConstants.PTASSESSMENT_REPORT_STRING;
+
+		prValidator.validatePTAssessmentReport(ptAssessmentSearchCriteria);
+
+		List<String> tenantIds = ptAssessmentSearchCriteria.getTenantIds();
+
+		for (String tenantId : tenantIds) {
+
+			String financialYear = ptAssessmentSearchCriteria.getFinancialYear();
+
+			List<UtilityReportDetails> reportList = new ArrayList<>();
+			
+//			if(prValidator.validateRecentReport(reportList, tenantId)) {
+//				log.info("Skipping... Report already present for tenantid: "+ tenantId);
+//				continue;
+//			}
+			
+			if (CollectionUtils.isEmpty(reportList)) {
+				UtilityReportDetails reportDetails = enrichmentService.enrichSaveReport(requestInfo, reportType,
+						financialYear, tenantId);
+				dcbRepository.saveReportDetails(new UtilityReportRequest(requestInfo, reportDetails));
+				reportList.add(reportDetails);
+			}
+
+			try {	
+			
+			List<Map<String, Object>> assessmentsDetailsList = pdRepository.createPTAssessmentReport(ptAssessmentSearchCriteria,tenantId);
+			log.info("Total Assessments Fetched : " + assessmentsDetailsList.size());
+			
+	        Set<String> userIds = assessmentsDetailsList.stream()
+	                .map(map -> (String) map.get("name"))
+	                .filter(Objects::nonNull)
+	                .collect(Collectors.toSet());
+			
+			
+			// Path and filename for the excel file
+			String fileName = generateFileName("PTAssessment_Report", tenantId, financialYear);
+			File temporaryfile = getTemporaryFile("PTAssessment_Report", fileName);
+
+	    	PTAssessmentsReportExcelGenerator generator = new PTAssessmentsReportExcelGenerator(assessmentsDetailsList);
+	    	
+	    	int limit = configuration.getReportLimit();
+	    	int count = assessmentsDetailsList.size();
+	        Map<String, User> userMap = new HashMap<>();
+
+            // get User details here
+	        if (count > 0) {
+	            while (count > 0) {
+            UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+                    .active(true)
+                    .userType(UserSearchCriteria.CITIZEN)
+                    .tenantId(tenantId)//is it required
+                    .build();
+
+            List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+            // Update global userMap
+            userMap.putAll(usersInfo.stream()
+                    .collect(Collectors.toMap(User::getUuid, Function.identity())));
+
+            count = count - limit;
+        }
+    }
+            
+	        assessmentsDetailsList.forEach(assessment -> {
+	            Object userId = assessment.get("name"); // Assuming the map has a key 'userId' to match with userMap
+	            if (userId != null && userMap.containsKey(userId.toString())) {
+	                User user = userMap.get(userId.toString());
+	                assessment.put("name", user.getName()); // Assuming User has a getName() method
+	            }
+	        });
+            
+			try {
+				generator.generateExcelFile(temporaryfile);
+			} catch (IOException e) {
+				log.info("Error Occured while writing into excel file...");
+				e.printStackTrace();
+			}
+
+			// push temporary file into file store
+			log.info("uploading file to filestore...");
+			Object filestoreDetails = fileStoreService.upload(temporaryfile, fileName, MediaType.MULTIPART_FORM_DATA_VALUE,
+					"PT", "od");
+			log.info("Uploaded the file to filestore with details: " + filestoreDetails.toString());
+
+			// enrich and update Utility Report Details
+			UtilityReportRequest reportDetailsRequest = enrichmentService.enrichUpdateReport(requestInfo, reportList,
+					fileName, filestoreDetails);
+			dcbRepository.updateReportDetails(reportDetailsRequest);
+
+			// user info not decrypted and enrichment giving null pointer
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			
+	}
+		
+	}
+		
+		private String generateFileName(String fileInitialName, String tenantId, String financialYear) {
+			String fileFormat = ".xlsx";
+			String fileSeparator = "_";
+			DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_hhmmss");
+			dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
+			String currentDateTime = dateFormat.format(new Date());
+			String ulbName = StringUtils.capitalize(tenantId.substring(3));
+			return fileInitialName + fileSeparator + ulbName + fileSeparator + financialYear + fileSeparator + currentDateTime + fileFormat;
+		}
+		
+		private File getTemporaryFile(String reportType, String fileName) {
+			//Temp file location
+			File currentDirFile = new File(configuration.getReportTemporaryLocation());
+			String currentPath = currentDirFile.getAbsolutePath();
+			String absolutePath = currentPath + File.separator + reportType;
+			log.info("Temporary storage Path : " + absolutePath);
+			File directory = new File(absolutePath);
+			if (directory.exists()) {
+				try {
+					FileUtils.deleteDirectory(directory);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			directory.mkdir();
+			File temporaryfile = new File(absolutePath, fileName);
+			
+			if (!temporaryfile.exists()) {
+				try {
+					temporaryfile.createNewFile();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			return temporaryfile;
+		}
+
+
+		public Map<String, Object> getPTAssessmentsReporteport(RequestInfo requestInfo,
+				@Valid UtilityReportSearchCriteria searchCriteria) {
+			Map<String, Object> response = new HashMap<>();
+			
+			String reportType = ReportConstants.PTASSESSMENT_REPORT_STRING;
+
+			String tenantId = searchCriteria.getTenant();
+			
+			String financialYear = searchCriteria.getFinancialYear();
+
+			List<UtilityReportDetails> reportList = dcbRepository.isReportExist(reportType, financialYear, tenantId);
+
+			prValidator.validateIfReportGenerationInProcess(reportList, tenantId);
+			
+			if(reportList.isEmpty()) {
+				throw new CustomException("REPORT_NOT_GENERATED",
+						"Report is not generated for mentioned criteria. Kindly generate the report first ..");
+			}
+			
+			List<UtilityReportDetails> reportDetails = reportList.stream()
+					.filter(item -> item.getTenantId().equalsIgnoreCase(tenantId)).collect(Collectors.toList());
+
+			response.put("reportsDetails", reportDetails.get(0));
+			
+			return response;
+		}
+
+		
+		
 
 }
