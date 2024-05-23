@@ -6,9 +6,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.egov.report.repository.WSReportRepository;
 import org.egov.report.util.WSReportUtils;
 import org.egov.report.web.model.DemandCriteria;
+import org.egov.report.web.model.PTAssessmentSearchCriteria;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -314,6 +317,50 @@ public class ReportQueryBuilder {
             + FROM
             + "eg_pt_property epp "
             + WHERE + "epp.status <> 'INACTIVE' ";
+    
+    private static final String PT_ASSESSMENT_REPORT_QUERY = "select initcap(split_part(asmt.tenantid, '.', 2)) as ulb , "
+			+ "	asmt.propertyid as propertyid , "
+			+ "	asmt.assessmentnumber as asmtnumber, "
+			+ "	asmt.status as status, "
+			+ "	address.ward as ward, "
+			+ "	address.city as city, "
+			+ "	own.userid as name, "
+			+ "	asmt.financialyear as finyear, "
+			+ "	to_char(to_timestamp(assessmentdate / 1000)::date, 'DD-MM-YYYY') as asmtdate, "
+			+ "	case "
+			+ "		when asmt.status = 'ACTIVE' then to_char(to_timestamp(asmt.lastmodifiedtime / 1000)::date, 'DD-MM-YYYY') "
+			+ "		else null "
+			+ "	end as approvaldate, "
+			+ "	coalesce(asmt.additionaldetails->>'lightTax', '0') as lighttax, "
+			+ "	coalesce(asmt.additionaldetails->>'waterTax', '0') as watertax, "
+			+ "	coalesce(asmt.additionaldetails->>'holdingTax', '0') as holdingtax, "
+			+ "	coalesce(asmt.additionaldetails->>'latrineTax', '0') as latrinetax, "
+			+ "	coalesce(asmt.additionaldetails->>'parkingTax', '0') as parkingtax, "
+			+ "	coalesce(asmt.additionaldetails->>'serviceTax', '0') as servicetax, "
+			+ "	coalesce(asmt.additionaldetails->>'drainageTax', '0') as drainagetax, "
+			+ "	coalesce(asmt.additionaldetails->>'usageExemption', '0') as usageexemption, "
+			+ "	coalesce(asmt.additionaldetails->>'ownershipExemption', '0') as ownershipexemption, "
+			+ "	coalesce(asmt.additionaldetails->>'solidWasteUserCharges', '0') as solidwasteusercharges, "
+			+ "	coalesce(asmt.additionaldetails->>'otherDues', '0') as otherdues, "
+			+ "	case "
+			+ "		when hrms.code is null then 'SYSTEM' "
+			+ "		else 'MANUAL' "
+			+ "	end as triggeredby "
+			+ "from "
+			+ "	eg_pt_asmt_assessment asmt "
+			+ "inner join eg_pt_property prop on "
+			+ "	prop.propertyid = asmt.propertyid "
+			+ "inner join eg_pt_address address on "
+			+ "	address.propertyid = prop.id "
+			+ "	and prop.status = 'ACTIVE' "
+			+ "inner join eg_pt_owner own on "
+			+ "	own.propertyid = prop.id "
+//			+ "inner join eg_user usr on "
+//			+ "	usr.uuid = own.userid "
+			+ "left outer join eg_hrms_employee hrms on "
+			+ "	hrms.uuid = asmt.createdby "
+			+ "where "
+			+ "	1 = 1 ";
 
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -443,16 +490,16 @@ public class ReportQueryBuilder {
 		query.append(" d.businessservice ='WS' and d.status !='CANCELLED' ");
 		query.append(AND_QUERY).append(" d.consumercode = ? ");
 		preparedStmtList.add(criteria.getConsumerCode());
-		
+
 		if(!StringUtils.isEmpty(criteria.getTenantId())) {
-			
+
 			query.append(AND_QUERY).append(" d.tenantid = ? ");
 			preparedStmtList.add(criteria.getTenantId());
-			
+
 			query.append(AND_QUERY).append(" dd.tenantid = ? ");
 			preparedStmtList.add(criteria.getTenantId());
 		}
-		
+
 		query.append(GROUP_BY).append(demandSelectValues.substring(0,demandSelectValues.length()-1));
 		query.append(ORDER_BY).append(" d.taxperiodto ");
 		
@@ -738,10 +785,10 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			query.append(AND).append(" EWC2.ADDITIONALDETAILS ->> 'ward' = ? ");
 			preparedStatement.add(searchCriteria.getWard());
 		}
-		
+
 		query.append(AND).append(" edv.tenantid = ? ");
 		preparedStatement.add(searchCriteria.getTenantId());
-		
+
 		return query.toString();
 	}
 	
@@ -1081,4 +1128,24 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 
         return query.toString();
     }
+
+	public String getCreatePTAssessmentReportQuery(@Valid PTAssessmentSearchCriteria ptAssessmentSearchCriteria,
+			String tenantid) {
+		StringBuilder query =  new StringBuilder(PT_ASSESSMENT_REPORT_QUERY);
+	    
+		if (!StringUtils.isEmpty(tenantid)) {
+			query.append(" and asmt.tenantid = '" + tenantid + "'");
+		}
+		
+		if (!StringUtils.isEmpty(ptAssessmentSearchCriteria.getFinancialYear())) {
+			query.append(" and financialyear = '" + ptAssessmentSearchCriteria.getFinancialYear() + "'");
+		}
+		
+		query.append(" order by asmt.propertyid, assessmentdate desc ");
+
+	    log.info("Query for Payment Report search: " + query);
+	    
+	    return query.toString();
+
+	}
 }
