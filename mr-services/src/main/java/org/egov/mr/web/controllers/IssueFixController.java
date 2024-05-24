@@ -40,5 +40,11 @@ public class IssueFixController {
 				.status("FIXED").build();
 		return new ResponseEntity<>(issueFixResponse, HttpStatus.OK);
 	}
+	
+    @PostMapping(value = "/_automatePaymentIssueFix")
+	public ResponseEntity<IssueFixResponse> automatePaymentIssueFix() {
+        issueFixService.automatePaymentIssueFix();		
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 
 }

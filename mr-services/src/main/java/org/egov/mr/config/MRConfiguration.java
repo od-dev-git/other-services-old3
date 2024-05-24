@@ -223,5 +223,8 @@ public class MRConfiguration {
     
     @Value("${text.for.subject.email.notif}")
     private String emailSubject;
+    
+    @Value("${mr.payment.issuefix}")
+	private Boolean mrPaymentIssueFIx;
 
 }
