@@ -33,7 +33,7 @@ public class USMQueryBuilder {
 
 	public static final String USM_TOTAL_ESCALATED_ISSUE = "select  SUM(CASE WHEN ticket.status = 'CLOSED' AND ticket.issatisfied  = false  THEN 1 ELSE 0 END) as totalamt FROM eg_usm_survey_ticket ticket";
 
-	public static final String USM_TOTAL_ESCALATED_RESPONDED_ISSUE = "select count(distinct(comm.ticketid)) from eg_usm_survey_ticket_comment comm inner join eg_usm_survey_ticket ticket on ticket .id = comm.ticketid ";
+	public static final String USM_TOTAL_ESCALATED_RESPONDED_ISSUE = "select count(distinct(comm.ticketid)) from eg_usm_survey_ticket_comment comm inner join eg_usm_survey_ticket ticket on ticket .id = comm.ticketid where ticket.status = 'CLOSED' AND ticket.issatisfied  = false";
 
 	public static final String USM_TOTAL_TICKET_CREATED = "select submit.tenantid as tenantid , count(*) as totalamt  from eg_usm_survey_ticket ticket left join eg_usm_survey_submitted_answer answer on ticket.surveyanswerid  = answer.id left join eg_usm_survey_submitted submit on answer.surveysubmittedid  = submit .id ";
 

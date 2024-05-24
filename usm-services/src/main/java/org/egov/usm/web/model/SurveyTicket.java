@@ -82,6 +82,12 @@ public class SurveyTicket {
 	
 	@JsonProperty("sdaMobileNo")
 	private String sdaMobileNo;
+	
+	@JsonProperty("escalatedId")
+	private String escalatedId;
+	
+	@JsonProperty("escalatedTime")
+	private Long escalatedTime;
 
 	public SurveyTicket addTicketComment(SurveyTicketComment surveyTicketComment) {
 		if (this.surveyTicketComments == null) {

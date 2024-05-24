@@ -1,5 +1,6 @@
 package org.egov.usm.utility;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -97,4 +98,25 @@ public class USMUtil {
 		return LocalDateTime.now(ZoneId.of(Constants.LOCAL_ZONE_ID)).toInstant(ZoneOffset.UTC).isAfter(instant);
 	}
 	
+	
+	/**
+	 * To check current time is after given time limit
+	 * 
+	 * @param inputUnixTime1
+	 * @param inputUnixTime2
+	 * @return true or false 
+	 */
+	public static boolean isConcurrentDay(Long inputUnixTime1, Long inputUnixTime2 ) {
+		LocalDateTime date1 = LocalDateTime
+				.ofInstant(Instant.ofEpochMilli(inputUnixTime1), ZoneId.of(Constants.LOCAL_ZONE_ID))
+		        .truncatedTo(ChronoUnit.DAYS);
+
+		LocalDateTime date2 = LocalDateTime
+		        .ofInstant(Instant.ofEpochMilli(inputUnixTime2), ZoneId.of(Constants.LOCAL_ZONE_ID))
+		        .truncatedTo(ChronoUnit.DAYS);
+
+		Duration duration = Duration.between(date1, date2);
+		long dayDifference = duration.toDays();
+		if(dayDifference == 1 || dayDifference == -1 ) return true; else return false;
+	}
 }

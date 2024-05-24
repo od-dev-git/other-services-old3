@@ -65,5 +65,8 @@ public class TicketSearchCriteria {
 
 	@JsonProperty("tickDate")
 	private Long ticketDate;
+	
+	@JsonProperty("isAutoEscalated")
+	private Boolean isAutoEscalated;
 
 }
