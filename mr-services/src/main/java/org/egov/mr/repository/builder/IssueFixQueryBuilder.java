@@ -83,7 +83,10 @@ public class IssueFixQueryBuilder {
 			+ "(id, tenantid, businessservice, businessid, action, status, comment, assigner, assignee, statesla, previousstatus, createdby, lastmodifiedby, createdtime, lastmodifiedtime, modulename, businessservicesla, rating) "
 			+ "VALUES( ? , ? , ? , ? , 'PAY' , ? , NULL, ? , NULL, 43200000, NULL, ? , ? , ? , ? , 'tl-services', 259052163, NULL)";
 
-
+   
+	public static final String GET_PAYMENT_ISSUES_APPLICATIONS_QUERY = "select mr.applicationnumber, mr.tenantid, txn.module  from eg_mr_application mr "
+			+ "inner join eg_pg_transactions txn on txn.consumer_code=mr.applicationnumber where mr.status in ('PENDINGPAYMENT') and txn.txn_status='SUCCESS' and txn.module='MR' ";
+	
 	public String searchDscQuery() {
 		return DELETE_DUPLICATE_DSC;
 	}
@@ -257,7 +260,9 @@ public class IssueFixQueryBuilder {
 		return INSERT_WORKFLOW_QUERY;
 	}
 
-
+	public String getPaymentIssueAppliactionsQuery() {
+		return GET_PAYMENT_ISSUES_APPLICATIONS_QUERY;
+	}
 
 
 }

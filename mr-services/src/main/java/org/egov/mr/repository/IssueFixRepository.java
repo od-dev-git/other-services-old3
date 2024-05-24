@@ -14,8 +14,10 @@ import org.egov.mr.web.models.collection.DemandSearchCriteria;
 import org.egov.mr.web.models.collection.Payment;
 import org.egov.mr.web.models.collection.PaymentSearchCriteria;
 import org.egov.mr.web.models.issuefix.IssueFix;
+import org.egov.mr.web.models.issuefix.PaymentIssueFix;
 import org.egov.mr.web.models.workflow.ProcessInstance;
 import org.egov.mr.web.models.workflow.WorkFlowSearchCriteria;
+import org.egov.mrcalculator.repository.rowmapper.PaymentIssueFixRowMapper;
 import org.egov.mrcalculator.web.models.demand.Demand;
 import org.egov.mrcalculator.web.models.demand.DemandDetail;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,9 @@ public class IssueFixRepository {
 
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+	
+	@Autowired
+	private PaymentIssueFixRowMapper paymentIssueFixRowMapper;
 	
 	public void deleteCertificate(String applicationNumber) {
 
@@ -250,7 +255,13 @@ public class IssueFixRepository {
 			}
 		});
 	}
-
+    
+    public List<PaymentIssueFix> getPaymentIssueApplications() {
+		String query = issueFixQueryBuilder.getPaymentIssueAppliactionsQuery();
+		log.info("*************" + query);
+		List<PaymentIssueFix> paymentIssueFixApplications = jdbcTemplate.query(query, paymentIssueFixRowMapper);
+		return paymentIssueFixApplications;
+	}
 
 
 }
