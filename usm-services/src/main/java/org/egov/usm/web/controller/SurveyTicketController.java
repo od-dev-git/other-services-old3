@@ -38,7 +38,6 @@ public class SurveyTicketController {
 
 	@PostMapping("/_create")
 	public ResponseEntity<SurveyTicketResponse> create(@Valid @RequestBody SurveyTicketRequest tiketRequest) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -78,4 +77,8 @@ public class SurveyTicketController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@PostMapping("/_updateAutoEscalatedTickets")
+	public void updateAutoEscalatedTickets() {
+		ticketService.updateAutoEscalatedTickets();
+	}
 }
