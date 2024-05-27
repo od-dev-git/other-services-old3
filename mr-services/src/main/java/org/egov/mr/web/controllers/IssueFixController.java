@@ -6,6 +6,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.mr.service.issuefix.IIssueFixService;
 import org.egov.mr.service.issuefix.IssueFixService;
 import org.egov.mr.util.ResponseInfoFactory;
+import org.egov.mr.web.models.RequestInfoWrapper;
 import org.egov.mr.web.models.issuefix.IssueFix;
 import org.egov.mr.web.models.issuefix.IssueFixRequest;
 import org.egov.mr.web.models.issuefix.IssueFixResponse;
@@ -43,8 +44,8 @@ public class IssueFixController {
 	}
 	
     @PostMapping(value = "/_automatePaymentIssueFix")
-	public ResponseEntity<IssueFixResponse> automatePaymentIssueFix(@Valid @RequestBody RequestInfo requestInfo) {
-        issueFixService.automatePaymentIssueFix(requestInfo);		
+	public ResponseEntity<IssueFixResponse> automatePaymentIssueFix(@Valid @RequestBody RequestInfoWrapper requestInfo) {
+        issueFixService.automatePaymentIssueFix(requestInfo.getRequestInfo());		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
