@@ -2,6 +2,7 @@ package org.egov.mr.service.issuefix;
 
 import java.util.List;
 
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.mr.config.MRConfiguration;
 import org.egov.mr.repository.IssueFixRepository;
 import org.egov.mr.validator.IssueFixValidator;
@@ -70,7 +71,7 @@ public class IssueFixService {
         }
     }
     
-    public void automatePaymentIssueFix() {
+    public void automatePaymentIssueFix(RequestInfo requestInfo) {
 		if (config.getMrPaymentIssueFIx()) {
 			log.info("Payment Issue Fix Scheduler Started Successfully. Time: {}", System.currentTimeMillis());
 			List<PaymentIssueFix> paymentIssueApplications = repository.getPaymentIssueApplications();
@@ -78,7 +79,7 @@ public class IssueFixService {
 				log.info("Number of Payment Issue Found in MR at : {} :{}", System.currentTimeMillis(),
 						paymentIssueApplications.size());
 
-				processPaymentIssues(paymentIssueApplications, "PAYMENT_ISSUE");
+				processPaymentIssues(paymentIssueApplications, "PAYMENT_ISSUE", requestInfo);
 				log.info("Payment Issue Fix Scheduler Completed Successfully. Time: {}", System.currentTimeMillis());
 			} else {
 				log.info("No Payment Issue Found in MR at : {}", System.currentTimeMillis());
@@ -89,7 +90,7 @@ public class IssueFixService {
 
 	}
 
-	private void processPaymentIssues(List<PaymentIssueFix> paymentIssues, String issueType) {
+	private void processPaymentIssues(List<PaymentIssueFix> paymentIssues, String issueType, RequestInfo requestInfo) {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		if (!CollectionUtils.isEmpty(paymentIssues)) {
 			paymentIssues.forEach(paymentIssue -> {
@@ -98,6 +99,7 @@ public class IssueFixService {
 							.issueFix(IssueFixRequest.builder()
 									.issueFix(IssueFix.builder().applicationNo(paymentIssue.getApplicationNumber())
 											.issueName(issueType).tenantId(paymentIssue.getTenantId()).build())
+									.requestInfo(requestInfo)
 									.build(), httpHeaders);
 				} catch (Exception e) {
 					log.error("Error processing mutation fee payment issue for application no: "
