@@ -22,6 +22,7 @@ import javax.validation.constraints.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Builder
 public class User   {
         @JsonProperty("id")
         private Long id;

@@ -1,8 +1,11 @@
 package org.egov.mr.service.issuefix;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.Role;
+import org.egov.common.contract.request.User;
 import org.egov.mr.config.MRConfiguration;
 import org.egov.mr.repository.IssueFixRepository;
 import org.egov.mr.validator.IssueFixValidator;
@@ -73,6 +76,7 @@ public class IssueFixService {
     
     public void automatePaymentIssueFix(RequestInfo requestInfo) {
 		if (config.getMrPaymentIssueFIx()) {
+			setUserDetails(requestInfo);
 			log.info("Payment Issue Fix Scheduler Started Successfully. Time: {}", System.currentTimeMillis());
 			List<PaymentIssueFix> paymentIssueApplications = repository.getPaymentIssueApplications();
 			if (!CollectionUtils.isEmpty(paymentIssueApplications)) {
@@ -108,6 +112,16 @@ public class IssueFixService {
 				}
 			});
 		}
+
+	}
+	
+
+	private void setUserDetails(RequestInfo requestInfo) {
+		Role role = Role.builder().code(config.getMrIssueFixRoleCode()).tenantId(config.getMrIssueFixTenantId())
+				.build();
+		User userInfo = User.builder().uuid(config.getMrIssueFixUUID()).type("EMPLOYEE").roles(Arrays.asList(role))
+				.id(0L).build();
+		requestInfo.setUserInfo(userInfo);
 
 	}
 

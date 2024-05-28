@@ -226,5 +226,15 @@ public class MRConfiguration {
     
     @Value("${mr.payment.issuefix}")
 	private Boolean mrPaymentIssueFIx;
+    
+    @Value("${mr.issuefix.rolecode}")
+	private String mrIssueFixRoleCode;
+    
+    @Value("${mr.issuefix.tenantid}")
+	private String mrIssueFixTenantId;
+    
+    @Value("${mr.issue.resolver.uuid}")
+	private String mrIssueFixUUID;
+
 
 }
