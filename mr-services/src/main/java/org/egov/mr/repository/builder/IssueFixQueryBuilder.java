@@ -62,6 +62,9 @@ public class IssueFixQueryBuilder {
 	public static final String PROCESS_INSTANCE_QUERY = "select * from eg_wf_processinstance_v2 wf ";
 
 	public static final String MR_QUERY_ORDER_BY_CLAUSE = " wf.lastmodifiedtime DESC";
+	
+	public static final String SEARCH_STATUS_MISMATCH_ISSUE_APPLICATIONS  = "select ema.tenantid,ema.applicationnumber,ewpv.action as actioninprocessinstance,ema.status as currentstatus,ewsv.applicationstatus as expectedstatus "
+			+ " from eg_mr_application ema inner join (select distinct on(businessid) * from eg_wf_processinstance_v2 where businessservice in('MR') order by businessid,createdtime desc) ewpv on ewpv.businessid = ema.applicationnumber inner join eg_wf_state_v2 ewsv on ewsv.uuid = ewpv.status where ema.status <> ewsv.applicationstatus and ema.status not in ('DELETED') and ema.createdtime >= ( select (extract(EPOCH from DATE_TRUNC('year', current_timestamp))* 1000 + 19800000)) ";
 
 	public static final String DEMAND_UPDATE_QUERY = "update egbs_demand_v1 "
 			+ " set ispaymentcompleted = true "
@@ -262,6 +265,10 @@ public class IssueFixQueryBuilder {
 
 	public String getPaymentIssueAppliactionsQuery() {
 		return GET_PAYMENT_ISSUES_APPLICATIONS_QUERY;
+	}
+	
+	public String getStatusMismatchAppliactionsQuery() {
+		return SEARCH_STATUS_MISMATCH_ISSUE_APPLICATIONS;
 	}
 
 

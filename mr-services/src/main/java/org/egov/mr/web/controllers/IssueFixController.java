@@ -48,5 +48,11 @@ public class IssueFixController {
         issueFixService.automatePaymentIssueFix(requestInfo.getRequestInfo());		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+    
+	@PostMapping(value = "/_automateStatusMismatchIssueFix")
+	public ResponseEntity<IssueFixResponse> automateStatusMismatchIssueFix(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
+        issueFixService.automateStatusMismatchIssueFix(requestInfoWrapper.getRequestInfo());		
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 
 }

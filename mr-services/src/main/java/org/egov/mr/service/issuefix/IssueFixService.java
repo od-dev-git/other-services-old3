@@ -12,6 +12,7 @@ import org.egov.mr.validator.IssueFixValidator;
 import org.egov.mr.web.models.issuefix.IssueFix;
 import org.egov.mr.web.models.issuefix.IssueFixRequest;
 import org.egov.mr.web.models.issuefix.PaymentIssueFix;
+import org.egov.mr.web.models.issuefix.StatusMismatchIssueFix;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -124,5 +125,48 @@ public class IssueFixService {
 		requestInfo.setUserInfo(userInfo);
 
 	}
+	
+	public void automateStatusMismatchIssueFix(RequestInfo requestInfo) {
+		if (config.getMrStatusMismatchIssueFIx()) {
+			setUserDetails(requestInfo);
+			log.info("Status Mismatch Issue Fix Scheduler Started Successfully. Time: {}", System.currentTimeMillis());
+			List<StatusMismatchIssueFix> statusMismatchIssueApplications = repository.getStatusMismatchApplications();
+			if (!CollectionUtils.isEmpty(statusMismatchIssueApplications)) {
+				log.info("Number of Status Mismatch Issue Found in MR at : {} :{}", System.currentTimeMillis(),
+						statusMismatchIssueApplications.size());
+
+				processStatusMismatchIssues(statusMismatchIssueApplications, "APPLICATION_STATUS_MISMATCH_ISSUE", requestInfo);
+				log.info("Status Mismatch Issue Fix Scheduler Completed Successfully. Time: {}", System.currentTimeMillis());
+			} else {
+				log.info("No Status Mismatch Issue Found in MR at : {}", System.currentTimeMillis());
+			}
+		} else {
+			log.info("MR Status Mismatch Issue Fix Config is : {}", config.getMrStatusMismatchIssueFIx());
+		}
+
+	}
+	
+	private void processStatusMismatchIssues(List<StatusMismatchIssueFix> statusMismatchIssues, String issueType, RequestInfo requestInfo) {
+		if(!CollectionUtils.isEmpty(statusMismatchIssues)) {
+			HttpHeaders headers = new HttpHeaders();
+			statusMismatchIssues.forEach(mismatchIssue -> {
+			    try {
+			    	applicationStatusMismatchIssueFix.issueFix(IssueFixRequest.builder()
+			            .issueFix(IssueFix.builder()
+			                .applicationNo(mismatchIssue.getApplicationNo())
+			                .issueName(issueType)
+			                .tenantId(mismatchIssue.getTenantId())
+			                .build())
+			                .requestInfo(requestInfo)
+			                .build(), headers);
+			    } catch (Exception e) {			       
+			    	log.error("Error processing status mismatch issue for application number: " + mismatchIssue.getApplicationNo());
+			        e.printStackTrace();
+			    }
+			});
+		}
+
+	}
+
 
 }
