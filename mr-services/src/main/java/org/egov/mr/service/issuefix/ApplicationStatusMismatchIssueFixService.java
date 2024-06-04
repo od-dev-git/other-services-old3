@@ -76,6 +76,11 @@ public class ApplicationStatusMismatchIssueFixService implements IIssueFixServic
                 processInstanceIdList.add(processInstance.getId());
             }
         }
+        
+        if (processInstanceIdList.size() > 1) {
+			throw new CustomException("INVALID_APPLICATION_STATE",
+					"This issue is not under status mismatch.. Kindly reach out to dev team !!");
+		}
         return processInstanceIdList;
     }
 

@@ -235,6 +235,8 @@ public class MRConfiguration {
     
     @Value("${mr.issue.resolver.uuid}")
 	private String mrIssueFixUUID;
-
+    
+    @Value("${mr.status.mismatch.issuefix}")
+	private Boolean mrStatusMismatchIssueFIx;
 
 }
