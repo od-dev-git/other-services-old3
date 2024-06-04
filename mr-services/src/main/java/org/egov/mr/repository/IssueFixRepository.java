@@ -15,9 +15,11 @@ import org.egov.mr.web.models.collection.Payment;
 import org.egov.mr.web.models.collection.PaymentSearchCriteria;
 import org.egov.mr.web.models.issuefix.IssueFix;
 import org.egov.mr.web.models.issuefix.PaymentIssueFix;
+import org.egov.mr.web.models.issuefix.StatusMismatchIssueFix;
 import org.egov.mr.web.models.workflow.ProcessInstance;
 import org.egov.mr.web.models.workflow.WorkFlowSearchCriteria;
 import org.egov.mrcalculator.repository.rowmapper.PaymentIssueFixRowMapper;
+import org.egov.mrcalculator.repository.rowmapper.StatusMismatchIssueRowMapper;
 import org.egov.mrcalculator.web.models.demand.Demand;
 import org.egov.mrcalculator.web.models.demand.DemandDetail;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,9 @@ public class IssueFixRepository {
 	
 	@Autowired
 	private PaymentIssueFixRowMapper paymentIssueFixRowMapper;
+	
+	@Autowired
+    private StatusMismatchIssueRowMapper statusMismatchIssueRowMapper;
 	
 	public void deleteCertificate(String applicationNumber) {
 
@@ -261,6 +266,14 @@ public class IssueFixRepository {
 		log.info("*************" + query);
 		List<PaymentIssueFix> paymentIssueFixApplications = jdbcTemplate.query(query, paymentIssueFixRowMapper);
 		return paymentIssueFixApplications;
+	}
+    
+	public List<StatusMismatchIssueFix> getStatusMismatchApplications() {
+		String query = issueFixQueryBuilder.getStatusMismatchAppliactionsQuery();
+		System.out.println("*************" + query);
+		List<StatusMismatchIssueFix> statusMismatchIssueFixs = jdbcTemplate.query(query,
+				statusMismatchIssueRowMapper);
+		return statusMismatchIssueFixs;
 	}
 
 
