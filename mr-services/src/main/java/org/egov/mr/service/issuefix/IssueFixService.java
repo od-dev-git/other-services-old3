@@ -41,6 +41,10 @@ public class IssueFixService {
     @Autowired
     @Qualifier("paymentIssueFixService")
     private IIssueFixService paymentIssueFixService;
+    
+	@Autowired
+	@Qualifier("stepBackService")
+	private IIssueFixService stepBackService;
 
     @Autowired
     private IssueFixValidator validator;
@@ -70,6 +74,9 @@ public class IssueFixService {
             case "PAYMENT_ISSUE":
                 return paymentIssueFixService.issueFix(issueFixRequest,headers);
 
+            case "STEP_BACK_TO_APPROVAL_PENDING":
+            	return stepBackService.issueFix(issueFixRequest, headers);
+            	
             default:
                 throw new CustomException("UNKNOWN_ISSUE", "The issue is unknown to the system !!");
         }
