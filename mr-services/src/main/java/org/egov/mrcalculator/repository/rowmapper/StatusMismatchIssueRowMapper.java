@@ -19,9 +19,9 @@ public class StatusMismatchIssueRowMapper implements ResultSetExtractor<List<Sta
 	public List<StatusMismatchIssueFix> extractData(ResultSet rs) throws SQLException, DataAccessException {
 		while (rs.next()) {
 			StatusMismatchIssueFix ps = StatusMismatchIssueFix.builder().tenantId(rs.getString("tenantid"))
-					.applicationNo(rs.getString("applicationno"))
-					.actionInProcessInstance(rs.getString("actionInProcessInstance"))
-					.currentStatus(rs.getString("currentStatus")).expectedStatus(rs.getString("expectedStatus"))
+					.applicationNo(rs.getString("applicationnumber"))
+					.actionInProcessInstance(rs.getString("actioninprocessinstance"))
+					.currentStatus(rs.getString("currentstatus")).expectedStatus(rs.getString("expectedstatus"))
 					.build();
 			statusMismatchIssueFixList.add(ps);
 		}
