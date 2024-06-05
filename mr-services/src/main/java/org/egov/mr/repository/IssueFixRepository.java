@@ -277,4 +277,42 @@ public class IssueFixRepository {
 	}
 
 
+
+	public void updateApplicationForStepBack(MarriageRegistration applicationToBeUpdated) {
+
+		String updateApplicationQuery = issueFixQueryBuilder.getStepBackApplicationUpdateQuery();
+
+		jdbcTemplate.update(updateApplicationQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) {
+				try {
+					ps.setString(1, IssueFixConstants.STATUS_PENDING_APPROVAL);
+					ps.setString(2, IssueFixConstants.ACTION_SCHEDULE);
+					ps.setString(3, applicationToBeUpdated.getApplicationNumber());
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	
+	public void updateWorkflowForStepBack(ProcessInstance processInstance) {
+
+		String insertWorkFlowQuery = issueFixQueryBuilder.getDeleteWorkflowQuery();
+		jdbcTemplate.update(insertWorkFlowQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) {
+				try {
+					ps.setString(1, processInstance.getBusinessId());
+					ps.setString(2, processInstance.getId());
+					ps.setString(2, IssueFixConstants.ACTION_APPROVE);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 }
