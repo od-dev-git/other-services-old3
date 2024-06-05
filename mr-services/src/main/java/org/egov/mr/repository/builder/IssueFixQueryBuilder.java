@@ -90,6 +90,13 @@ public class IssueFixQueryBuilder {
 	public static final String GET_PAYMENT_ISSUES_APPLICATIONS_QUERY = "select mr.applicationnumber, mr.tenantid, txn.module  from eg_mr_application mr "
 			+ "inner join eg_pg_transactions txn on txn.consumer_code=mr.applicationnumber where mr.status in ('PENDINGPAYMENT') and txn.txn_status='SUCCESS' and txn.module='MR' ";
 	
+	public static final String STEPBACK_APPLICATION_UPDATE_QUERY = "update eg_mr_application "
+			+ " set status = ?, action = ?, issueddate = null, mrnumber = null"
+			+ " where applicationnumber = ?";
+
+		public static final String DELETE_WORKFLOW_QUERY = "delete from public.eg_wf_processinstance_v2 where businessid = ? and id = ? and action = ?";
+
+	
 	public String searchDscQuery() {
 		return DELETE_DUPLICATE_DSC;
 	}
@@ -271,5 +278,12 @@ public class IssueFixQueryBuilder {
 		return SEARCH_STATUS_MISMATCH_ISSUE_APPLICATIONS;
 	}
 
+	public String getStepBackApplicationUpdateQuery() {
+		return STEPBACK_APPLICATION_UPDATE_QUERY;
+	}
+
+	public String getDeleteWorkflowQuery() {
+		return DELETE_WORKFLOW_QUERY;
+	}
 
 }
