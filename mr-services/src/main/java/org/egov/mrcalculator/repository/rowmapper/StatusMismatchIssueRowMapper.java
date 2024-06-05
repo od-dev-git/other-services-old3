@@ -8,7 +8,9 @@ import java.util.List;
 import org.egov.mr.web.models.issuefix.StatusMismatchIssueFix;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.stereotype.Component;
 
+@Component
 public class StatusMismatchIssueRowMapper implements ResultSetExtractor<List<StatusMismatchIssueFix>> {
 
 	List<StatusMismatchIssueFix> statusMismatchIssueFixList = new ArrayList<>();
