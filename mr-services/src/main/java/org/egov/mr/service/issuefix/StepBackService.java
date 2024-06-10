@@ -133,12 +133,12 @@ public class StepBackService implements IIssueFixService {
 	private MarriageRegistration checkIfApplicationUpdatedProperly(IssueFixRequest issueFixRequest,
 			MarriageRegistration marriageRegistration, Map<String, Boolean> isDataUpdateNeeded) {
 
-		if (marriageRegistration.getStatus().equalsIgnoreCase(IssueFixConstants.STATUS_PAY_PENDING_SCHEDULE)
+		if (marriageRegistration.getStatus().equalsIgnoreCase(IssueFixConstants.STATUS_APPROVED)
 				&& IssueFixConstants.APPLICATION_TYPE.contains(marriageRegistration.getApplicationType().toString())) {
 			isDataUpdateNeeded.put(IssueFixConstants.IS_APPLICATION_UPDATE_NEEDED, true);
 			
 		} else {
-			throw new CustomException("APPLICATION_UPDATE_ISSUE", "Current Status of the application is not in " + IssueFixConstants.STATUS_PAY_PENDING_SCHEDULE + " step");
+			throw new CustomException("APPLICATION_UPDATE_ISSUE", "Current Status of the application is not in " + IssueFixConstants.STATUS_APPROVED + " step");
 		}
 		
 		return marriageRegistration;

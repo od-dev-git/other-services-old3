@@ -30,6 +30,8 @@ public class IssueFixConstants {
 
     public static final String STATUS_PAY_PENDING_SCHEDULE  = "PENDINGSCHEDULE";
     
+    public static final String STATUS_APPROVED  = "APPROVED";
+    
     public static final String STATUS_PENDING_APPROVAL  = "PENDINGAPPROVAL";
 
     public static final List<String> APPLICATION_TYPE= Arrays.asList("NEW","CORRECTION");
