@@ -308,7 +308,7 @@ public class IssueFixRepository {
 				try {
 					ps.setString(1, processInstance.getBusinessId());
 					ps.setString(2, processInstance.getId());
-					ps.setString(2, IssueFixConstants.ACTION_APPROVE);
+					ps.setString(3, IssueFixConstants.ACTION_APPROVE);
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
