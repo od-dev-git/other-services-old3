@@ -89,7 +89,7 @@ public class StepBackService implements IIssueFixService {
 			lastestProcessInstance = processInstances.get(0);
 
 			if (lastestProcessInstance.getAction().equalsIgnoreCase(IssueFixConstants.ACTION_APPROVE)) {
-				isDataUpdateNeeded.put(IssueFixConstants.IS_WORKFLOW_DELETE_NEEDED, true);
+				isDataUpdateNeeded.put(IssueFixConstants.IS_WORKFLOW_UPDATE_NEEDED, true);
 			} else {
 				log.info("Process instance is not found for action APPROVE");
 			}
