@@ -80,4 +80,25 @@ public class IntegrationConfiguration {
 	@Value("${egov.integration.feedback.save.topic}")
 	private String saveFeedbackTopic;
 
+	@Value("${egov.enc.host}")
+	private String encHost;
+
+	@Value("${egov.enc.encrypt.endpoint}")
+	private String encEncryptEndpoint;
+
+	@Value("${egov.enc.decrypt.endpoint}")
+	private String encDecryptEndpoint;
+	
+	@Value("${egov.user.host}")
+	private String userHost;
+
+	@Value("${egov.user.search.path}")
+	private String userSearchEndpoint;
+
+	@Value("${egov.user.otp.host}")
+	private String userOTPHost;
+
+	@Value("${egov.user.otp.endpoint}")
+	private String userOTPEndpoint;
+
 }
