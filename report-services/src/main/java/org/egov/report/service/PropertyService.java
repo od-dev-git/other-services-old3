@@ -227,6 +227,7 @@ public class PropertyService {
 //				.of("CASH", "OFFLINE_RTGS", "OFFLINE_NEFT", "POSTAL_ORDER", "CHEQUE","DD","CARD").collect(Collectors.toSet()));
 
 		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+		log.info("Final Payments Size is : " + payments.size() );
         List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse =  payments.parallelStream().map(payment  ->{
             
             TaxCollectorWiseCollectionResponse taxCollectorWiseCollection = TaxCollectorWiseCollectionResponse
@@ -246,6 +247,7 @@ public class PropertyService {
 
             return taxCollectorWiseCollection;
         }).collect(Collectors.toList());
+        log.info("TaxCollectorWiseCollectionResponse Size is : " + taxCollectorWiseCollectionResponse.size() );
 
         if (!CollectionUtils.isEmpty(taxCollectorWiseCollectionResponse)) {
             List<Long> userIds = taxCollectorWiseCollectionResponse.stream().map(res ->Long.valueOf(res.getUserid())).distinct().collect(Collectors.toList());
@@ -261,7 +263,7 @@ public class PropertyService {
                     .build();
             List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
                     requestInfo);
-            log.info("User Details Fetched ");
+            log.info(usersInfo.size() + " User Details Fetched ");
             Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
                     .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
             
@@ -285,8 +287,18 @@ public class PropertyService {
                         collectionResponse.setLegacyHoldingNo(propertyMap.get(collectionResponse.getConsumercode()).getLegacyHoldingNo());
                     }
                 }
+
+                // Log details if the type is missing or empty
+                if (!StringUtils.hasText(collectionResponse.getType())) {
+                    log.info("Logging details for entries with empty or null type:");
+                    log.info("UserID: " + collectionResponse.getUserid());
+                    log.info("Name: " + collectionResponse.getName());
+                    log.info("ConsumerCode: " + collectionResponse.getConsumercode());
+                    log.info("OldPropertyID: " + collectionResponse.getOldpropertyid());
+                    log.info("Type: " + collectionResponse.getType());
+                }
             }).filter(tcwcrUser -> StringUtils.hasText(tcwcrUser.getType())).collect(Collectors.toList());
-            
+            log.info("TaxCollectorWiseCollectionResponse Final Size is : " + taxCollectorWiseCollectionResponse.size() );
 //            //getting Property Details
 //            log.info("Fetching Property Details ");
 //            PropertyDetailsSearchCriteria propertySearchingCriteria = PropertyDetailsSearchCriteria.builder()
