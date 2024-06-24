@@ -75,6 +75,8 @@ public class PaymentRepository {
         Map<String, Object> preparedStatementValues = new HashMap<>();
         String query = paymentQueryBuilder.getIdQuery(paymentSearchCriteria, preparedStatementValues);
         log.info("query: "+query);
+        log.info("PaymentSearchCriteria: " + paymentSearchCriteria.toString());
+
         return namedParameterJdbcTemplate.query(query, preparedStatementValues, new SingleColumnRowMapper<>(String.class));
     }
 	

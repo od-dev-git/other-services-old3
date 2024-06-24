@@ -65,6 +65,8 @@ public class PaymentService {
 		}
 		
 		List<Payment> payments = paymentRepository.fetchPayments(paymentSearchCriteria);
+		log.info("Initial Payments Size is : " + payments.size() );
+
 		payments = payments.stream().filter(payment -> payment.getPaymentStatus() != PaymentStatusEnum.CANCELLED).collect(Collectors.toList());
 		return payments;
 	}
