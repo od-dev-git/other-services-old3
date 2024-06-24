@@ -223,5 +223,20 @@ public class MRConfiguration {
     
     @Value("${text.for.subject.email.notif}")
     private String emailSubject;
+    
+    @Value("${mr.payment.issuefix}")
+	private Boolean mrPaymentIssueFIx;
+    
+    @Value("${mr.issuefix.rolecode}")
+	private String mrIssueFixRoleCode;
+    
+    @Value("${mr.issuefix.tenantid}")
+	private String mrIssueFixTenantId;
+    
+    @Value("${mr.issue.resolver.uuid}")
+	private String mrIssueFixUUID;
+    
+    @Value("${mr.status.mismatch.issuefix}")
+	private Boolean mrStatusMismatchIssueFIx;
 
 }

@@ -1,0 +1,73 @@
+
+----------------------	
+USM Application Report
+----------------------
+
+select
+    INITCAP(SPLIT_PART(tenantid, '.', 2)) tenantid,
+    to_char(surveyDate, 'DD-MM-YYYY') dateofsubmit,
+    slumcode,
+    message slumname,
+    ward,
+    case
+        when count(WATER)>= 1 then 'YES'
+        else 'NO'
+    end as water,
+    case
+        when count(SANITATION)>= 1 then 'YES'
+        else 'NO'
+    end as sanitation,
+    case
+        when count(STREETLIGHT)>= 1 then 'YES'
+        else 'NO'
+    end as streetlight
+from
+    (
+    select
+        tbl.tenantid,
+        tbl.surveyDate,
+        tbl.slumcode,
+        tbl.message,
+        tbl.ward,
+        tbl.WATER,
+        tbl.STREETLIGHT,
+        tbl.SANITATION
+    from
+        (
+        select
+            sda.tenantid,
+            date(timezone('Asia/Kolkata',to_timestamp(ss.surveytime / 1000))) as surveyDate,
+            sda.slumcode,
+            m.message,
+            sda.ward,
+            case
+                when ss.createdby is null then sda.userid
+                else ss.createdby
+            end as sda_member,
+            case
+                when su.title = 'Water' then 'Yes'
+            end as WATER,
+            case
+                when su.title = 'Streetlight' then 'Yes'
+            end as STREETLIGHT,
+            case
+                when su.title = 'Sanitation' then 'Yes'
+            end as SANITATION
+        from
+            eg_usm_sda_mapping sda
+        left outer join (
+            select
+                *
+            from
+                eg_usm_survey_submitted) ss on
+            ss.tenantid = sda.tenantid and ss.slumcode = sda.slumcode
+        left outer join eg_usm_survey su on
+            su.id = ss.surveyid
+        left outer join message m on
+            m.code = concat(upper(replace(sda.tenantid, '.', '_')), '_SLUM_', sda.slumcode)
+            and m.locale = 'en_IN'
+            and m.module = 'rainmaker-usm'
+        where
+             sda.active = true) tbl) tmp
+group by tenantid, surveyDate, slumcode, message, ward
+order by  ward

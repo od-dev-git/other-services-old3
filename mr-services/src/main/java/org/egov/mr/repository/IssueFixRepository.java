@@ -14,8 +14,12 @@ import org.egov.mr.web.models.collection.DemandSearchCriteria;
 import org.egov.mr.web.models.collection.Payment;
 import org.egov.mr.web.models.collection.PaymentSearchCriteria;
 import org.egov.mr.web.models.issuefix.IssueFix;
+import org.egov.mr.web.models.issuefix.PaymentIssueFix;
+import org.egov.mr.web.models.issuefix.StatusMismatchIssueFix;
 import org.egov.mr.web.models.workflow.ProcessInstance;
 import org.egov.mr.web.models.workflow.WorkFlowSearchCriteria;
+import org.egov.mrcalculator.repository.rowmapper.PaymentIssueFixRowMapper;
+import org.egov.mrcalculator.repository.rowmapper.StatusMismatchIssueRowMapper;
 import org.egov.mrcalculator.web.models.demand.Demand;
 import org.egov.mrcalculator.web.models.demand.DemandDetail;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +44,12 @@ public class IssueFixRepository {
 
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+	
+	@Autowired
+	private PaymentIssueFixRowMapper paymentIssueFixRowMapper;
+	
+	@Autowired
+    private StatusMismatchIssueRowMapper statusMismatchIssueRowMapper;
 	
 	public void deleteCertificate(String applicationNumber) {
 
@@ -250,7 +260,59 @@ public class IssueFixRepository {
 			}
 		});
 	}
+    
+    public List<PaymentIssueFix> getPaymentIssueApplications() {
+		String query = issueFixQueryBuilder.getPaymentIssueAppliactionsQuery();
+		log.info("*************" + query);
+		List<PaymentIssueFix> paymentIssueFixApplications = jdbcTemplate.query(query, paymentIssueFixRowMapper);
+		return paymentIssueFixApplications;
+	}
+    
+	public List<StatusMismatchIssueFix> getStatusMismatchApplications() {
+		String query = issueFixQueryBuilder.getStatusMismatchAppliactionsQuery();
+		System.out.println("*************" + query);
+		List<StatusMismatchIssueFix> statusMismatchIssueFixs = jdbcTemplate.query(query,
+				statusMismatchIssueRowMapper);
+		return statusMismatchIssueFixs;
+	}
 
 
 
+	public void updateApplicationForStepBack(MarriageRegistration applicationToBeUpdated) {
+
+		String updateApplicationQuery = issueFixQueryBuilder.getStepBackApplicationUpdateQuery();
+
+		jdbcTemplate.update(updateApplicationQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) {
+				try {
+					ps.setString(1, IssueFixConstants.STATUS_PENDING_APPROVAL);
+					ps.setString(2, IssueFixConstants.ACTION_SCHEDULE);
+					ps.setString(3, applicationToBeUpdated.getApplicationNumber());
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	
+	public void updateWorkflowForStepBack(ProcessInstance processInstance) {
+
+		String insertWorkFlowQuery = issueFixQueryBuilder.getDeleteWorkflowQuery();
+		jdbcTemplate.update(insertWorkFlowQuery, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) {
+				try {
+					ps.setString(1, processInstance.getBusinessId());
+					ps.setString(2, processInstance.getId());
+					ps.setString(3, IssueFixConstants.ACTION_APPROVE);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 }

@@ -75,7 +75,7 @@ public class SurveyTicketRepository {
 	 * @return List<SurveyTicket>
 	 */
 	public List<SurveyTicket> getSurveyTicketRequests(TicketSearchCriteria searchCriteria) {
-		log.info("Search Criteria :", searchCriteria.toString());
+		log.info("Search Criteria :" + searchCriteria.toString());
 		List<Object> preparedStmtList = new ArrayList<>();
 		String query = queryBuilder.getSurveyTicketSearchQuery(searchCriteria, preparedStmtList);
 		List<SurveyTicket> surveyRequests = jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
@@ -94,6 +94,18 @@ public class SurveyTicketRepository {
 		log.info("Execute query for update Daily Tickets");
 		String query = queryBuilder.getUpdateDailyTicketQuery();
 		jdbcTemplate.execute(query);
+	}
+
+	
+	/**
+	 * Repository for updating daily unattended auto-escalated SurveyTicket in db
+	 * @param escalatedTicket 
+	 */
+	public void updateAutoEscalatedTickets(SurveyTicket escalatedTicket) {
+		log.info("Execute query for update unattended auto-escalated Tickets");
+		String query = queryBuilder.updateAutoEscalatedTickets(escalatedTicket);
+		jdbcTemplate.execute(query);
+		
 	}
 
 }

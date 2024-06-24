@@ -40,6 +40,7 @@
 package org.egov.arc.model;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
@@ -61,6 +62,8 @@ import lombok.NoArgsConstructor;
 public class DemandCriteria {
 
 	private String tenantId; 
+	
+	private List<Object> tenantIds;
 	
 	private Set<String> demandId;
 	

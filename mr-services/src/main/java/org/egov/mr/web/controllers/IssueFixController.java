@@ -2,9 +2,11 @@ package org.egov.mr.web.controllers;
 
 import javax.validation.Valid;
 
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.mr.service.issuefix.IIssueFixService;
 import org.egov.mr.service.issuefix.IssueFixService;
 import org.egov.mr.util.ResponseInfoFactory;
+import org.egov.mr.web.models.RequestInfoWrapper;
 import org.egov.mr.web.models.issuefix.IssueFix;
 import org.egov.mr.web.models.issuefix.IssueFixRequest;
 import org.egov.mr.web.models.issuefix.IssueFixResponse;
@@ -39,6 +41,18 @@ public class IssueFixController {
 						responseInfoFactory.createResponseInfoFromRequestInfo(issueFixRequest.getRequestInfo(), true))
 				.status("FIXED").build();
 		return new ResponseEntity<>(issueFixResponse, HttpStatus.OK);
+	}
+	
+    @PostMapping(value = "/_automatePaymentIssueFix")
+	public ResponseEntity<IssueFixResponse> automatePaymentIssueFix(@Valid @RequestBody RequestInfoWrapper requestInfo) {
+        issueFixService.automatePaymentIssueFix(requestInfo.getRequestInfo());		
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+    
+	@PostMapping(value = "/_automateStatusMismatchIssueFix")
+	public ResponseEntity<IssueFixResponse> automateStatusMismatchIssueFix(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
+        issueFixService.automateStatusMismatchIssueFix(requestInfoWrapper.getRequestInfo());		
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 }

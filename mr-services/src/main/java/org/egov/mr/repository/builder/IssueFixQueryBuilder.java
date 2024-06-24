@@ -62,6 +62,9 @@ public class IssueFixQueryBuilder {
 	public static final String PROCESS_INSTANCE_QUERY = "select * from eg_wf_processinstance_v2 wf ";
 
 	public static final String MR_QUERY_ORDER_BY_CLAUSE = " wf.lastmodifiedtime DESC";
+	
+	public static final String SEARCH_STATUS_MISMATCH_ISSUE_APPLICATIONS  = "select ema.tenantid,ema.applicationnumber,ewpv.action as actioninprocessinstance,ema.status as currentstatus,ewsv.applicationstatus as expectedstatus "
+			+ " from eg_mr_application ema inner join (select distinct on(businessid) * from eg_wf_processinstance_v2 where businessservice in('MR') order by businessid,createdtime desc) ewpv on ewpv.businessid = ema.applicationnumber inner join eg_wf_state_v2 ewsv on ewsv.uuid = ewpv.status where ema.status <> ewsv.applicationstatus and ema.status not in ('DELETED') and ema.createdtime >= ( select (extract(EPOCH from DATE_TRUNC('year', current_timestamp))* 1000 + 19800000)) ";
 
 	public static final String DEMAND_UPDATE_QUERY = "update egbs_demand_v1 "
 			+ " set ispaymentcompleted = true "
@@ -83,7 +86,17 @@ public class IssueFixQueryBuilder {
 			+ "(id, tenantid, businessservice, businessid, action, status, comment, assigner, assignee, statesla, previousstatus, createdby, lastmodifiedby, createdtime, lastmodifiedtime, modulename, businessservicesla, rating) "
 			+ "VALUES( ? , ? , ? , ? , 'PAY' , ? , NULL, ? , NULL, 43200000, NULL, ? , ? , ? , ? , 'tl-services', 259052163, NULL)";
 
+   
+	public static final String GET_PAYMENT_ISSUES_APPLICATIONS_QUERY = "select mr.applicationnumber, mr.tenantid, txn.module  from eg_mr_application mr "
+			+ "inner join eg_pg_transactions txn on txn.consumer_code=mr.applicationnumber where mr.status in ('PENDINGPAYMENT') and txn.txn_status='SUCCESS' and txn.module='MR' ";
+	
+	public static final String STEPBACK_APPLICATION_UPDATE_QUERY = "update eg_mr_application "
+			+ " set status = ?, action = ?, issueddate = null, mrnumber = null"
+			+ " where applicationnumber = ?";
 
+		public static final String DELETE_WORKFLOW_QUERY = "delete from public.eg_wf_processinstance_v2 where businessid = ? and id = ? and action = ?";
+
+	
 	public String searchDscQuery() {
 		return DELETE_DUPLICATE_DSC;
 	}
@@ -257,7 +270,20 @@ public class IssueFixQueryBuilder {
 		return INSERT_WORKFLOW_QUERY;
 	}
 
+	public String getPaymentIssueAppliactionsQuery() {
+		return GET_PAYMENT_ISSUES_APPLICATIONS_QUERY;
+	}
+	
+	public String getStatusMismatchAppliactionsQuery() {
+		return SEARCH_STATUS_MISMATCH_ISSUE_APPLICATIONS;
+	}
 
+	public String getStepBackApplicationUpdateQuery() {
+		return STEPBACK_APPLICATION_UPDATE_QUERY;
+	}
 
+	public String getDeleteWorkflowQuery() {
+		return DELETE_WORKFLOW_QUERY;
+	}
 
 }

@@ -2,7 +2,6 @@ package org.egov.mr.validator;
 
 import java.util.List;
 
-import org.egov.mr.util.MRConstants;
 import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.issuefix.IssueFix;
 import org.egov.mr.web.models.issuefix.IssueFixRequest;

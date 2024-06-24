@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.egov.usm.config.USMConfiguration;
 import org.egov.usm.web.model.SurveyDetails;
+import org.egov.usm.web.model.SurveyTicket;
 import org.egov.usm.web.model.TicketSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ public class TicketQueryBuilder {
 						+ "ticket.questionid, ticket.ticketdescription, question.questionstatement_odia, ticket.status ,comment.id as commentid,comment.ticketid,comment.comment ,submit.slumcode , submit.ward,"
 						+ "ticket.ticketcreatedtime,ticket.ticketclosedtime ,ticket.unattended,"
 						+ "ticket.createdtime ,ticket.createdby ,ticket.lastmodifiedtime ,ticket.issatisfied,"
-						+ "ticket.lastmodifiedby FROM eg_usm_survey_ticket ticket ");
+						+ "ticket.lastmodifiedby, ticket.escalatedid, ticket.escalatedtime FROM eg_usm_survey_ticket ticket ");
 		query.append(" LEFT OUTER JOIN eg_usm_question question on ticket.questionid =question.id");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted_answer answer on ticket.surveyanswerid =answer.id");
 		query.append(" LEFT OUTER JOIN eg_usm_survey_submitted submit ON answer.surveysubmittedid =submit.id");
@@ -124,7 +125,16 @@ public class TicketQueryBuilder {
 			query.append(" ticket.unattended = ? ");
 			preparedStmtList.add(searchCriteria.getUnAttended());
 		}
-
+		
+		if (!ObjectUtils.isEmpty(searchCriteria.getIsAutoEscalated())) {
+			addClauseIfRequired(query, preparedStmtList);
+			if(searchCriteria.getIsAutoEscalated() == Boolean.FALSE) {
+				query.append(" ticket.escalatedid IS NULL ");
+			} else {
+				query.append(" ticket.escalatedid IS NOT NULL ");
+			}
+		}
+		
 		if (!ObjectUtils.isEmpty(searchCriteria.getIsSatisfied())) {
 			addClauseIfRequired(query, preparedStmtList);
 			query.append(" ticket.issatisfied = ? ");
@@ -148,5 +158,11 @@ public class TicketQueryBuilder {
 
 		return query.toString();
 	}
+
+	public String updateAutoEscalatedTickets(SurveyTicket escalatedTicket) {
+		StringBuilder query = new StringBuilder("UPDATE public.eg_usm_survey_ticket SET escalatedid = '"+escalatedTicket.getEscalatedId()+"', escalatedtime = "+escalatedTicket.getEscalatedTime()+" WHERE id = '"+escalatedTicket.getId()+"' ;");
+		return query.toString();
+	}
+	
 
 }
