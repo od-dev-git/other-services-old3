@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jdk.internal.org.jline.utils.Log;
+import lombok.extern.slf4j.Slf4j;
 
 import org.egov.encryption.web.contract.EncReqObject;
 import org.egov.encryption.web.contract.EncryptionRequest;
@@ -26,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 @Service
+@Slf4j
 public class GoSwiftEncryptionService {
 
     @Autowired
@@ -80,17 +82,24 @@ public class GoSwiftEncryptionService {
 	public Object login(String code) {
 		//Decryption
 		JsonNode decodedResponse = getDecodedResponse(code);
+		log.info("@Class: GoSwiftEncryptionService @method:login @message:Received Decoded Response - {} ",decodedResponse);
 		//User Search
 		Boolean isUserRegistered=isUserRegistered(decodedResponse);
+		log.info("@Class: GoSwiftEncryptionService @method:login @message:Received Response From User Search- Is User registered : - {} ",isUserRegistered);
 		//User Login or Registration
 		OtpRequest otpRequest;
 		if(isUserRegistered) {
 			otpRequest= getOTPRequestForLogin(decodedResponse);
+			log.info("@Class: GoSwiftEncryptionService @method:login @message:Received OTP Registration Request : - {} ",otpRequest);
 		}
 		else {
 			otpRequest= getOTPRequestForRegistration(decodedResponse);
+			log.info("@Class: GoSwiftEncryptionService @method:login @message:Received OTP Login Request : - {} ",otpRequest);
+
 		}
 		Object otpResponse= sendOTPToUser(otpRequest);
+		log.info("@Class: GoSwiftEncryptionService @method:login @message:OTP Sent to user : - {} ",otpResponse);
+
 		return otpResponse;
 	}
 
