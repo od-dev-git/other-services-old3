@@ -40,8 +40,6 @@
 package org.egov.dsc.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -159,4 +157,7 @@ public class ApplicationProperties {
     
     @Value("${DSC_ERR_28}")
     private String DSC_ERR_28; 
+    
+    @Value("${DSC_ERR_29}")
+    private String DSC_ERR_29; 
 }
