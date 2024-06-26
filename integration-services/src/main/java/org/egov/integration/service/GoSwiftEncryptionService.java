@@ -15,6 +15,7 @@ import org.egov.integration.model.otp.OtpRequest;
 import org.egov.integration.model.otp.OtpRequestType;
 import org.egov.integration.model.user.UserSearchRequest;
 import org.egov.integration.repository.ServiceRepository;
+import org.egov.integration.validator.GoSwiftEncryptionValidator;
 import org.egov.integration.web.model.GoSwiftInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,18 @@ public class GoSwiftEncryptionService {
     @Autowired
     private ObjectMapper objectMapper;
 
+	@Autowired
+	private GoSwiftEncryptionValidator goSwiftEncryptionValidator;
+
+	/**
+	 *
+	 * @param goSwiftInput
+	 * @return
+	 * To Encrypt the data provided by GoSwift in a Single Encrypted String
+	 */
     public String encrypt(GoSwiftInput goSwiftInput){
 
+    	goSwiftEncryptionValidator.validateEncodedInput(goSwiftInput);
         EncryptionRequest encryptionRequest = getEncryptionRequest(goSwiftInput);
         StringBuilder encryptionURL = getEncryptionURL();
         Object response=serviceRepository.fetchResultString(encryptionURL,encryptionRequest);
@@ -78,10 +89,19 @@ public class GoSwiftEncryptionService {
         }
     }
 
+	/**
+	 *
+	 * @param code
+	 * @return
+	 * To Decrypt the Encrypted String Passed by Go Swift
+	 * and send otp to the corresponding user mobile number
+	 */
 	public Object login(String code) {
 		//Decryption
 		JsonNode decodedResponse = getDecodedResponse(code);
 		log.info("@Class: GoSwiftEncryptionService @method:login @message:Received Decoded Response - {} ",decodedResponse);
+		//Response Validate
+		goSwiftEncryptionValidator.validateDecodedResponse(decodedResponse);
 		//User Search
 		Boolean isUserRegistered=isUserRegistered(decodedResponse);
 		log.info("@Class: GoSwiftEncryptionService @method:login @message:Received Response From User Search- Is User registered : - {} ",isUserRegistered);
