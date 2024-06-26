@@ -994,5 +994,99 @@ public class DscController {
 		ResponseEntity<byte[]> response = restTemplate.exchange(uri.toString(), HttpMethod.GET, entity, byte[].class);
 		return response;
 	}
+	
+	
+	/**
+	 * DataSign Deregister API
+	 * @param dataSignRequest
+	 * @return Deregister response
+	 */
+	@RequestMapping(value = "/_dataSignDeregister", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<DataSignResponse> dataSignDeregister(@RequestBody DataSignRequest dataSignRequest) {
+		emBridge bridge = null;
+		File logFile = new File(logPath);
+		File licFile = new File(licPath);
+		String response = "";
+		ResponseDataPKCSSign responseDataPKCSSign = null;
+		String emudhraErrorCode = "";
+		try {
+			if (!logFile.exists()) {
+				logFile.mkdirs();
+			}
+			if (!licFile.exists()) {
+				licFile.mkdirs();
+			}
+			bridge = new emBridge(licPath + "/OdishaUrban.lic", logFile.getCanonicalPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return getSuccessDataSignDeregisterResponse(response, dataSignRequest.getRequestInfo(),
+					applicationProperties.getDSC_ERR_01(), null);
+		}
 
+		try {
+			responseDataPKCSSign = bridge.decPKCSSign(dataSignRequest.getResponseData());
+		} catch (EMBLException e) {
+			e.printStackTrace();
+			return getSuccessDataSignDeregisterResponse(response, dataSignRequest.getRequestInfo(),
+					applicationProperties.getDSC_ERR_07(), null);
+		}
+		// deregister
+		try {
+			if (responseDataPKCSSign != null) {
+				if (responseDataPKCSSign.getSignedText() != null) {
+					response = populateDeregisterSoapCall(dataSignRequest.getRequestInfo().getUserInfo().getId(),
+							dataSignRequest.getChannelId(), responseDataPKCSSign.getSignedText());
+					if (!(response.toLowerCase().contains("success"))) {
+						emudhraErrorCode = response;
+					}
+				}
+			}
+
+		} catch (DSCException e) {
+			return getSuccessDataSignDeregisterResponse(response, dataSignRequest.getRequestInfo(),
+					applicationProperties.getDSC_ERR_29(), null);
+		}
+
+		return getSuccessDataSignDeregisterResponse(response, dataSignRequest.getRequestInfo(), null, emudhraErrorCode);
+
+	}
+	
+	
+	/**
+	 * 
+	 * @param id
+	 * @param channel
+	 * @param signedText
+	 * @return Result after deregistration
+	 * @throws DSCException
+	 */
+	private String populateDeregisterSoapCall(Long id, String channel, String signedText) throws DSCException {
+		String result = "";
+		DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
+		try {
+			String response = authenticateWS.userExists(id + "~" + channel);
+			if (response.toLowerCase().contains("success")) {
+				result = authenticateWS.deregister(id + "~" + channel, "degistration");
+				System.out.println("result after deregistration ::::" + result);
+			} else {
+				throw new DSCException("Error in deregistration api from Emas" + response);
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			throw new DSCException("Error in deregistration api from Emas");
+		}
+		return result;
+	}
+	
+	
+	private ResponseEntity<DataSignResponse> getSuccessDataSignDeregisterResponse(String responseString,
+			RequestInfo requestInfo, String dscErrorCode, String emudhraErrorCode) {
+		final ResponseInfo responseInfo = ResponseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true);
+		responseInfo.setStatus(HttpStatus.OK.toString());
+
+		DataSignResponse datasign = new DataSignResponse(responseInfo, responseString, null, dscErrorCode,
+				emudhraErrorCode);
+		return new ResponseEntity<>(datasign, HttpStatus.OK);
+	}
 }
