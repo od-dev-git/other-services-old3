@@ -7,6 +7,8 @@
 
 package org.egov.dsc.emas.ws.ds;
 
+import java.rmi.RemoteException;
+
 public class DSAuthenticateWSImplServiceSoapBindingStub extends org.apache.axis.client.Stub implements DSAuthenticateWS {
     private java.util.Vector cachedSerClasses = new java.util.Vector();
     private java.util.Vector cachedSerQNames = new java.util.Vector();
@@ -146,6 +148,21 @@ public class DSAuthenticateWSImplServiceSoapBindingStub extends org.apache.axis.
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[6] = oper;
+        
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("deregister");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("", "arg0"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        param.setOmittable(true);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("", "arg1"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        param.setOmittable(true);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        oper.setReturnClass(java.lang.String.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("", "return"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[7] = oper;
 
     }
 
@@ -437,5 +454,11 @@ public class DSAuthenticateWSImplServiceSoapBindingStub extends org.apache.axis.
   throw axisFaultException;
 }
     }
+
+	@Override
+	public String deregister(String var1, String var2) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

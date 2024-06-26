@@ -15,4 +15,5 @@ public interface DSAuthenticateWS extends java.rmi.Remote {
     public java.lang.String generateRandomNumber(java.lang.String arg0) throws java.rmi.RemoteException;
     public java.lang.String reregister(java.lang.String arg0, java.lang.String arg1, java.lang.String arg2, java.lang.String arg3, boolean arg4) throws java.rmi.RemoteException;
     public java.lang.String enableUser(java.lang.String arg0) throws java.rmi.RemoteException;
+    public java.lang.String deregister(java.lang.String arg0, java.lang.String arg1) throws java.rmi.RemoteException;
 }
