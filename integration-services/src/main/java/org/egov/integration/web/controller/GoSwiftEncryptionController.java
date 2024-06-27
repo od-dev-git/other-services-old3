@@ -4,6 +4,7 @@ import org.egov.integration.service.GoSwiftEncryptionService;
 import org.egov.integration.web.model.FeedbackCreationResponse;
 import org.egov.integration.web.model.GoSwiftInputRequest;
 import org.egov.integration.web.model.GoSwiftLoginRequest;
+import org.egov.integration.web.model.GoSwiftLoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +28,8 @@ public class GoSwiftEncryptionController {
     }
     
     @PostMapping("/_login")
-    public ResponseEntity<Object> decrypt(@RequestBody GoSwiftLoginRequest goSwiftLoginRequest){
-        Object response= encryptionService.login(goSwiftLoginRequest.getCode());
-        return new ResponseEntity<Object>(response, HttpStatus.OK);
+    public ResponseEntity<GoSwiftLoginResponse> decrypt(@RequestBody GoSwiftLoginRequest goSwiftLoginRequest){
+        GoSwiftLoginResponse response= encryptionService.login(goSwiftLoginRequest.getCode());
+        return new ResponseEntity<GoSwiftLoginResponse>(response, HttpStatus.OK);
     }
 }
