@@ -17,14 +17,12 @@ import org.egov.integration.model.user.UserSearchRequest;
 import org.egov.integration.repository.ServiceRepository;
 import org.egov.integration.validator.GoSwiftEncryptionValidator;
 import org.egov.integration.web.model.GoSwiftInput;
+import org.egov.integration.web.model.GoSwiftLoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -96,7 +94,7 @@ public class GoSwiftEncryptionService {
 	 * To Decrypt the Encrypted String Passed by Go Swift
 	 * and send otp to the corresponding user mobile number
 	 */
-	public Object login(String code) {
+	public GoSwiftLoginResponse login(String code) {
 		//Decryption
 		JsonNode decodedResponse = getDecodedResponse(code);
 		log.info("@Class: GoSwiftEncryptionService @method:login @message:Received Decoded Response - {} ",decodedResponse);
@@ -116,10 +114,19 @@ public class GoSwiftEncryptionService {
 			log.info("@Class: GoSwiftEncryptionService @method:login @message:Received OTP Login Request : - {} ",otpRequest);
 
 		}
-		Object otpResponse= sendOTPToUser(otpRequest);
+		Map<String,Object> otpResponse= (Map<String, Object>) sendOTPToUser(otpRequest);
+		GoSwiftLoginResponse response=generateResponse(otpResponse,isUserRegistered,decodedResponse);
 		log.info("@Class: GoSwiftEncryptionService @method:login @message:OTP Sent to user : - {} ",otpResponse);
 
-		return otpResponse;
+		return response;
+	}
+
+	private GoSwiftLoginResponse generateResponse(Map<String, Object> otpResponse, Boolean isUserRegistered, JsonNode decodedResponse) {
+		GoSwiftLoginResponse goSwiftLoginResponse= GoSwiftLoginResponse.builder()
+				.isSuccessful((Boolean) otpResponse.get("isSuccessful"))
+				.username(decodedResponse.path("mobileNo").asText())
+				.type(isUserRegistered?"login":"registration").build();
+		return goSwiftLoginResponse;
 	}
 
 	private Object sendOTPToUser(OtpRequest otpRequest) {
