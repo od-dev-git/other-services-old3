@@ -1,5 +1,7 @@
 package org.egov.dsc.emas.ws.ds;
 
+import java.rmi.RemoteException;
+
 public class DSAuthenticateWSProxy implements DSAuthenticateWS {
   private String _endpoint = null;
   private DSAuthenticateWS dSAuthenticateWS = null;
@@ -85,6 +87,11 @@ public class DSAuthenticateWSProxy implements DSAuthenticateWS {
       _initDSAuthenticateWSProxy();
     return dSAuthenticateWS.enableUser(arg0);
   }
-  
+
+  public java.lang.String deregister(java.lang.String arg0, java.lang.String arg1) throws java.rmi.RemoteException {
+	if (dSAuthenticateWS == null)
+	  _initDSAuthenticateWSProxy();
+	return dSAuthenticateWS.deregister(arg0, arg1);
+  }
   
 }
