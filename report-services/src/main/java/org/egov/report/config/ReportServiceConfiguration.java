@@ -134,4 +134,7 @@ public class ReportServiceConfiguration {
 	
 	@Value("${dcb.report.request.gap}")
 	private Long requestGap;
+	
+	@Value("${egov.report.user.service.search.limit}")
+	private Integer userServiceSearchLimit;
 }
