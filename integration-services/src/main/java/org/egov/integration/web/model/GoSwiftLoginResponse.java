@@ -1,5 +1,7 @@
 package org.egov.integration.web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.egov.common.contract.response.ResponseInfo;
@@ -22,4 +24,12 @@ public class GoSwiftLoginResponse {
 
     @JsonProperty("type")
     private String type;
+
+    @JsonProperty("name")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String name;
+
+    @JsonProperty("tenantId")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String tenantId;
 }
