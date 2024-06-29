@@ -1035,8 +1035,7 @@ public class DscController {
 		try {
 			if (responseDataPKCSSign != null) {
 				if (responseDataPKCSSign.getSignedText() != null) {
-					response = populateDeregisterSoapCall(dataSignRequest.getRequestInfo().getUserInfo().getId(),
-							dataSignRequest.getChannelId(), responseDataPKCSSign.getSignedText());
+					response = populateDeregisterSoapCall(dataSignRequest.getUserId(), dataSignRequest.getChannelId());
 					if (!(response.toLowerCase().contains("success"))) {
 						emudhraErrorCode = response;
 					}
@@ -1057,17 +1056,16 @@ public class DscController {
 	 * 
 	 * @param id
 	 * @param channel
-	 * @param signedText
 	 * @return Result after deregistration
 	 * @throws DSCException
 	 */
-	private String populateDeregisterSoapCall(Long id, String channel, String signedText) throws DSCException {
+	private String populateDeregisterSoapCall(Long userId, String channel) throws DSCException {
 		String result = "";
 		DSAuthenticateWS authenticateWS = new DSAuthenticateWSProxy(applicationProperties.getEmasWsUrl());
 		try {
-			String response = authenticateWS.userExists(id + "~" + channel);
+			String response = authenticateWS.userExists(userId + "~" + channel);
 			if (response.toLowerCase().contains("success")) {
-				result = authenticateWS.deregister(id + "~" + channel, "degistration");
+				result = authenticateWS.deregister(userId + "~" + channel, "degistration");
 				System.out.println("result after deregistration ::::" + result);
 			} else {
 				throw new DSCException("Error in deregistration api from Emas" + response);
