@@ -55,4 +55,7 @@ public class DataSignRequest {
     
     @JsonProperty("tempFilePath")
 	private String tempFilePath;
+    
+    @JsonProperty("userId")
+    private Long userId;
 }
