@@ -968,6 +968,7 @@ public class DscController {
 			fileDirPath = Paths.get(tempFilePath+fileStoreId);
 			path = Files.write(fileDirPath, responseEntity.getBody());
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new DSCException(applicationProperties.getDSC_ERR_12());
 		}
 		return path;
@@ -1004,42 +1005,14 @@ public class DscController {
 	@RequestMapping(value = "/_dataSignDeregister", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<DataSignResponse> dataSignDeregister(@RequestBody DataSignRequest dataSignRequest) {
-		emBridge bridge = null;
-		File logFile = new File(logPath);
-		File licFile = new File(licPath);
 		String response = "";
-		ResponseDataPKCSSign responseDataPKCSSign = null;
 		String emudhraErrorCode = "";
-		try {
-			if (!logFile.exists()) {
-				logFile.mkdirs();
-			}
-			if (!licFile.exists()) {
-				licFile.mkdirs();
-			}
-			bridge = new emBridge(licPath + "/OdishaUrban.lic", logFile.getCanonicalPath());
-		} catch (IOException e) {
-			e.printStackTrace();
-			return getSuccessDataSignDeregisterResponse(response, dataSignRequest.getRequestInfo(),
-					applicationProperties.getDSC_ERR_01(), null);
-		}
-
-		try {
-			responseDataPKCSSign = bridge.decPKCSSign(dataSignRequest.getResponseData());
-		} catch (EMBLException e) {
-			e.printStackTrace();
-			return getSuccessDataSignDeregisterResponse(response, dataSignRequest.getRequestInfo(),
-					applicationProperties.getDSC_ERR_07(), null);
-		}
 		// deregister
 		try {
-			if (responseDataPKCSSign != null) {
-				if (responseDataPKCSSign.getSignedText() != null) {
-					response = populateDeregisterSoapCall(dataSignRequest.getUserId(), dataSignRequest.getChannelId());
-					if (!(response.toLowerCase().contains("success"))) {
-						emudhraErrorCode = response;
-					}
-				}
+			
+			response = populateDeregisterSoapCall(dataSignRequest.getUserId(), dataSignRequest.getChannelId());
+			if (!(response.toLowerCase().contains("success"))) {
+				emudhraErrorCode = response;
 			}
 
 		} catch (DSCException e) {
