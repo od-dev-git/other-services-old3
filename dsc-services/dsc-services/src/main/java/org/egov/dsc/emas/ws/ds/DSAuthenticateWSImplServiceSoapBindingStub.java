@@ -16,7 +16,7 @@ public class DSAuthenticateWSImplServiceSoapBindingStub extends org.apache.axis.
     static org.apache.axis.description.OperationDesc [] _operations;
 
     static {
-        _operations = new org.apache.axis.description.OperationDesc[7];
+        _operations = new org.apache.axis.description.OperationDesc[10];
         _initOperationDesc1();
     }
 
