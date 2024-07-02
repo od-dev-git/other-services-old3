@@ -1016,6 +1016,7 @@ public class DscController {
 			}
 
 		} catch (DSCException e) {
+			e.printStackTrace();
 			return getSuccessDataSignDeregisterResponse(response, dataSignRequest.getRequestInfo(),
 					applicationProperties.getDSC_ERR_29(), null);
 		}
