@@ -126,6 +126,7 @@ public class GoSwiftEncryptionService {
 				.isSuccessful((Boolean) otpResponse.get("isSuccessful"))
 				.username(decodedResponse.path("mobileNo").asText())
 				.type(isUserRegistered?"login":"registration")
+				.goSwiftDetails(decodedResponse)
 				.build();
 		if(!isUserRegistered) {
 			goSwiftLoginResponse.setTenantId(decodedResponse.path("tenantId").asText());

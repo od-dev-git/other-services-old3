@@ -32,4 +32,7 @@ public class GoSwiftLoginResponse {
     @JsonProperty("tenantId")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String tenantId;
+    
+    @JsonProperty("goSwiftDetails")
+    private Object goSwiftDetails;
 }
