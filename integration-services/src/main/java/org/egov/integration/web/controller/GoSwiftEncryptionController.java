@@ -23,13 +23,13 @@ public class GoSwiftEncryptionController {
 
     @PostMapping("/_encrypt")
     public ResponseEntity<String> encrypt(@RequestBody GoSwiftInputRequest goSwiftInputRequest){
-        String response= encryptionService.encrypt(goSwiftInputRequest.getGoSwiftInput());
+        String response= encryptionService.encrypt(goSwiftInputRequest.getGoSwiftInput(),goSwiftInputRequest.getRequestInfo());
         return new ResponseEntity<String>(response, HttpStatus.OK);
     }
     
     @PostMapping("/_login")
     public ResponseEntity<GoSwiftLoginResponse> decrypt(@RequestBody GoSwiftLoginRequest goSwiftLoginRequest){
-        GoSwiftLoginResponse response= encryptionService.login(goSwiftLoginRequest.getCode());
+        GoSwiftLoginResponse response= encryptionService.login(goSwiftLoginRequest.getCode(),goSwiftLoginRequest.getRequestInfo());
         return new ResponseEntity<GoSwiftLoginResponse>(response, HttpStatus.OK);
     }
 }
