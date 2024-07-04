@@ -1,5 +1,7 @@
 package org.egov.integration.web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -30,4 +32,8 @@ public class GoSwiftInput {
     
     @JsonProperty("name")
     private String name;
+    
+    @JsonProperty("securityToken")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String securityToken;
 }
