@@ -801,7 +801,7 @@ public class DscController {
 					}
 					try {
 						signedDocBytes = Base64.decodeBase64(doc.getSignedData());
-						finalFilePath = tempPath + "\\" + fileName + "_signed.pdf";
+						finalFilePath = tempPath + File.separatorChar + fileName + "_signed.pdf";
 						file = new File(finalFilePath);
 						os = new FileOutputStream(file);
 						os.write(signedDocBytes);
