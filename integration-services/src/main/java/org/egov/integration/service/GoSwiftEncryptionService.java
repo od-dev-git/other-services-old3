@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.encryption.web.contract.EncReqObject;
 import org.egov.encryption.web.contract.EncryptionRequest;
 import org.egov.integration.config.IntegrationConfiguration;
@@ -43,12 +45,13 @@ public class GoSwiftEncryptionService {
 	/**
 	 *
 	 * @param goSwiftInput
+	 * @param requestInfo 
 	 * @return
 	 * To Encrypt the data provided by GoSwift in a Single Encrypted String
 	 */
-    public String encrypt(GoSwiftInput goSwiftInput){
+    public String encrypt(GoSwiftInput goSwiftInput, RequestInfo requestInfo){
 
-    	goSwiftEncryptionValidator.validateEncodedInput(goSwiftInput);
+    	goSwiftEncryptionValidator.validateEncodedInput(goSwiftInput,requestInfo);
         EncryptionRequest encryptionRequest = getEncryptionRequest(goSwiftInput);
         StringBuilder encryptionURL = getEncryptionURL();
         Object response=serviceRepository.fetchResultString(encryptionURL,encryptionRequest);
@@ -90,16 +93,17 @@ public class GoSwiftEncryptionService {
 	/**
 	 *
 	 * @param code
+	 * @param requestInfo 
 	 * @return
 	 * To Decrypt the Encrypted String Passed by Go Swift
 	 * and send otp to the corresponding user mobile number
 	 */
-	public GoSwiftLoginResponse login(String code) {
+	public GoSwiftLoginResponse login(String code, RequestInfo requestInfo) {
 		//Decryption
 		JsonNode decodedResponse = getDecodedResponse(code);
 		log.info("@Class: GoSwiftEncryptionService @method:login @message:Received Decoded Response - {} ",decodedResponse);
 		//Response Validate
-		goSwiftEncryptionValidator.validateDecodedResponse(decodedResponse);
+		goSwiftEncryptionValidator.validateDecodedResponse(decodedResponse,requestInfo);
 		//User Search
 		Boolean isUserRegistered=isUserRegistered(decodedResponse);
 		log.info("@Class: GoSwiftEncryptionService @method:login @message:Received Response From User Search- Is User registered : - {} ",isUserRegistered);
@@ -122,6 +126,8 @@ public class GoSwiftEncryptionService {
 	}
 
 	private GoSwiftLoginResponse generateResponse(Map<String, Object> otpResponse, Boolean isUserRegistered, JsonNode decodedResponse) {
+		decodedResponse = removeSecurityToken(decodedResponse);
+
 		GoSwiftLoginResponse goSwiftLoginResponse= GoSwiftLoginResponse.builder()
 				.isSuccessful((Boolean) otpResponse.get("isSuccessful"))
 				.username(decodedResponse.path("mobileNo").asText())
@@ -133,6 +139,15 @@ public class GoSwiftEncryptionService {
 			goSwiftLoginResponse.setName(decodedResponse.path("name").asText());
 		}
 		return goSwiftLoginResponse;
+	}
+
+	private JsonNode removeSecurityToken(JsonNode decodedResponse) {
+		if (decodedResponse.isObject()) {
+            ObjectNode objectNode = (ObjectNode) decodedResponse;
+            objectNode.remove("securityToken");
+            decodedResponse=objectNode;
+        }
+		return decodedResponse;
 	}
 
 	private Object sendOTPToUser(OtpRequest otpRequest) {
