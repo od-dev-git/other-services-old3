@@ -227,6 +227,7 @@ public class PropertyService {
 //				.of("CASH", "OFFLINE_RTGS", "OFFLINE_NEFT", "POSTAL_ORDER", "CHEQUE","DD","CARD").collect(Collectors.toSet()));
 
 		List<Payment> payments = paymentService.getPayments(requestInfo, paymentSearchCriteria);
+		log.info("Final Payments Size is : " + payments.size() );
         List<TaxCollectorWiseCollectionResponse> taxCollectorWiseCollectionResponse =  payments.parallelStream().map(payment  ->{
             
             TaxCollectorWiseCollectionResponse taxCollectorWiseCollection = TaxCollectorWiseCollectionResponse
@@ -246,6 +247,7 @@ public class PropertyService {
 
             return taxCollectorWiseCollection;
         }).collect(Collectors.toList());
+		log.info("TaxCollectorWiseCollectionResponse Size is : " + taxCollectorWiseCollectionResponse.size() );
 
         if (!CollectionUtils.isEmpty(taxCollectorWiseCollectionResponse)) {
             List<Long> userIds = taxCollectorWiseCollectionResponse.stream().map(res ->Long.valueOf(res.getUserid())).distinct().collect(Collectors.toList());
@@ -261,7 +263,7 @@ public class PropertyService {
                     .build();
             List<org.egov.report.user.User> usersInfo = userService.searchUsers(userSearchCriteria,
                     requestInfo);
-            log.info("User Details Fetched ");
+            log.info(usersInfo.size() + " User Details Fetched ");
             Map<Long, org.egov.report.user.User> userMap = usersInfo.stream()
                     .collect(Collectors.toMap(org.egov.report.user.User::getId, Function.identity()));
             
@@ -285,8 +287,20 @@ public class PropertyService {
                         collectionResponse.setLegacyHoldingNo(propertyMap.get(collectionResponse.getConsumercode()).getLegacyHoldingNo());
                     }
                 }
+                
+                // Log details if the type is missing or empty
+                if (!StringUtils.hasText(collectionResponse.getType())) {
+                    log.info("Logging details for entries with empty or null type:");
+                    log.info("UserID: " + collectionResponse.getUserid());
+                    log.info("Name: " + collectionResponse.getName());
+                    log.info("ConsumerCode: " + collectionResponse.getConsumercode());
+                    log.info("OldPropertyID: " + collectionResponse.getOldpropertyid());
+                    log.info("Type: " + collectionResponse.getType());
+                }
+                
             }).filter(tcwcrUser -> StringUtils.hasText(tcwcrUser.getType())).collect(Collectors.toList());
-            
+    		log.info("TaxCollectorWiseCollectionResponse Final Size is : " + taxCollectorWiseCollectionResponse.size() );
+
 //            //getting Property Details
 //            log.info("Fetching Property Details ");
 //            PropertyDetailsSearchCriteria propertySearchingCriteria = PropertyDetailsSearchCriteria.builder()
@@ -855,23 +869,52 @@ public class PropertyService {
 	        Map<String, User> userMap = new HashMap<>();
 
             // get User details here
-	        if (count > 0) {
-	            while (count > 0) {
-            UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
-                    .active(true)
-                    .userType(UserSearchCriteria.CITIZEN)
-                    .tenantId(tenantId)//is it required
-                    .build();
+//	        if (count > 0) {
+//	            while (count > 0) {
+//            UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
+//                    .active(true)
+//                    .userType(UserSearchCriteria.CITIZEN)
+//                    .tenantId(tenantId)//is it required
+//                    .build();
+//
+//            List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+//            // Update global userMap
+//            userMap.putAll(usersInfo.stream()
+//                    .collect(Collectors.toMap(User::getUuid, Function.identity())));
+//
+//            count = count - limit;
+//        }
+//    }
 
-            List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
-            // Update global userMap
-            userMap.putAll(usersInfo.stream()
-                    .collect(Collectors.toMap(User::getUuid, Function.identity())));
+		     // Set the limit for chunk size to 10,000 from configuration
+	        int userSearchLimit = configuration.getUserServiceSearchLimit();
 
-            count = count - limit;
-        }
-    }
-            
+	        while (!userIds.isEmpty()) {
+	            Set<String> chunk = userIds.stream()
+	                    .limit(userSearchLimit)
+	                    .collect(Collectors.toSet());
+
+	            UserSearchCriteria usCriteria = UserSearchCriteria.builder()
+	                    .uuid(chunk)
+	                    .active(true)
+	                    .userType(UserSearchCriteria.CITIZEN)
+	                    .tenantId(tenantId)
+	                    .build();
+
+	            try {
+	                List<OwnerInfo> usersInfo = userService.getUserDetails(requestInfo, usCriteria);
+
+					userMap.putAll(usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity())));
+
+	                userIds.removeAll(chunk);
+	            } catch (Exception e) {
+	                System.err.println("Error fetching user details: " + e.getMessage());
+	                e.printStackTrace();
+	            }
+	        }
+
+	        System.out.println("Fetched user details for: " + userMap.size() + " users.");
+	
 	        assessmentsDetailsList.forEach(assessment -> {
 	            Object userId = assessment.get("name"); // Assuming the map has a key 'userId' to match with userMap
 	            if (userId != null && userMap.containsKey(userId.toString())) {
