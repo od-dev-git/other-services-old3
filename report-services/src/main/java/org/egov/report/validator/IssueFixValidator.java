@@ -20,4 +20,15 @@ public class IssueFixValidator {
 		}
 
 	}
+
+	public void valiDateDSCDeletionIssue(IssueFixRequest issueFixRequest) {
+
+		IssueFix issueFix = issueFixRequest.getIssueFix();
+		if (StringUtils.isEmpty(issueFix.getIssueName()) || StringUtils.isEmpty(issueFix.getTenantId())
+				|| StringUtils.isEmpty(issueFix.getEmpID()) || StringUtils.isEmpty(issueFix.getEmpName())) {
+			throw new CustomException("INVALID REQUEST",
+					"Tenant Id, Employee ID, Employee Name and Issue Name are mandatory for this request. Kindly provide them to proceed ..!");
+		}
+
+	}
 }

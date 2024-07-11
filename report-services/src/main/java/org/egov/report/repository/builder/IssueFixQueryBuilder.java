@@ -21,6 +21,12 @@ public class IssueFixQueryBuilder {
 			+ "(select distinct bill.id from egbs_billdetail_v1 billdtl inner join egbs_bill_v1 bill on bill.id=billdtl.billid where "
 			+ "billdtl.consumercode = ? and bill.status ='ACTIVE' and billdtl.tenantid = ? and bill.tenantid = ?) bll))))) where txn_id = ? and txn_status <> 'SUCCESS' ";
 
+	public static final String HRMS_QUERY = " select id from eg_hrms_employee ";
+	
+	public static final String EMAS_DELETION_QUERY = " select f_delete_dsc(?) ";
+	
+	public static final String EMAS_NAME_QUERY = " select common_name from public.emas_cust_temp ";
+	
 	public String getTransactionsQuery(IssueFix issueFix, List<Object> preparedPropStmtList) {
 
 		StringBuilder query = new StringBuilder(QUERY_FOR_TRANSACTIONS);
@@ -77,6 +83,50 @@ public class IssueFixQueryBuilder {
 
 	public String getUpdateBillIdInTransactionQuery() {	
 		return QUERY_TO_UPDATE_BILL_IN_TRANSACTION;
+	}
+
+	public String getHRMSSearchQuery(String tenantId, String empId, List<Object> preparedPropStmtList) {
+		
+		StringBuilder query = new StringBuilder(HRMS_QUERY);
+	
+		if (!StringUtils.isEmpty(tenantId)) {
+			addClauseIfRequired(preparedPropStmtList, query);
+			query.append(" tenantid = ? ");
+			preparedPropStmtList.add(tenantId);
+		}
+		
+		if (!StringUtils.isEmpty(empId)) {
+			addClauseIfRequired(preparedPropStmtList, query);
+			query.append(" code = ? ");
+			preparedPropStmtList.add(empId);
+		}
+
+		return query.toString();
+	}
+
+	public String getEMASDeletionQuery(int userId, List<Object> preparedPropStmtList) {
+
+		StringBuilder query = new StringBuilder(EMAS_DELETION_QUERY);
+
+		if (!StringUtils.isEmpty(userId)) {
+			preparedPropStmtList.add(userId + "~ch4");
+		}
+
+		return query.toString();
+
+	}
+
+	public String getNameFromEMASDBQuery(int userId, List<Object> preparedPropStmtList) {
+		
+		StringBuilder query = new StringBuilder(EMAS_NAME_QUERY);
+		
+		if (!StringUtils.isEmpty(userId)) {
+			addClauseIfRequired(preparedPropStmtList, query);
+			query.append(" unique_id = ? ");
+			preparedPropStmtList.add(userId+"~ch4");
+		}
+
+		return query.toString();
 	}
 
 }

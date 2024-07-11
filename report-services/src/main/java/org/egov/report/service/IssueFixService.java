@@ -14,6 +14,10 @@ public class IssueFixService {
 	@Autowired
     @Qualifier("updateTransactionIssue")
     private IIssueFixService updateTransactionIssue;
+	
+	@Autowired
+    @Qualifier("dscDeletionIssue")
+    private IIssueFixService dscDeletionIssue;
 
 	@Autowired
 	private IssueFixValidator validator;
@@ -21,13 +25,16 @@ public class IssueFixService {
     public IssueFix issueFix(IssueFixRequest issueFixRequest) {
 
         String issueName=issueFixRequest.getIssueFix().getIssueName();
-
-        validator.validateUpdateTransactionRequest(issueFixRequest);
         
         switch (issueName){
 
             case "UPDATE_TRANSACTION_ISSUE":
+            	validator.validateUpdateTransactionRequest(issueFixRequest);
                 return updateTransactionIssue.issueFix(issueFixRequest);
+                
+            case "DSC_DELETION_ISSUE":
+            	validator.valiDateDSCDeletionIssue(issueFixRequest);
+                return dscDeletionIssue.issueFix(issueFixRequest);    
 
             default:
                 throw new CustomException("UNKNOWN_ISSUE","The issue is unknown to the system !!");

@@ -26,5 +26,11 @@ public class IssueFix {
     
     @JsonProperty("consumerCode")
     private String consumerCode = null;
+    
+    @JsonProperty("empID")
+    private String empID;
+    
+    @JsonProperty("empName")
+    private String empName;
 
 }
