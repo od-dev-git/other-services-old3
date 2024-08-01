@@ -137,4 +137,9 @@ public class ReportServiceConfiguration {
 	
 	@Value("${egov.report.user.service.search.limit}")
 	private Integer userServiceSearchLimit;
+	
+	@Value("${egov.report.user.tlservice.search.limit}")
+	private Integer userTLServiceSearchLimit;
+
+
 }
