@@ -79,5 +79,7 @@ public class ReportResponse {
 	
 	@JsonProperty("srTicketDetailsResponse")
 	private List<TicketDetails> srTicketDetailsResponse;
-		
+
+	@JsonProperty("tradeLicenseEscallationDetailsResponse")
+	private List<TradeLicenseEscallationDetailsResponse> tradeLicenseEscallationDetailsResponse;		
 }
