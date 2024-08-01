@@ -13,6 +13,7 @@ import org.egov.report.util.WSReportUtils;
 import org.egov.report.web.model.DemandCriteria;
 import org.egov.report.web.model.PTAssessmentSearchCriteria;
 import org.egov.report.web.model.PropertyDetailsSearchCriteria;
+import org.egov.report.web.model.TradeLicenseSearchCriteria;
 import org.egov.report.web.model.WSReportSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -361,6 +362,34 @@ public class ReportQueryBuilder {
 			+ "	hrms.uuid = asmt.createdby "
 			+ "where "
 			+ "	1 = 1 ";
+
+	private static final String TL_AUTOESCALLATION_DETAILS_QUERY = "with td as ( "
+			+ "select distinct on (ewpv.businessid) ewpv.businessid,ett.tenantid,ett.licensetype ,ett.applicationtype,ett.status,ewpv.comment,ewpv.createdtime,ewpv.createdby,ewav.assignee  from eg_tl_tradelicense ett  "
+			+ "inner join eg_wf_processinstance_v2 ewpv on ewpv.businessid = ett.applicationnumber and modulename='tl-services' "
+			+ "left outer join eg_wf_assignee_v2 ewav on ewpv.id = ewav.processinstanceid  "
+			+ "where ett.businessservice ='TL' "
+			+ "and ett.tenantid != 'od.testing' and ett.licensetype = '$licensetype' "
+			+ "and ( case 	when '$ulb' = 'od' then ( ett.tenantid in ( 	select 	distinct tenantid 	from 	eg_tl_tradelicense ett2 ) ) 	else ett.tenantid = '$ulb' "
+			+ "end ) "
+			+ "and ett.status not in ('INITIATED', 'APPLIED', 'PENDINGPAYMENT', 'DELETED','APPROVED','INACTIVE','EXPIRED') "
+			+ "order by ewpv.businessid , ewpv.lastmodifiedtime  desc	 "
+			+ ") "
+			+ " select	initcap(split_part(td.tenantid, '.', 2)) as tenantid, "
+			+ "		td.licensetype , "
+			+ "	td.applicationtype, "
+			+  " td.businessid , "
+			+ "	td.status, "
+			+ "	td.comment, "
+			+ "	td.createdtime ,"
+			+ "	td.createdby, "
+			+ "	td.assignee, "
+			+ "	td.createdtime  as escallationdate, "
+			+ "	ewpv.createdtime  as submissiondate "
+			+ "from td inner join eg_wf_processinstance_v2 ewpv on td.businessid = ewpv.businessid and ewpv.modulename='tl-services' "
+			+ "and td.comment in 	('Auto Escalated to Approver', 'Auto Escalated to Approver From Citizen', 'Auto Escalated to Document Verifier From Citizen', 'Auto Escalated to Field Inspection', 'Auto Escalated to Field Inspection From Citizen' 	) and  "
+			+ "case  when td.applicationtype in ('NEW','RENEWAL') then ewpv.\"action\" ='PAY' "
+			+ "	when td.applicationtype in ('CORRECTION','OWNERSHIPTRANSFER') then ewpv.\"action\" ='APPLY' "
+			+ "end ";
 
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -1135,5 +1164,47 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 	    
 	    return query.toString();
 
+	}
+
+	public String getTLAutoEscallationReport(TradeLicenseSearchCriteria searchCriteria,
+	        List<Object> preparedPropStmtList) {
+	    // Initialize the query with the base query string
+	    StringBuilder query = new StringBuilder(TL_AUTOESCALLATION_DETAILS_QUERY);
+	    log.info("Initial Query: {}", query);
+
+	    // Replace all occurrences of $ulb with the provided tenantId or default to 'od'
+	    String tenantIdReplacement = StringUtils.hasText(searchCriteria.getTenantId()) 
+	                                ? searchCriteria.getTenantId() : "'od'";
+	    log.info("Tenant ID Replacement: {}", tenantIdReplacement);
+	    replacePlaceholder(query, "$ulb", tenantIdReplacement);
+
+	    // Replace all occurrences of $licensetype with the provided licenseType if available
+	    if (StringUtils.hasText(searchCriteria.getLicenseType())) {
+	        String licenseTypeReplacement = searchCriteria.getLicenseType();
+	        log.info("License Type Replacement: {}", licenseTypeReplacement);
+	        replacePlaceholder(query, "$licensetype", licenseTypeReplacement);
+	    } else {
+	        // Remove the license type condition from the query if licenseType is not provided
+	        removeLicenseTypeCondition(query);
+	    }
+
+	    log.info("Final Query: {}", query);
+	    return query.toString();
+	}
+
+	private void replacePlaceholder(StringBuilder query, String placeholder, String replacement) {
+	    int index = query.indexOf(placeholder);
+	    while (index != -1) {
+	        query.replace(index, index + placeholder.length(), replacement);
+	        index = query.indexOf(placeholder, index + replacement.length());
+	    }
+	}
+
+	private void removeLicenseTypeCondition(StringBuilder query) {
+	    String conditionToRemove = "and ett.licensetype = '$licensetype'";
+	    int index = query.indexOf(conditionToRemove);
+	    if (index != -1) {
+	        query.delete(index, index + conditionToRemove.length());
+	    }
 	}
 }
