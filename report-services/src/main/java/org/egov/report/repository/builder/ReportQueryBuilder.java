@@ -1185,8 +1185,8 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 	    log.info("Initial Query: {}", query);
 
 	    // Replace all occurrences of $ulb with the provided tenantId or default to 'od'
-	    String tenantIdReplacement = StringUtils.hasText(searchCriteria.getTenantId()) 
-	                                ? searchCriteria.getTenantId() : "'od'";
+	    String tenantIdReplacement = StringUtils.hasText(searchCriteria.getTenant()) 
+	                                ? searchCriteria.getTenant() : "'od'";
 	    log.info("Tenant ID Replacement: {}", tenantIdReplacement);
 	    replacePlaceholder(query, "$ulb", tenantIdReplacement);
 
