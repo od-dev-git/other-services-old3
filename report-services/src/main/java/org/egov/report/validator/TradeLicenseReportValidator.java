@@ -18,7 +18,7 @@ public class TradeLicenseReportValidator {
 		// TODO Auto-generated method stub
 		Map<String, String> errorMap = new HashMap<>();
 
-		if(!StringUtils.hasText(searchCriteria.getTenantId())) {
+		if(!StringUtils.hasText(searchCriteria.getTenant())) {
 			errorMap.put("INVALID_CRITERIA", "ULB Name can not be blank/empty");
 		}
 		if (!errorMap.isEmpty())
