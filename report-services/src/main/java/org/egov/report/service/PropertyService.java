@@ -833,12 +833,26 @@ public class PropertyService {
 
 			String financialYear = ptAssessmentSearchCriteria.getFinancialYear();
 
-			List<UtilityReportDetails> reportList = new ArrayList<>();
-			
-//			if(prValidator.validateRecentReport(reportList, tenantId)) {
-//				log.info("Skipping... Report already present for tenantid: "+ tenantId);
-//				continue;
-//			}
+			List<UtilityReportDetails> reportList = dcbRepository.isReportExist(reportType, financialYear, tenantId);
+
+			prValidator.validateIfReportGenerationInProcess(reportList, tenantId);
+
+			if(!reportList.isEmpty()) {
+				UtilityReportDetails dcbReport = reportList.get(0);
+
+				Long requestGap = configuration.getRequestGap();
+
+				Long createdTime = dcbReport.getAuditDetails().getCreatedTime();
+
+				Long currentTime = System.currentTimeMillis();
+
+				if(currentTime < createdTime + requestGap) {
+					log.info("Skipping... Report already present for tenantid: "+ tenantId);
+					continue;
+				}
+
+			}
+			reportList = new ArrayList<>();
 			
 			if (CollectionUtils.isEmpty(reportList)) {
 				UtilityReportDetails reportDetails = enrichmentService.enrichSaveReport(requestInfo, reportType,
