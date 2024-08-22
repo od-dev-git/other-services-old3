@@ -319,7 +319,7 @@ public class ReportQueryBuilder {
             + "eg_pt_property epp "
             + WHERE + "epp.status <> 'INACTIVE' ";
     
-    private static final String PT_ASSESSMENT_REPORT_QUERY = "select initcap(split_part(asmt.tenantid, '.', 2)) as ulb , "
+    private static final String PT_ASSESSMENT_REPORT_QUERY = "select distinct on (asmt.assessmentnumber) initcap(split_part(asmt.tenantid, '.', 2)) as ulb , "
 			+ "	asmt.propertyid as propertyid , "
 			+ "	asmt.assessmentnumber as asmtnumber, "
 			+ "	asmt.status as status, "
@@ -355,7 +355,7 @@ public class ReportQueryBuilder {
 			+ "	address.propertyid = prop.id "
 			+ "	and prop.status = 'ACTIVE' "
 			+ "inner join eg_pt_owner own on "
-			+ "	own.propertyid = prop.id "
+			+ "	own.propertyid = prop.id and own.status = 'ACTIVE' "
 //			+ "inner join eg_user usr on "
 //			+ "	usr.uuid = own.userid "
 			+ "left outer join eg_hrms_employee hrms on "
@@ -1158,7 +1158,7 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 			query.append(" and financialyear = '" + ptAssessmentSearchCriteria.getFinancialYear() + "'");
 		}
 		
-		query.append(" order by asmt.propertyid, assessmentdate desc ");
+		query.append(" order by asmt.assessmentnumber,asmt.propertyid, assessmentdate desc ");
 
 	    log.info("Query for Payment Report search: " + query);
 	    
