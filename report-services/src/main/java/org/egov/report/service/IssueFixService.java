@@ -18,6 +18,11 @@ public class IssueFixService {
 	@Autowired
     @Qualifier("dscDeletionIssue")
     private IIssueFixService dscDeletionIssue;
+	
+
+	@Autowired
+    @Qualifier("expireBillIssue")
+    private IIssueFixService expireBillIssue;	
 
 	@Autowired
 	private IssueFixValidator validator;
@@ -35,6 +40,10 @@ public class IssueFixService {
             case "DSC_DELETION_ISSUE":
             	validator.valiDateDSCDeletionIssue(issueFixRequest);
                 return dscDeletionIssue.issueFix(issueFixRequest);    
+
+            case "EXPIRE_BILL":
+            	validator.validateBillExpireIssue(issueFixRequest);
+                return expireBillIssue.issueFix(issueFixRequest);     
 
             default:
                 throw new CustomException("UNKNOWN_ISSUE","The issue is unknown to the system !!");
