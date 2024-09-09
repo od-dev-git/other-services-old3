@@ -134,6 +134,25 @@ public class IssueFixRepository {
 		
 		return jdbcTemplateEmas.queryForObject(deletionQuery,preparedPropStmtList.toArray(), Boolean.class);		
 	}
+	
+	public void expireBill(String consumerCode) {
+
+        String billExpireQuery = queryBuilder.getBillExpireQuery();
+
+        jdbcTemplate.update(billExpireQuery, new PreparedStatementSetter() {
+
+            @Override
+            public void setValues(PreparedStatement ps) {
+                try {
+                    ps.setString(1, consumerCode);
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        });
+
+	}
 
 	
 }
