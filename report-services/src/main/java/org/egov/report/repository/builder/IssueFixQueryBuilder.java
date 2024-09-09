@@ -27,6 +27,10 @@ public class IssueFixQueryBuilder {
 	
 	public static final String EMAS_NAME_QUERY = " select common_name from public.emas_cust_temp ";
 	
+    public static final String BILL_EXPIRE_QUERY = "update egbs_bill_v1 ebv "
+            + "set status ='EXPIRED' "
+            + "where id in (select billid from egbs_billdetail_v1 ebv2 where consumercode in (?)) and status = 'ACTIVE'";
+	
 	public String getTransactionsQuery(IssueFix issueFix, List<Object> preparedPropStmtList) {
 
 		StringBuilder query = new StringBuilder(QUERY_FOR_TRANSACTIONS);
@@ -122,5 +126,9 @@ public class IssueFixQueryBuilder {
 
 		return query.toString();
 	}
+
+    public String getBillExpireQuery() {
+        return BILL_EXPIRE_QUERY;
+    }
 
 }
