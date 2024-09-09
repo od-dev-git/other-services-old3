@@ -1,5 +1,7 @@
 package org.egov.report.web.model.issuefix;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -32,5 +34,11 @@ public class IssueFix {
     
     @JsonProperty("empName")
     private String empName;
+    
+    @JsonProperty("consumerCodes")
+    private List<String> consumerCodes = null;
+
+    @JsonProperty("allowExtendedLimit")
+    private Boolean allowExtendedLimit = false;  // New field to allow extended limit for consumerCodes
 
 }
