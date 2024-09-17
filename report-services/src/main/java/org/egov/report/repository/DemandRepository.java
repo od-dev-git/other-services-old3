@@ -10,13 +10,18 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.NotNull;
+
 //import org.egov.demand.model.AuditDetails;
 //import org.egov.demand.model.DemandDetail;
 //import org.egov.demand.model.PaymentBackUpdateAudit;
 //import org.egov.demand.repository.DemandRepository;
 //import org.egov.demand.web.contract.DemandRequest;
 import org.egov.report.model.Demand;
+import org.egov.report.model.DemandDetailAudit;
+import org.egov.report.model.DemandDetailAuditRequest;
 import org.egov.report.repository.builder.DemandQueryBuilder;
+import org.egov.report.repository.rowmapper.DemandDetailAuditRowMapper;
 import org.egov.report.repository.rowmapper.DemandRowMapper;
 import org.egov.report.util.Util;
 import org.egov.report.web.model.DemandCriteria;
@@ -56,6 +61,10 @@ public class DemandRepository {
     
     @Autowired
     private Util util;
+    
+	@Autowired
+	private DemandDetailAuditRowMapper demandDetailAuditRowMapper;
+	
     
     public List<Demand> getDemands(DemandCriteria demandCriteria) {
 
@@ -372,4 +381,12 @@ public class DemandRepository {
 //
 //        return paymentId;
 //    }
+    
+
+	public List<DemandDetailAudit> findDemandDetails(DemandDetailAuditRequest request) {
+		List<Object> preparedStmtList = new ArrayList<>();
+		String query = demandQueryBuilder.getDemandDetailsQuery(request, preparedStmtList);
+        return jdbcTemplate.query(query, preparedStmtList.toArray(), demandDetailAuditRowMapper);
+    }
+
 }

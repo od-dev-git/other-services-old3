@@ -17,7 +17,9 @@ import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.mdms.model.ModuleDetail;
 import org.egov.report.config.ReportServiceConfiguration;
 import org.egov.report.model.AuditDetails;
+import org.egov.report.model.DemandDetailAudit;
 import org.egov.report.repository.ServiceRepository;
+import org.egov.report.user.User;
 import org.egov.tracer.model.CustomException;
 import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,4 +140,65 @@ public class Util {
 
 		return financialYearStartDate.toInstant(ZoneOffset.UTC).toEpochMilli();
 	}
+
+	public void enrichOwnerDetailsInDemandDetailAudit(Map<String, User> userDetailResponse,
+			List<DemandDetailAudit> demandDetails) {
+        // Early return for invalid input
+		if (isNullOrEmpty(userDetailResponse, demandDetails))
+			return;
+
+        // Process each audit object
+		demandDetails.forEach(audit -> {
+			if (audit == null) {
+				log.info("Encountered null DemandDetailAudit object, skipping...");
+				return;
+			}
+
+			log.info("Processing DemandDetailAudit with createdBy UUID: {}, lastModifiedBy UUID: {}",
+					audit.getDemandDetailCreatedby(), audit.getDemandDetailLastmodifiedby());
+
+        // Enrich fields for createdBy and lastModifiedBy
+			audit.setDemandDetailCreatedby(
+					enrichField(audit.getDemandDetailCreatedby(), userDetailResponse, "createdBy"));
+			audit.setDemandDetailLastmodifiedby(
+					enrichField(audit.getDemandDetailLastmodifiedby(), userDetailResponse, "lastModifiedBy"));
+		});
+	}
+
+	private boolean isNullOrEmpty(Map<String, User> userDetailResponse, List<DemandDetailAudit> demandDetails) {
+		if (userDetailResponse == null || userDetailResponse.isEmpty()) {
+			log.info("UserDetailResponse map is null or contains no users");
+			return true;
+		}
+
+		if (demandDetails == null || demandDetails.isEmpty()) {
+			log.info("DemandDetails list is null or empty");
+			return true;
+		}
+
+		return false;
+	}
+
+	private String enrichField(String uuid, Map<String, User> userDetailResponse, String fieldName) {
+		if (uuid == null) {
+			log.info("{} UUID is null, setting space", capitalize(fieldName));
+			return " ";
+		}
+
+		User user = userDetailResponse.get(uuid);
+		if (user != null) {
+			log.info("Enriched {} UUID {} with user name: {}", fieldName, uuid, user.getName());
+			return user.getName();
+		} else {
+			log.info("No user found for {} UUID: {}, setting space", fieldName, uuid);
+			return " "; // Set space if user not found
+		}
+	}
+
+	private String capitalize(String str) {
+		if (str == null || str.isEmpty())
+			return str;
+		return str.substring(0, 1).toUpperCase() + str.substring(1);
+	}
+
 }
