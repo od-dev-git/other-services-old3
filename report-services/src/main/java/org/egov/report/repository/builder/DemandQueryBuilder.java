@@ -5,10 +5,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.egov.report.model.DemandDetailAuditRequest;
 import org.egov.report.repository.builder.DemandQueryBuilder;
 import org.egov.report.web.model.DemandCriteria;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -82,6 +84,29 @@ public class DemandQueryBuilder {
     public static final String DEMAND_UPDATE_CONSUMERCODE_QUERY="UPDATE egbs_demand_v1 SET consumercode=?, lastmodifiedby=?, lastmodifiedtime=? "
             + " WHERE tenantid=? AND id IN (";
     
+    private static final String BASE_DEMAND_AUDIT_QUERY = "SELECT "
+            + "edv.id, "
+            + "edv.consumercode, "
+            + "edv.businessservice, "
+            + "edv.taxperiodfrom, "
+            + "edv.taxperiodto, "
+            + "dense_rank() over (partition by edv.consumercode order by edv2.createdtime) as entryRank, "
+            + "initcap(replace(edv2.taxheadcode,'_',' ')) as taxheadcode , "
+            + "edv2.taxamount as demandTaxamount, "
+            + "sum(edv2.taxamount) over (partition by edv.consumercode order by edv2.createdtime rows between unbounded preceding and current row) as cumulativeTaxamount, "
+            + "edv2.collectionamount as demandCollectionamount, "
+            + "sum(edv2.collectionamount) over (partition by edv.consumercode order by edv2.createdtime rows between unbounded preceding and current row) as cumulativeCollectionamount, "
+            + "edv2.createdby as demandDetailCreatedby, "
+            + "edv2.createdtime as demandDetailCreatedtime, "
+            + "edv2.lastmodifiedby as demandDetailLastmodifiedby, "
+            + "edv2.lastmodifiedtime as demandDetailLastmodifiedtime "
+            + "FROM egbs_demand_v1 edv "
+            + "INNER JOIN egbs_demanddetail_v1 edv2 ON edv.id = edv2.demandid "
+            + "WHERE edv.tenantid = ?";
+
+        private static final String PAGINATION_AND_SORT = " ORDER BY edv2.createdtime ASC "
+            + "LIMIT ? OFFSET ?";
+
     public String getDemandQueryForConsumerCodes(Map<String,Set<String>> businessConsumercodeMap,List<Object> preparedStmtList, String tenantId){
         
         StringBuilder query = new StringBuilder(BASE_DEMAND_QUERY);
@@ -210,5 +235,40 @@ public class DemandQueryBuilder {
         }
         return query.append(")").toString();
     }
+    
+    public String getDemandDetailsQuery(DemandDetailAuditRequest request, List<Object> preparedStmtList) {
+		StringBuilder queryBuilder = new StringBuilder(BASE_DEMAND_AUDIT_QUERY);
+
+		preparedStmtList.add(request.getTenantId());
+
+		if (!StringUtils.isEmpty(request.getConsumercode())) {
+			queryBuilder.append(" AND edv.consumercode = ?");
+			preparedStmtList.add(request.getConsumercode());
+		}
+
+		if (request.getTaxperiodfrom() != null) {
+			queryBuilder.append(" AND edv.taxperiodfrom >= ?");
+			preparedStmtList.add(request.getTaxperiodfrom());
+		}
+
+		if (request.getTaxperiodto() != null) {
+			queryBuilder.append(" AND edv.taxperiodto <= ?");
+			preparedStmtList.add(request.getTaxperiodto());
+		}
+
+		if (!StringUtils.isEmpty(request.getDemandid())) {
+			queryBuilder.append(" AND edv.id = ?");
+			preparedStmtList.add(request.getDemandid());
+		}
+
+		queryBuilder.append(PAGINATION_AND_SORT);
+
+		preparedStmtList.add(request.getPageSize());
+		preparedStmtList.add((request.getPageNumber() - 1) * request.getPageSize());
+        log.info("Generated SQL Query: {}", queryBuilder.toString());
+		return queryBuilder.toString();
+	}
+
+
 
 }

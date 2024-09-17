@@ -140,4 +140,13 @@ public class ReportServiceConfiguration {
 	
 	@Value("${egov.report.user.tlservice.search.limit}")
 	private Integer userTLServiceSearchLimit;
+	
+    @Value("${report.default.page.number}")
+    private int defaultPageNumber;
+
+    @Value("${report.default.page.size}")
+    private int defaultPageSize;
+
+    @Value("${report.default.page.size.max}")
+    private int defaultPageSizeMax;
 }
