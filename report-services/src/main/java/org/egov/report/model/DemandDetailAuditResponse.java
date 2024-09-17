@@ -1,6 +1,7 @@
 package org.egov.report.model;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,6 +29,6 @@ public class DemandDetailAuditResponse {
     private int pageSize;
 
     @JsonProperty("demandDetails")
-    private List<DemandDetailAudit> demandDetails;
+    private List<DemandDetailAudit> demandDetails = new ArrayList<>();
 
 }
