@@ -101,7 +101,7 @@ public class DemandQueryBuilder {
             + "edv2.lastmodifiedby as demandDetailLastmodifiedby, "
             + "edv2.lastmodifiedtime as demandDetailLastmodifiedtime "
             + "FROM egbs_demand_v1 edv "
-            + "INNER JOIN egbs_demanddetail_v1 edv2 ON edv.id = edv2.demandid "
+            + "INNER JOIN egbs_demanddetail_v1 edv2 ON edv.id = edv2.demandid and edv.status='ACTIVE' "
             + "WHERE edv.tenantid = ?";
 
         private static final String PAGINATION_AND_SORT = " ORDER BY edv2.createdtime ASC "
