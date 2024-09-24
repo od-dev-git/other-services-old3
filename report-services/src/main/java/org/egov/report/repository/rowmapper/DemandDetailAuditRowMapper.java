@@ -35,6 +35,7 @@ public class DemandDetailAuditRowMapper implements ResultSetExtractor<List<Deman
                     .demandDetailCreatedtime(getLong(rs, "demandDetailCreatedtime"))
                     .demandDetailLastmodifiedby(getString(rs, "demandDetailLastmodifiedby"))
                     .demandDetailLastmodifiedtime(getLong(rs, "demandDetailLastmodifiedtime"))
+                    .demandAdjusted(getString(rs, "demandadjusted"))
                     .build();
 
             demandDetailList.add(currentDemandDetail);
