@@ -61,5 +61,8 @@ public class DemandDetailAudit {
 
 	@JsonProperty("demandDetailLastmodifiedtime")
 	private Long demandDetailLastmodifiedtime;
+	
+	@JsonProperty("demandAdjusted")
+	private String demandAdjusted;
 
 }
