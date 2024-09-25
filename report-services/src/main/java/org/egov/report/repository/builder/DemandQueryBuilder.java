@@ -99,7 +99,8 @@ public class DemandQueryBuilder {
             + "edv2.createdby as demandDetailCreatedby, "
             + "edv2.createdtime as demandDetailCreatedtime, "
             + "edv2.lastmodifiedby as demandDetailLastmodifiedby, "
-            + "edv2.lastmodifiedtime as demandDetailLastmodifiedtime "
+            + "edv2.lastmodifiedtime as demandDetailLastmodifiedtime, "
+            + "edv2.additionalDetails ->> 'demandAdjusted' as demandadjusted "
             + "FROM egbs_demand_v1 edv "
             + "INNER JOIN egbs_demanddetail_v1 edv2 ON edv.id = edv2.demandid and edv.status='ACTIVE' "
             + "WHERE edv.tenantid = ?";
@@ -270,6 +271,17 @@ public class DemandQueryBuilder {
 			preparedStmtList.add(request.getDemandid());
 		}
 
+
+		if (request.getDemandAdjusted() != null) {
+			if(request.getDemandAdjusted()) {
+			    queryBuilder.append(" AND edv2.additionalDetails ->> 'demandAdjusted' = ?");
+			}else if(!request.getDemandAdjusted()) {
+			    queryBuilder.append(" AND edv2.additionalDetails ->> 'demandAdjusted' != ?");
+			}
+
+		    preparedStmtList.add("Y");
+		}
+		
 		queryBuilder.append(PAGINATION_AND_SORT);
 
 		preparedStmtList.add(request.getPageSize());
