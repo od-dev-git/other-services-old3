@@ -36,4 +36,7 @@ public class DemandDetailAuditRequest {
 
     @JsonProperty("pageSize")
     private int pageSize;
+    
+    @JsonProperty("demandAdjusted")
+    private Boolean demandAdjusted;
 }
