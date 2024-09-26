@@ -276,7 +276,9 @@ public class DemandQueryBuilder {
 			if(request.getDemandAdjusted()) {
 			    queryBuilder.append(" AND edv2.additionalDetails ->> 'demandAdjusted' = ?");
 			}else if(!request.getDemandAdjusted()) {
-			    queryBuilder.append(" AND edv2.additionalDetails ->> 'demandAdjusted' != ?");
+			    queryBuilder.append(" AND (edv2.additionalDetails ->> 'demandAdjusted' != ?  "
+			    		+ " or edv2.additionalDetails is null  "
+			    		+ "	or edv2.additionalDetails::text ='null' ) ");
 			}
 
 		    preparedStmtList.add("Y");
