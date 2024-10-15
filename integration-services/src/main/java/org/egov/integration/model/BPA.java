@@ -29,5 +29,14 @@ public class BPA {
 
 	  @JsonProperty("landInfo")
 	  private LandInfo landInfo = null;
+	  
+	  @JsonProperty("approvalNo")
+	  private String approvalNo = null;
+	  
+	  @JsonProperty("approvalDate")
+	  private Long approvalDate = null;
+	  
+	  @JsonProperty("permitExpiryDate")
+	  private Long permitExpiryDate = null;
 
 }

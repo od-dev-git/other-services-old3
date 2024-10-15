@@ -1,38 +1,35 @@
 package org.egov.integration.service;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.egov.common.contract.request.RequestInfo;
-import org.egov.common.contract.request.Role;
 import org.egov.common.contract.request.User;
 import org.egov.integration.config.IntegrationConfiguration;
 import org.egov.integration.model.Address;
 import org.egov.integration.model.BPA;
-import org.egov.integration.model.ConsumerVerification;
+import org.egov.integration.model.BPAVerification;
+import org.egov.integration.model.BPAVerificationSearchCriteria;
 import org.egov.integration.model.ConsumerVerificationSearchCriteria;
 import org.egov.integration.model.ConsumerVerificationServiceResponse;
-import org.egov.integration.model.CoupleDetails;
 import org.egov.integration.model.MarriageRegistration;
-import org.egov.integration.model.OwnerInfo;
 import org.egov.integration.model.Property;
 import org.egov.integration.model.TradeLicense;
 import org.egov.integration.model.VerificationOwner;
+import org.egov.integration.model.WSConnection;
+import org.egov.integration.repository.ServiceRepository;
+import org.egov.integration.validator.ConsumerVerificationValidator;
 import org.egov.integration.web.model.BPAResponse;
-import org.egov.integration.web.model.ConsumerVerificationResponse;
 import org.egov.integration.web.model.MarriageRegistrationResponse;
 import org.egov.integration.web.model.PropertyResponse;
 import org.egov.integration.web.model.RequestInfoWrapper;
 import org.egov.integration.web.model.TradeLicenseResponse;
 import org.egov.integration.web.model.WaterConnectionDetailResponse;
-import org.egov.integration.model.WSConnection;
-import org.egov.integration.repository.ServiceRepository;
-import org.egov.integration.validator.ConsumerVerificationValidator;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +37,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -477,5 +473,49 @@ public class ConsumerVerificationService implements InitializingBean {
 		}
 		return bpaRegistrations;
 	}
+
+	public BPAVerification searchBPA(@Valid BPAVerificationSearchCriteria searchCriteria) {
+		
+		StringBuilder uri = new StringBuilder(configuration.getBpaHost()).append(configuration.getBpaSearchEndpoint())
+				.append("?").append("offset=0").append("&").append("limit=-1").append("&")
+				.append("tenantId=" + searchCriteria.getTenantId()).append("&")
+				.append("approvalNo=" + searchCriteria.getPermitNumber());
+		requestInfo.setTs(null);
+		//requestInfo.setAuthToken("040d1223-85ee-400a-9e7c-a59f81593e0d");
+		List<BPA> bpaRegistrations = new ArrayList<>();
+		RequestInfoWrapper requestWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
+		try {
+			Object fetchResponse = repository.fetchResult(uri, requestWrapper);
+			log.info("BPA response: ", fetchResponse);
+
+			BPAResponse res = mapper.convertValue(fetchResponse, BPAResponse.class);
+			log.info("BPA response: " + String.valueOf(res));
+			bpaRegistrations.addAll(res.getBPA());
+		} catch (Exception ex) {
+			log.error("External Service Call Erorr", ex);
+			throw new CustomException("BPA FETCH ERROR", "Unable to fetch BPA Information");
+		}
+		
+		// Map BPA reponse to BPA Verification Object
+		if (CollectionUtils.isEmpty(bpaRegistrations)) {
+			throw new CustomException("Not_Found", "No Sujog Application Found with mentioned Permit Number !");
+		}
+
+		BPA bpa = bpaRegistrations.get(0);
+
+		Long approvalDate = bpa.getApprovalDate();
+		
+		BPAVerification bpaResponse = BPAVerification.builder().permitApprovalDate(approvalDate)
+				.permitNumber(bpa.getApprovalNo()).tenantId(bpa.getTenantId()).build();
+
+		// Add 3 years to Permit Approval Date to Get Permit Expiry Date
+		Long threeYears = 94670856000L;
+        Long permitExpiryDate = approvalDate + threeYears;
+		
+        bpaResponse.setPermitExpiryDate(permitExpiryDate);
+        
+		return bpaResponse;
+	}
+
 
 }
