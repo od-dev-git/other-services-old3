@@ -3,6 +3,9 @@ package org.egov.integration.validator;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.Valid;
+
+import org.egov.integration.model.BPAVerificationSearchCriteria;
 import org.egov.integration.model.ConsumerVerificationSearchCriteria;
 import org.egov.tracer.model.CustomException;
 import org.springframework.stereotype.Component;
@@ -33,6 +36,17 @@ public class ConsumerVerificationValidator {
 		}		
 		createCustomException(errorMap);
 	}
-	
-	
+
+	public void validateBPASearch(@Valid BPAVerificationSearchCriteria searchCriteria) {
+		
+		Map<String, String> errorMap = new HashMap<>();
+
+		if (!StringUtils.hasText(searchCriteria.getTenantId())) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "Ulb can not be empty/blank");
+		}
+		if (!StringUtils.hasText(searchCriteria.getPermitNumber())) {
+			errorMap.put("INVALID_SEARCH_CRITERIA", "Consumer Number can not be empty/blank");
+		}	
+		createCustomException(errorMap);
+	}
 }
