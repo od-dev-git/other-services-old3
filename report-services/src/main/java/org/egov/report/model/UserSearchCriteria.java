@@ -36,4 +36,10 @@ public class UserSearchCriteria {
 	@JsonProperty("userType")
     private String userType;
 	
+	@JsonProperty("financialYear")
+    private String financialYear;
+	
+	@JsonProperty("tenantIds")
+	private List<String> tenantIds; 
+	
 }

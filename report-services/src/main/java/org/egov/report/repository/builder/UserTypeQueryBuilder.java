@@ -3,14 +3,19 @@ package org.egov.report.repository.builder;
 import static java.util.Objects.isNull;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.validation.Valid;
 
 import org.egov.report.repository.RoleRepository;
 import org.egov.report.user.UserSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,6 +56,8 @@ public class UserTypeQueryBuilder {
             "'false' WHERE user_uuid = :user_uuid";
 
     private static final String SELECT_USER_ROLE_QUERY = "SELECT distinct(user_id) from eg_userrole_v1 ur";
+
+    private static final String USERDETAILS_REPORT_QUERY = "select distinct on  (name, mobilenumber) uuid as name, mobilenumber from eg_user eu where 1=1 ";
 
     @SuppressWarnings("rawtypes")
     public String getQuery(final UserSearchCriteria userSearchCriteria, final List preparedStatementValues) {
@@ -257,5 +264,49 @@ public class UserTypeQueryBuilder {
     public String getUserPresentByUserNameAndTenant() {
         return "select count(*) from eg_user where username =:userName and tenantId =:tenantId and type = :userType ";
     }
+
+	public String getCreateUserDetailsReportQuery(org.egov.report.model.@Valid UserSearchCriteria userSearchCriteria,
+			String tenantId) {
+		StringBuilder query =  new StringBuilder(USERDETAILS_REPORT_QUERY);
+	    
+		if (!StringUtils.isEmpty(tenantId)) {
+			query.append(" and eu.tenantid = '" + tenantId + "'");
+		}
+		
+	    // Check for financial year and append to query if present
+		if (!StringUtils.isEmpty(userSearchCriteria.getFinancialYear())) {
+		    String financialYear = userSearchCriteria.getFinancialYear();
+		    String[] years = financialYear.split("-");
+		    int startYear = Integer.parseInt(years[0]);
+		    int endYear = Integer.parseInt(years[1]) + 2000; // Convert two-digit year to four-digit
+
+		    // Define start and end dates for the financial year
+		    LocalDate startDate = LocalDate.of(startYear, 4, 1); // April 1st
+		    LocalDate endDate = LocalDate.of(endYear, 3, 31); // March 31st
+
+		    // Convert the dates to the 'yyyy-MM-dd' format
+		    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		    String startDateStr = startDate.format(formatter); // 'yyyy-MM-dd'
+		    String endDateStr = endDate.format(formatter); // 'yyyy-MM-dd'
+
+		    // Append to query for the date range comparison with 'TIMESTAMP'
+		    query.append(" AND eu.createddate >= '").append(startDateStr).append(" 00:00:00'")
+		         .append(" AND eu.createddate <= '").append(endDateStr).append(" 23:59:59'");
+		}
+		
+		if (!StringUtils.isEmpty(userSearchCriteria.getUserType())) {
+			query.append(" and eu.type = '" + userSearchCriteria.getUserType() + "'");
+		}
+		
+		if (!StringUtils.isEmpty(userSearchCriteria.getActive())) { // this is boolean true or false/ modify it
+			query.append(" and eu.active is " + userSearchCriteria.getActive() );
+		}
+		
+		query.append(" 	and eu.mobilenumber is not null ; ");
+
+	    log.info("Query for User Details Report : " + query);
+	    
+	    return query.toString();
+	}
 
 }

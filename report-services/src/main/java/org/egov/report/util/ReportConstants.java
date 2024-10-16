@@ -16,5 +16,8 @@ public class ReportConstants {
 	public static final String DCB_REPORT_STRING = "PT_DCB_REPORT";
 	
 	public static final String PTASSESSMENT_REPORT_STRING = "PTASSESSMENT_REPORT";
+	
+	public static final String USERDETAILS_REPORT_STRING = "USERDETAILS_REPORT";
+
 
 }
