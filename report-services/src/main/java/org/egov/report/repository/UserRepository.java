@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.egov.report.model.enums.UserType;
 import org.egov.report.repository.builder.UserTypeQueryBuilder;
 import org.egov.report.repository.rowmapper.UserResultSetExtractor;
@@ -163,4 +165,17 @@ public class UserRepository {
 
         return count > 0;
     }
+	
+	public List<Map<String, Object>> createUserDetailsReport(
+			org.egov.report.model.@Valid UserSearchCriteria userSearchCriteria, String tenantId) {
+		log.info("Search Criteria : " + userSearchCriteria.toString());
+
+        String query = userTypeQueryBuilder.getCreateUserDetailsReportQuery(userSearchCriteria, tenantId);
+
+	    List<Map<String, Object>> UserDetailsList =  jdbcTemplate.queryForList(query.toString());
+
+	    if(UserDetailsList.isEmpty())
+			return Collections.emptyList();
+		return UserDetailsList;
+	}
 }
