@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
-
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -253,7 +255,7 @@ public class UserService {
 			log.info("Total Users Fetched : " + userDetailsList.size());
 
 	        Set<String> userIds = userDetailsList.stream()
-	                .map(map -> (String) map.get("name"))
+	                .map(map -> (String) map.get("uuid"))
 	                .filter(Objects::nonNull)
 	                .collect(Collectors.toSet());
 
@@ -303,7 +305,7 @@ public class UserService {
 	        AtomicInteger userCount = new AtomicInteger(0); // Using AtomicInteger for thread-safety if needed
 
 	        userDetailsList.forEach(userDetail -> {
-	            Object userId = userDetail.get("name"); // Assuming the map has a key 'userId' to match with userMap
+	            Object userId = userDetail.get("uuid"); // Assuming the map has a key 'userId' to match with userMap
 	            if (userId != null && userMap.containsKey(userId.toString())) {
 	                User user = userMap.get(userId.toString());
 
@@ -311,7 +313,7 @@ public class UserService {
 	                int currentCount = userCount.incrementAndGet();
 	                log.info("Processing user {}: ID: {}, Name: {}, Mobile: {}", currentCount, userId, user.getName(), user.getMobileNumber());
 
-	                userDetail.put("name", user.getName()); // Assuming User has a getName() method
+	                userDetail.put("uuid", user.getName()); // Assuming User has a getName() method
 	                userDetail.put("mobilenumber", user.getMobileNumber());
 	            } else {
 	                // Log when a user ID does not match any entry in userMap
@@ -406,6 +408,31 @@ public class UserService {
 	        userSearchCriteria.setFinancialYear("2019-" + String.valueOf(fiscalYearEnd).substring(2));
 	        log.info("Setting FY to 2019-" + String.valueOf(fiscalYearEnd).substring(2));
 	    }
+	    if (userSearchCriteria.getCreateddate() != null && userSearchCriteria.getLastmodifieddate() != null) {
+	        // Ensure the dates are non-negative and within a valid range
+	        if (userSearchCriteria.getCreateddate() > 0 && userSearchCriteria.getLastmodifieddate() > 0) {
+	        	
+	        	
+	        	Long createdDate = userSearchCriteria.getCreateddate();
+	            Long lastModifiedDate = userSearchCriteria.getLastmodifieddate();
+
+	            // Create the financial year range string with timestamps
+	            String financialYearRange = createdDate + "_" + lastModifiedDate;
+	            // Set the financial year range in userSearchCriteria
+	            userSearchCriteria.setFinancialYear(financialYearRange);
+
+	            // Log the financial year range
+	            log.info("Financial Year set to: " + financialYearRange);
+	        	
+	            log.info("Both createddate and lastmodifieddate are provided: " 
+	                     + "Created Date: " + userSearchCriteria.getCreateddate() 
+	                     + ", Last Modified Date: " + userSearchCriteria.getLastmodifieddate()
+	                     + ", FinancialYear: " + userSearchCriteria.getFinancialYear());
+	        } else {
+	            throw new IllegalArgumentException("Createddate and Lastmodifieddate must be positive.");
+	        }
+	    }
+
 	}
 
 

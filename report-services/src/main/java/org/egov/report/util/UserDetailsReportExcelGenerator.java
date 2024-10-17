@@ -79,7 +79,7 @@ public class UserDetailsReportExcelGenerator {
         for (Map<String, Object> record: userDetailsList) {
             Row row = sheet.createRow(rowCount++);
             int columnCount = 0;
-            createCell(row, columnCount++, record.get("name"), style);
+            createCell(row, columnCount++, record.get("uuid"), style);
             createCell(row, columnCount++, record.get("mobilenumber"), style);
         }
     }

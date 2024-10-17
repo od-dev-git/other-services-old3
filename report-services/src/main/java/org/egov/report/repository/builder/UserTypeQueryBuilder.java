@@ -3,7 +3,10 @@ package org.egov.report.repository.builder;
 import static java.util.Objects.isNull;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +60,7 @@ public class UserTypeQueryBuilder {
 
     private static final String SELECT_USER_ROLE_QUERY = "SELECT distinct(user_id) from eg_userrole_v1 ur";
 
-    private static final String USERDETAILS_REPORT_QUERY = "select distinct on (name, mobilenumber) uuid as name, mobilenumber from eg_user eu where 1=1 ";
+    private static final String USERDETAILS_REPORT_QUERY = "select distinct on (name, mobilenumber) uuid , mobilenumber from eg_user eu where 1=1 ";
     
     @SuppressWarnings("rawtypes")
     public String getQuery(final UserSearchCriteria userSearchCriteria, final List preparedStatementValues) {
@@ -274,7 +277,28 @@ public class UserTypeQueryBuilder {
 		}
 
 	    // Check for financial year and append to query if present
-		if (!StringUtils.isEmpty(userSearchCriteria.getFinancialYear())) {
+		
+	    // Check if both createddate and lastmodifieddate are provided
+	    if (userSearchCriteria.getCreateddate() != null && userSearchCriteria.getLastmodifieddate() != null) {
+	        // Use createddate and lastmodifieddate logic
+	        Long createdDate = userSearchCriteria.getCreateddate();
+	        Long lastModifiedDate = userSearchCriteria.getLastmodifieddate();
+
+	        // Convert the epoch millisecond values to formatted dates
+	        LocalDateTime  createdDateLocal = Instant.ofEpochMilli(createdDate).atZone(ZoneId.systemDefault()).toLocalDateTime();
+	        LocalDateTime  lastModifiedDateLocal = Instant.ofEpochMilli(lastModifiedDate).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+	        String createdDateStr = createdDateLocal.format(formatter);
+	        String lastModifiedDateStr = lastModifiedDateLocal.format(formatter);
+
+	        // Append to query for date range comparison
+	        query.append(" AND eu.createddate >= '").append(createdDateStr).append("'")
+	             .append(" AND eu.createddate <= '").append(lastModifiedDateStr).append("'");
+
+	        log.info("Using createddate and lastmodifieddate for query: " + query.toString());
+
+	    } else 	if (!StringUtils.isEmpty(userSearchCriteria.getFinancialYear())) {
 		    String financialYear = userSearchCriteria.getFinancialYear();
 		    String[] years = financialYear.split("-");
 		    int startYear = Integer.parseInt(years[0]);
@@ -293,6 +317,26 @@ public class UserTypeQueryBuilder {
 		    query.append(" AND eu.createddate >= '").append(startDateStr).append(" 00:00:00'")
 		         .append(" AND eu.createddate <= '").append(endDateStr).append(" 23:59:59'");
 		}
+		
+//		if (!StringUtils.isEmpty(userSearchCriteria.getFinancialYear())) {
+//		    String financialYear = userSearchCriteria.getFinancialYear();
+//		    String[] years = financialYear.split("-");
+//		    int startYear = Integer.parseInt(years[0]);
+//		    int endYear = Integer.parseInt(years[1]) + 2000; // Convert two-digit year to four-digit
+//
+//		    // Define start and end dates for the financial year
+//		    LocalDate startDate = LocalDate.of(startYear, 4, 1); // April 1st
+//		    LocalDate endDate = LocalDate.of(endYear, 3, 31); // March 31st
+//
+//		    // Convert the dates to the 'yyyy-MM-dd' format
+//		    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//		    String startDateStr = startDate.format(formatter); // 'yyyy-MM-dd'
+//		    String endDateStr = endDate.format(formatter); // 'yyyy-MM-dd'
+//
+//		    // Append to query for the date range comparison with 'TIMESTAMP'
+//		    query.append(" AND eu.createddate >= '").append(startDateStr).append(" 00:00:00'")
+//		         .append(" AND eu.createddate <= '").append(endDateStr).append(" 23:59:59'");
+//		}
 
 		if (!StringUtils.isEmpty(userSearchCriteria.getUserType())) {
 			query.append(" and eu.type = '" + userSearchCriteria.getUserType() + "'");
