@@ -42,4 +42,10 @@ public class UserSearchCriteria {
 	@JsonProperty("tenantIds")
 	private List<String> tenantIds; 
 	
+	@JsonProperty("createddate")
+    private Long createddate;
+
+	@JsonProperty("lastmodifieddate")
+    private Long lastmodifieddate;
+	
 }
