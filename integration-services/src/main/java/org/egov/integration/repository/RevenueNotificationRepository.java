@@ -5,11 +5,14 @@ import java.util.List;
 
 import org.egov.integration.IntegrationServicesApplication;
 import org.egov.integration.config.IntegrationConfiguration;
+import org.egov.integration.model.BPAVerification;
+import org.egov.integration.model.BPAVerificationSearchCriteria;
 import org.egov.integration.model.revenue.RevenueNotification;
 import org.egov.integration.model.revenue.RevenueNotificationRequest;
 import org.egov.integration.model.revenue.RevenueNotificationSearchCriteria;
 import org.egov.integration.producer.RevenueNotificationProducer;
 import org.egov.integration.repository.builder.RevenueNotificationQueryBuilder;
+import org.egov.integration.repository.rowmapper.BPAVerificationRowMapper;
 import org.egov.integration.repository.rowmapper.RevenueNotificationsRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,6 +56,16 @@ public class RevenueNotificationRepository {
 		String query = queryBuilder.getNotificationsSearchQuery(searchCriteria, preparedStmtList);
 
 		return jdbcTemplate.query(query, preparedStmtList.toArray(), new RevenueNotificationsRowMapper(mapper));
+	}
+	
+	public List<BPAVerification> getBPADataFromDatabase(BPAVerificationSearchCriteria criteria) {
+		
+		List<Object> preparedStmtList = new ArrayList<>();
+
+		String query = queryBuilder.getBPADataSearchQuery(criteria, preparedStmtList);
+		
+		return jdbcTemplate.query(query, preparedStmtList.toArray(), new BPAVerificationRowMapper());
+		
 	}
 
 }
