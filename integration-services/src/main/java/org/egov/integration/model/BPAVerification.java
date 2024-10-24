@@ -23,8 +23,5 @@ public class BPAVerification {
 	
 	@JsonProperty("permitNumber")
 	private String permitNumber;
-	
-	@JsonProperty("tenantId")
-	private String tenantId;
 
 }
