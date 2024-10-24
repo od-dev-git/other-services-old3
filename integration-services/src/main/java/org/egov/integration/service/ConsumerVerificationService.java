@@ -22,6 +22,7 @@ import org.egov.integration.model.Property;
 import org.egov.integration.model.TradeLicense;
 import org.egov.integration.model.VerificationOwner;
 import org.egov.integration.model.WSConnection;
+import org.egov.integration.repository.RevenueNotificationRepository;
 import org.egov.integration.repository.ServiceRepository;
 import org.egov.integration.validator.ConsumerVerificationValidator;
 import org.egov.integration.web.model.BPAResponse;
@@ -65,6 +66,9 @@ public class ConsumerVerificationService implements InitializingBean {
 
 	@Autowired
 	private ConsumerVerificationValidator consumerVerificationValidator;
+	
+	@Autowired
+	private RevenueNotificationRepository revenueRepository;
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -476,45 +480,28 @@ public class ConsumerVerificationService implements InitializingBean {
 
 	public BPAVerification searchBPA(@Valid BPAVerificationSearchCriteria searchCriteria) {
 		
-		StringBuilder uri = new StringBuilder(configuration.getBpaHost()).append(configuration.getBpaSearchEndpoint())
-				.append("?").append("offset=0").append("&").append("limit=-1").append("&")
-				.append("tenantId=" + searchCriteria.getTenantId()).append("&")
-				.append("approvalNo=" + searchCriteria.getPermitNumber());
-		requestInfo.setTs(null);
-		//requestInfo.setAuthToken("040d1223-85ee-400a-9e7c-a59f81593e0d");
-		List<BPA> bpaRegistrations = new ArrayList<>();
-		RequestInfoWrapper requestWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
-		try {
-			Object fetchResponse = repository.fetchResult(uri, requestWrapper);
-			log.info("BPA response: ", fetchResponse);
-
-			BPAResponse res = mapper.convertValue(fetchResponse, BPAResponse.class);
-			log.info("BPA response: " + String.valueOf(res));
-			bpaRegistrations.addAll(res.getBPA());
-		} catch (Exception ex) {
-			log.error("External Service Call Erorr", ex);
-			throw new CustomException("BPA FETCH ERROR", "Unable to fetch BPA Information");
-		}
-		
-		// Map BPA reponse to BPA Verification Object
-		if (CollectionUtils.isEmpty(bpaRegistrations)) {
-			throw new CustomException("Not_Found", "No Sujog Application Found with mentioned Permit Number !");
+		if (StringUtils.isEmpty(searchCriteria.getPermitNumber())) {
+			throw new CustomException("Search_Error",
+					"Permit Number is not provided, Kindly provide Permit Number to proceed. ");
 		}
 
-		BPA bpa = bpaRegistrations.get(0);
+		List<BPAVerification> bpaResponse = revenueRepository.getBPADataFromDatabase(searchCriteria);
 
-		Long approvalDate = bpa.getApprovalDate();
+		if(CollectionUtils.isEmpty(bpaResponse)) {
+			return BPAVerification.builder().build();
+		}
 		
-		BPAVerification bpaResponse = BPAVerification.builder().permitApprovalDate(approvalDate)
-				.permitNumber(bpa.getApprovalNo()).tenantId(bpa.getTenantId()).build();
-
+		BPAVerification bpa = bpaResponse.get(0);
+		
+		Long approvalDate = bpa.getPermitApprovalDate();		
+				
 		// Add 3 years to Permit Approval Date to Get Permit Expiry Date
 		Long threeYears = 94670856000L;
         Long permitExpiryDate = approvalDate + threeYears;
 		
-        bpaResponse.setPermitExpiryDate(permitExpiryDate);
+        bpa.setPermitExpiryDate(permitExpiryDate);
         
-		return bpaResponse;
+		return bpa;
 	}
 
 

@@ -3,6 +3,7 @@ package org.egov.integration.repository.builder;
 import java.util.List;
 
 import org.egov.integration.config.IntegrationConfiguration;
+import org.egov.integration.model.BPAVerificationSearchCriteria;
 import org.egov.integration.model.revenue.RevenueNotificationSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,6 +51,7 @@ public class RevenueNotificationQueryBuilder {
 			+ FROM + revenueNotificationTable
 			+ INNER_JOIN + revenueNotificationOwnersTable + ON+ " rn.id = rno.revenuenotificationid ";
 
+	private static final String BPA_SEARCH_QUERY = "select approvalno, approvaldate from eg_bpa_buildingplan where approvalno = ?";
 
 	private String addPaginationWrapper(String query, List<Object> preparedStmtList,
 			RevenueNotificationSearchCriteria criteria) {
@@ -99,6 +101,17 @@ public class RevenueNotificationQueryBuilder {
 
 		return addPaginationWrapper(query.toString(), preparedStmtList, searchCriteria);
 
+	}
+
+	public String getBPADataSearchQuery(BPAVerificationSearchCriteria criteria, List<Object> preparedStmtList) {
+
+		StringBuilder query = new StringBuilder(BPA_SEARCH_QUERY);
+
+		if (!StringUtils.isEmpty(criteria.getPermitNumber())) {
+			preparedStmtList.add(criteria.getPermitNumber());
+		}
+
+		return query.toString();
 	}
 
 }
