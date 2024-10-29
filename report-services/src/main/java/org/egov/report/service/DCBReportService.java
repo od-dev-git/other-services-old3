@@ -166,6 +166,7 @@ public class DCBReportService {
 			BigDecimal advanceAmount = BigDecimal.ZERO;
 			BigDecimal arrear = BigDecimal.ZERO;
 			BigDecimal totalDemand = BigDecimal.ZERO;
+			BigDecimal dueAmt = BigDecimal.ZERO;
 			
 			BigDecimal currentDemandCollection = BigDecimal.ZERO;
 			BigDecimal arrearDemandCollection = BigDecimal.ZERO;
@@ -210,6 +211,7 @@ public class DCBReportService {
 			collectionsBeforeSujog = collectionsTillDate.subtract(paymentsTillToday).compareTo(BigDecimal.ZERO) > 0
 					? collectionsTillDate.subtract(paymentsTillToday)
 					: BigDecimal.ZERO;
+			log.info("Collections before Sujog :"+ collectionsBeforeSujog);
 			
 			/*arrear = arrearDemand.subtract(collectionsTillDate.subtract(paymentsTillToday).subtract(advanceAmount))
 					.compareTo(BigDecimal.ZERO) > 0
@@ -220,16 +222,28 @@ public class DCBReportService {
 			arrear = arrearDemand.subtract(collectionsBeforeSujog).compareTo(BigDecimal.ZERO) > 0
 					? arrearDemand.subtract(collectionsBeforeSujog)
 					: BigDecimal.ZERO;
+			log.info("arrear :"+ arrear);
+			
+			dueAmt = arrearDemand.subtract(collectionsBeforeSujog).subtract(paymentsTillToday).add(currentPayment).compareTo(BigDecimal.ZERO) > 0
+					? arrearDemand.subtract(collectionsBeforeSujog).subtract(paymentsTillToday).add(currentPayment)
+					: BigDecimal.ZERO;
+			log.info("dueAmt :"+ dueAmt);
 					
 			totalDemand = arrear.add(currentDemand);
 			
-			currentDemandCollection = currentPayment.subtract(arrear).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
+			/* currentDemandCollection = currentPayment.subtract(arrear).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
+					? currentPayment.subtract(arrear).subtract(advanceAmount)
+					: BigDecimal.ZERO; */
+			
+			currentDemandCollection = currentPayment.subtract(dueAmt).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
 					? currentPayment.subtract(arrear).subtract(advanceAmount)
 					: BigDecimal.ZERO;
+			log.info("currentDemandCollection :"+ currentDemandCollection);
 			
 			arrearDemandCollection = currentPayment.subtract(currentDemandCollection).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
 					? currentPayment.subtract(currentDemandCollection).subtract(advanceAmount)
 					: BigDecimal.ZERO;
+			log.info("arrearDemandCollection :"+ arrearDemandCollection);
 			
 			dcbObject.setCurrentDemand(currentDemand);
 			dcbObject.setCurrentPayment(currentPayment);
