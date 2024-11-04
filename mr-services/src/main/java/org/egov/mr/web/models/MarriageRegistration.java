@@ -155,7 +155,7 @@ public class MarriageRegistration {
 	  @JsonProperty("assignee")
       private List<String> assignee = null;
 	  
-	  @Size(max=128)
+	  @Size(max=512)
       private String comment;
 	  
 	  
