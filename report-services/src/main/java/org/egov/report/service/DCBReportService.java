@@ -236,7 +236,7 @@ public class DCBReportService {
 					: BigDecimal.ZERO; */
 			
 			currentDemandCollection = currentPayment.subtract(dueAmt).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
-					? currentPayment.subtract(arrear).subtract(advanceAmount)
+					? currentPayment.subtract(dueAmt).subtract(advanceAmount)
 					: BigDecimal.ZERO;
 			log.info("currentDemandCollection :"+ currentDemandCollection);
 			
@@ -248,7 +248,7 @@ public class DCBReportService {
 			dcbObject.setCurrentDemand(currentDemand);
 			dcbObject.setCurrentPayment(currentPayment);
 			dcbObject.setTotalDemand(totalDemand);
-			dcbObject.setArrearDemand(arrear);
+			dcbObject.setArrearDemand(dueAmt);
 			dcbObject.setArrearCollection(arrearDemandCollection);
 			dcbObject.setCurrentCollection(currentDemandCollection);
 		}
