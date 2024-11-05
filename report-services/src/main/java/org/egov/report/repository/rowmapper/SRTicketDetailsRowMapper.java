@@ -22,7 +22,9 @@ public class SRTicketDetailsRowMapper implements ResultSetExtractor<List<TicketD
 			reponse.setTenantId(rs.getString("tenantid"));
 			reponse.setServiceRequestId(rs.getString("servicerequestid"));
 			reponse.setCreatedDate(rs.getLong("createdtime"));
+			reponse.setRaisedby(rs.getString("createdby"));
 			reponse.setName(rs.getString("firstname"));
+			reponse.setMobilenumber(rs.getString("phone"));
 			reponse.setService(rs.getString("service"));
 			reponse.setType(rs.getString("servicetype"));
 			reponse.setDescription(rs.getString("description"));
