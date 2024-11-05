@@ -229,7 +229,7 @@ public class DCBReportService {
 					: BigDecimal.ZERO;
 			log.info("dueAmt :"+ dueAmt);
 					
-			totalDemand = arrear.add(currentDemand);
+			totalDemand = dueAmt.add(currentDemand);
 			
 			/* currentDemandCollection = currentPayment.subtract(arrear).subtract(advanceAmount).compareTo(BigDecimal.ZERO) > 0
 					? currentPayment.subtract(arrear).subtract(advanceAmount)
