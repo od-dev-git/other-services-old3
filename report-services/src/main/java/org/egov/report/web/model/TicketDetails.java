@@ -32,8 +32,14 @@ public class TicketDetails {
 	@JsonProperty("closedDate")
 	private Long closedDate;
 	
+	@JsonProperty("raisedby")
+	private String raisedby;
+	
 	@JsonProperty("name")
 	private String name;
+	
+	@JsonProperty("mobilenumber")
+	private String mobilenumber;
 	
 	@JsonProperty("module")
 	private String service;
