@@ -13,6 +13,7 @@ import static org.egov.mr.util.MRConstants.GROOM_DIVYANG_PROOF;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
@@ -38,6 +40,8 @@ import org.egov.mr.repository.MRRepository;
 import org.egov.mr.util.MRConstants;
 import org.egov.mr.util.MarriageRegistrationUtil;
 import org.egov.mr.web.models.AppointmentDetails;
+import org.egov.mr.web.models.Couple;
+import org.egov.mr.web.models.CoupleDetails;
 import org.egov.mr.web.models.DscDetails;
 import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.MarriageRegistration.ApplicationTypeEnum;
@@ -51,7 +55,10 @@ import org.springframework.util.CollectionUtils;
 
 import com.jayway.jsonpath.JsonPath;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class MRValidator {
 	
 	@Value("${egov.allowed.businessServices}")
@@ -89,6 +96,9 @@ public class MRValidator {
         if(marriageRegistrations.get(0).getApplicationType() != null && marriageRegistrations.get(0).getApplicationType().toString().equals(MRConstants.APPLICATION_TYPE_CORRECTION)){
             validateMRCorrection(marriageRegistrationRequest);
         }
+        if(marriageRegistrations.get(0).getApplicationType() != null && marriageRegistrations.get(0).getApplicationType().toString().equals(MRConstants.APPLICATION_TYPE_NEW)){
+            validateNewMR(marriageRegistrationRequest);
+        }
         
         if (businessService == null)
             businessService = businessService_MR;
@@ -103,7 +113,64 @@ public class MRValidator {
     }
 
 
-    public void validateMRCorrection(MarriageRegistrationRequest request){
+	/**
+     * Validates a new Marriage Registration request.
+     *
+     * @param marriageRegistrationRequest the marriage registration request to validate
+     */
+    public void validateNewMR(MarriageRegistrationRequest marriageRegistrationRequest) {
+        log.info("Starting validation for MarriageRegistrationRequest");
+
+        List<MarriageRegistration> marriageRegistrations = marriageRegistrationRequest.getMarriageRegistrations();
+        if (marriageRegistrations == null || marriageRegistrations.isEmpty()) {
+            log.error("No Marriage Registrations found in the request");
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Marriage Registrations list cannot be empty");
+        }
+
+        for (MarriageRegistration marriageRegistration : marriageRegistrations) {
+            validateApplicantName(marriageRegistration);
+        }
+
+        log.info("Validation for MarriageRegistrationRequest completed successfully");
+    }
+
+
+
+	/**
+     * Validates the applicant name in the additional details of a Marriage Registration.
+     *
+     * @param marriageRegistration the Marriage Registration object to validate
+     */
+    private void validateApplicantName(MarriageRegistration marriageRegistration) {
+        if (marriageRegistration == null) {
+            log.error("Marriage Registration is null");
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Marriage Registration cannot be null");
+        }
+
+        Object additionalDetailsObj = marriageRegistration.getAdditionalDetails();
+        if (!(additionalDetailsObj instanceof Map)) {
+            log.error("Invalid additional details format for MarriageRegistration ID: {}", marriageRegistration.getId());
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Invalid additional details format");
+        }
+
+        Map<String, Object> additionalDetails = (Map<String, Object>) additionalDetailsObj;
+        Object applicantNameObj = additionalDetails.get(MRConstants.MRA_APPLICANT_NAME);
+
+        if (applicantNameObj == null || !(applicantNameObj instanceof String)) {
+            log.error("Applicant name is missing in additional details: {}", additionalDetails);
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Applicant name cannot be left blank");
+        }
+
+        String applicantName = (String) applicantNameObj;
+        if (StringUtils.isEmpty(applicantName)) {
+            log.error("Applicant name is empty in additional details: {}", additionalDetails);
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Applicant name cannot be left blank");
+        }
+
+        log.info("Validated applicant name: {}", applicantName);
+    }
+
+	public void validateMRCorrection(MarriageRegistrationRequest request){
             
         MarriageRegistrationSearchCriteria criteria = new MarriageRegistrationSearchCriteria();
         List<String> mrNumbers = new LinkedList<>();
@@ -604,11 +671,68 @@ public class MRValidator {
 
         validateDuplicateAndDivyangDocuments(request);
         setFieldsFromSearch(request, searchResult);
+        validateApplicantName(request,searchResult);
         validateUserAuthorization(request );
     }
 
-    
-    private void validateUserAuthorization(MarriageRegistrationRequest request ){
+
+	private void validateApplicantName(MarriageRegistrationRequest request, List<MarriageRegistration> searchResult) {
+        log.info("Validating applicant name consistency for MarriageRegistrationRequest");
+
+        // Validate the input
+        if (request == null || request.getMarriageRegistrations() == null || request.getMarriageRegistrations().isEmpty()) {
+            log.error("MarriageRegistrationRequest is null or contains no registrations");
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Request cannot be null or empty");
+        }
+        if (searchResult == null || searchResult.isEmpty()) {
+            log.error("Search result is null or contains no registrations");
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "No existing marriage registrations found for validation");
+        }
+
+        List<MarriageRegistration> newRegistrations = request.getMarriageRegistrations();
+
+            MarriageRegistration newRegistration = newRegistrations.get(0);
+            MarriageRegistration existingRegistration = searchResult.get(0);
+
+            // Extract applicant name
+            String newApplicantName = extractApplicantName(newRegistration);
+            String existingApplicantName = extractApplicantName(existingRegistration);
+
+            // Check consistency
+            if (!Objects.equals(existingApplicantName, newApplicantName)) {
+                log.error("Applicant name inconsistency detected. Registration ID: {}. Earlier: '{}', Now: '{}'", 
+                          newRegistration.getId(), existingApplicantName, newApplicantName);
+                throw new CustomException("INVALID_MARRIAGE_REGISTRATION", 
+                        "Applicant name must remain the same. Earlier: " + existingApplicantName + ", Now: " + newApplicantName);
+            }
+
+            log.info("Applicant name consistency validated for Registration ID: {}. Value: {}", 
+                     newRegistration.getId(), newApplicantName);
+        
+
+        log.info("Applicant name validation completed successfully for all registrations");
+    }
+
+    private String extractApplicantName(MarriageRegistration registration) {
+        if (registration == null || registration.getAdditionalDetails() == null) {
+            return null;
+        }
+        Object additionalDetailsObj = registration.getAdditionalDetails();
+        if (!(additionalDetailsObj instanceof Map)) {
+            log.error("Invalid additional details format for Registration ID: {}", registration.getId());
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Invalid additional details format");
+        }
+
+        Map<String, Object> additionalDetails = (Map<String, Object>) additionalDetailsObj;
+        Object applicantNameObj = additionalDetails.get(MRConstants.MRA_APPLICANT_NAME);
+        if (applicantNameObj instanceof String) {
+            return (String) applicantNameObj;
+        }
+        return null;
+    }
+
+
+	private void validateUserAuthorization(MarriageRegistrationRequest request ){
     	Map<String,String> errorMap = new HashMap<>();
 
     	if(request.getRequestInfo().getUserInfo().getType().equalsIgnoreCase("CITIZEN" )){
