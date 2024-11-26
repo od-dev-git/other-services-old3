@@ -293,6 +293,11 @@ public class MRConstants {
 	    
 	    public MRConstants() {}
 	    
+	    // MR Additional Details
+
+	    public static final String MRA_APPLICANT_NAME = "nameOfApplicant";
+	    
+	    
 }
 
 
