@@ -5,12 +5,19 @@ import static org.egov.mr.util.MRConstants.ACTION_INITIATE;
 import static org.egov.mr.util.MRConstants.STATUS_INITIATED;
 import static org.egov.mr.util.MRConstants.businessService_MR;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.egov.mr.util.MRConstants;
+import org.egov.mr.web.models.Couple;
+import org.egov.mr.web.models.MarriageRegistration;
 import org.egov.mr.web.models.MarriageRegistrationRequest;
 import org.egov.mr.web.models.workflow.BusinessService;
 import org.egov.tracer.model.CustomException;
@@ -18,8 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
 
 @Component
+@Slf4j
 public class ActionValidator {
 
 
@@ -122,6 +132,10 @@ public class ActionValidator {
 				if(CollectionUtils.isEmpty(marriageRegistration.getCoupleDetails()))
 					errorMap.put("INVALID UPDATE","Couple Details are mandatory");
 				
+		        if(marriageRegistration.getApplicationType() != null && marriageRegistration.getApplicationType().toString().equals(MRConstants.APPLICATION_TYPE_NEW)){
+		            validateWitnessDOB(marriageRegistration);
+		        }
+				
 				
 			}
 		});
@@ -129,6 +143,68 @@ public class ActionValidator {
 		if(!errorMap.isEmpty())
 			throw new CustomException(errorMap);
 	}
+
+    private void validateWitnessDOB(MarriageRegistration marriageRegistration) {
+        if (marriageRegistration == null) {
+            log.error("Marriage Registration is null");
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Marriage Registration cannot be null");
+        }
+
+        List<Couple> coupleDetails = marriageRegistration.getCoupleDetails();
+        if (coupleDetails == null || coupleDetails.isEmpty()) {
+            log.error("Couple details are missing in Marriage Registration");
+            throw new CustomException("INVALID_COUPLE_DETAILS", "Couple details cannot be null or empty");
+        }
+
+        for (Couple couple : coupleDetails) {
+            if (couple.getBride() == null || couple.getBride().getWitness() == null) {
+                log.error("Bride's witness details are missing");
+                throw new CustomException("INVALID_WITNESS_DETAILS", "Bride's witness details cannot be null");
+            }
+
+            if (couple.getGroom() == null || couple.getGroom().getWitness() == null) {
+                log.error("Groom's witness details are missing");
+                throw new CustomException("INVALID_WITNESS_DETAILS", "Groom's witness details cannot be null");
+            }
+
+            Long bridesWitnessDOBMillis = couple.getBride().getWitness().getDateOfBirth();
+            Long groomWitnessDOBMillis = couple.getGroom().getWitness().getDateOfBirth();
+
+            if (bridesWitnessDOBMillis == null) {
+                log.error("Bride's witness Date of Birth is missing");
+                throw new CustomException("INVALID_DATE_OF_BIRTH", "Bride's witness Date of Birth cannot be null");
+            }
+
+            if (groomWitnessDOBMillis == null) {
+                log.error("Groom's witness Date of Birth is missing");
+                throw new CustomException("INVALID_DATE_OF_BIRTH", "Groom's witness Date of Birth cannot be null");
+            }
+
+            
+         // Convert milliseconds to LocalDate
+            LocalDate bridesWitnessDOB = Instant.ofEpochMilli(bridesWitnessDOBMillis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+            LocalDate groomWitnessDOB = Instant.ofEpochMilli(groomWitnessDOBMillis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+            LocalDate currentDate = LocalDate.now();
+
+            // Check if witnesses are at least 18 years old
+            if (Period.between(bridesWitnessDOB, currentDate).getYears() < 18) {
+                log.error("Bride's witness is underage");
+                throw new CustomException("INVALID_WITNESS_AGE", "Bride's witness must be at least 18 years old");
+            }
+
+            if (Period.between(groomWitnessDOB, currentDate).getYears() < 18) {
+                log.error("Groom's witness is underage");
+                throw new CustomException("INVALID_WITNESS_AGE", "Groom's witness must be at least 18 years old");
+            }            
+            
+        }
+
+        log.info("Witness Date of Birth validation completed successfully for marriage registration.");
+    }
 
 
 

@@ -1,5 +1,6 @@
 package org.egov.mr.web.models;
 
+import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -42,6 +43,9 @@ public class Witness {
     @Size(max=64)
     @JsonProperty("firstName")
     private String firstName;
+    
+    @JsonProperty("dateOfBirth")
+    private Long dateOfBirth;    
         
     @Size(max=64)
     @JsonProperty("country")
