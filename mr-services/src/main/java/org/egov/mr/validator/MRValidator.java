@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,6 +54,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
@@ -96,9 +99,7 @@ public class MRValidator {
         if(marriageRegistrations.get(0).getApplicationType() != null && marriageRegistrations.get(0).getApplicationType().toString().equals(MRConstants.APPLICATION_TYPE_CORRECTION)){
             validateMRCorrection(marriageRegistrationRequest);
         }
-        if(marriageRegistrations.get(0).getApplicationType() != null && marriageRegistrations.get(0).getApplicationType().toString().equals(MRConstants.APPLICATION_TYPE_NEW)){
             validateNewMR(marriageRegistrationRequest);
-        }
         
         if (businessService == null)
             businessService = businessService_MR;
@@ -118,21 +119,36 @@ public class MRValidator {
      *
      * @param marriageRegistrationRequest the marriage registration request to validate
      */
-    public void validateNewMR(MarriageRegistrationRequest marriageRegistrationRequest) {
-        log.info("Starting validation for MarriageRegistrationRequest");
+	public void validateNewMR(MarriageRegistrationRequest marriageRegistrationRequest) {
+		log.info("Starting validation for MarriageRegistrationRequest");
 
-        List<MarriageRegistration> marriageRegistrations = marriageRegistrationRequest.getMarriageRegistrations();
-        if (marriageRegistrations == null || marriageRegistrations.isEmpty()) {
-            log.error("No Marriage Registrations found in the request");
-            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Marriage Registrations list cannot be empty");
-        }
+		List<MarriageRegistration> marriageRegistrations = marriageRegistrationRequest.getMarriageRegistrations();
+		if (marriageRegistrations == null || marriageRegistrations.isEmpty()) {
+			log.error("No Marriage Registrations found in the request");
+			throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Marriage Registrations list cannot be empty");
+		}
 
-        for (MarriageRegistration marriageRegistration : marriageRegistrations) {
-            validateApplicantName(marriageRegistration);
-        }
+		for (MarriageRegistration marriageRegistration : marriageRegistrations) {
+			String action = marriageRegistration.getAction();
+			if ((marriageRegistrations.get(0).getApplicationType() != null && marriageRegistrations.get(0)
+					.getApplicationType().toString().equals(MRConstants.APPLICATION_TYPE_NEW))
+					&& (MRConstants.ACTION_APPLY.equals(action))) {
+				validateApplicantName(marriageRegistration);
+	            validateWitnessDOB(marriageRegistration);
 
-        log.info("Validation for MarriageRegistrationRequest completed successfully");
-    }
+			} else {//change here
+				if(!(MRConstants.ACTION_INITIATE.equals(action) || MRConstants.ACTION_APPLY.equals(action))) {
+					List<MarriageRegistration> searchResult = getMarriageRegistrationsWithOwnerInfo(
+							marriageRegistrationRequest);
+					validateApplicantName(marriageRegistrationRequest, searchResult);
+			        validateWitnessDOB(marriageRegistrationRequest,searchResult);
+				}
+
+			}
+		}
+
+		log.info("Validation for MarriageRegistrationRequest completed successfully");
+	}
 
 
 
@@ -671,10 +687,62 @@ public class MRValidator {
 
         validateDuplicateAndDivyangDocuments(request);
         setFieldsFromSearch(request, searchResult);
-        validateApplicantName(request,searchResult);
+            validateNewMR(request);
         validateUserAuthorization(request );
     }
 
+    
+    private void validateWitnessDOB(MarriageRegistrationRequest request, List<MarriageRegistration> searchResult) {
+    	
+    
+    	  log.info("Validating Witness DOB consistency for MarriageRegistrationRequest");
+
+          // Validate the input
+          if (request == null || request.getMarriageRegistrations() == null || request.getMarriageRegistrations().isEmpty()) {
+              log.error("MarriageRegistrationRequest is null or contains no registrations");
+              throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Request cannot be null or empty");
+          }
+          if (searchResult == null || searchResult.isEmpty()) {
+              log.error("Search result is null or contains no registrations");
+              throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "No existing marriage registrations found for validation");
+          }
+
+          List<MarriageRegistration> newRegistrations = request.getMarriageRegistrations();
+
+              MarriageRegistration newRegistration = newRegistrations.get(0);
+              MarriageRegistration existingRegistration = searchResult.get(0);
+              
+              String action = newRegistration.getAction();
+              
+              if(!(MRConstants.ACTION_INITIATE.equals(action) || MRConstants.ACTION_APPLY.equals(action))) {
+
+                  Long newBrideWitnessDOB = newRegistration.getCoupleDetails().get(0).getBride().getWitness().getDateOfBirth();
+                  Long newGroomWitnessDOB = newRegistration.getCoupleDetails().get(0).getGroom().getWitness().getDateOfBirth();
+
+                  
+                  Long existingBrideWitnessDOB = existingRegistration.getCoupleDetails().get(0).getBride().getWitness().getDateOfBirth();
+                  Long existingGroomWitnessDOB = existingRegistration.getCoupleDetails().get(0).getGroom().getWitness().getDateOfBirth();
+                  
+                  // Check consistency
+                  // Validate consistency for Bride's Witness DOB
+                  if (!Objects.equals(newBrideWitnessDOB, existingBrideWitnessDOB)) {
+                      log.error("Bride's witness DOB is inconsistent. Existing: {}, New: {}", existingBrideWitnessDOB, newBrideWitnessDOB);
+                      throw new CustomException("INCONSISTENT_WITNESS_DOB", "Bride's witness DOB is inconsistent with existing records");
+                  }
+
+                  // Validate consistency for Groom's Witness DOB
+                  if (!Objects.equals(newGroomWitnessDOB, existingGroomWitnessDOB)) {
+                      log.error("Groom's witness DOB is inconsistent. Existing: {}, New: {}", existingGroomWitnessDOB, newGroomWitnessDOB);
+                      throw new CustomException("INCONSISTENT_WITNESS_DOB", "Groom's witness DOB is inconsistent with existing records");
+                  }
+
+              log.info(" Witness DOB validation completed successfully for all registrations");            	  
+              }else {
+                  log.info("Skipping Witness DOB validation because action not in INITIATE or APPLY");            	  
+              }
+
+		
+	}
 
 	private void validateApplicantName(MarriageRegistrationRequest request, List<MarriageRegistration> searchResult) {
         log.info("Validating applicant name consistency for MarriageRegistrationRequest");
@@ -718,6 +786,20 @@ public class MRValidator {
             return null;
         }
         Object additionalDetailsObj = registration.getAdditionalDetails();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        if (additionalDetailsObj instanceof ObjectNode) {
+            try {
+                // Convert ObjectNode to Map
+                additionalDetailsObj = objectMapper.convertValue(additionalDetailsObj, Map.class);
+                log.info("Converted ObjectNode to Map: {}", additionalDetailsObj);
+            } catch (Exception e) {
+                log.error("Failed to convert ObjectNode to Map for Registration ID: {}", registration.getId(), e);
+                throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Invalid additional details format");
+            }
+        }
+
+
         if (!(additionalDetailsObj instanceof Map)) {
             log.error("Invalid additional details format for Registration ID: {}", registration.getId());
             throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Invalid additional details format");
@@ -1314,5 +1396,88 @@ public class MRValidator {
 		}
 
 	}
+	
+	public List<MarriageRegistration> getMarriageRegistrationsWithOwnerInfo(MarriageRegistrationRequest request){
+		MarriageRegistrationSearchCriteria criteria = new MarriageRegistrationSearchCriteria();
+		List<String> ids = new LinkedList<>();
+		request.getMarriageRegistrations().forEach(marriageRegistrations -> {ids.add(marriageRegistrations.getId());});
+
+		criteria.setTenantId(request.getMarriageRegistrations().get(0).getTenantId());
+		criteria.setIds(ids);
+		criteria.setBusinessService(request.getMarriageRegistrations().get(0).getBusinessService());
+
+		List<MarriageRegistration> marriageRegistrations = mrRepository.getMarriageRegistartions(criteria);
+
+		if(marriageRegistrations.isEmpty())
+			return Collections.emptyList();
+		return marriageRegistrations;
+	}
+	
+    private void validateWitnessDOB(MarriageRegistration marriageRegistration) {
+        if (marriageRegistration == null) {
+            log.error("Marriage Registration is null");
+            throw new CustomException("INVALID_MARRIAGE_REGISTRATION", "Marriage Registration cannot be null");
+        }
+
+        List<Couple> coupleDetails = marriageRegistration.getCoupleDetails();
+        if (coupleDetails == null || coupleDetails.isEmpty()) {
+            log.error("Couple details are missing in Marriage Registration");
+            throw new CustomException("INVALID_COUPLE_DETAILS", "Couple details cannot be null or empty");
+        }
+
+        for (Couple couple : coupleDetails) {
+            if (couple.getBride() == null || couple.getBride().getWitness() == null) {
+                log.error("Bride's witness details are missing");
+                throw new CustomException("INVALID_WITNESS_DETAILS", "Bride's witness details cannot be null");
+            }
+
+            if (couple.getGroom() == null || couple.getGroom().getWitness() == null) {
+                log.error("Groom's witness details are missing");
+                throw new CustomException("INVALID_WITNESS_DETAILS", "Groom's witness details cannot be null");
+            }
+
+            Long bridesWitnessDOBMillis = couple.getBride().getWitness().getDateOfBirth();
+            Long groomWitnessDOBMillis = couple.getGroom().getWitness().getDateOfBirth();
+
+            if (bridesWitnessDOBMillis == null) {
+                log.error("Bride's witness Date of Birth is missing");
+                throw new CustomException("INVALID_DATE_OF_BIRTH", "Bride's witness Date of Birth cannot be null");
+            }
+
+            if (groomWitnessDOBMillis == null) {
+                log.error("Groom's witness Date of Birth is missing");
+                throw new CustomException("INVALID_DATE_OF_BIRTH", "Groom's witness Date of Birth cannot be null");
+            }
+
+            
+         // Convert milliseconds to LocalDate
+            LocalDate bridesWitnessDOB = Instant.ofEpochMilli(bridesWitnessDOBMillis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+            LocalDate groomWitnessDOB = Instant.ofEpochMilli(groomWitnessDOBMillis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+            LocalDate currentDate = LocalDate.now();
+
+            // Check if witnesses are at least 18 years old
+            if (Period.between(bridesWitnessDOB, currentDate).getYears() < 18) {
+                log.error("Bride's witness is underage");
+                throw new CustomException("INVALID_WITNESS_AGE", "Bride's witness must be at least 18 years old");
+            }
+
+            if (Period.between(groomWitnessDOB, currentDate).getYears() < 18) {
+                log.error("Groom's witness is underage");
+                throw new CustomException("INVALID_WITNESS_AGE", "Groom's witness must be at least 18 years old");
+            }            
+            
+        }
+
+        log.info("Witness Date of Birth validation completed successfully for marriage registration.");
+    }
+
+
+
+
+
 	
 }
