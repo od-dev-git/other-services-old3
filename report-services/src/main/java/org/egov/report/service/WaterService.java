@@ -439,9 +439,10 @@ public List<BillSummaryResponses> billSummary(RequestInfo requestInfo, WSReportS
 
 
                 // get User details here
-                Set<String> userIds = demandsGroupedByConnectionNo.entrySet().parallelStream()
-                        .map(entry -> entry.getValue().get(0).getPayer().getUuid())
-                        .distinct().collect(Collectors.toSet());
+				Set<String> userIds = demandsGroupedByConnectionNo.entrySet().parallelStream()
+						.map(entry -> entry.getValue().get(entry.getValue().size()- 1)
+						.getPayer().getUuid()).distinct()
+						.collect(Collectors.toSet());
                 UserSearchCriteria usCriteria = UserSearchCriteria.builder().uuid(userIds)
                         .active(true)
                         .userType(UserSearchCriteria.CITIZEN)
