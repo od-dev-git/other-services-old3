@@ -140,7 +140,7 @@ public class MRValidator {
 				if(!(MRConstants.ACTION_INITIATE.equals(action) || MRConstants.ACTION_APPLY.equals(action))) {
 					List<MarriageRegistration> searchResult = getMarriageRegistrationsWithOwnerInfo(
 							marriageRegistrationRequest);
-					validateApplicantName(marriageRegistrationRequest, searchResult);
+//					validateApplicantName(marriageRegistrationRequest, searchResult);
 			        validateWitnessDOB(marriageRegistrationRequest,searchResult);
 				}
 
