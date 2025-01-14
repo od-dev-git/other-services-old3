@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.egov.report.model.DCBSearchCriteria;
+import org.egov.report.model.UserSearchCriteria;
 import org.egov.report.model.UtilityReportSearchCriteria;
 import org.egov.report.service.DCBReportService;
 import org.egov.report.service.PropertyService;
@@ -131,6 +132,25 @@ public class PropertyReportController {
 	public ResponseEntity<UtilityReportResponse> getPTAssessmentReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
 			@Valid @ModelAttribute UtilityReportSearchCriteria searchCriteria) throws IOException {
 		Map<String, Object> responseMap = propertyService.getPTAssessmentsReporteport(requestInfoWrapper.getRequestInfo(), searchCriteria);
+		
+		UtilityReportResponse response = UtilityReportResponse.builder()
+				.response(responseMap)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@PostMapping("/_generatePTDDNNoReport")
+	public void generateUserDetailsReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+			@Valid @ModelAttribute PTAssessmentSearchCriteria userSearchCriteria) {
+		
+		propertyService.generatePTDDNNoReport(requestInfoWrapper, userSearchCriteria);
+	}
+	
+	@PostMapping(value = "/_getPTDDNNoReport")
+	public ResponseEntity<UtilityReportResponse> getPTDDNNoReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+			@Valid @ModelAttribute UtilityReportSearchCriteria searchCriteria) throws IOException {
+		Map<String, Object> responseMap = propertyService.getPTDDNNoReport(requestInfoWrapper.getRequestInfo(), searchCriteria);
 		
 		UtilityReportResponse response = UtilityReportResponse.builder()
 				.response(responseMap)

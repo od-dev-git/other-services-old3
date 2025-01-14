@@ -138,5 +138,18 @@ public class PropertyDetailsReportRepository {
 		return paymentsDetailsList;
 	}
 
+	public List<Map<String, Object>> createptDDNReport(@Valid PTAssessmentSearchCriteria searchCriteria,
+			String tenantId) {
+		log.info("Search Criteria : " + searchCriteria.toString());
+		
+        String query = queryBuilder.createptDDNReport(searchCriteria, tenantId);
+	    
+	    List<Map<String, Object>> ptDDNList =  jdbcTemplate.queryForList(query.toString());
+	    
+	    if(ptDDNList.isEmpty())
+			return Collections.emptyList();
+		return ptDDNList;
+	}
+
 
 }
