@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,6 +30,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.report.service.DemandService;
 import org.egov.report.util.DCBReportExcelGenerator;
 import org.egov.report.util.PTAssessmentsReportExcelGenerator;
+import org.egov.report.util.PTDDNDetailsReportExcelGenerator;
 import org.egov.report.util.PaymentUtil;
 import org.egov.report.util.PaymetsReportExcelGenerator;
 import org.egov.report.util.ReportConstants;
@@ -45,6 +47,7 @@ import org.egov.report.model.Property;
 import org.egov.report.model.PropertyConnectionRequest;
 import org.egov.report.model.PropertySearchingCriteria;
 import org.egov.report.model.UserSearchCriteria;
+import org.egov.report.model.UserSearchRequest;
 import org.egov.report.model.UtilityReportDetails;
 import org.egov.report.model.UtilityReportSearchCriteria;
 import org.egov.report.model.enums.UserType;
@@ -66,6 +69,7 @@ import org.egov.report.web.model.RequestInfoWrapper;
 import org.egov.report.web.model.TaxCollectorWiseCollectionResponse;
 import org.egov.report.web.model.ULBWiseTaxCollectionResponse;
 import org.egov.report.web.model.User;
+import org.egov.report.web.model.UserDetailResponse;
 import org.egov.report.web.model.UtilityReportRequest;
 import org.egov.report.web.model.WaterConnectionDetails;
 import org.egov.report.web.model.WaterMonthlyDemandResponse;
@@ -1030,7 +1034,297 @@ public class PropertyService {
 			return response;
 		}
 
-		
+		public void generatePTDDNNoReport(@Valid RequestInfoWrapper requestInfoWrapper,
+				@Valid PTAssessmentSearchCriteria searchCriteria) {
+
+			RequestInfo requestInfo = requestInfoWrapper.getRequestInfo();
+
+			String reportType = ReportConstants.PTDDN_REPORT_STRING;
+
+			List<String> tenantIds = searchCriteria.getTenantIds(); 
+
+			validatePTDDNReport(searchCriteria);
+
+			for (String tenantId : tenantIds) {
+
+//			    String tenantId = "od";
+
+
+				List<UtilityReportDetails> reportList = dcbRepository.isReportExist(reportType, tenantId);
+
+				validateIfReportGenerationInProcess(reportList, tenantId);
+
+				if(!reportList.isEmpty()) {
+					UtilityReportDetails dcbReport = reportList.get(0);
+
+					Long requestGap = configuration.getRequestGap();
+
+					Long createdTime = dcbReport.getAuditDetails().getCreatedTime();
+
+					Long currentTime = System.currentTimeMillis();
+
+					if(currentTime < createdTime + requestGap) {
+						log.info("Skipping... Report already present for tenantid: "+ tenantId);
+						continue;
+//			            return; // Use return to exit the method instead of continue
+
+					}
+
+				}
+				reportList = new ArrayList<>();
+				if (CollectionUtils.isEmpty(reportList)) {
+					UtilityReportDetails reportDetails = enrichmentService.enrichSaveReport(requestInfo, reportType,
+							null, tenantId);
+					dcbRepository.saveReportDetails(new UtilityReportRequest(requestInfo, reportDetails));
+					reportList.add(reportDetails);
+				}
+
+				try {	
+
+				List<Map<String, Object>> ptDDNList = pdRepository.createptDDNReport(searchCriteria,tenantId);
+				log.info("Total Data Fetched : " + ptDDNList.size());
+
+		        Set<String> userIds = ptDDNList.stream()
+		                .map(map -> (String) map.get("name"))
+		                .filter(Objects::nonNull)
+		                .collect(Collectors.toSet());
+
+
+				// Path and filename for the excel file
+				String fileName = generateFileName("PTDDNDetails_Report", tenantId, null);
+				File temporaryfile = getTemporaryFile("PTDDNDetails_Report", fileName);
+
+//				PTDDNDetailsReportExcelGenerator generator = new PTDDNDetailsReportExcelGenerator(ptDDNList);
+
+		    	int limit = configuration.getReportLimit();
+		    	int count = ptDDNList.size();
+		        Map<String, User> userMap = new HashMap<>();
+
+
+		     // Set the limit for chunk size to 10,000 from configuration
+		        int userSearchLimit = configuration.getUserServiceSearchLimit();
+
+		        while (!userIds.isEmpty()) {
+		            Set<String> chunk = userIds.stream()
+		                    .limit(userSearchLimit)
+		                    .collect(Collectors.toSet());
+
+		            UserSearchCriteria usCriteria = UserSearchCriteria.builder()
+		                    .uuid(chunk)
+		                    .userType("CITIZEN")
+		                    .active(true)
+		                    .build();
+
+		            try {
+		                List<OwnerInfo> usersInfo = getUserDetails(requestInfo, usCriteria);
+
+						userMap.putAll(usersInfo.stream().collect(Collectors.toMap(User::getUuid, Function.identity())));
+
+		                userIds.removeAll(chunk);
+		            } catch (Exception e) {
+		                System.err.println("Error fetching user details: " + e.getMessage());
+		                e.printStackTrace();
+		            }
+		        }
+
+		        System.out.println("Fetched user details for: " + userMap.size() + " users.");
+
+
+
+		        AtomicInteger userCount = new AtomicInteger(0); // Using AtomicInteger for thread-safety if needed
+
+		        ptDDNList.forEach(ptDDN -> {
+		            Object userId = ptDDN.get("Name"); // Assuming the map has a key 'userId' to match with userMap
+		            if (userId != null && userMap.containsKey(userId.toString())) {
+		                User user = userMap.get(userId.toString());
+
+		                // Log the current user being processed along with the count
+		                int currentCount = userCount.incrementAndGet();
+		                log.info("Processing user {}: ID: {}, Name: {}, Mobile: {}", currentCount, userId, user.getName(), user.getMobileNumber());
+
+		                ptDDN.put("Name", user.getName()); // Assuming User has a getName() method
+		            } else {
+		                // Log when a user ID does not match any entry in userMap
+		                log.warn("No matching user found for user ID: {}", userId);
+		            }
+		        });
+
+		        ptDDNList = generateGroupedPTDDNList(ptDDNList);
+
+				PTDDNDetailsReportExcelGenerator generator = new PTDDNDetailsReportExcelGenerator(ptDDNList);
+
+
+				try {
+					generator.generateExcelFile(temporaryfile);
+				} catch (IOException e) {
+					log.info("Error Occured while writing into excel file...");
+					e.printStackTrace();
+				}
+
+				// push temporary file into file store
+				log.info("uploading file to filestore...");
+				Object filestoreDetails = fileStoreService.upload(temporaryfile, fileName, MediaType.MULTIPART_FORM_DATA_VALUE,
+						"PT", tenantId);
+				log.info("Uploaded the file to filestore with details: " + filestoreDetails.toString());
+
+				// enrich and update Utility Report Details
+				UtilityReportRequest reportDetailsRequest = enrichmentService.enrichUpdateReport(requestInfo, reportList,
+						fileName, filestoreDetails);
+				dcbRepository.updateReportDetails(reportDetailsRequest);
+
+				// user info not decrypted and enrichment giving null pointer
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}	
+
+
+
+		}
+
+		private void validatePTDDNReport(@Valid PTAssessmentSearchCriteria searchCriteria) {
+		 		 // Validate tenantId and tenantIds
+		    if (searchCriteria.getTenantIds() == null || searchCriteria.getTenantIds().isEmpty()) {
+		        throw new CustomException("INVALID_REQUEST", "At least one of tenantId or tenantIds must be provided.");
+		    }
+
+		}
+
+		private void validateIfReportGenerationInProcess(List<UtilityReportDetails> reportList, String tenantId) {
+			if (!reportList.isEmpty()) {
+
+				UtilityReportDetails dcbReport = reportList.get(0);
+
+				if (dcbReport.getTenantId().equalsIgnoreCase(tenantId) && StringUtils.isEmpty(dcbReport.getFileStoreId())) {
+					throw new CustomException("REPORT_GENERATION_INPROCESS",
+							"Report Generation is currently in process. Kindly wait ..");
+				}
+
+			}		
+		}
+
+
+		public List<OwnerInfo> getUserDetails(RequestInfo requestInfo, UserSearchCriteria userSearchCriteria){
+
+			StringBuilder uri = new StringBuilder(configuration.getUserHost())
+					.append(configuration.getUserSearchEndpoint());
+
+			UserSearchRequest request = generateUserSearchRequest(requestInfo, userSearchCriteria);
+
+			try {
+				Object response = repository.fetchResult(uri, request);
+				UserDetailResponse userDetailResponse = mapper.convertValue(response, UserDetailResponse.class);
+				return userDetailResponse.getUser();
+			}catch(Exception ex) {
+				log.error("External Service Call Erorr", ex);
+				throw new CustomException("USER_FETCH_EXCEPTION", "Unable to fetch User Information");
+			}
+		}
+
+		private UserSearchRequest generateUserSearchRequest(RequestInfo requestInfo, UserSearchCriteria criteria) {
+
+			UserSearchRequest request = UserSearchRequest.builder().requestInfo(requestInfo).active(Boolean.TRUE).build();
+
+			if(StringUtils.hasText(criteria.getTenantId())) {
+				if(StringUtils.hasText(criteria.getUserType()) && UserSearchCriteria.CITIZEN.equals(criteria.getUserType()))
+					request.setTenantId(ReportConstants.STATE_TENANT);
+				else
+					request.setTenantId(criteria.getTenantId());
+			}
+
+			if(!CollectionUtils.isEmpty(criteria.getUuid())) {
+				request.setUuid(criteria.getUuid().stream().collect(Collectors.toSet()));
+			}
+
+			if(!CollectionUtils.isEmpty(criteria.getId())) {
+				request.setId(criteria.getId().stream().collect(Collectors.toList()));
+			}
+
+			if(StringUtils.hasText(criteria.getUserType())) {
+				request.setUserType(criteria.getUserType());
+			}
+			return request;
+		}
+
+
+		public Map<String, Object> getPTDDNNoReport(RequestInfo requestInfo,
+				@Valid UtilityReportSearchCriteria searchCriteria) {
+			Map<String, Object> response = new HashMap<>();
+
+			String reportType = ReportConstants.PTDDN_REPORT_STRING;
+
+			String tenantId = searchCriteria.getTenant();
+
+			List<UtilityReportDetails> reportList = dcbRepository.isReportExist(reportType, tenantId);
+
+			validateIfReportGenerationInProcess(reportList, tenantId);
+
+			if(reportList.isEmpty()) {
+				throw new CustomException("REPORT_NOT_GENERATED",
+						"Report is not generated for mentioned criteria. Kindly generate the report first ..");
+			}
+
+			List<UtilityReportDetails> reportDetails = reportList.stream()
+					.filter(item -> item.getTenantId().equalsIgnoreCase(tenantId)).collect(Collectors.toList());
+
+			response.put("reportsDetails", reportDetails.get(0));
+
+			return response;
+		}
+
+		public List<Map<String, Object>> generateGroupedPTDDNList(List<Map<String, Object>> ptDDNList) {
+	        // Group data by propertyid
+			Map<String, Map<String, Object>> groupedData = new HashMap<>();
+
+			for (Map<String, Object> record : ptDDNList) {
+			    String propertyId = (String) record.get("propertyid");
+
+			    // If the propertyId already exists, merge the names
+			    if (groupedData.containsKey(propertyId)) {
+			        Map<String, Object> existingRecord = groupedData.get(propertyId);
+			        List<String> existingNames = (List<String>) existingRecord.get("names");
+			        String incomingName = (String) record.get("name");
+
+			        if (incomingName != null && !existingNames.contains(incomingName)) {
+			            existingNames.add(incomingName);
+			        }
+			    } else {
+			        // If this is the first record for this propertyId, create a new entry
+			        Map<String, Object> newRecord = new HashMap<>();
+			        newRecord.put("ulb", record.get("ulb"));
+			        newRecord.put("propertyid", record.get("propertyid"));
+			        newRecord.put("ddnno", record.get("ddnno"));
+
+			        // Initialize the names list and add the name if not null
+			        List<String> names = new ArrayList<>();
+			        String name = (String) record.get("name");
+			        if (name != null) {
+			            names.add(name);
+			        }
+			        newRecord.put("names", names);
+
+			        // Add the new record to the groupedData map
+			        groupedData.put(propertyId, newRecord);
+			    }
+			}
+
+			// Convert grouped map to a list and combine names into a comma-separated string
+			List<Map<String, Object>> resultList = new ArrayList<>();
+			for (Map<String, Object> record : groupedData.values()) {
+			    List<String> names = (List<String>) record.get("names");
+			    if (names != null && !names.isEmpty()) {
+			        record.put("names", String.join(", ", names));
+			    }
+			    resultList.add(record);
+			}
+
+			// Step 3: Send or return the result list
+			return resultList;
+
+
+
+	    }		
 		
 
 }

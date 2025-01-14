@@ -138,4 +138,23 @@ public class PropertyReportController {
 				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@PostMapping("/_generatePTDDNNoReport")
+	public void generateUserDetailsReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+			@Valid @ModelAttribute PTAssessmentSearchCriteria userSearchCriteria) {
+
+		propertyService.generatePTDDNNoReport(requestInfoWrapper, userSearchCriteria);
+	}
+
+	@PostMapping(value = "/_getPTDDNNoReport")
+	public ResponseEntity<UtilityReportResponse> getPTDDNNoReport(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+			@Valid @ModelAttribute UtilityReportSearchCriteria searchCriteria) throws IOException {
+		Map<String, Object> responseMap = propertyService.getPTDDNNoReport(requestInfoWrapper.getRequestInfo(), searchCriteria);
+
+		UtilityReportResponse response = UtilityReportResponse.builder()
+				.response(responseMap)
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }
