@@ -390,6 +390,15 @@ public class ReportQueryBuilder {
 			+ "case  when td.applicationtype in ('NEW','RENEWAL') then ewpv.\"action\" ='PAY' "
 			+ "	when td.applicationtype in ('CORRECTION','OWNERSHIPTRANSFER') then ewpv.\"action\" ='APPLY' "
 			+ "end ";
+	
+	private static final String PT_DDN_DETAILS_QUERY = "select distinct INITCAP(SPLIT_PART(epp.tenantid, '.', 2)) as ulb,"
+			+ " epp.propertyid as propertyid, epp.createdtime , eu.uuid as name, epp.ddnno as ddnno"
+			+ " from eg_pt_property epp"
+			+ " inner join eg_pt_owner epo on epp.id = epo.propertyid"
+			+ " and epp.tenantid != 'od.testing' and epp.tenantid not like '%deleted%' and epo.status = 'ACTIVE'"
+			+ " and ( case when '$ulb' = 'od' then ( epp.tenantid in ( select distinct tenantid from eg_pt_property ) )"
+			+ " else epp.tenantid = '$ulb' end ) inner join eg_user eu on epo.userid = eu.uuid"
+			+ " order by ulb, epp.propertyid, epp.createdtime desc";
 
 	private void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
 		if (values.isEmpty())
@@ -1206,5 +1215,20 @@ StringBuilder query = new StringBuilder(PROPERTY_DEMANDS_QUERY);
 	    if (index != -1) {
 	        query.delete(index, index + conditionToRemove.length());
 	    }
+	}
+
+	public String createptDDNReport(@Valid PTAssessmentSearchCriteria searchCriteria, String tenantId) {
+		StringBuilder query = new StringBuilder(PT_DDN_DETAILS_QUERY);
+
+		log.info("Initial Query: {}", query);
+
+		// Replace all occurrences of $ulb with the provided tenantId or default to 'od'
+		String tenantIdReplacement = StringUtils.hasText(tenantId) ? tenantId : "'od'";
+		log.info("Tenant ID Replacement: {}", tenantIdReplacement);
+		replacePlaceholder(query, "$ulb", tenantIdReplacement);
+
+		log.info("Final Query: {}", query);
+		return query.toString();
+
 	}
 }
