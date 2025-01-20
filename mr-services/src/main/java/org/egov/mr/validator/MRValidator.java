@@ -725,7 +725,7 @@ public class MRValidator {
                   
                   // Check consistency
                   // Validate consistency for Bride's Witness DOB
-                  if (!Objects.equals(newBrideWitnessDOB, existingBrideWitnessDOB)) {
+                  /*if (!Objects.equals(newBrideWitnessDOB, existingBrideWitnessDOB)) {
                       log.error("Bride's witness DOB is inconsistent. Existing: {}, New: {}", existingBrideWitnessDOB, newBrideWitnessDOB);
                       throw new CustomException("INCONSISTENT_WITNESS_DOB", "Bride's witness DOB is inconsistent with existing records");
                   }
@@ -734,7 +734,7 @@ public class MRValidator {
                   if (!Objects.equals(newGroomWitnessDOB, existingGroomWitnessDOB)) {
                       log.error("Groom's witness DOB is inconsistent. Existing: {}, New: {}", existingGroomWitnessDOB, newGroomWitnessDOB);
                       throw new CustomException("INCONSISTENT_WITNESS_DOB", "Groom's witness DOB is inconsistent with existing records");
-                  }
+                  }*/
 
               log.info(" Witness DOB validation completed successfully for all registrations");            	  
               }else {
