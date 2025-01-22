@@ -83,18 +83,18 @@ Map<String, String> errorMap = new HashMap<>();
 
 	public boolean validateIfDCBReportAlreadyExists(List<UtilityReportDetails> reportList, String tenantId) {
 
-		if (!reportList.isEmpty()) {
+//		if (!reportList.isEmpty()) {
 
 			UtilityReportDetails dcbReport = reportList.get(0);
-
-			if (dcbReport.getTenantId().equalsIgnoreCase(tenantId)
-					&& !StringUtils.isEmpty(dcbReport.getFileStoreId())) {
-				return true;
-			} else {
+//
+//			if (dcbReport.getTenantId().equalsIgnoreCase(tenantId)
+//					&& !StringUtils.isEmpty(dcbReport.getFileStoreId())) {
+//				return true;
+//			} else {
 				return checkIfEligibleForAnotherRequest(dcbReport, tenantId);
-			}
-		}
-		return false;
+//			}
+//		}
+//		return false;
 	}
 
 	public void validateIfReportGenerationInProcess(List<UtilityReportDetails> reportList, String tenantId) {
@@ -116,11 +116,11 @@ Map<String, String> errorMap = new HashMap<>();
 		
 		Long requestGap = config.getRequestGap();
 		
-		Long createdTime = dcbReport.getAuditDetails().getCreatedTime();
+		Long lastModifiedTime = dcbReport.getAuditDetails().getLastModifiedTime();
 		
 		Long currentTime = System.currentTimeMillis();
 		
-		if(currentTime >= createdTime + requestGap) {
+		if(currentTime >= lastModifiedTime + requestGap) {
 			return false;
 		}
 		return true;
