@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+    tools {
+        // maven 'maven' // Use the name defined in the Maven installation configuration
+        jdk 'java-1.8'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                // Checkout the source code
+                checkout scm
+
+                // Build the Maven project
+                sh 'mvn -f dashboard-services/pom.xml clean package -DskipTests'
+
+                // Build Docker
+                sh 'sudo docker build . -t odhub/dashboard-services:master-${BUILD_NUMBER} -f dashboard-services/Dockerfile'
+                }
+            }
+        stage('Push') {
+            steps {
+                // Push the Docker image to a registry
+                sh "sudo docker push odhub/dashboard-services:master-${BUILD_NUMBER}"
+                }
+            }
+        
+
+         }
+    }
