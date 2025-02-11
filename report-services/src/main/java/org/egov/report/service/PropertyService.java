@@ -238,10 +238,15 @@ public class PropertyService {
             
             TaxCollectorWiseCollectionResponse taxCollectorWiseCollection = TaxCollectorWiseCollectionResponse
                   .builder()
-                  .amountpaid(payment.getTotalAmountPaid().toString())
-                  .paymentMode(payment.getPaymentMode().toString())
-                  .receiptnumber(payment.getPaymentDetails().get(0).getReceiptNumber())
-                  .consumercode(payment.getPaymentDetails().get(0).getBill().getConsumerCode())
+                  .amountpaid(payment.getTotalAmountPaid() != null ? payment.getTotalAmountPaid().toString() : "0")
+                  .paymentMode(payment.getPaymentMode() != null ? payment.getPaymentMode().toString() : "UNKNOWN")
+                  .receiptnumber((payment.getPaymentDetails() != null && !payment.getPaymentDetails().isEmpty()) 
+                      ? payment.getPaymentDetails().get(0).getReceiptNumber() 
+                      : "N/A")
+                  .consumercode((payment.getPaymentDetails() != null && !payment.getPaymentDetails().isEmpty() 
+                      && payment.getPaymentDetails().get(0).getBill() != null) 
+                      ? payment.getPaymentDetails().get(0).getBill().getConsumerCode() 
+                      : "N/A")
                   .paymentdate(payment.getTransactionDate().toString())
                   .userid(payment.getAuditDetails().getCreatedBy())
                   .tenantid(payment.getTenantId())
@@ -253,7 +258,7 @@ public class PropertyService {
 
             return taxCollectorWiseCollection;
         }).collect(Collectors.toList());
-        log.info("TaxCollectorWiseCollectionResponse Size is : " + taxCollectorWiseCollectionResponse.size() );
+		log.info("TaxCollectorWiseCollectionResponse Size is : " + taxCollectorWiseCollectionResponse.size() );
 
         if (!CollectionUtils.isEmpty(taxCollectorWiseCollectionResponse)) {
             List<Long> userIds = taxCollectorWiseCollectionResponse.stream().map(res ->Long.valueOf(res.getUserid())).distinct().collect(Collectors.toList());
@@ -287,10 +292,13 @@ public class PropertyService {
                     collectionResponse.setName(user.getName());
                     collectionResponse.setEmployeeid(user.getUsername());
                     collectionResponse.setType(user.getType().toString());
-                    if(StringUtils.hasText(propertyMap.get(collectionResponse.getConsumercode()).getOldPropertyId())){
-                        collectionResponse.setOldpropertyid(propertyMap.get(collectionResponse.getConsumercode()).getOldPropertyId());
-                        collectionResponse.setDdnNo(propertyMap.get(collectionResponse.getConsumercode()).getDdnNo());
-                        collectionResponse.setLegacyHoldingNo(propertyMap.get(collectionResponse.getConsumercode()).getLegacyHoldingNo());
+                    PropertyDetailsResponse property = propertyMap.get(collectionResponse.getConsumercode());
+                    if (property != null && StringUtils.hasText(property.getOldPropertyId())) {
+                        collectionResponse.setOldpropertyid(property.getOldPropertyId());
+                        collectionResponse.setDdnNo(property.getDdnNo());
+                        collectionResponse.setLegacyHoldingNo(property.getLegacyHoldingNo());
+                    } else {
+                        log.info("Missing or empty oldPropertyId for consumer code: {}", collectionResponse.getConsumercode());
                     }
                 }
 
@@ -304,7 +312,7 @@ public class PropertyService {
                     log.info("Type: " + collectionResponse.getType());
                 }
             }).filter(tcwcrUser -> StringUtils.hasText(tcwcrUser.getType())).collect(Collectors.toList());
-            log.info("TaxCollectorWiseCollectionResponse Final Size is : " + taxCollectorWiseCollectionResponse.size() );
+    		log.info("TaxCollectorWiseCollectionResponse Final Size is : " + taxCollectorWiseCollectionResponse.size() );
 //            //getting Property Details
 //            log.info("Fetching Property Details ");
 //            PropertyDetailsSearchCriteria propertySearchingCriteria = PropertyDetailsSearchCriteria.builder()
