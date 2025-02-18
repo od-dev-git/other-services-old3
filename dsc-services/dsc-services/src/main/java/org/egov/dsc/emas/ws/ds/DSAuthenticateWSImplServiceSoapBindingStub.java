@@ -227,6 +227,7 @@ public class DSAuthenticateWSImplServiceSoapBindingStub extends org.apache.axis.
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setTimeout(200000);
         _call.setOperationName(new javax.xml.namespace.QName("http://ds.ws.emas/", "authenticatePDF"));
 
         setRequestHeaders(_call);
